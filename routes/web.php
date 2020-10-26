@@ -365,8 +365,12 @@ Route::group([ 'middleware' => 'app.user'], function (){
         Route::get('/warehouse/deliveryorder/getdatadodetail', ['uses' => 'TMS\Warehouse\DeliveryOrderController@getDataDeliveryOrder', 'as' => 'tms.warehouse.deliveryorder.dodetail']);
         Route::post('/warehouse/deliveryorder/save', ['uses' => 'TMS\Warehouse\DeliveryOrderController@saveDataDeliveryOrder', 'as' => 'tms.warehouse.deliveryorder.save']);
         Route::delete('/warehouse/deliveryorder/void/{do}', ['uses' => 'TMS\Warehouse\DeliveryOrderController@voidDataDeliveryOrder', 'as' => 'tms.warehouse.deliveryorder.void']);
-       
-       
+        
+        // 4. MTO Entry :: PAGE ::
+        Route::get('/warehouse/mto_entry', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@index', 
+            'as' => 'tms.warehouse.mto-entry'
+        ]);
        
        
         /*

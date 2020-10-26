@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Module_Item extends Model
 {
-    protected $connection = 'tms_web';
-     
+    protected $connection = 'tms_web';   
     protected $table = 'module_items';
 
+    
 
     protected $fillable = [
         'id', 'module_id', 'title', 'url', 'route', 'icon_class', 'order'

@@ -180,3 +180,11 @@ Breadcrumbs::for('tms.warehouse.transfer-order', function ($trail) {
     $trail->push('Warehouse', '#');
     $trail->push('Transfer Order', route('tms.warehouse.transfer-order'));
 });
+    // 2.4.3
+Breadcrumbs::for('tms.warehouse.mto-entry', function ($trail) {
+    $trail->push('Warehouse', '#');
+    $trail->push('MTO-Entry', route('tms.warehouse.mto-entry'));
+});
+
+
+
