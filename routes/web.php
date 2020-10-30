@@ -371,6 +371,20 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'uses' => 'TMS\Warehouse\MtoEntryController@index', 
             'as' => 'tms.warehouse.mto-entry'
         ]);
+        Route::get('/warehouse/mto_entry/datatables', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@getMtoDatatables', 
+            'as' => 'tms.warehouse.mto-entry_datatables'
+        ]);
+
+        Route::get('/warehouse/mto_entry/datatables_choice_data', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@getPopUpChoiceDataDatatables', 
+            'as' => 'tms.warehouse.mto-entry_datatables_choice_data'
+        ]);
+        Route::post('/warehouse/mto_entry/store-mto', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@StoreMtoData', 
+            'as' => 'tms.warehouse.mto-entry_store_mto_data'
+        ]);
+
        
        
         /*

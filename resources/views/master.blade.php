@@ -25,7 +25,7 @@
     <!-- Custom css -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/sweetalert2/dist/sweetalert2.min.css') }}">
-    
+    <link rel="stylesheet" href="{{ asset('vendor/select2/css/select2.min.css') }}">
     <!-- modernizr css -->
     <script src="{{ asset('vendor/srtdash/js/vendor/modernizr-2.8.3.min.js') }}"></script>
 
@@ -36,7 +36,7 @@
 </head>
 
 <body>
-
+  
     <!-- preloader area start -->
     <div id="preloader">
         <div class="loader"></div>
@@ -79,11 +79,14 @@
     <script src="{{ asset('vendor/srtdash/js/pie-chart.js') }}"></script> -->
     <script src="{{ asset('vendor/srtdash/js/plugins.js') }}"></script>
     <script src="{{ asset('vendor/srtdash/js/scripts.js') }}"></script>
+    <script src="{{ asset('vendor/select2/js/select2.full.min.js') }}"></script>
 
     <!-- Custom js -->
     <script src="{{ asset('vendor/sweetalert2/dist/sweetalert2.min.js') }}"></script>
     <script src="{{ asset('js/custom-general.js') }}"></script>
     @stack('js')
+
+    @yield('script')
     
 </body>
 
