@@ -9,7 +9,7 @@
                 <div class="modal-body">
                 <form  method="POST" action="{{ route('tms.warehouse.mto-entry_store_mto_data') }}">
                       @csrf
-                      @include('tms.warehouse.mto-entry._form')
+                      @include('tms.warehouse.mto-entry.modal.create-mto-modal._form')
                       {{-- <hr>
                        <div class="row">
                           <div class="col-12">
