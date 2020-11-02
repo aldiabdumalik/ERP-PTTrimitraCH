@@ -8,6 +8,7 @@ use App\Models\Dbtbs\MtoEntry;
 use DataTables;
 use App\Models\Dbtbs\Formula;
 use App\Models\Dbtbs\Item;
+use App\Classes\ButtonBuilder As ButtonBuilder;
 use Carbon\Carbon;
 use DB;
 use Auth;
@@ -38,13 +39,33 @@ class MtoEntryController extends Controller
                         return '//';
                     }
                 })->editColumn('voided', function($data){
-                    if ($data->voided) {
+                    if ($data->voided != null) {
                         return $data->voided;
                     } else {
                         return '//';
                     }
-                })->editColumn('action', function(){
-                    return '-';
+                })->addColumn('action', function($data){
+                    $ActionButton = '';
+    
+                    if($data){
+                        $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'VIEW', 'view-btn', 'ti-eye', 'View','#', "row-id=$data->id_mto");
+                    }
+
+                // //     // $ModuleEditAccess = RolePermissionControl::CheckPermission($RoleID, 'edit_modules');
+                // //     // if($ModuleEditAccess){
+                // //     //     $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'EDIT', 'module-edit-btn', 'ti-pencil-alt', 'Edit', route('admin.modules.edit', ['id' => $data->id]));
+                // //     // }
+
+                // //     // $ModuleDeleteAccess = RolePermissionControl::CheckPermission($RoleID, 'delete_modules');
+                // //     // if($ModuleDeleteAccess){
+                // //     //     $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'DELETE', $data->id, 'ti-trash', 'Delete', '#', "name='$data->name'");
+                // //     // }
+
+                    return $ActionButton;
+                //   return view('tms.warehouse._action_datatables._actionmto', [
+                //         'model' => $data,
+                //         'url_showdetail' => route('tms.warehouse.mto-entry_show_view_detail', $data->id_mto)
+                //   ]);
                 })
                 ->make(true);  
         }
@@ -99,6 +120,30 @@ class MtoEntryController extends Controller
         ]);
         // dd($data);
         return redirect()->back();
+    }
+
+    public function show_view_detail($id)
+    {
+        $MTOHeader   = MtoEntry::where('id_mto', $id)->first();
+        $MTOHeaderNo = $MTOHeader->mto_no;
+        $MTODetail   = MtoEntry::select(
+                            'id_mto', 'mto_no', 'itemcode', 'part_no', 'descript', 'fac_unit',
+                            'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
+                            'warehouse','branch','ip_type','ref_no','uid_export'
+                            )
+                      ->where('mto_no', '=', $MTOHeaderNo)
+                      ->get();
+        $output = [
+            'header' => $MTOHeader,
+            'detail' => $MTODetail
+        ];
+
+        return response()->json($output);
+    }
+
+    public function editMtoData($id)
+    {
+        return $id;
     }
 
     

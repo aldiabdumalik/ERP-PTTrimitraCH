@@ -13,7 +13,7 @@
     <div class="row">
         <div class="col-12 mt-5">
             <div class="#">
-               <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">
+               <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".modalcreate">
                 Add
                 </button>
             </div>
@@ -43,7 +43,7 @@
                                             <th>Ref No</th>
                                             <th>Remark</th>
                                             <th>Brch</th>
-                                            <th>ACTION</th>
+                                            <th width="50%">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -58,10 +58,10 @@
 </div>
 
 </div>
+@include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
+@include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
+@include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
 
-@include('tms.warehouse.mto-entry.modal._create')
-@include('tms.warehouse.mto-entry.modal.popUpMto') 
-  
 @endsection
 
 @section('script')
@@ -79,8 +79,77 @@ function setTwoNumberDecimal(event) {
 }
 
 $(function(){
-    $('#select2').select2();
+    $('#SELECT2').select2();
 });
+
+$(document).on('click', '.view', function(){
+    var id = $(this).attr('row-id');
+    $('#viewModal').modal('show');
+    getDetail(id, 'VIEW')
+});
+
+
+function getDetail(id, method){
+        var route  = "{{ route('tms.warehouse.mto-entry_show_view_detail', ':id') }}";
+            route  = route.replace(':id', id);
+        $.ajax({
+            url:      route,
+            method:   'get',
+            dataType: 'json',
+            success:function(data){
+                $('#MTO_NO').val(data['header'].mto_no);
+                $('#REF_NO').val(data['header'].ref_no);
+                $('#ITEM_CODE').val(data['header'].itemcode);
+                $('#PARTNO').val(data['header'].part_no);
+                $('#DESCRIPT_').val(data['header'].descript);
+                $('#QUANTITY').val(data['header'].quantity);
+                $('#QTY_NG').val(data['header'].qty_ng);
+                $('#UNIT').val(data['header'].unit);
+                $('#REMARK').val(data['header'].remark);
+                $('#STAFF').val(data['header'].staff);
+                
+   
+
+                var detailDataset = [];
+
+                for(var i = 0; i < data['detail'].length; i++){
+                    detailDataset.push([
+                        data['detail'][i].itemcode, data['detail'][i].part_no, data['detail'][i].descript,
+                        data['detail'][i].types, data['detail'][i].quantity
+                    ]);
+                }
+
+                $('#tbl-detail-mto').DataTable().clear().destroy();
+                $('#tbl-detail-mto').DataTable({
+                    data: detailDataset,
+                    columns: [
+                        { title: 'itemcode'},
+                        { title: 'Part No.'},
+                        { title: 'Description'},
+                        { title: 'Type' },
+                        { title: 'Qty' }
+                    ]
+                });
+                
+                // resetForm();
+                // if(method == 'FORM') {
+                //     $('#role-form').attr('action', editURL);
+                //     $('#modal-role-name').html(data.name);
+                //     $('#role-id').val(data.id);
+                //     $('#role-name').val(data.name);
+                //     $('#role-description').val(data.description);
+                // } else if(method == 'VIEW') {
+                //     viewForm('SHOW');
+                //     inputForm('HIDE');
+                //     $('#modal-role-name').html(data.name)
+                //     $('#role-id').val(data.id);
+                //     $('#role-view-name').html(data.name);
+                //     $('#role-view-description').html(data.description);
+                // }
+                // $('#modal-role-form').modal('show');
+            }
+        });
+    }
 
 </script>
 @endsection
@@ -158,7 +227,10 @@ $(function(){
                 });
             },
         });
-  
+        
+        
+        // show detaiMto
+        
 
     });
     

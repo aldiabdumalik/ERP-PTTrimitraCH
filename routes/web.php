@@ -385,6 +385,16 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'as' => 'tms.warehouse.mto-entry_store_mto_data'
         ]);
 
+        Route::get('/warehouse/mto_entry/{id}/show_detail_mto', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@show_view_detail', 
+            'as' => 'tms.warehouse.mto-entry_show_view_detail'
+        ]);
+
+        Route::get('/warehouse/mto_entry/{id}/edit_mto_data', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@editMtoData', 
+            'as' => 'tms.warehouse.mto-entry_edit_mto_data'
+        ]);
+
        
        
         /*

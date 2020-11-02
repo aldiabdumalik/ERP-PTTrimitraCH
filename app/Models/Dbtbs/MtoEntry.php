@@ -54,7 +54,7 @@ class MtoEntry extends Model
               if ($cek_data_mto->isEmpty()){
                 $mto_no = $cek_nomto;
                 return $mto_no;
-              }else{
+              } else {
                 do{
                     $cek_nomto++;
                     $cek_data_mto = MtoEntry::where('mto_no', $cek_nomto)->select('mto_no')->get();          
