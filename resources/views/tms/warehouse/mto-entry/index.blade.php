@@ -181,7 +181,8 @@ $(document).on('click', '.edit', function(e){
 
 $(document).on('click', '.delete', function(e){
     var id = $(this).attr('row-id');
-    
+    e.preventDefault();
+    deleteData(id)
 });
 
 function EditData(id){
@@ -264,6 +265,60 @@ function UpdateData(id){
             })
         });
 }
+
+
+// CALL TOKEN FOR DELETE THIS DATA
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+});
+function deleteData(id){
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Delete this data MTO",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+        }).
+        then((willDelete) => {
+            var route  = "{{ route('tms.warehouse.mto-entry_delete_mto_entry', ':id') }}";
+                route  = route.replace(':id', id);
+            if(willDelete.value){
+                    $.ajax({
+                        url: route,
+                        type: "POST",
+                        data : {
+                            '_method' : 'DELETE'
+                        },
+                        success: function(data){
+                        Swal.fire(
+                            'Deleted!',
+                            'Data has been deleted.',
+                            'success'
+                            ).then(function(){
+                                location.reload();
+                            });
+                            
+                        }, 
+                        error: function(){
+                            Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Something went wrong!',
+                        })
+                    }
+                })
+            } else {
+                console.log(`dialog was dismissed by ${willDelete.dismiss}`);
+            }
+         
+        
+        })
+}
+// Method Delete
 
     function formatDate (input) {
         if (input !== null) {

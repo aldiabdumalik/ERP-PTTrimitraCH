@@ -52,7 +52,7 @@ class MtoEntryController extends Controller
                     // $ModuleEditAccess = RolePermissionControl::CheckPermission($RoleID, 'edit_modules');
                     // if($ModuleEditAccess){
                         $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'EDIT', 'module-edit-btn', 'ti-pencil-alt', 'Edit', '#', "row-id=$data->id_mto");
-                        $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'DELETE', 'module-delete-btn', 'ti-trash', 'Delete', '#', "row-id=$data->id_mto");
+                        $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'DELETE', 'module-delete-btn', 'ti-trash', 'Delete', '#', "row-id=$data->id_mto");
                     // }
              
                 // //     // $ModuleDeleteAccess = RolePermissionControl::CheckPermission($RoleID, 'delete_modules');
@@ -173,7 +173,11 @@ class MtoEntryController extends Controller
 
     public function DeleteMtoData($id)
     {
-        
+        $data = MtoEntry::find($id);
+        $data->delete();
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     
