@@ -13,22 +13,22 @@
                     </div>
                     <div class="col-4">
                         <div class="form-group">
-                            <input type="number" disabled   name="mto_no" class="form-control form-control-sm" id="MTO_NO" aria-describedby="" placeholder="">
+                            <input type="number" disabled   name="mto_no" class="form-control form-control-sm" id="mto_no_view" aria-describedby="" placeholder="">
                         </div>  
                     </div>
                     <div class="col-2">
                         <div class="form-group">
-                            <input type="text" value="HO" disabled class="form-control form-control-sm " id="HO" aria-describedby="" placeholder="">
+                            <input type="text" name="branch" disabled class="form-control form-control-sm " id="branch_view" aria-describedby="" placeholder="">
                         </div>  
                     </div>
                     <div class="col-2">
                         <div class="form-group">
-                            <input type="text" class="form-control form-control-sm" name="warehouse" value="90" disabled id="WAREHOUSE" aria-describedby="" placeholder="">
+                            <input type="text" disabled class="form-control form-control-sm" name="warehouse"  disabled id="warehouse_view" aria-describedby="" placeholder="">
                         </div>  
                     </div>
                     <div class="col-2">
                         <div class="form-group">
-                            <select name="" class="form-control form-control-sm " name="" id="SELECT2">
+                            <select disabled name="" class="form-control form-control-sm " name="" id="select_view">
                                 <option value="">Pilih Item</option>
                                 <option value="91 PRESSING">91 PRESSING</option>
                                 <option value="92 WELDING">92 WELDING</option>
@@ -52,7 +52,7 @@
                     </div>
                     <div class="col-6">
                         <div class="form-group">
-                            <input class="form-control form-control-sm" name="staff" type="text" id="STAFF" disabled>
+                            <input class="form-control disabled form-control-sm" name="staff" type="text" id="staff_view" disabled>
                         </div>  
                     </div>
                 </div> 
@@ -69,7 +69,7 @@
                     </div>
                     <div class="col-6">
                         <div class="form-group">
-                            <input type="text" name="ref_no"   class="form-control form-control-sm" id="REF_NO" aria-describedby="" placeholder="">
+                            <input type="text" name="ref_no" disabled   class="form-control form-control-sm" id="ref_no_view" aria-describedby="" placeholder="">
                         </div>  
                     </div>
                 </div>
@@ -83,12 +83,12 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input class="form-control form-control-sm"  type="text" name="period" id="period" required value="{{ $getDate1 }}">
+                                    <input class="form-control form-control-sm" disabled  type="text" name="period" id="period_view" required >
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input class="form-control form-control-sm" type="text" name="vperiod" value="{{ $getDate }}" id="VPERIOD" required>
+                                    <input class="form-control form-control-sm" disabled type="text" name="vperiod" id="vperiod_view" required>
                                 </div>
                             </div>
                         </div>
@@ -105,8 +105,8 @@
                             <div class="col-5">
                                 <div class="form-group">
                                     <div class="input-group">
-                                    <input class="form-control form-control-sm" name="itemcode" type="text" name="from-wh-branch"  required
-                                     onkeydown="keyPressed(event)" id="ITEM_CODE" aria-describedby="" placeholder="Cari Itemcode">
+                                    <input class="form-control form-control-sm" name="fin_code" type="text" name="from-wh-branch"  required
+                                     onkeydown="keyPressed(event)" disabled id="item_code_view" aria-describedby="" placeholder="Cari Itemcode">
                                      {{-- <span class="input-group-btn">
                                         <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                     </span> --}}
@@ -115,12 +115,12 @@
                             </div>
                             <div class="col-3">
                                 <div class="form-group">
-                                    <input type="text" name="part_no" class="form-control form-control-sm" id="PARTNO" aria-describedby="" placeholder="">
+                                    <input type="text" disabled name="frm_code" class="form-control form-control-sm" id="part_no_view" aria-describedby="" placeholder="">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <input type="text" name="descript" class="form-control form-control-sm" id="DESCRIPT_" aria-describedby="" placeholder="">
+                                    <input type="text" disabled name="descript" class="form-control form-control-sm" id="descript_view" aria-describedby="" placeholder="">
                                 </div>
                             </div>
                         </div>
@@ -139,18 +139,18 @@
                                 <div class="form-group">
                                     <input type="number" name="quantity" onchange="setTwoNumberDecimal(event)" 
                                     min="0" max="10" step="0.25" value="0.00" value="" class="form-control form-control-sm" 
-                                    id="QUANTITY" aria-describedby="" placeholder="Qty IN">
+                                    id="quantity_view" disabled aria-describedby="" placeholder="Qty IN">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <input type="number" name="qty_ng" class="form-control form-control-sm" id="QTY_NG" 
-                                    onchange="setTwoNumberDecimal(event)" min="0" max="10" step="0.25" value="0.00" aria-describedby="" placeholder="Qty NG">
+                                    <input type="number" name="qty_ng" class="form-control form-control-sm" id="qty_ng_view" 
+                                    onchange="setTwoNumberDecimal(event)" disabled min="0" max="10" step="0.25" value="0.00" aria-describedby="" placeholder="Qty NG">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <input type="text" name="unit" class="form-control form-control-sm" id="UNIT" aria-describedby="" placeholder="Unit">
+                                    <input type="text" name="unit" disabled class="form-control form-control-sm" id="UNIT" aria-describedby="" placeholder="Unit">
                                 </div>
                             </div>
                         </div>
@@ -165,7 +165,7 @@
                     </div>
                     <div class="col-10">
                         <div class="form-group">
-                            <input type="text" name="remark"  class="form-control form-control-sm" id="REMARK" aria-describedby="" placeholder="Remark">
+                            <input type="text" name="remark"  disabled class="form-control form-control-sm" id="remark_view" aria-describedby="" placeholder="Remark">
                         </div>
                     </div>
                 </div>
@@ -181,7 +181,7 @@
                     </div>
                     <div class="col-4">
                         <div class="form-group">
-                            <input class="form-control form-control-sm" name="printed" type="text" id="PRINTED" disabled>
+                            <input class="form-control form-control-sm"   name="printed" type="text" id="printed_view" disabled>
                         </div>  
                     </div>
                 </div>
@@ -194,7 +194,7 @@
                     </div>
                     <div class="col-4">
                         <div class="form-group">
-                            <input class="form-control form-control-sm" name="voided" type="text" id="VOIDED" disabled>
+                            <input class="form-control form-control-sm" name="voided" type="text" id="voided_view" disabled>
                         </div>  
                     </div>
                 </div>
@@ -207,7 +207,7 @@
                     </div>
                     <div class="col-4">
                         <div class="form-group">
-                            <input class="form-control form-control-sm" name="posted" type="text" id="POSTED" disabled>
+                            <input class="form-control form-control-sm" name="posted" type="text" id="posted_view" disabled>
                         </div>  
                     </div>
                 </div>

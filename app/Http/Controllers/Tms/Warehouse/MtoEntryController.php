@@ -20,7 +20,6 @@ class MtoEntryController extends Controller
         $getDate1 =  Carbon::now()->format('Y/m');
         $data_mto = new MtoEntry();
         $get_no_mto = $data_mto->getMtoNo();
-        //passing data ke modal view
         return view('tms.warehouse.mto-entry.index', compact('getDate','getDate1','get_no_mto'));
     }
 
@@ -46,16 +45,16 @@ class MtoEntryController extends Controller
                     }
                 })->addColumn('action', function($data){
                     $ActionButton = '';
-    
-                    if($data){
-                        $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'VIEW', 'view-btn', 'ti-eye', 'View','#', "row-id=$data->id_mto");
-                    }
+                    $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'VIEW', 'view-btn', 'ti-eye', 'View','#', "row-id=$data->id_mto");
+                    // $ActionButton .= '<a href="#" class="btn btn-info btn-sm" onclick="editForm('. $data->id_mto .')"><i class="ti-pencil"></i> Edit</a>';
+                    // $ActionButton .= '<a href="#" class="btn btn-sm btn-flat btn-info" onclick="editForm('. $data->mto_no .')"><i class="ti-pencil"></i> Edit</a>';
 
-                // //     // $ModuleEditAccess = RolePermissionControl::CheckPermission($RoleID, 'edit_modules');
-                // //     // if($ModuleEditAccess){
-                // //     //     $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'EDIT', 'module-edit-btn', 'ti-pencil-alt', 'Edit', route('admin.modules.edit', ['id' => $data->id]));
-                // //     // }
-
+                    // $ModuleEditAccess = RolePermissionControl::CheckPermission($RoleID, 'edit_modules');
+                    // if($ModuleEditAccess){
+                        $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'EDIT', 'module-edit-btn', 'ti-pencil-alt', 'Edit', '#', "row-id=$data->id_mto");
+                        $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'DELETE', 'module-delete-btn', 'ti-trash', 'Delete', '#', "row-id=$data->id_mto");
+                    // }
+             
                 // //     // $ModuleDeleteAccess = RolePermissionControl::CheckPermission($RoleID, 'delete_modules');
                 // //     // if($ModuleDeleteAccess){
                 // //     //     $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'DELETE', $data->id, 'ti-trash', 'Delete', '#', "name='$data->name'");
@@ -87,8 +86,8 @@ class MtoEntryController extends Controller
         $userStaff = Auth::user()->UserID;
         $data = MtoEntry::create([
             'mto_no' => $get_mto_no,
-            'itemcode' => $request->itemcode,
-            'part_no' => $request->part_no,
+            'fin_code' => $request->fin_code,
+            'frm_code' => $request->frm_code,
             'descript' => $request->descript,
             'fac_unit' => $request->fac_unit !== '' ? $request->fac_unit : null,
             'fac_qty'=> $request->fac_qty !== '' ? $request->fac_unit : '-',
@@ -119,7 +118,9 @@ class MtoEntryController extends Controller
 
         ]);
         // dd($data);
-        return redirect()->back();
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     public function show_view_detail($id)
@@ -127,7 +128,7 @@ class MtoEntryController extends Controller
         $MTOHeader   = MtoEntry::where('id_mto', $id)->first();
         $MTOHeaderNo = $MTOHeader->mto_no;
         $MTODetail   = MtoEntry::select(
-                            'id_mto', 'mto_no', 'itemcode', 'part_no', 'descript', 'fac_unit',
+                            'id_mto', 'mto_no', 'fin_code', 'frm_code', 'descript', 'fac_unit',
                             'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
                             'warehouse','branch','ip_type','ref_no','uid_export'
                             )
@@ -143,7 +144,36 @@ class MtoEntryController extends Controller
 
     public function editMtoData($id)
     {
-        return $id;
+        $data = MtoEntry::find($id);
+        $MTOHeader   = MtoEntry::where('id_mto', $id)->first();
+        $MTOHeaderNo = $MTOHeader->mto_no;
+        $MTODetail   = MtoEntry::select(
+                            'id_mto', 'mto_no', 'fin_code', 'frm_code', 'descript', 'fac_unit',
+                            'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
+                            'warehouse','branch','ip_type','ref_no','uid_export'
+                            )
+                      ->where('mto_no', '=', $MTOHeaderNo)
+                      ->get();
+        $output = [
+            'detail' => $MTODetail,
+            'data' => $data
+        ];
+        return response()->json($output);
+    }
+    public function updateMtoEntry(Request $request, $id)
+    {
+        $data = MtoEntry::find($id);
+        $data->update($request->all());
+
+        return response()->json([
+            'success' => true
+        ]);
+
+    }
+
+    public function DeleteMtoData($id)
+    {
+        
     }
 
     

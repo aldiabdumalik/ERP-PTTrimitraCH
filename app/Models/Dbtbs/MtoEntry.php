@@ -10,13 +10,13 @@ class MtoEntry extends Model
        protected $connection = 'db_tbs';
        //Define table
        protected $table = 'entry_mto_tbl';
-       protected $fillable = [
-              'mto_no','itemcode','part_no','descript','fac_unit','fac_qty','factor','unit',
+       protected $fillable = [ 
+              'mto_no','fin_code','frm_code','descript','fac_unit','fac_qty','factor','unit',
               'quantity','qty_ng','cost','glinv','types','written','posted','printed','voided',
               'warehouse','branch','ip_type','ref_no','uid_export','period','vperiod','staff',
               'dept','remark','lbom','xprinted','operator'
        ];
-
+       protected $primaryKey = 'id_mto';
        public $timestamps = false;
 
 

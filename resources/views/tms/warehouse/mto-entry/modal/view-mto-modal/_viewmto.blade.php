@@ -2,12 +2,12 @@
     <div class="modal-dialog modal-80">
       <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">Detail Many To One Entry (New)</h4>
+            <h4 class="modal-title view">Detail Many To One Entry (New)</h4>
           </div>
           <div class="row">
              <div class="col">
                 <div class="modal-body">
-                <form  method="POST" action="{{ route('tms.warehouse.mto-entry_store_mto_data') }}">
+                <form  method="POST">
                       @csrf
                       @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewformDetail')
                       <hr>

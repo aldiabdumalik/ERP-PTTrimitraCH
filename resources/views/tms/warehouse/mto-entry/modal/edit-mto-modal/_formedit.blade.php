@@ -12,22 +12,22 @@
                 </div>
                 <div class="col-4">
                     <div class="form-group">
-                        <input type="number" disabled  value="{{ $get_no_mto }}"  name="mto_no" class="form-control form-control-sm" id="mto_no_create" aria-describedby="" placeholder="">
+                        <input type="number" disabled   name="mto_no" class="form-control form-control-sm" id="mto_no_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <input type="text" value="HO" disabled class="form-control form-control-sm " id="branch_create" aria-describedby="" placeholder="">
+                        <input type="text" value="HO" disabled class="form-control form-control-sm " id="branch_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <input type="text" class="form-control form-control-sm" name="warehouse" value="90" disabled id="warehouse_create" aria-describedby="" placeholder="">
+                        <input type="text" class="form-control form-control-sm" name="warehouse_edit" value="90" disabled id="warehouse" aria-describedby="" placeholder="">
                     </div>  
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="" class="form-control form-control-sm " name="" id="select_create">
+                        <select name="" class="form-control form-control-sm " name="" id="select_edit">
                             <option value="">Pilih Item</option>
                             <option value="91 PRESSING">91 PRESSING</option>
                             <option value="92 WELDING">92 WELDING</option>
@@ -51,7 +51,7 @@
                 </div>
                 <div class="col-6">
                     <div class="form-group">
-                    <input class="form-control form-control-sm" value="{{ Auth::user()->UserID }}" name="staff" type="text" id="staff_create" disabled>
+                    <input class="form-control form-control-sm" value="{{ Auth::user()->UserID }}" name="staff_edit" type="text" id="STAFF" disabled>
                     </div>  
                 </div>
             </div> 
@@ -68,7 +68,7 @@
                 </div>
                 <div class="col-6">
                     <div class="form-group">
-                        <input type="text" name="ref_no"  value="{{ $get_no_mto }}"  class="form-control form-control-sm" id="ref_no_create" aria-describedby="" placeholder="">
+                        <input type="text" name="ref_no"    class="form-control form-control-sm" id="ref_no_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
             </div>
@@ -82,12 +82,12 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
-                                <input class="form-control form-control-sm"  value="{{ $getDate1 }}"  type="text" name="period" id="period_create" required value="{{ $getDate1 }}">
+                                <input class="form-control form-control-sm"  value="{{ $getDate1 }}"  type="text" name="period" id="period_edit" required value="{{ $getDate1 }}">
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <input class="form-control form-control-sm" type="text" value="{{ $getDate }}"  name="vperiod" value="{{ $getDate }}" id="vperiode" required>
+                                <input class="form-control form-control-sm" type="text" value="{{ $getDate }}"  name="vperiod" value="{{ $getDate }}" id="vperiod_edit" required>
                             </div>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                             <div class="form-group">
                                 <div class="input-group">
                                 <input class="form-control form-control-sm" name="fin_code" type="text"   
-                                 onkeydown="keyPressed(event)" id="itemcode_create" placeholder="Cari Itemcode">
+                                 onkeydown="keyPressed(event)" id="ITEMCODE" placeholder="Cari Itemcode">
                                  <span class="input-group-btn">
                                     <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                 </span><br>
@@ -116,12 +116,12 @@
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <input type="text" name="frm_code" class="form-control form-control-sm" id="part_no_create" aria-describedby="" placeholder="">
+                                <input type="text" name="frm_code" class="form-control form-control-sm" id="PART_NO" aria-describedby="" placeholder="">
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="descript" class="form-control form-control-sm" id="descript_create" aria-describedby="" placeholder="">
+                                <input type="text" name="descript" class="form-control form-control-sm" id="DESCRIPT" aria-describedby="" placeholder="">
                             </div>
                         </div>
                     </div>
@@ -140,18 +140,18 @@
                             <div class="form-group">
                                 <input type="number" name="quantity" onchange="setTwoNumberDecimal(event)" 
                                 min="0" step="0.25" value="0.00" value="" class="form-control form-control-sm" 
-                                id="quantity_create" aria-describedby="" placeholder="Qty IN">
+                                id="quantity_edit" aria-describedby="" placeholder="Qty IN">
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="number" name="qty_ng" class="form-control form-control-sm" id="qty_ng" 
+                                <input type="number" name="qty_ng" class="form-control form-control-sm" id="qty_ng_edit" 
                                 onchange="setTwoNumberDecimal(event)" min="0" max="10" step="0.25" value="0.00" aria-describedby="" placeholder="Qty NG">
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="unit" class="form-control form-control-sm" id="unit_create" aria-describedby="" placeholder="Unit">
+                                <input type="text" name="unit" class="form-control form-control-sm" id="unit_edit" aria-describedby="" placeholder="Unit">
                             </div>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
                 </div>
                 <div class="col-10">
                     <div class="form-group">
-                        <input type="text" name="remark"  class="form-control form-control-sm" id="remark_create" aria-describedby="" placeholder="Remark">
+                        <input type="text" name="remark"  class="form-control form-control-sm" id="remark_edit" aria-describedby="" placeholder="Remark">
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@
                 </div>
                 <div class="col-4">
                     <div class="form-group">
-                        <input class="form-control form-control-sm" name="printed" type="text" id="printed_create" disabled>
+                        <input class="form-control form-control-sm" name="printed" type="text" id="printed_edit" disabled>
                     </div>  
                 </div>
             </div>
@@ -195,7 +195,7 @@
                 </div>
                 <div class="col-4">
                     <div class="form-group">
-                        <input class="form-control form-control-sm" name="voided" type="text" id="voided_voided" disabled>
+                        <input class="form-control form-control-sm" name="voided" type="text" id="voided_edit" disabled>
                     </div>  
                 </div>
             </div>
@@ -208,11 +208,12 @@
                 </div>
                 <div class="col-4">
                     <div class="form-group">
-                        <input class="form-control form-control-sm" name="posted" type="text" id="posted_create" disabled>
+                        <input class="form-control form-control-sm" name="posted" type="text" id="posted_edit" disabled>
                     </div>  
                 </div>
             </div>
         </div>
+    </div>
 {{-- <div class="pull-right">
 <a href="{{ route('tms.warehouse.mto-entry') }}" class="btn btn-sm btn-danger">Kembali</a>
 </div> --}}

@@ -36,7 +36,7 @@
 </head>
 
 <body>
-  
+    
     <!-- preloader area start -->
     <div id="preloader">
         <div class="loader"></div>
@@ -80,9 +80,10 @@
     <script src="{{ asset('vendor/srtdash/js/plugins.js') }}"></script>
     <script src="{{ asset('vendor/srtdash/js/scripts.js') }}"></script>
     <script src="{{ asset('vendor/select2/js/select2.full.min.js') }}"></script>
-
+    @include('sweetalert::alert')
     <!-- Custom js -->
     <script src="{{ asset('vendor/sweetalert2/dist/sweetalert2.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="{{ asset('js/custom-general.js') }}"></script>
     @stack('js')
 
