@@ -37,15 +37,15 @@
                                 <table id="mto-datatables" class="table table-striped" style="width:100%">
                                     <thead class="text-center">
                                         <tr>
-                                            <th>MTO No</th>
-                                            <th>Written</th>
-                                            <th>Posted</th>
-                                            <th>Voided</th>
-                                            <th>Item Code</th>
-                                            <th>Ref No</th>
-                                            <th>Remark</th>
-                                            <th>Brch</th>
-                                            <th>ACTION</th>
+                                            <th width="20%">MTO No</th>
+                                            <th width="20%">Written</th>
+                                            <th width="20%">Posted</th>
+                                            <th width="20%">Voided</th>
+                                            <th width="50%">Item Code</th>
+                                            <th width="20%">Ref No</th>
+                                            <th width="20%">Remark</th>
+                                            <th width="20%">Brch</th>
+                                            <th width="50%">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -61,16 +61,17 @@
 </div>
 
 </div>
-@include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
+
 @include('tms.warehouse.mto-entry.modal.edit-mto-modal._edit')
 @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
 @include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
+@include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
 @endsection
 @section('script')
 <script type="text/javascript">
 
 function keyPressed(e){
-    if (e.keyCode == 120) {
+    if (e.keyCode == 120) { // PRESS KEYBOARD SHORTCUT F9 FOR APPEAR DATA ITEM
        $('#btnPopUp').click();
     } else if(e.keyCode){
         e.preventDefault();
@@ -79,21 +80,66 @@ function keyPressed(e){
 function setTwoNumberDecimal(event) {
     this.value = parseFloat(this.value).toFixed(2);
 }
-
 $(function(){
     $('#select_create').select2();
     $('#select_view').select2();
     $('#select_edit').select2();
 });
-
-
-
+// ADDED NEW MTO DATA
+$(document).on('click', '#addModal', function() {
+   $('#createModal').modal('show');
+   $('.modal-title').text('Many To One Entry (New)');
+});
+// EDIT DATA MTO
+$(document).on('click', '.edit', function(e){
+    var id = $(this).attr('row-id');
+    $('.modal-title').text('Edit Many To One Entry (New)');
+    $('#EditModal').modal('show');
+    EditData(id)
+    UpdateData(id)
+});
 // SHOW VIEW DATA MTO
 $(document).on('click', '.view', function(){
     var id = $(this).attr('row-id');
     $('#viewModal').modal('show');
     getDetail(id, 'VIEW')
 });
+// DELETE THIS DATA
+$(document).on('click', '.delete', function(e){
+    var id = $(this).attr('row-id');
+    e.preventDefault();
+    deleteData(id)
+});
+
+// SAVE DATA TO DATABASE
+$('.modal-footer').on('click','.add', function(){
+    $('.add').html('Saving...')
+     $.ajax({
+         url: "{{ route('tms.warehouse.mto-entry_store_mto_data') }}",
+         type: "POST",
+         data: $('#form-mto').serialize(),
+         success: function(data){
+            $("#createModal").modal('hide'); 
+                Swal.fire(
+                    'Successfully!',
+                    'Added new data Many To One!',
+                    'success'
+                ).then(function(){
+                    location.reload();
+                });
+             
+         }, 
+         error: function(){
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+            })
+         }
+     })
+})
+
+// VIEW DATA SHOW DETAIl
 function getDetail(id, method){
         var route  = "{{ route('tms.warehouse.mto-entry_show_view_detail', ':id') }}";
             route  = route.replace(':id', id);
@@ -139,52 +185,7 @@ function getDetail(id, method){
         });
     }
 
-// ADDED NEW MTO DATA
-$(document).on('click', '#addModal', function() {
-   $('#createModal').modal('show');
-   $('.modal-title').text('Many To One Entry (New)');
-});
-$('.modal-footer').on('click','.add', function(){
-    $('.add').html('Saving...')
-     $.ajax({
-         url: "{{ route('tms.warehouse.mto-entry_store_mto_data') }}",
-         type: "POST",
-         data: $('#form-mto').serialize(),
-         success: function(data){
-            $("#createModal").modal('hide'); 
-                Swal.fire(
-                'Successfully!',
-                'Added new data!',
-                'success'
-                ).then(function(){
-                    location.reload();
-                });
-             
-         }, 
-         error: function(){
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Something went wrong!',
-            })
-         }
-     })
-})
-// EDIT DATA MTO
-$(document).on('click', '.edit', function(e){
-    var id = $(this).attr('row-id');
-    $('.modal-title').text('Edit Many To One Entry (New)');
-    $('#EditModal').modal('show');
-    EditData(id)
-    UpdateData(id)
-});
-
-$(document).on('click', '.delete', function(e){
-    var id = $(this).attr('row-id');
-    e.preventDefault();
-    deleteData(id)
-});
-
+// VIEW EDIT
 function EditData(id){
         var route  = "{{ route('tms.warehouse.mto-entry_edit_mto_data', ':id') }}";
             route  = route.replace(':id', id);
@@ -234,6 +235,8 @@ function EditData(id){
         
         
     }
+
+
 // UPDATE MTO
 function UpdateData(id){
     var route  = "{{ route('tms.warehouse.mto-entry_update_mto_entry', ':id') }}";
@@ -312,27 +315,24 @@ function deleteData(id){
                     }
                 })
             } else {
-                console.log(`dialog was dismissed by ${willDelete.dismiss}`);
+                console.log(`data MTO was dismissed by ${willDelete.dismiss}`);
             }
          
         
         })
 }
-// Method Delete
 
-    function formatDate (input) {
-        if (input !== null) {
-            var datePart = input.match(/\d+/g),
-                year = datePart[0].substring(0),
-                month = datePart[1], day = datePart[2];
-            return day+'/'+month+'/'+year;
-        } else {
-            return null;
-        }
+
+function formatDate (input) {
+    if (input !== null) {
+        var datePart = input.match(/\d+/g),
+            year = datePart[0].substring(0),
+            month = datePart[1], day = datePart[2];
+        return day+'/'+month+'/'+year;
+    } else {
+        return null;
     }
-
-
-    
+}
 
 </script>
 @endsection
@@ -363,12 +363,8 @@ function deleteData(id){
                 { data: 'remark', name: 'remark' },
                 { data: 'branch', name: 'branch' },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
-            ]
-
-
-            
+            ]    
         });
-
         // get Datatables choices data from ITEM / CREATE
         var url = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
         var lookUpdata =  $('#lookUpdata').DataTable({
@@ -411,14 +407,6 @@ function deleteData(id){
                 });
             },
         });
-        
-        
-        // EDIT CHOICE DATA
-        
-        
-
     });
-    
-  
 </script>
 @endpush

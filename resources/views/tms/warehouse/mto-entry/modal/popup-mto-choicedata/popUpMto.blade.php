@@ -1,4 +1,4 @@
-<div class="modal fade bd-example-modal-lg modalpopup" id="mtoModal">
+<div class="modal fade bd-example-modal-lg popupchoice" id="mtoModal"  role="dialog">
     {{-- <div class="modal-dialog" style="width:800px"> --}}
     <div class="modal-dialog modal-80">
         <div class="modal-content">

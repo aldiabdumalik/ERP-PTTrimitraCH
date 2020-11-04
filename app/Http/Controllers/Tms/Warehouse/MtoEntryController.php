@@ -132,6 +132,7 @@ class MtoEntryController extends Controller
                             'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
                             'warehouse','branch','ip_type','ref_no','uid_export'
                             )
+                    //   ->join('formula','entry_mto_tbl.fin_code','=','formula.fin_code')      
                       ->where('mto_no', '=', $MTOHeaderNo)
                       ->get();
         $output = [

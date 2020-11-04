@@ -150,7 +150,7 @@
                             </div>
                             <div class="col-4">
                                 <div class="form-group">
-                                    <input type="text" name="unit" disabled class="form-control form-control-sm" id="UNIT" aria-describedby="" placeholder="Unit">
+                                    <input type="text" name="unit" disabled class="form-control form-control-sm" id="unit_view" aria-describedby="" placeholder="Unit">
                                 </div>
                             </div>
                         </div>
