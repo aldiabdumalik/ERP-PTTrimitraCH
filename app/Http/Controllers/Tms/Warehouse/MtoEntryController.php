@@ -12,6 +12,7 @@ use App\Classes\ButtonBuilder As ButtonBuilder;
 use Carbon\Carbon;
 use DB;
 use Auth;
+use PDF;
 class MtoEntryController extends Controller
 {
     public function index(Request $request)
@@ -52,7 +53,13 @@ class MtoEntryController extends Controller
                     // $ModuleEditAccess = RolePermissionControl::CheckPermission($RoleID, 'edit_modules');
                     // if($ModuleEditAccess){
                         $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'EDIT', 'module-edit-btn', 'ti-pencil-alt', 'Edit', '#', "row-id=$data->id_mto");
+                        $ActionButton .= "<br>";
+                        // $ActionButton .= "<br>";
                         $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'DELETE', 'module-delete-btn', 'ti-trash', 'Delete', '#', "row-id=$data->id_mto");
+ 
+                        $ActionButton .= "<button type='button' class='btn btn-secondary btn-xs btn-flat'>";
+                        $ActionButton .= "<a href='". route('tms.warehouse.mto-entry_report_pdf_mtodata', $data->id_mto) ."' style='color: white;'><i class='fa fa-print'></i> Print</a>";
+                        $ActionButton .= "</button>";
                     // }
              
                 // //     // $ModuleDeleteAccess = RolePermissionControl::CheckPermission($RoleID, 'delete_modules');
@@ -65,7 +72,7 @@ class MtoEntryController extends Controller
                 //         'model' => $data,
                 //         'url_showdetail' => route('tms.warehouse.mto-entry_show_view_detail', $data->id_mto)
                 //   ]);
-                })
+                })->rawColumns(['action'])
                 ->make(true);  
         }
     }
@@ -106,7 +113,7 @@ class MtoEntryController extends Controller
             'branch'=> 'HO',
             'ip_type'=> '-',
             'ref_no'=> $get_mto_no,
-            'uid_export'=> '-',
+            'uid_export'=> $request->uid_export !== '' ? $request->uid_export : null,
             'period'=>  '-',
             'vperiode'=>  '-',
             'staff'=>  $userStaff,
@@ -131,8 +138,7 @@ class MtoEntryController extends Controller
                             'id_mto', 'mto_no', 'fin_code', 'frm_code', 'descript', 'fac_unit',
                             'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
                             'warehouse','branch','ip_type','ref_no','uid_export'
-                            )
-                    //   ->join('formula','entry_mto_tbl.fin_code','=','formula.fin_code')      
+                            )   
                       ->where('mto_no', '=', $MTOHeaderNo)
                       ->get();
         $output = [
@@ -146,14 +152,12 @@ class MtoEntryController extends Controller
     public function editMtoData($id)
     {
         $data = MtoEntry::find($id);
-        $MTOHeader   = MtoEntry::where('id_mto', $id)->first();
-        $MTOHeaderNo = $MTOHeader->mto_no;
         $MTODetail   = MtoEntry::select(
                             'id_mto', 'mto_no', 'fin_code', 'frm_code', 'descript', 'fac_unit',
                             'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
                             'warehouse','branch','ip_type','ref_no','uid_export'
                             )
-                      ->where('mto_no', '=', $MTOHeaderNo)
+                      ->where('id_mto', '=', $id)
                       ->get();
         $output = [
             'detail' => $MTODetail,
@@ -179,6 +183,13 @@ class MtoEntryController extends Controller
         return response()->json([
             'success' => true
         ]);
+    }
+
+    public function reportPdfMto($id)
+    {
+        $data = MtoEntry::find($id);
+        $pdf = PDF::loadView('tms.warehouse.mto-entry.report.report', ['data' => $data]);
+        return $pdf->stream();
     }
 
     

@@ -9,7 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/tms-icon-blue.ico') }}">
-
+    <link rel="stylesheet" href="{{ asset('vendor/select2/css/select2.min.css') }}">
     <!-- SRTDash native css -->
     <link rel="stylesheet" href="{{ asset('vendor/srtdash/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/srtdash/css/font-awesome.min.css') }}">

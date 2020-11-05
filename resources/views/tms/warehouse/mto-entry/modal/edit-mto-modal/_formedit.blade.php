@@ -27,13 +27,13 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="" class="form-control form-control-sm " name="" id="select_edit">
+                        <select name="types" class="form-control form-control-sm "  id="select_edit">
                             <option value="">Pilih Item</option>
-                            <option value="91 PRESSING">91 PRESSING</option>
-                            <option value="92 WELDING">92 WELDING</option>
-                            <option value="93 SPOT WELDING">93 SPOT WELDING</option>
-                            <option value="94 ASSY">94 ASSY</option>
-                            <option value="D5 PROCESS AT D5">D5 PROCESS AT D5</option>
+                            <option value="91">91 PRESSING</option>
+                            <option value="92">92 WELDING</option>
+                            <option value="93">93 SPOT WELDING</option>
+                            <option value="94">94 ASSY</option>
+                            <option value="D5">D5 PROCESS AT D5</option>
                         </select>
                     </div>  
                 </div>
@@ -105,9 +105,9 @@
                             <div class="form-group">
                                 <div class="input-group">
                                 <input class="form-control form-control-sm" name="fin_code" type="text"   
-                                 onkeydown="keyPressed(event)" id="ITEMCODE" placeholder="Cari Itemcode">
+                                 onkeydown="keyPressedEdit(event)" id="ITEMCODE" placeholder="Cari Itemcode">
                                  <span class="input-group-btn">
-                                    <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
+                                    <button type="button" id="btnPopUp2" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal2"><i class="fa fa-search"></i></button>
                                 </span><br>
                                 <i style="color: red; font-size: 11px;">(*) tekan F9/Tombol Cari</i>
                                 </div>

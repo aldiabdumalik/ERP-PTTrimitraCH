@@ -1,4 +1,4 @@
-<div class="modal fade bd-example-modal-lg modalcreate" id="createModal" data-target="#mtoModalCreate" data-whatever="@createMTO"  role="dialog">
+<div class="modal fade bd-example-modal-lg modalcreate" style="z-index: 1041" tabindex="-1" id="createModal" data-target="#mtoModalCreate" data-whatever="@createMTO"  role="dialog">
     <div class="modal-dialog modal-80">
       <div class="modal-content">
           <div class="modal-header">

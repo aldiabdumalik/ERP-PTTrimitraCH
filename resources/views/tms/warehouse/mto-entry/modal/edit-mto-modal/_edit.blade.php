@@ -1,4 +1,4 @@
-<div class="modal fade bd-example-modal-lg modaledit" id="EditModal"  role="dialog">
+<div class="modal fade-in bd-example-modal-lg modaledit"  tabindex="-1" id="EditModal"  role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-80">
       <div class="modal-content">
           <div class="modal-header">

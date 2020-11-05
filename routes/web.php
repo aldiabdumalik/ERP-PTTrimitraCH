@@ -403,6 +403,13 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'uses' => 'TMS\Warehouse\MtoEntryController@DeleteMtoData', 
             'as' => 'tms.warehouse.mto-entry_delete_mto_entry'
         ]);
+        Route::get('/warehouse/mto_entry/{id}/report_pdf_mtodata', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@reportPdfMto', 
+            'as' => 'tms.warehouse.mto-entry_report_pdf_mtodata'
+        ]);
+        
+
+
 
        
        

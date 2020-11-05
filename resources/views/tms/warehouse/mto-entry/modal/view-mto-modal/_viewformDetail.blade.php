@@ -28,13 +28,13 @@
                     </div>
                     <div class="col-2">
                         <div class="form-group">
-                            <select disabled name="" class="form-control form-control-sm " name="" id="select_view">
+                            <select disabled name="types" class="form-control form-control-sm" name="" id="select_view" multiple>
                                 <option value="">Pilih Item</option>
-                                <option value="91 PRESSING">91 PRESSING</option>
-                                <option value="92 WELDING">92 WELDING</option>
-                                <option value="93 SPOT WELDING">93 SPOT WELDING</option>
-                                <option value="94 ASSY">94 ASSY</option>
-                                <option value="D5 PROCESS AT D5">D5 PROCESS AT D5</option>
+                                <option value="91">91 PRESSING</option>
+                                <option value="92">92 WELDING</option>
+                                <option value="93">93 SPOT WELDING</option>
+                                <option value="94">94 ASSY</option>
+                                <option value="D5">D5 PROCESS AT D5</option>
                             </select>
                         </div>  
                     </div>

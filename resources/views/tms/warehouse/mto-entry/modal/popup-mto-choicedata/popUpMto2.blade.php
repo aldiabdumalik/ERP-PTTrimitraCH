@@ -1,4 +1,4 @@
-<div class="modal fade-in bd-example-modal-lg popupchoice" tabindex="-1" id="mtoModal" aria-hidden="true"  role="dialog">
+<div class="modal fade-out bd-example-modal-lg popupchoice2" tabindex="-1" id="mtoModal2" aria-hidden="true"  role="dialog">
     {{-- <div class="modal-dialog" style="width:800px"> --}}
     <div class="modal-dialog modal-80">
         <div class="modal-content">
@@ -10,7 +10,7 @@
             </div>
             <div class="modal-body">
                 <div class="data-tables datatable-dark">
-                <table id="lookUpdata" class="table table-bordered table-hover" width="100%" >
+                <table id="lookUpdata2" class="table table-bordered table-hover" width="100%" >
                     <thead>
                         <tr>
                             <th>Item Code</th>
