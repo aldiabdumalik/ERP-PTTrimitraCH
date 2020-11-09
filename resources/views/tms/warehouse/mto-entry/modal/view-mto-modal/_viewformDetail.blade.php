@@ -28,21 +28,11 @@
                     </div>
                     <div class="col-2">
                         <div class="form-group">
-                            <select disabled name="types" class="form-control form-control-sm" name="" id="select_view" multiple>
-                                <option value="">Pilih Item</option>
-                                <option value="91">91 PRESSING</option>
-                                <option value="92">92 WELDING</option>
-                                <option value="93">93 SPOT WELDING</option>
-                                <option value="94">94 ASSY</option>
-                                <option value="D5">D5 PROCESS AT D5</option>
-                            </select>
+                            <input type="text" class="form-control form-control-sm" name="types"  disabled id="types_view"  >
                         </div>  
                     </div>
                 </div>
             </div>
-
-            
-            
             <div class="col-6">
                 <div class="row">
                     <div class="col-6">
@@ -88,7 +78,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input class="form-control form-control-sm" disabled type="text" name="vperiod" id="vperiod_view" required>
+                                    <input class="form-control form-control-sm" disabled type="text" name="written_view" id="written_view" required>
                                 </div>
                             </div>
                         </div>

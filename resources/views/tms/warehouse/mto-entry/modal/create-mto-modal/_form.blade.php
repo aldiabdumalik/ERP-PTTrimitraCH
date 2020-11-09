@@ -27,8 +27,8 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="types" class="form-control form-control-xs"  id="select_create" multiple="multiple">
-                            <option value="">Pilih Item</option>
+                        <select name="types" class="form-control form-control-xs"   id="select_create" required>
+                            <option value=""></option>
                             <option value="91">91 PRESSING</option>
                             <option value="92">92 WELDING</option>
                             <option value="93">93 SPOT WELDING</option>
@@ -87,7 +87,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <input class="form-control form-control-sm" type="text" value="{{ $getDate }}"  name="vperiod" value="{{ $getDate }}" id="vperiode" required>
+                                <input class="form-control form-control-sm"  name="written" value="{{ $getDate }}" id="written_create" required>
                             </div>
                         </div>
                     </div>

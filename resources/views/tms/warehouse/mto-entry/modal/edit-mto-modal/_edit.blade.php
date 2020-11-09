@@ -1,4 +1,4 @@
-<div class="modal fade-in bd-example-modal-lg modaledit"  tabindex="-1" id="EditModal"  role="dialog" aria-hidden="true">
+<div class="modal fade bd-example-modal-lg modaledit"  tabindex="-1" id="EditModal"  role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-80">
       <div class="modal-content">
           <div class="modal-header">
@@ -22,8 +22,10 @@
                                           <th>Item Code</th>
                                           <th>Part No</th>
                                           <th>Description</th>
-                                          <th>Type</th>
+                                          <th>Unit</th>
                                           <th>Qty</th>
+                                          <th>Qty NG</th>
+                                          <th>Warehouse</th>
                                       </tr>
                                   </thead>
                                   <tbody></tbody>

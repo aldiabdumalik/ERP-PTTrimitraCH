@@ -17,24 +17,25 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <input type="text" value="HO" disabled class="form-control form-control-sm " id="branch_edit" aria-describedby="" placeholder="">
+                        <input type="text" disabled class="form-control form-control-sm " id="branch_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <input type="text" class="form-control form-control-sm" name="warehouse_edit" value="90" disabled id="warehouse" aria-describedby="" placeholder="">
+                        <input type="text" class="form-control form-control-sm" name="warehouse" disabled  id="warehouse_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="types" class="form-control form-control-sm "  id="select_edit">
-                            <option value="">Pilih Item</option>
+                        {{-- <select name="types" class="form-control form-control-sm select_edit"  id="types_edit">
+                            <option value=""></option>
                             <option value="91">91 PRESSING</option>
                             <option value="92">92 WELDING</option>
                             <option value="93">93 SPOT WELDING</option>
                             <option value="94">94 ASSY</option>
                             <option value="D5">D5 PROCESS AT D5</option>
-                        </select>
+                        </select> --}}
+                        <input type="text" disabled class="form-control form-control-sm" name="types"  id="types_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
             </div>
@@ -68,7 +69,7 @@
                 </div>
                 <div class="col-6">
                     <div class="form-group">
-                        <input type="text" name="ref_no"    class="form-control form-control-sm" id="ref_no_edit" aria-describedby="" placeholder="">
+                        <input type="text" name="ref_no" disabled class="form-control form-control-sm" id="ref_no_edit" aria-describedby="" placeholder="">
                     </div>  
                 </div>
             </div>
@@ -82,12 +83,12 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
-                                <input class="form-control form-control-sm"  value="{{ $getDate1 }}"  type="text" name="period" id="period_edit" required value="{{ $getDate1 }}">
+                                <input class="form-control form-control-sm"   type="text" name="period" id="period_edit" >
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <input class="form-control form-control-sm" type="text" value="{{ $getDate }}"  name="vperiod" value="{{ $getDate }}" id="vperiod_edit" required>
+                                <input class="form-control form-control-sm" type="date"  name="written"  id="written_edit">
                             </div>
                         </div>
                     </div>
@@ -107,7 +108,7 @@
                                 <input class="form-control form-control-sm" name="fin_code" type="text"   
                                  onkeydown="keyPressedEdit(event)" id="ITEMCODE" placeholder="Cari Itemcode">
                                  <span class="input-group-btn">
-                                    <button type="button" id="btnPopUp2" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal2"><i class="fa fa-search"></i></button>
+                                    <button type="button" id="btnPopUp2" disabled class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal2"><i class="fa fa-search"></i></button>
                                 </span><br>
                                 <i style="color: red; font-size: 11px;">(*) tekan F9/Tombol Cari</i>
                                 </div>
@@ -116,12 +117,12 @@
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <input type="text" name="frm_code" class="form-control form-control-sm" id="PART_NO" aria-describedby="" placeholder="">
+                                <input type="text" name="frm_code" disabled class="form-control form-control-sm" id="PART_NO" aria-describedby="" placeholder="">
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="descript" class="form-control form-control-sm" id="DESCRIPT" aria-describedby="" placeholder="">
+                                <input type="text" name="descript" disabled class="form-control form-control-sm" id="DESCRIPT" aria-describedby="" placeholder="">
                             </div>
                         </div>
                     </div>

@@ -407,6 +407,11 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'uses' => 'TMS\Warehouse\MtoEntryController@reportPdfMto', 
             'as' => 'tms.warehouse.mto-entry_report_pdf_mtodata'
         ]);
+
+        Route::post('/warehouse/mto_entry/posted_mto_data/{id}', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@postedMtoData', 
+            'as' => 'tms.warehouse.mto-entry_posted_mto_entry_data'
+        ]);
         
 
 

@@ -17,11 +17,13 @@
                               <table id="tbl-detail-mto" class="table table-bordered table-hover" width="100%" >
                                   <thead>
                                       <tr>
-                                          <th>Item Code</th>
-                                          <th>Part No</th>
-                                          <th>Description</th>
-                                          <th>Type</th>
-                                          <th>Qty</th>
+                                        <th>Item Code</th>
+                                        <th>Part No</th>
+                                        <th>Description</th>
+                                        <th>Unit</th>
+                                        <th>Qty</th>
+                                        <th>Qty NG</th>
+                                        <th>Warehouse</th>
                                       </tr>
                                   </thead>
                                   <tbody></tbody>
