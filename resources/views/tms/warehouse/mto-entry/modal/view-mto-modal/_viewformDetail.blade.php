@@ -1,8 +1,6 @@
 <div class="col">
-        
         <span id="form-output"></span>
         {{-- <input class="form-control" type="hidden" name="id" id="role-id"> --}}
-        
         <div class="row">
             <div class="col-6">
                 <div class="row">
@@ -78,7 +76,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input class="form-control form-control-sm" disabled type="text" name="written_view" id="written_view" required>
+                                    <input ype="date" class="form-control form-control-sm" disabled t name="written" id="written_view" required>
                                 </div>
                             </div>
                         </div>
@@ -97,9 +95,9 @@
                                     <div class="input-group">
                                     <input class="form-control form-control-sm" name="fin_code" type="text" name="from-wh-branch"  required
                                      onkeydown="keyPressed(event)" disabled id="item_code_view" aria-describedby="" placeholder="Cari Itemcode">
-                                     {{-- <span class="input-group-btn">
-                                        <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
-                                    </span> --}}
+                                     <span class="input-group-btn">
+                                        <button type="button" id="btnPopUp" disabled class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
+                                    </span>
                                     </div>
                                 </div>
                             </div>
@@ -201,7 +199,6 @@
                         </div>  
                     </div>
                 </div>
-
                 {{-- <div class="row">
                     <div class="col-8">
                         <div class="form-group align-right">

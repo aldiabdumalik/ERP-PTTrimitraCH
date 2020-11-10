@@ -34,17 +34,18 @@
                            
                             <div class="data-tables datatable-dark">
                                 <div class="table-responsive">
-                                <table id="mto-datatables" class="table table-striped table-bordered" style="width:100%">
-                                    <thead class="text-center">
+                                <table id="mto-datatables" class="table table-striped" style="width:100%">
+                                    {{ csrf_field() }}
+                                    <thead class="text-center" style="">
                                         <tr>
-                                            <th width="%">MTO No</th>
-                                            <th width="10%">Written</th>
-                                            <th width="10%">Posted</th>
-                                            <th width="10%">Voided</th>
-                                            <th width="10%">Item Code</th>
-                                            <th width="10%">Ref No</th>
-                                            <th width="10%">Remark</th>
-                                            <th width="4%">Brch</th>
+                                            <th>MTO No</th>
+                                            <th>Written</th>
+                                            <th>Posted</th>
+                                            <th>Voided</th>
+                                            <th>Item Code</th>
+                                            <th>Ref No</th>
+                                            <th>Remark</th>
+                                            <th width="1%">Brch</th>
                                             <th width="100%">ACTION</th>
                                         </tr>
                                     </thead>
@@ -104,33 +105,37 @@ $( document ).ready(function() {
 
 // ADDED NEW MTO DATA
 $(document).on('click', '#addModal', function(e) {
-    e.preventDefault();
-    $('#createModal').after('#mtoModal');
+   e.preventDefault();
+   $('#createModal').after('#mtoModal');
    $('#createModal').modal('show');
    $('.modal-title').text('Many To One Entry (New)');
 });
 // EDIT DATA MTO
 $(document).on('click', '.edit', function(e){
+    e.preventDefault();
     var id = $(this).attr('row-id');
-    $('.modal-title').text('Edit Many To One Entry (New)');
-    $('#EditModal').modal('show');
-    EditData(id)
-    UpdateData(id)
+    var posted = $(this).attr('data-target');
+    var mto_no = $(this).attr('data-id');
+    if (posted !== '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'MTO no.' + mto_no + ' '+'has been posted cant edit',
+        });
+    } else {
+        $('.modal-title').text('Edit Many To One Entry (New)');
+        $('#EditModal').modal('show');
+        // e.preventDefault();
+        EditData(id)
+        UpdateData(id, mto_no)
+    }  
 });
-// VALIDASI EDIT WHEN POSTED
-// $(document).on('click', '.valedit', function(e){
-//     var id = $(this).attr('row-id');
-//     Swal.fire({
-//         icon: 'error',
-//         title: 'MTO',
-//         text: 'entry has been!',
-//     })
-// });
 // SHOW VIEW DATA MTO
 $(document).on('click', '.view', function(e){
     e.preventDefault();
     var id = $(this).attr('row-id');
     $('#viewModal').modal('show');
+    $('.modal-title').text('Many To One Entry (New)');
     getDetail(id, 'VIEW')
 });
 // DELETE THIS DATA
@@ -273,7 +278,7 @@ function EditData(id){
                 $('#tbl-edit').DataTable({
                     data: detailDataset,
                     columns: [
-                        { title: 'itemcode'},
+                        { title: 'Itemcode'},
                         { title: 'Part No.'},
                         { title: 'Description'},
                         { title: 'Unit' },
@@ -293,35 +298,37 @@ function EditData(id){
 
 
 // UPDATE MTO FROM EDIT
-function UpdateData(id){
+function UpdateData(id, mto_no){
     var route  = "{{ route('tms.warehouse.mto-entry_update_mto_entry', ':id') }}";
         route  = route.replace(':id', id);
+        //
     $('.modal-footer').on('click','.edit', function(){
             $('.edit').html('Saving...');
-            $.ajax({
-                url: route,
-                type: "PUT",
-                data: $('#form-mto-edit').serialize(),
-                success: function(data){
-                   $("#EditModal").modal('hide'); 
-                   Swal.fire(
-                    'Successfully!',
-                    'Update data!',
-                    'success'
-                    ).then(function(){
-                        location.reload();
-                    });
-                    
-                }, 
-                error: function(){
-                    Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong!',
-                })
-                }
-            })
+                $.ajax({
+                    url: route,
+                    type: "PUT",
+                    data: $('#form-mto-edit').serialize(),
+                    success: function(data){
+                    $("#EditModal").modal('hide'); 
+                        Swal.fire(
+                            'Successfully!',
+                            'Update data MTO no.' + mto_no,
+                            'success'
+                            ).then(function(){
+                                location.reload();
+                        });
+                        
+                    }, 
+                        error: function(){
+                            Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Something went wrong!',
+                        })
+                    }
+                });
         });
+        
 }
 
 
@@ -421,7 +428,7 @@ function postedMTO(id, mto_no){
                     }
                 })
             } else {
-                console.log(`data MTO was dismissed by ${willDelete.dismiss}`);
+                console.log(`data MTO was dismissed by ${willPosted.dismiss}`);
             }
          
         

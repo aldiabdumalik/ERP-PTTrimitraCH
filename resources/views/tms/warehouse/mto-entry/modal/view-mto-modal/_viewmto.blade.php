@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-80">
       <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title view">Detail Many To One Entry (New)</h4>
+            <h4 class="modal-title view"></h4>
           </div>
           <div class="row">
              <div class="col">
