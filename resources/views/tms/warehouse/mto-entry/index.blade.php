@@ -98,7 +98,7 @@ function setTwoNumberDecimal(event) {
 }
 
 $( document ).ready(function() {
-    $('#select_create').select2();
+    $('.select_create').select2();
     $('.select_view').select2();
     $('.select_edit').select2();
 });
@@ -106,10 +106,11 @@ $( document ).ready(function() {
 // ADDED NEW MTO DATA
 $(document).on('click', '#addModal', function(e) {
    e.preventDefault();
+ 
    $('#createModal').after('#mtoModal');
    $('#createModal').modal('show');
    $('.modal-title').text('Many To One Entry (New)');
-   validateCreateMto()
+   
 });
 // EDIT DATA MTO
 $(document).on('click', '.edit', function(e){
@@ -179,7 +180,7 @@ $('.modal-footer').on('click','.add', function(){
             $("#createModal").modal('hide'); 
                 Swal.fire(
                     'Successfully!',
-                    'Added new data Many To One!',
+                    'add new data MTO entry!',
                     'success'
                 ).then(function(){
                     location.reload();
@@ -257,8 +258,6 @@ function EditData(id){
             method:   'get',
             dataType: 'json',
             success:function(data){
-            
-                // alert(cek);
                 $('#mto_no_edit').val(data['header'].mto_no);
                 $('#branch_edit').val(data['header'].branch);
                 $('#warehouse_edit').val(data['header'].warehouse);
@@ -324,7 +323,7 @@ function UpdateData(id, mto_no){
                     $("#EditModal").modal('hide'); 
                         Swal.fire(
                             'Successfully!',
-                            'Update data MTO no.' + mto_no,
+                            'update data MTO entry no.' + mto_no,
                             'success'
                             ).then(function(){
                                 location.reload();
@@ -342,8 +341,6 @@ function UpdateData(id, mto_no){
         });
         
 }
-
-
 // CALL TOKEN FOR DELETE THIS DATA FROM AJAX
 $.ajaxSetup({
     headers: {
@@ -450,16 +447,23 @@ function postedMTO(id, mto_no){
 
 function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
-    var descript = document.getElementById('descript_create').value;
+        descript = document.getElementById('descript_create').value;
+        types = document.getElementById('types_create').value;
+        itemcode = document.getElementById('itemcode_create').value
     if (part_no !== '' || descript !== '') {
         Swal.fire({
             icon: 'error',
             title: 'not valid',
             text: 'please press F9 or button search at itemcode input',
         })
+    } else if (itemcode == '') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'please fill in itemcode',
+            text: 'please press F9 or button search',
+        })
     }
 }
-
 function formatDate (input) {
     if (input !== null) {
         var datePart = input.match(/\d+/g),
@@ -470,7 +474,6 @@ function formatDate (input) {
         return null;
     }
 }
-
 </script>
 @endsection
 @push('js')

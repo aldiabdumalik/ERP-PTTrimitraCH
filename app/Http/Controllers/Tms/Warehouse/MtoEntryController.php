@@ -100,6 +100,9 @@ class MtoEntryController extends Controller
 
     public function StoreMtoData(Request $request)
     {
+        $request->validate([
+            'types' => 'required',
+        ]);
 
         $data = new MtoEntry();
         $get_mto_no = $data->getMtoNo();
@@ -137,7 +140,6 @@ class MtoEntryController extends Controller
             'operator'=> $request->operator !== '' ? $request->operator : '-'
 
         ]);
-        // dd($data);
         return response()->json([
             'success' => true
         ]);
@@ -171,14 +173,11 @@ class MtoEntryController extends Controller
                             'warehouse','branch','ip_type','ref_no','uid_export'
                             )
                       ->where('id_mto', '=', $id)
-                      
                       ->get();
-        
-        // $data = $data['types'];      
+      
         $output = [
             'detail' => $MTODetail,
             'header' => $data
-            // 'cek' => $cek
         ];
         return response()->json($output);
     }
@@ -186,7 +185,6 @@ class MtoEntryController extends Controller
     {
         $data = MtoEntry::find($id);
         $data->update($request->all());
-
         return response()->json([
             'success' => true
         ]);

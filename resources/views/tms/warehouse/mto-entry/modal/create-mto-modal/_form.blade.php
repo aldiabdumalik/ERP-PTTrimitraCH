@@ -27,7 +27,7 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="types" class="form-control form-control-xs"   id="select_create" required>
+                        <select name="types" class="form-control form-control-xs select_create"   id="types_create" required>
                             <option value=""></option>
                             <option value="91">91 PRESSING</option>
                             <option value="92">92 WELDING</option>
@@ -105,7 +105,7 @@
                             <div class="form-group">
                                 <div class="input-group">
                                 <input class="form-control form-control-sm" name="fin_code" type="text"   
-                                 onkeydown="keyPressed(event)" id="itemcode_create" placeholder="Cari Itemcode">
+                                 onkeydown="keyPressed(event)" id="itemcode_create" onchange="validateCreateMto()" placeholder="Cari Itemcode">
                                  <span class="input-group-btn">
                                     <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                 </span><br>
