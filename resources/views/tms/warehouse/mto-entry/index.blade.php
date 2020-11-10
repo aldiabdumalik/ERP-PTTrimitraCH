@@ -36,7 +36,7 @@
                                 <div class="table-responsive">
                                 <table id="mto-datatables" class="table table-striped" style="width:100%">
                                     {{ csrf_field() }}
-                                    <thead class="text-center" style="">
+                                    <thead class="text-center" style="font-size: 15px;">
                                         <tr>
                                             <th>MTO No</th>
                                             <th>Written</th>
