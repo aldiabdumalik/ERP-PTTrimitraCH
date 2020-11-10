@@ -1,7 +1,6 @@
 <div class="col">
     <span id="form-output"></span>
     {{-- <input class="form-control" type="hidden" name="id" id="role-id"> --}}
-    
     <div class="row">
         <div class="col-6">
             <div class="row">
@@ -39,9 +38,7 @@
                 </div>
             </div>
         </div>
-
-        
-        
+{{-- right form --}}
         <div class="col-6">
             <div class="row">
                 <div class="col-6">
@@ -57,7 +54,6 @@
             </div> 
         </div>
     </div>
-
     <div class="row">
         <div class="col-6">
             <div class="row">

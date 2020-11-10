@@ -131,7 +131,7 @@ class MtoEntryController extends Controller
             'ref_no'=> $get_mto_no,
             'uid_export'=> $request->uid_export !== '' ? $request->uid_export : null,
             'period'=>  Carbon::now()->format('Y/m'),
-            'vperiode'=>  '-',
+            'vperiode'=>  $request->vperiod !== '' ? $request->vperiod : null,
             'staff'=>  $userStaff,
             'dept'=> '-',
             'remark'=> $request->remark !== '' ? $request->remark : '-',

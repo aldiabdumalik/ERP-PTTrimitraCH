@@ -13,8 +13,8 @@
     <div class="row">
         <div class="col-12 mt-5">
             <div class="#">
-               <button type="button"  class="btn btn-primary" id="addModal">
-              <i class="fa fa-plus"></i>  Add
+               <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
+              <i class="ti-plus"></i>  Add New Data
                 </button>
             </div>
         </div>
@@ -159,7 +159,6 @@ $(document).on('click', '.delete', function(e){
     
 });
 //  POSTED VIA AJAX
-
 $(document).on('click', '.posted', function(e){
     var id = $(this).attr('row-id');
     var mto_no = $(this).attr('data-id');
