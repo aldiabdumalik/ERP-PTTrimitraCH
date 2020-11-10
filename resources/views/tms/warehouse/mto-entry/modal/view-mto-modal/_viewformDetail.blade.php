@@ -96,7 +96,7 @@
                                     <input class="form-control form-control-sm" name="fin_code" type="text" name="from-wh-branch"  required
                                      onkeydown="keyPressed(event)" disabled id="item_code_view" aria-describedby="" placeholder="Cari Itemcode">
                                      <span class="input-group-btn">
-                                        <button type="button" id="btnPopUp" disabled class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
+                                        <button type="button" id="btnPopUp3" disabled class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                     </span>
                                     </div>
                                 </div>

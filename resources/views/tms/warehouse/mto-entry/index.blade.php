@@ -120,7 +120,7 @@ $(document).on('click', '.edit', function(e){
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'MTO no.' + mto_no + ' '+'has been posted cant edit',
+            text: 'MTO entry no.' + mto_no + ' '+'has been posted cant edit',
         });
     } else {
         $('.modal-title').text('Edit Many To One Entry (New)');
@@ -142,8 +142,19 @@ $(document).on('click', '.view', function(e){
 $(document).on('click', '.delete', function(e){
     var id = $(this).attr('row-id');
     var mto_no = $(this).attr('data-id');
-    e.preventDefault();
-    deleteData(id, mto_no)
+    var posted = $(this).attr('data-target');
+
+    if (posted !== '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'MTO entry no.' + mto_no + ' '+'has been posted cant delete',
+        });
+    } else {
+        e.preventDefault();
+        deleteData(id, mto_no)
+    }
+    
 });
 //  POSTED VIA AJAX
 
@@ -302,8 +313,8 @@ function UpdateData(id, mto_no){
     var route  = "{{ route('tms.warehouse.mto-entry_update_mto_entry', ':id') }}";
         route  = route.replace(':id', id);
         //
-    $('.modal-footer').on('click','.edit', function(){
-            $('.edit').html('Saving...');
+    $('.modal-footer').on('click','.update', function(){
+            $('.update').html('Saving...');
                 $.ajax({
                     url: route,
                     type: "PUT",
