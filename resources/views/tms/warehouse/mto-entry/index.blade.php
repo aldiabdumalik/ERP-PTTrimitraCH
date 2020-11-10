@@ -109,6 +109,7 @@ $(document).on('click', '#addModal', function(e) {
    $('#createModal').after('#mtoModal');
    $('#createModal').modal('show');
    $('.modal-title').text('Many To One Entry (New)');
+   validateCreateMto()
 });
 // EDIT DATA MTO
 $(document).on('click', '.edit', function(e){
@@ -446,6 +447,18 @@ function postedMTO(id, mto_no){
         })
 }
 
+
+function validateCreateMto(){
+    var part_no = document.getElementById('part_no_create').value;
+    var descript = document.getElementById('descript_create').value;
+    if (part_no !== '' || descript !== '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'not valid',
+            text: 'please press F9 or button search at itemcode input',
+        })
+    }
+}
 
 function formatDate (input) {
     if (input !== null) {

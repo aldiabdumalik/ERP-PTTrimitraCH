@@ -116,12 +116,12 @@
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <input type="text" name="frm_code" class="form-control form-control-sm" id="part_no_create" aria-describedby="" placeholder="">
+                                <input type="text" name="frm_code" class="form-control form-control-sm" autocomplete="off" onchange="validateCreateMto()" id="part_no_create" aria-describedby="" placeholder="">
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="descript" class="form-control form-control-sm" id="descript_create" aria-describedby="" placeholder="">
+                                <input type="text" name="descript" class="form-control form-control-sm" autocomplete="off" onchange="validateCreateMto()" id="descript_create" aria-describedby="" placeholder="">
                             </div>
                         </div>
                     </div>
@@ -151,7 +151,7 @@
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="unit" class="form-control form-control-sm" id="unit_create" aria-describedby="" placeholder="Unit">
+                                <input type="text" name="unit" autocomplete="off" class="form-control form-control-sm" id="unit_create" aria-describedby="" placeholder="Unit">
                             </div>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
                 </div>
                 <div class="col-10">
                     <div class="form-group">
-                        <input type="text" name="remark"  class="form-control form-control-sm" id="remark_create" aria-describedby="" placeholder="Remark">
+                        <input type="text" name="remark" autocomplete="off" class="form-control form-control-sm" id="remark_create" aria-describedby="" placeholder="Remark">
                     </div>
                 </div>
             </div>

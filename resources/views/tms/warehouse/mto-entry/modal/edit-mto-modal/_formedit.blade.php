@@ -152,7 +152,7 @@
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="unit" class="form-control form-control-sm" id="unit_edit" aria-describedby="" placeholder="Unit">
+                                <input type="text" name="unit" autocomplete="off" class="form-control form-control-sm" id="unit_edit" aria-describedby="" placeholder="Unit">
                             </div>
                         </div>
                     </div>
@@ -167,7 +167,7 @@
                 </div>
                 <div class="col-10">
                     <div class="form-group">
-                        <input type="text" name="remark"  class="form-control form-control-sm" id="remark_edit" aria-describedby="" placeholder="Remark">
+                        <input type="text" name="remark" autocomplete="off"  class="form-control form-control-sm" id="remark_edit" aria-describedby="" placeholder="Remark">
                     </div>
                 </div>
             </div>
