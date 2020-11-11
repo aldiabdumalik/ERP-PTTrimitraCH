@@ -102,6 +102,8 @@ class MtoEntryController extends Controller
     {
         $request->validate([
             'types' => 'required',
+            'quantity'=> 'required',
+            'unit'=> 'required'
         ]);
 
         $data = new MtoEntry();
@@ -133,7 +135,6 @@ class MtoEntryController extends Controller
             'period'=>  Carbon::now()->format('Y/m'),
             'vperiode'=>  $request->vperiod !== '' ? $request->vperiod : null,
             'staff'=>  $userStaff,
-            'dept'=> '-',
             'remark'=> $request->remark !== '' ? $request->remark : '-',
             'lbom'=> $request->lbom !== '' ? $request->lbom : '-',
             'xprinted'=> $request->xprinted !== '' ? $request->xprinted : '-',
@@ -209,7 +210,8 @@ class MtoEntryController extends Controller
         $data['printed'] = Carbon::now();
         $data->save();
         $pdf = PDF::loadView('tms.warehouse.mto-entry.report.report', ['data' => $data]);
-        return $pdf->download('report_mto'.'_'.  Carbon::now()->format('d/M/Y') . '.pdf');
+        // return $pdf->download('report_mto'.'_'.  Carbon::now()->format('d/M/Y') . '.pdf');
+        return $pdf->stream();
     }
 
     public function postedMtoData($id)

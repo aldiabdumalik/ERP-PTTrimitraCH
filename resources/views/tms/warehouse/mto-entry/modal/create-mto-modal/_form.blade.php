@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="types" class="form-control form-control-xs select_create"   id="types_create" required>
+                        <select name="types"  class="form-control select_create" style="border: none;"   id="types_create" multiple="multiple" required>
                             <option value=""></option>
                             <option value="91">91 PRESSING</option>
                             <option value="92">92 WELDING</option>
@@ -83,7 +83,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <input class="form-control form-control-sm"  name="written" value="{{ $getDate }}" id="written_create" required>
+                                <input type="text" readonly class="form-control form-control-sm"  name="written" value="{{ $getDate }}" id="written_create" required>
                             </div>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                         <div class="col-4">
                             <div class="form-group">
                                 <input type="number" name="quantity" onchange="setTwoNumberDecimal(event)" 
-                                min="0" step="0.25" value="0.00" value="" class="form-control form-control-sm" 
+                                min="0" step="0.25" value="0.00" value=""  class="form-control form-control-sm" 
                                 id="quantity_create" aria-describedby="" placeholder="Qty IN">
                             </div>
                         </div>

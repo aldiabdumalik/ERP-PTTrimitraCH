@@ -32,9 +32,9 @@
                     <div class="row mt-3">
                         <div class="col">
                            
-                            <div class="data-tables datatable-dark">
+                            <div class="">
                                 <div class="table-responsive">
-                                <table id="mto-datatables" class="table table-striped" style="width:100%">
+                                <table id="mto-datatables" class="table table-striped table-hover table-border" style="width:100%">
                                     {{ csrf_field() }}
                                     <thead class="text-center" style="font-size: 15px;">
                                         <tr>
@@ -98,15 +98,16 @@ function setTwoNumberDecimal(event) {
 }
 
 $( document ).ready(function() {
-    $('.select_create').select2();
-    $('.select_view').select2();
-    $('.select_edit').select2();
+    $('.select_create').select2({
+        placeholder: "Pilih item"
+    });
+    
+
 });
 
 // ADDED NEW MTO DATA
 $(document).on('click', '#addModal', function(e) {
    e.preventDefault();
- 
    $('#createModal').after('#mtoModal');
    $('#createModal').modal('show');
    $('.modal-title').text('Many To One Entry (New)');
@@ -448,7 +449,7 @@ function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
         descript = document.getElementById('descript_create').value;
         types = document.getElementById('types_create').value;
-        itemcode = document.getElementById('itemcode_create').value
+        itemcode = document.getElementById('itemcode_create').value;
     if (part_no !== '' || descript !== '') {
         Swal.fire({
             icon: 'error',
@@ -461,7 +462,7 @@ function validateCreateMto(){
             title: 'please fill in itemcode',
             text: 'please press F9 or button search',
         })
-    }
+    } 
 }
 function formatDate (input) {
     if (input !== null) {
