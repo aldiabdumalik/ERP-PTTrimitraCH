@@ -551,50 +551,6 @@ function formatDate (input) {
         });
 
 
-        
-        // GET DATATABLES CHOICE DATA 2x CLICK AT EDIT FORM
-        var url2 = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
-        var lookUpdata2 =  $('#lookUpdata2').DataTable({
-            processing: true, 
-            serverSide: true,
-            "pagingType": "numbers",
-            ajax: url2,
-            responsive: true,
-            // "scrollX": true,
-            // "scrollY": "500px",
-            // "scrollCollapse": true,
-            "order": [[1, 'asc']],
-            columns: [
-                { data: 'ITEMCODE', name: 'ITEMCODE' },
-                { data: 'PART_NO', name: 'PART_NO' },
-                { data: 'DESCRIPT', name: 'DESCRIPT' },
-                { data: 'DESCRIPT1', name: 'DESCRIPT1' }
-
-            ],
-            "bDestroy": true,
-            "initComplete": function(settings, json) {
-                // $('div.dataTables_filter input').focus();
-                $('#lookUpdata2 tbody').on('dblclick', 'tr', function () {
-                    var dataArr = [];
-                    var rows2 = $(this);
-                    var rowData2 = lookUpdata2.rows(rows2).data();
-                    $.each($(rowData2),function(key,value){
-                        document.getElementById("ITEMCODE").value = value["ITEMCODE"];
-                        document.getElementById("PART_NO").value = value["PART_NO"];
-                        document.getElementById("DESCRIPT").value = value["DESCRIPT"];
-                        $('#mtoModal2').modal('hide');
-                        // $('.edit').focus();
-                    });
-                });
-                $('#mtoModalLabel').on('hidden.bs.modal', function () {
-                    var itemcode2 = document.getElementById("ITEMCODE").value.trim();
-                    if(itemcode2 === '') {
-                        document.getElementById("PART_NO").value = "";
-                        $('#PART_NO').focus();
-                    }
-                });
-            },
-        });
     });
 </script>
 @endpush
