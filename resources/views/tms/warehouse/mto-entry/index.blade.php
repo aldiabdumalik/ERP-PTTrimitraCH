@@ -45,8 +45,8 @@
                                             <th>Item Code</th>
                                             <th>Ref No</th>
                                             <th>Remark</th>
-                                            <th width="1%">Brch</th>
-                                            <th width="100%">ACTION</th>
+                                            <th>Brch</th>
+                                            <th width="30%">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -64,7 +64,7 @@
 </div>
 @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
 @include('tms.warehouse.mto-entry.modal.edit-mto-modal._edit')
-@include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto2') 
+{{-- @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto2')  --}}
 @include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
 @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
 
@@ -74,14 +74,14 @@
 @section('script')
 <script type="text/javascript">
 
-function keyPressedEdit(e){
-    if (e.keyCode == 120) { // PRESS KEYBOARD SHORTCUT F9 FOR APPEAR DATA ITEM FOR EDIT FORM
-        e.preventDefault();
-       $('#btnPopUp2').click();
-    } else if(e.keyCode){
-        e.preventDefault();
-    }
-}
+// function keyPressedEdit(e){
+//     if (e.keyCode == 120) { // PRESS KEYBOARD SHORTCUT F9 FOR APPEAR DATA ITEM FOR EDIT FORM
+//         e.preventDefault();
+//        $('#btnPopUp2').click();
+//     } else if(e.keyCode){
+//         e.preventDefault();
+//     }
+// }
 
 function keyPressed(e){
     if (e.keyCode == 120) { // PRESS KEYBOARD SHORTCUT F9 FOR APPEAR DATA ITEM
