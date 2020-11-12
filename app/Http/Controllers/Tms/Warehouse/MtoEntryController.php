@@ -27,7 +27,12 @@ class MtoEntryController extends Controller
     public function getMtoDatatables(Request $request)
     {
         if ($request->ajax()) {
+            // $get_data = $request->get('filter_field');
             $data =  MtoEntry::all();
+            // dd($data);
+            // if ($get_data == 1) {
+            //     $data->posted()->get();
+            // }
             return Datatables::of($data)
                 ->editColumn('written', function(){
                     $data = Carbon::now()->format('d/m/Y');
@@ -52,39 +57,10 @@ class MtoEntryController extends Controller
                     }
                 })
                 ->addColumn('action', function($data){
-                    $ActionButton = '';
-                   
-                    // // $ActionButton .= '<a href="#" class="btn btn-info btn-sm" onclick="editForm('. $data->id_mto .')"><i class="ti-pencil"></i> Edit</a>';
-                    // // $ActionButton .= '<a href="#" class="btn btn-sm btn-flat btn-info" onclick="editForm('. $data->mto_no .')"><i class="ti-pencil"></i> Edit</a>';
-
-                    // // $ModuleEditAccess = RolePermissionControl::CheckPermission($RoleID, 'edit_modules');
-                    // // if($ModuleEditAccess){
-
-
-                        // $ActionButton = "<div class='pull-right'>";
-                        // $ActionButton .= $ActionButton.ButtonBuilder::Build('DATATABLE', 'VIEW', 'view-btn', 'ti-eye', 'View','#', "row-id=$data->id_mto");
-                        // $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE-LINK', 'EDIT', 'module-edit-btn', 'ti-pencil-alt', 'Edit', '#', "row-id=$data->id_mto");
-                        // $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'DELETE', 'module-delete-btn', 'ti-trash', 'Delete', '', "row-id=$data->id_mto data-id=$data->mto_no");
- 
-                        // $ActionButton .= "<button type='button' class='btn btn-secondary btn-xs btn-flat'>";
-                        // $ActionButton .= "<a href='". route('tms.warehouse.mto-entry_report_pdf_mtodata', base64_encode($data->id_mto)) ."' style='color: white;'><i class='fa fa-print'></i> Print</a>";
-                        // $ActionButton .= "</button>";
-                        // $ActionButton .= "<button type='button' class='btn btn-primary btn-xs btn-flat'>";
-                        // $ActionButton .= "<a href='#' class='posted' data-id=$data->mto_no row-id=$data->id_mto style='color: white;'><i class='fa fa-paper-plane'></i> Post</a>";
-                        // $ActionButton .= "</button>";
-                        // $ActionButton .= "</div>";
-                   
-             
-                // //     // $ModuleDeleteAccess = RolePermissionControl::CheckPermission($RoleID, 'delete_modules');
-                // //     // if($ModuleDeleteAccess){
-                // //     //     $ActionButton = $ActionButton.ButtonBuilder::Build('DATATABLE', 'DELETE', $data->id, 'ti-trash', 'Delete', '#', "name='$data->name'");
-                // //     // }
-
-                    // return $ActionButton;
-                  return view('tms.warehouse.mto-entry._action_datatables._actionmto', [
-                        'model' => $data,
-                        'url_print' => route('tms.warehouse.mto-entry_report_pdf_mtodata', base64_encode($data->id_mto))
-                  ]);
+                    return view('tms.warehouse.mto-entry._action_datatables._actionmto', [
+                            'model' => $data,
+                            'url_print' => route('tms.warehouse.mto-entry_report_pdf_mtodata', base64_encode($data->id_mto))
+                    ]);
                 })->rawColumns(['action'])
                 ->make(true);  
         }
@@ -219,7 +195,6 @@ class MtoEntryController extends Controller
         $data = MtoEntry::find($id);
         $data['posted'] = Carbon::now();
         $data->save();
-
         return response()->json([
             'success' => true
         ]);

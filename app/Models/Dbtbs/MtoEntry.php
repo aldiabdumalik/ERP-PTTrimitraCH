@@ -63,4 +63,14 @@ class MtoEntry extends Model
             }
           }          
        }
+
+      //  public function scopePosted($query)
+      //  {
+      //    return $query->where('status', 1);
+      //  }
+
+      //  public function scopeMtono($query)
+      //  {
+      //    return $query->orderBy('mto_no','asc');
+      //  }
 }

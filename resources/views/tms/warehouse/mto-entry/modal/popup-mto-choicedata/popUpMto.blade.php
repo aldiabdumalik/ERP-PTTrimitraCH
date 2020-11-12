@@ -9,8 +9,8 @@
                  <b><font color="red">Klik 2x untuk memilih Data</font></b>
             </div>
             <div class="modal-body">
-                <div class="data-tables datatable-dark">
-                <table id="lookUpdata" class="table table-bordered table-hover" width="100%" >
+                <div class="">
+                <table id="lookUpdata" class="table table-striped table-bordered table-hover" width="100%" >
                     <thead>
                         <tr>
                             <th>Item Code</th>

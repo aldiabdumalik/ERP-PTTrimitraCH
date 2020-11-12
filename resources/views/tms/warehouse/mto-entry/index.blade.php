@@ -31,10 +31,18 @@
                 <div class="card-body">
                     <div class="row mt-3">
                         <div class="col">
-                           
+                           {{-- <div class="col-3">
+                            <label for="filter-field"> Search Index :</label>   
+                            <select data-column="1" name="filter_field" class="form-control" id="filter_field">
+                              <option value="">--Choice--</option>
+                              <option value="1"> Posted </option>
+                              <option value="mto_no">mto no</option>
+                            </select>
+                           </div>
+                           <br> --}}
                             <div class="">
                                 <div class="table-responsive">
-                                <table id="mto-datatables" class="table table-striped table-hover table-border" style="width:100%">
+                                <table id="mto-datatables" class="table table-striped table-hover" style="width:100%">
                                     {{ csrf_field() }}
                                     <thead class="text-center" style="font-size: 15px;">
                                         <tr>
@@ -177,6 +185,7 @@ $('.modal-footer').on('click','.add', function(){
          type: "POST",
          data: $('#form-mto').serialize(),
          success: function(data){
+             console.log(data);
             $("#createModal").modal('hide'); 
                 Swal.fire(
                     'Successfully!',
@@ -189,9 +198,11 @@ $('.modal-footer').on('click','.add', function(){
          }, 
          error: function(){
             Swal.fire({
-                icon: 'error',
+                icon: 'warning',
                 title: 'Oops...',
-                text: 'Something went wrong!',
+                text: 'Something went wrong! data not saved please check form input',
+            }).then(function(){
+                location.reload();
             })
          }
      })
@@ -236,7 +247,7 @@ function getDetail(id, method){
                 $('#tbl-detail-mto').DataTable({
                     data: detailDataset,
                     columns: [
-                        { title: 'itemcode'},
+                        { title: 'Itemcode'},
                         { title: 'Part No.'},
                         { title: 'Description'},
                         { title: 'Unit' },
@@ -449,20 +460,19 @@ function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
         descript = document.getElementById('descript_create').value;
         types = document.getElementById('types_create').value;
-        itemcode = document.getElementById('itemcode_create').value;
+        // itemcode = document.getElementById('itemcode_create').value;
     if (part_no !== '' || descript !== '') {
         Swal.fire({
             icon: 'error',
             title: 'not valid',
             text: 'please press F9 or button search at itemcode input',
         })
-    } else if (itemcode == '') {
+    } else if(types == ''){
         Swal.fire({
             icon: 'warning',
-            title: 'please fill in itemcode',
-            text: 'please press F9 or button search',
+            title: 'please fill in choice type',
         })
-    } 
+    }
 }
 function formatDate (input) {
     if (input !== null) {
@@ -474,6 +484,24 @@ function formatDate (input) {
         return null;
     }
 }
+
+// function get(table){
+//     $('#filter_field').change(function(){
+//         // table.column(this.data('column')).search(this.value).ajax.reload();
+//         table.column( $(this).data('column'))
+//         .search( $(this).val() )
+//         .ajax.reload();
+//     });
+
+//     table.on('preXhr.dt', function(e, setting, data){
+//         data.filter_field = $('select[name="filter_field"]').val();
+//     });
+
+//     $('select[name="filter_field"]').change(function(){
+//         table.ajax.reload();
+//     })
+
+// }
 </script>
 @endsection
 @push('js')
@@ -487,7 +515,9 @@ function formatDate (input) {
         var table = $('#mto-datatables').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('tms.warehouse.mto-entry_datatables') }}",
+            ajax: {
+                url: "{{ route('tms.warehouse.mto-entry_datatables') }}",
+            },
             order: [[ 0, 'desc']],
             responsive: true,
             // columnDefs: [
@@ -507,7 +537,7 @@ function formatDate (input) {
             ]    
         });
 
-
+        // get(table)
         // get Datatables choices data from ITEM / CREATE
         var url = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
         var lookUpdata =  $('#lookUpdata').DataTable({
