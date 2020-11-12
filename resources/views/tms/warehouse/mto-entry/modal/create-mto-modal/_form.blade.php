@@ -101,7 +101,7 @@
                             <div class="form-group">
                                 <div class="input-group">
                                 <input class="form-control form-control-sm" name="fin_code" type="text"   
-                                 onkeydown="keyPressed(event)" id="itemcode_create" onchange="validateCreateMto()" placeholder="Cari Itemcode">
+                                 onkeydown="keyPressed(event)" id="itemcode_create" onchange="validateCreateMto()" placeholder="Search">
                                  <span class="input-group-btn">
                                     <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                 </span><br>
