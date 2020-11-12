@@ -1,12 +1,9 @@
 @extends('master')
 @section('title', 'TMS | Warehouse - MTO Entry')
 @section('css')
-
 <!-- DATATABLES -->
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/Datatables/dataTables.bootstrap4.min.css') }}">
-
 @endsection
-
 @section('content')           
 
 <div class="main-content-inner">
@@ -19,7 +16,6 @@
             </div>
         </div>
     </div>
-
     <div class="row">
         <div class="col-12 mt-5">
             <div class="card">
@@ -68,16 +64,12 @@
          </div>
     </div>
 </div>
-
 </div>
 @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
 @include('tms.warehouse.mto-entry.modal.edit-mto-modal._edit')
 {{-- @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto2')  --}}
 @include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
 @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
-
-
-
 @endsection
 @section('script')
 <script type="text/javascript">
@@ -107,8 +99,9 @@ function setTwoNumberDecimal(event) {
 
 $( document ).ready(function() {
     $('.select_create').select2({
-        placeholder: "Pilih item"
+        placeholder: "Choice",
     });
+
     
 
 });
@@ -119,6 +112,8 @@ $(document).on('click', '#addModal', function(e) {
    $('#createModal').after('#mtoModal');
    $('#createModal').modal('show');
    $('.modal-title').text('Many To One Entry (New)');
+   var select2 = $('.select_create').select2();
+    select2.select2('focus').trigger('click');
    
 });
 // EDIT DATA MTO
@@ -328,7 +323,7 @@ function UpdateData(id, mto_no){
             $('.update').html('Saving...');
                 $.ajax({
                     url: route,
-                    type: "PUT",
+                    type: "POST",
                     data: $('#form-mto-edit').serialize(),
                     success: function(data){
                     $("#EditModal").modal('hide'); 
@@ -568,7 +563,11 @@ function formatDate (input) {
                         document.getElementById("itemcode_create").value = value["ITEMCODE"];
                         document.getElementById("part_no_create").value = value["PART_NO"];
                         document.getElementById("descript_create").value = value["DESCRIPT"];
+                        document.getElementById("unit_create").value = value["UNIT"];
+                        var quantity = document.getElementById('quantity_create').value;
                         $('#mtoModal').modal('hide');
+                        quantity.focus();
+                        
                     });
                 });
                 $('#mtoModalLabel').on('hidden.bs.modal', function () {
@@ -580,8 +579,6 @@ function formatDate (input) {
                 });
             },
         });
-
-
     });
 </script>
 @endpush
