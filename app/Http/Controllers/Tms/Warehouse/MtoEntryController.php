@@ -196,9 +196,11 @@ class MtoEntryController extends Controller
        
         $get_posted =  $data['posted'];
         if ($get_posted != null) {
+            //un-posted
             $data['posted'] = NULL;
             $data->update();
         } else {
+            // posted-mto
            $data['posted'] = Carbon::now();
            $data->save();
         }

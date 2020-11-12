@@ -101,9 +101,6 @@ $( document ).ready(function() {
     $('.select_create').select2({
         placeholder: "Choice",
     });
-
-    
-
 });
 
 // ADDED NEW MTO DATA
@@ -201,7 +198,7 @@ $('.modal-footer').on('click','.add', function(){
             Swal.fire({
                 icon: 'warning',
                 title: 'Oops...',
-                text: 'Something went wrong! data not saved please check form input',
+                text: 'Something went wrong data not saved please check form input',
             }).then(function(){
                 location.reload();
             })
@@ -432,7 +429,7 @@ function postedMTO(id, mto_no){
                         },
                         success: function(data){   
                         Swal.fire(       
-                            'Posted!',
+                            'Succesfully!',
                             'Data has been Posted.',
                             'success'
                         ).then(function(){
