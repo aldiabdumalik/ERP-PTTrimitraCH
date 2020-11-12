@@ -105,7 +105,7 @@
                                  <span class="input-group-btn">
                                     <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                 </span><br>
-                                <i style="color: red; font-size: 11px;">(*) tekan F9/Tombol Cari</i>
+                                <i style="color: red; font-size: 11px;">(*) Press Enter/Search Button</i>
                                 </div>
                                
                             </div>

@@ -84,7 +84,7 @@
 // }
 
 function keyPressed(e){
-    if (e.keyCode == 120) { // PRESS KEYBOARD SHORTCUT F9 FOR APPEAR DATA ITEM
+    if (e.keyCode == 13) { // PRESS KEYBOARD SHORTCUT ENTER FOR APPEAR DATA ITEM
         e.preventDefault();
        $('#btnPopUp').click();
     } else if(e.keyCode){
@@ -564,9 +564,9 @@ function formatDate (input) {
                         document.getElementById("part_no_create").value = value["PART_NO"];
                         document.getElementById("descript_create").value = value["DESCRIPT"];
                         document.getElementById("unit_create").value = value["UNIT"];
-                        var quantity = document.getElementById('quantity_create').value;
+                       
                         $('#mtoModal').modal('hide');
-                        quantity.focus();
+                        $('#quantity_create').val().autofocus();
                         
                     });
                 });
