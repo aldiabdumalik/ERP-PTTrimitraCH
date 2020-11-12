@@ -193,8 +193,15 @@ class MtoEntryController extends Controller
     public function postedMtoData($id)
     {
         $data = MtoEntry::find($id);
-        $data['posted'] = Carbon::now();
-        $data->save();
+       
+        $get_posted =  $data['posted'];
+        if ($get_posted != null) {
+            $data['posted'] = NULL;
+            $data->update();
+        } else {
+           $data['posted'] = Carbon::now();
+           $data->save();
+        }
         return response()->json([
             'success' => true
         ]);

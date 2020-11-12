@@ -166,9 +166,15 @@ $(document).on('click', '.delete', function(e){
 $(document).on('click', '.posted', function(e){
     var id = $(this).attr('row-id');
     var mto_no = $(this).attr('data-id');
-    // alert(mto_no);
-    e.preventDefault();
-    postedMTO(id, mto_no)
+    var posted = $(this).attr('data-target');
+    // alert(posted);
+    if(posted !== ''){
+        UnPostedMTO(id, mto_no);
+    } else {
+        // alert(mto_no);
+        e.preventDefault();
+        postedMTO(id, mto_no)
+    }
 });
 
 
@@ -450,6 +456,52 @@ function postedMTO(id, mto_no){
         })
 }
 
+function UnPostedMTO(id, mto_no){
+    Swal.fire({
+        title: 'Are you sure UN-POSTED?',
+        text: "this data mto no." + mto_no,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Un-Posted it!'
+        }).
+        then((willPosted) => {
+            var route  = "{{ route('tms.warehouse.mto-entry_posted_mto_entry_data', ':id') }}";
+                route  = route.replace(':id', id);
+            if(willPosted.value){
+                    $.ajax({
+                        url: route,
+                        type: "POST",
+                        data : {
+                            '_method' : 'POST'
+                        },
+                        success: function(data){   
+                        Swal.fire(       
+                            'Succesfully!',
+                            'Data has been UN-POSTED.',
+                            'success'
+                        ).then(function(){
+                            location.reload();
+                        });
+                            
+                        }, 
+                        error: function(){
+                            Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Something went wrong!',
+                        })
+                    }
+                })
+            } else {
+                console.log(`data MTO was dismissed by ${willPosted.dismiss}`);
+            }
+         
+        
+        })
+}
+
 
 function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
@@ -460,7 +512,7 @@ function validateCreateMto(){
         Swal.fire({
             icon: 'error',
             title: 'not valid',
-            text: 'please press F9 or button search at itemcode input',
+            text: 'please press enter or button search at itemcode input',
         })
     } else if(types == ''){
         Swal.fire({
