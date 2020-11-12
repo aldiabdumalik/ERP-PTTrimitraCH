@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="types"onchange="validateCreateMto()"  class="form-control select_create" style="border: none;"   id="types_create" multiple="multiple" required>
+                        <select name="types" onchange="validateCreateMto()"  class="form-control select_create" style="border: none;"   id="types_create" multiple="multiple" required>
                             <option value=""></option>
                             <option value="91">91 PRESSING</option>
                             <option value="92">92 WELDING</option>
@@ -147,7 +147,7 @@
                         </div>
                         <div class="col-4">
                             <div class="form-group">
-                                <input type="text" name="unit" autocomplete="off" class="form-control form-control-sm" id="unit_create" aria-describedby="" placeholder="Unit">
+                                <input type="text" name="unit"  onchange="validateCreateMto()"  autocomplete="off" class="form-control form-control-sm" id="unit_create" aria-describedby="" placeholder="Unit">
                             </div>
                         </div>
                     </div>

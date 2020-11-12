@@ -507,8 +507,9 @@ function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
         descript = document.getElementById('descript_create').value;
         types = document.getElementById('types_create').value;
+        unit = document.getElementById('unit_create').value;
         // itemcode = document.getElementById('itemcode_create').value;
-    if (part_no !== '' || descript !== '') {
+    if (part_no !== '' || descript !== '' || unit !== '') {
         Swal.fire({
             icon: 'error',
             title: 'not valid',
