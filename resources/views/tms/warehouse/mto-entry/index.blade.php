@@ -27,21 +27,10 @@
                 <div class="card-body">
                     <div class="row mt-3">
                         <div class="col">
-                           {{-- <div class="col-3">
-                            <label for="filter-field"> Search Index :</label>   
-                            <select data-column="1" name="filter_field" class="form-control" id="filter_field">
-                              <option value="">--Choice--</option>
-                              <option value="1"> Posted </option>
-                              <option value="mto_no">mto no</option>
-                            </select>
-                           </div>
-                           <br> --}}
-                          
                            <button type="button" id="checkStockItem" class="btn btn-flat btn-sm btn-danger">
                                <i class="fas fa-inventory">
                                    </i> Check Stock
                             </button>
-                         
                             <br>
                             <br>        
                             <div class="">
@@ -502,8 +491,6 @@ function UnPostedMTO(id, mto_no){
         
         })
 }
-
-
 function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
         descript = document.getElementById('descript_create').value;
