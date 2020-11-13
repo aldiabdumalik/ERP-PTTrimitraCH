@@ -27,15 +27,14 @@ class MtoEntryController extends Controller
     public function getMtoDatatables(Request $request)
     {
         if ($request->ajax()) {
-            // $get_data = $request->get('filter_field');
             $data =  MtoEntry::all();
             // dd($data);
             // if ($get_data == 1) {
             //     $data->posted()->get();
             // }
             return Datatables::of($data)
-                ->editColumn('written', function(){
-                    $data = Carbon::now()->format('d/m/Y');
+                ->editColumn('written', function($data){
+                    $data = Carbon::parse($data->written)->format('d/m/Y');
                     return $data;
                 })->editColumn('posted', function($data){
                     if ($data->posted != null) {
@@ -45,13 +44,15 @@ class MtoEntryController extends Controller
                     }
                 })->editColumn('voided', function($data){
                     if ($data->voided != null) {
-                        return $data->voided;
+                        $get_data = Carbon::parse($data->voided)->format('d/m/Y');
+                        return $get_data;
                     } else {
                         return '//';
                     }
                 })->editColumn('posted', function($data){
                     if ($data->posted != null) {
-                        return Carbon::parse($data->posted)->format('d/m/Y');
+                        $get_data = Carbon::parse($data->posted)->format('d/m/Y');
+                        return $get_data;
                     } else {
                         return "//";
                     }
@@ -84,21 +85,21 @@ class MtoEntryController extends Controller
 
         $data = new MtoEntry();
         $get_mto_no = $data->getMtoNo();
-        $userStaff = Auth::user()->UserID;
+        $get_user_staff = Auth::user()->UserID;
         $data = MtoEntry::create([
             'mto_no' => $get_mto_no,
             'fin_code' => $request->fin_code,
             'frm_code' => $request->frm_code,
             'descript' => $request->descript,
             'fac_unit' => $request->fac_unit !== '' ? $request->fac_unit : null,
-            'fac_qty'=> $request->fac_qty !== '' ? $request->fac_unit : '-',
-            'factor'=> $request->factor !== '' ? $request->factor : '-',
-            'unit'=> $request->unit !== '' ? $request->unit : '-',
-            'quantity'=> $request->quantity !== '' ? $request->quantity : '-',
+            'fac_qty'=> $request->fac_qty !== '' ? $request->fac_unit : null,
+            'factor'=> $request->factor !== '' ? $request->factor : null,
+            'unit'=> $request->unit !== '' ? $request->unit : null,
+            'quantity'=> $request->quantity !== '' ? $request->quantity : null,
             'qty_ng'=> $request->qty_ng !== '' ? $request->qty_ng : '0,00',
-            'cost'=> $request->cost !== '' ? $request->cost : '-',
-            'glinv'=> $request->glinv !== '' ? $request->glinv : '-',
-            'types'=> $request->types !== '' ? $request->types : '-',
+            'cost'=> $request->cost !== '' ? $request->cost : null,
+            'glinv'=> $request->glinv !== '' ? $request->glinv : null,
+            'types'=> $request->types !== '' ? $request->types : null,
             'written'=> Carbon::now(),
             'posted'=> $request->posted !== '' ? $request->posted : null,
             'printed'=> $request->printed  !== '' ? $request->printed : null,
@@ -110,11 +111,11 @@ class MtoEntryController extends Controller
             'uid_export'=> $request->uid_export !== '' ? $request->uid_export : null,
             'period'=>  Carbon::now()->format('Y/m'),
             'vperiode'=>  $request->vperiod !== '' ? $request->vperiod : null,
-            'staff'=>  $userStaff,
-            'remark'=> $request->remark !== '' ? $request->remark : '-',
-            'lbom'=> $request->lbom !== '' ? $request->lbom : '-',
-            'xprinted'=> $request->xprinted !== '' ? $request->xprinted : '-',
-            'operator'=> $request->operator !== '' ? $request->operator : '-'
+            'staff'=>  $get_user_staff,
+            'remark'=> $request->remark !== '' ? $request->remark : null,
+            'lbom'=> $request->lbom !== '' ? $request->lbom : null,
+            'xprinted'=> $request->xprinted !== '' ? $request->xprinted : null,
+            'operator'=> $request->operator !== '' ? $request->operator : null
 
         ]);
         return response()->json([
@@ -133,6 +134,7 @@ class MtoEntryController extends Controller
                             )   
                       ->where('mto_no', '=', $MTOHeaderNo)
                       ->get();
+        // $format_des = ',00';              
         $output = [
             'header' => $MTOHeader,
             'detail' => $MTODetail
@@ -193,7 +195,7 @@ class MtoEntryController extends Controller
     public function postedMtoData($id)
     {
         $data = MtoEntry::find($id);
-       
+
         $get_posted =  $data['posted'];
         if ($get_posted != null) {
             //un-posted

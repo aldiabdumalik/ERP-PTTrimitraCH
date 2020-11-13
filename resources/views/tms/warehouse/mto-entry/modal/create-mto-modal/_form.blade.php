@@ -83,7 +83,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-group">
-                                <input type="text" readonly class="form-control form-control-sm"  name="written" value="{{ $getDate }}" id="written_create" required>
+                                <input type="text" class="form-control form-control-sm"  name="written" value="{{ $getDate }}" id="written_create" required>
                             </div>
                         </div>
                     </div>

@@ -39,7 +39,6 @@
                             <div class="">
                                 <div class="table-responsive">
                                 <table id="mto-datatables" class="table table-striped table-hover" style="width:100%">
-                                    {{ csrf_field() }}
                                     <thead class="text-center" style="font-size: 15px;">
                                         <tr>
                                             <th>MTO No</th>
@@ -71,17 +70,9 @@
 @include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
 @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
 @endsection
-@section('script')
-<script type="text/javascript">
 
-// function keyPressedEdit(e){
-//     if (e.keyCode == 120) { // PRESS KEYBOARD SHORTCUT F9 FOR APPEAR DATA ITEM FOR EDIT FORM
-//         e.preventDefault();
-//        $('#btnPopUp2').click();
-//     } else if(e.keyCode){
-//         e.preventDefault();
-//     }
-// }
+@section('script')
+<script>
 
 function keyPressed(e){
     if (e.keyCode == 13) { // PRESS KEYBOARD SHORTCUT ENTER FOR APPEAR DATA ITEM
@@ -92,11 +83,10 @@ function keyPressed(e){
     }
 }
 
-
 function setTwoNumberDecimal(event) {
     this.value = parseFloat(this.value).toFixed(2);
 }
-
+// SELECT2 AT FORM CREATE
 $( document ).ready(function() {
     $('.select_create').select2({
         placeholder: "Choice",
@@ -529,7 +519,6 @@ function formatDate (input) {
         return null;
     }
 }
-
 // function get(table){
 //     $('#filter_field').change(function(){
 //         // table.column(this.data('column')).search(this.value).ajax.reload();
@@ -549,86 +538,88 @@ function formatDate (input) {
 // }
 </script>
 @endsection
+
+{{-- generate datatable mto-entry --}}
 @push('js')
-<!-- Datatables -->
-<script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
-<script>
-    $(document).ready(function() {
-    
-        //get data from datatables
-        var table = $('#mto-datatables').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('tms.warehouse.mto-entry_datatables') }}",
-            },
-            order: [[ 0, 'desc']],
-            responsive: true,
-            // columnDefs: [
-            //     {"className": "align-right vertical-center", "targets": 6},
-            //     {"className": "align-center vertical-center", "targets": [0, 1, 2, 3, 4, 5]}
-            // ],
-            columns: [
-                { data: 'mto_no', name: 'mto_no' },
-                { data: 'written', name: 'written' },
-                { data: 'posted', name: 'posted' },
-                { data: 'voided', name: 'voided' },
-                { data: 'frm_code', name: 'frm_code' },
-                { data: 'ref_no', name: 'ref_no' },
-                { data: 'remark', name: 'remark' },
-                { data: 'branch', name: 'branch' },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
-            ]    
-        });
+    <!-- Datatables -->
+    <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+        
+            //get data from datatables
+            var table = $('#mto-datatables').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('tms.warehouse.mto-entry_datatables') }}",
+                },
+                order: [[ 0, 'desc']],
+                responsive: true,
+                // columnDefs: [
+                //     {"className": "align-right vertical-center", "targets": 6},
+                //     {"className": "align-center vertical-center", "targets": [0, 1, 2, 3, 4, 5]}
+                // ],
+                columns: [
+                    { data: 'mto_no', name: 'mto_no' },
+                    { data: 'written', name: 'written' },
+                    { data: 'posted', name: 'posted' },
+                    { data: 'voided', name: 'voided' },
+                    { data: 'frm_code', name: 'frm_code' },
+                    { data: 'ref_no', name: 'ref_no' },
+                    { data: 'remark', name: 'remark' },
+                    { data: 'branch', name: 'branch' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ]    
+            });
 
-        // get(table)
-        // get Datatables choices data from ITEM / CREATE
-        var url = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
-        var lookUpdata =  $('#lookUpdata').DataTable({
-            processing: true, 
-            serverSide: true,
-            "pagingType": "numbers",
-            ajax: url,
-            responsive: true,
-            // "scrollX": true,
-            // "scrollY": "500px",
-            // "scrollCollapse": true,
-            "order": [[1, 'asc']],
-            columns: [
-                { data: 'ITEMCODE', name: 'ITEMCODE' },
-                { data: 'PART_NO', name: 'PART_NO' },
-                { data: 'DESCRIPT', name: 'DESCRIPT' },
-                { data: 'DESCRIPT1', name: 'DESCRIPT1' }
+            // get(table)
+            // get Datatables choices data from ITEM / CREATE
+            var url = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
+            var lookUpdata =  $('#lookUpdata').DataTable({
+                processing: true, 
+                serverSide: true,
+                "pagingType": "numbers",
+                ajax: url,
+                responsive: true,
+                // "scrollX": true,
+                // "scrollY": "500px",
+                // "scrollCollapse": true,
+                "order": [[1, 'asc']],
+                columns: [
+                    { data: 'ITEMCODE', name: 'ITEMCODE' },
+                    { data: 'PART_NO', name: 'PART_NO' },
+                    { data: 'DESCRIPT', name: 'DESCRIPT' },
+                    { data: 'DESCRIPT1', name: 'DESCRIPT1' }
 
-            ],
-            "bDestroy": true,
-            "initComplete": function(settings, json) {
-                // $('div.dataTables_filter input').focus();
-                $('#lookUpdata tbody').on( 'dblclick', 'tr', function () {
-                    var dataArr = [];
-                    var rows = $(this);
-                    var rowData = lookUpdata.rows(rows).data();
-                    $.each($(rowData),function(key,value){
-                        document.getElementById("itemcode_create").value = value["ITEMCODE"];
-                        document.getElementById("part_no_create").value = value["PART_NO"];
-                        document.getElementById("descript_create").value = value["DESCRIPT"];
-                        document.getElementById("unit_create").value = value["UNIT"];
-                       
-                        $('#mtoModal').modal('hide');
-                        $('#quantity_create').val().autofocus();
+                ],
+                "bDestroy": true,
+                "initComplete": function(settings, json) {
+                    // $('div.dataTables_filter input').focus();
+                    $('#lookUpdata tbody').on( 'dblclick', 'tr', function () {
+                        var dataArr = [];
+                        var rows = $(this);
+                        var rowData = lookUpdata.rows(rows).data();
+                        $.each($(rowData),function(key,value){
+                            document.getElementById("itemcode_create").value = value["ITEMCODE"];
+                            document.getElementById("part_no_create").value = value["PART_NO"];
+                            document.getElementById("descript_create").value = value["DESCRIPT"];
+                            document.getElementById("unit_create").value = value["UNIT"];
                         
+                            $('#mtoModal').modal('hide');
+                            $('#quantity_create').val().autofocus();
+                            
+                        });
                     });
-                });
-                $('#mtoModalLabel').on('hidden.bs.modal', function () {
-                    var itemcode = document.getElementById("itemcode_create").value.trim();
-                    if(itemcode === '') {
-                        document.getElementById("part_no_create").value = "";
-                        $('#part_no_create').focus();
-                    }
-                });
-            },
+                    $('#mtoModalLabel').on('hidden.bs.modal', function () {
+                        var itemcode = document.getElementById("itemcode_create").value.trim();
+                        if(itemcode === '') {
+                            document.getElementById("part_no_create").value = "";
+                            $('#part_no_create').focus();
+                        }
+                    });
+                },
+            });
         });
-    });
-</script>
+    </script>
 @endpush

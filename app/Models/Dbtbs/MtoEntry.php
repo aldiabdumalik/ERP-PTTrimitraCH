@@ -3,10 +3,13 @@
 namespace App\Models\Dbtbs;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use DB;
 class MtoEntry extends Model
 {
-       //Connect to db_tbs
+      
+       use SoftDeletes;
+      //Connect to db_tbs
        protected $connection = 'db_tbs';
        //Define table
        protected $table = 'entry_mto_tbl';
@@ -18,7 +21,8 @@ class MtoEntry extends Model
        protected $primaryKey = 'id_mto';
        public $timestamps = false;
 
-
+       protected $dates = ['voided'];
+       const DELETED_AT = 'voided';
      
        public function getMtoNo()
        {
