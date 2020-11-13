@@ -32,7 +32,7 @@ class MtoEntryController extends Controller
             // if ($get_data == 1) {
             //     $data->posted()->get();
             // }
-            return Datatables::of($data)
+            return Datatables::of($data)    
                 ->editColumn('written', function($data){
                     $data = Carbon::parse($data->written)->format('d/m/Y');
                     return $data;
@@ -70,7 +70,7 @@ class MtoEntryController extends Controller
     public function getPopUpChoiceDataDatatables(Request $request)
     {
         if ($request->ajax()) {
-            $getItem = Item::all();
+            $getItem = Item::get();
             return Datatables::of($getItem)->make(true);  
         }
     }

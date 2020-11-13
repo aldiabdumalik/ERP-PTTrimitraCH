@@ -36,6 +36,14 @@
                             </select>
                            </div>
                            <br> --}}
+                          
+                           <button type="button" id="checkStockItem" class="btn btn-flat btn-sm btn-danger">
+                               <i class="fas fa-inventory">
+                                   </i> Check Stock
+                            </button>
+                         
+                            <br>
+                            <br>        
                             <div class="">
                                 <div class="table-responsive">
                                 <table id="mto-datatables" class="table table-striped table-hover" style="width:100%">
@@ -64,12 +72,14 @@
     </div>
 </div>
 </div>
+@include('tms.warehouse.mto-entry.modal.stock.modal_stock')
 @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
 @include('tms.warehouse.mto-entry.modal.edit-mto-modal._edit')
 {{-- @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto2')  --}}
 @include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
 @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
 @endsection
+
 
 @section('script')
 <script>
@@ -100,7 +110,7 @@ $(document).on('click', '#addModal', function(e) {
    $('#createModal').modal('show');
    $('.modal-title').text('Many To One Entry (New)');
    var select2 = $('.select_create').select2();
-    select2.select2('focus').trigger('click');
+    select2.select2('focus');
    
 });
 // EDIT DATA MTO
@@ -162,6 +172,10 @@ $(document).on('click', '.posted', function(e){
         e.preventDefault();
         postedMTO(id, mto_no)
     }
+});
+
+$(document).on('click','#checkStockItem', function(e){
+    $('#StockModal').modal('show');
 });
 
 
@@ -519,107 +533,114 @@ function formatDate (input) {
         return null;
     }
 }
-// function get(table){
-//     $('#filter_field').change(function(){
-//         // table.column(this.data('column')).search(this.value).ajax.reload();
-//         table.column( $(this).data('column'))
-//         .search( $(this).val() )
-//         .ajax.reload();
-//     });
-
-//     table.on('preXhr.dt', function(e, setting, data){
-//         data.filter_field = $('select[name="filter_field"]').val();
-//     });
-
-//     $('select[name="filter_field"]').change(function(){
-//         table.ajax.reload();
-//     })
-
-// }
 </script>
 @endsection
 
 {{-- generate datatable mto-entry --}}
 @push('js')
     <!-- Datatables -->
-    <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-        
-            //get data from datatables
-            var table = $('#mto-datatables').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('tms.warehouse.mto-entry_datatables') }}",
-                },
-                order: [[ 0, 'desc']],
-                responsive: true,
-                // columnDefs: [
-                //     {"className": "align-right vertical-center", "targets": 6},
-                //     {"className": "align-center vertical-center", "targets": [0, 1, 2, 3, 4, 5]}
-                // ],
-                columns: [
-                    { data: 'mto_no', name: 'mto_no' },
-                    { data: 'written', name: 'written' },
-                    { data: 'posted', name: 'posted' },
-                    { data: 'voided', name: 'voided' },
-                    { data: 'frm_code', name: 'frm_code' },
-                    { data: 'ref_no', name: 'ref_no' },
-                    { data: 'remark', name: 'remark' },
-                    { data: 'branch', name: 'branch' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
-                ]    
-            });
-
-            // get(table)
-            // get Datatables choices data from ITEM / CREATE
-            var url = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
-            var lookUpdata =  $('#lookUpdata').DataTable({
-                processing: true, 
-                serverSide: true,
-                "pagingType": "numbers",
-                ajax: url,
-                responsive: true,
-                // "scrollX": true,
-                // "scrollY": "500px",
-                // "scrollCollapse": true,
-                "order": [[1, 'asc']],
-                columns: [
-                    { data: 'ITEMCODE', name: 'ITEMCODE' },
-                    { data: 'PART_NO', name: 'PART_NO' },
-                    { data: 'DESCRIPT', name: 'DESCRIPT' },
-                    { data: 'DESCRIPT1', name: 'DESCRIPT1' }
-
-                ],
-                "bDestroy": true,
-                "initComplete": function(settings, json) {
-                    // $('div.dataTables_filter input').focus();
-                    $('#lookUpdata tbody').on( 'dblclick', 'tr', function () {
-                        var dataArr = [];
-                        var rows = $(this);
-                        var rowData = lookUpdata.rows(rows).data();
-                        $.each($(rowData),function(key,value){
-                            document.getElementById("itemcode_create").value = value["ITEMCODE"];
-                            document.getElementById("part_no_create").value = value["PART_NO"];
-                            document.getElementById("descript_create").value = value["DESCRIPT"];
-                            document.getElementById("unit_create").value = value["UNIT"];
-                        
-                            $('#mtoModal').modal('hide');
-                            $('#quantity_create').val().autofocus();
-                            
-                        });
-                    });
-                    $('#mtoModalLabel').on('hidden.bs.modal', function () {
-                        var itemcode = document.getElementById("itemcode_create").value.trim();
-                        if(itemcode === '') {
-                            document.getElementById("part_no_create").value = "";
-                            $('#part_no_create').focus();
-                        }
-                    });
-                },
-            });
+<script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
+<script>
+    $(document).ready(function() {
+    
+        //get data from datatables
+        var table = $('#mto-datatables').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('tms.warehouse.mto-entry_datatables') }}",
+            },
+            order: [[ 0, 'desc']],
+            responsive: true,
+            // columnDefs: [
+            //     {"className": "align-right vertical-center", "targets": 6},
+            //     {"className": "align-center vertical-center", "targets": [0, 1, 2, 3, 4, 5]}
+            // ],
+            columns: [
+                { data: 'mto_no', name: 'mto_no' },
+                { data: 'written', name: 'written' },
+                { data: 'posted', name: 'posted' },
+                { data: 'voided', name: 'voided' },
+                { data: 'frm_code', name: 'frm_code' },
+                { data: 'ref_no', name: 'ref_no' },
+                { data: 'remark', name: 'remark' },
+                { data: 'branch', name: 'branch' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]    
         });
-    </script>
+
+        // get(table)
+        // get Datatables choices data from ITEM / CREATE
+        var url = "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}";
+        var lookUpdata =  $('#lookUpdata').DataTable({
+            processing: true, 
+            serverSide: true,
+            "pagingType": "numbers",
+            ajax: url,
+            responsive: true,
+            // "scrollX": true,
+            // "scrollY": "500px",
+            // "scrollCollapse": true,
+            "order": [[1, 'asc']],
+            columns: [
+                { data: 'ITEMCODE', name: 'ITEMCODE' },
+                { data: 'PART_NO', name: 'PART_NO' },
+                { data: 'DESCRIPT', name: 'DESCRIPT' },
+                { data: 'DESCRIPT1', name: 'DESCRIPT1' }
+
+            ],
+            "bDestroy": true,
+            "initComplete": function(settings, json) {
+                // $('div.dataTables_filter input').focus();
+                $('#lookUpdata tbody').on( 'dblclick', 'tr', function () {
+                    var dataArr = [];
+                    var rows = $(this);
+                    var rowData = lookUpdata.rows(rows).data();
+                    $.each($(rowData),function(key,value){
+                        document.getElementById("itemcode_create").value = value["ITEMCODE"];
+                        document.getElementById("part_no_create").value = value["PART_NO"];
+                        document.getElementById("descript_create").value = value["DESCRIPT"];
+                        document.getElementById("unit_create").value = value["UNIT"];
+                    
+                        $('#mtoModal').modal('hide');
+                        $('#quantity_create').val().autofocus();
+                        
+                    });
+                });
+                $('#mtoModalLabel').on('hidden.bs.modal', function () {
+                    var itemcode = document.getElementById("itemcode_create").value.trim();
+                    if(itemcode === '') {
+                        document.getElementById("part_no_create").value = "";
+                        $('#part_no_create').focus();
+                    }
+                });
+            },
+        });
+
+        var lookUpStock = $('#lookUpStock').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('tms.warehouse.mto-entry_datatables_choice_data') }}",
+            },
+            order: [[ 0, 'desc']],
+            // "oLanguage": {
+            // 'sProcessing': '<div id="processing" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: rgb(102, 102, 102); z-index: 30001; opacity: 0.8;"><p style="position: absolute; color: White; top: 50%; left: 45%;"><img src="{{ asset('images/ajax-loader.gif') }}"></p></div>Processing...'
+            //  }, 
+            responsive: true,
+            // columnDefs: [
+            //     {"className": "align-right vertical-center", "targets": 6},
+            //     {"className": "align-center vertical-center", "targets": [0, 1, 2, 3, 4, 5]}
+            // ],
+            columns: [
+                { data: 'ITEMCODE', name: 'ITEMCODE' },
+                { data: 'PART_NO', name: 'PART_NO' },
+                { data: 'DESCRIPT', name: 'DESCRIPT' },
+                { data: 'DESCRIPT1', name: 'DESCRIPT1' },
+                { data: 'TEMP_QTY', name: 'TEMP_QTY' }
+            ]    
+        });
+    });
+</script>
 @endpush

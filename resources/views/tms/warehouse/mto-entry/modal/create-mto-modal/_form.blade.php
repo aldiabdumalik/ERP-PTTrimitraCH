@@ -26,8 +26,8 @@
                 </div>
                 <div class="col-2">
                     <div class="form-group">
-                        <select name="types" onchange="validateCreateMto()"  class="form-control select_create" style="border: none;"   id="types_create" multiple="multiple" required>
-                            <option value=""></option>
+                        <select name="types" autocomplete="off" onchange="validateCreateMto()"  class="form-control select_create"    id="types_create"  required>
+                            <option value="">-Choice-</option>
                             <option value="91">91 PRESSING</option>
                             <option value="92">92 WELDING</option>
                             <option value="93">93 SPOT WELDING</option>
@@ -101,7 +101,7 @@
                             <div class="form-group">
                                 <div class="input-group">
                                 <input class="form-control form-control-sm" name="fin_code" type="text"   
-                                 onkeydown="keyPressed(event)" id="itemcode_create" onchange="validateCreateMto()" placeholder="Search">
+                                 onkeydown="keyPressed(event)" autocomplete="off" id="itemcode_create" onchange="validateCreateMto()" placeholder="Search">
                                  <span class="input-group-btn">
                                     <button type="button" id="btnPopUp" class="btn btn-info btn-xs" data-toggle="modal" data-target="#mtoModal"><i class="fa fa-search"></i></button>
                                 </span><br>
