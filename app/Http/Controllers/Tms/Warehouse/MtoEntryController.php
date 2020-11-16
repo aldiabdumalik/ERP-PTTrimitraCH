@@ -23,7 +23,6 @@ class MtoEntryController extends Controller
         $data_mto = new MtoEntry();
         // $cekdata_mto_entry =
         $get_no_mto = $data_mto->getMtoNo();
-
         // dd($get_no_mto);
         return view('tms.warehouse.mto-entry.index', compact('getDate','getDate1','get_no_mto'));
     }
@@ -125,8 +124,9 @@ class MtoEntryController extends Controller
     
             ]);
                // INSERT LOG MTO
+            date_default_timezone_set("Asia/Jakarta");
             $date = Carbon::now();
-            $time = new datetime;
+            $time = Carbon::now()->format('H:i:s');
             $status = "ADD";
             $mto_no = $get_mto_no;
             $userstaff = Auth::user()->FullName;
@@ -197,8 +197,9 @@ class MtoEntryController extends Controller
             $data->update($request->all());
 
             // INSERT LOG MTO
+            date_default_timezone_set("Asia/Jakarta");
             $date = Carbon::now();
-            $time = new datetime;
+            $time = Carbon::now()->format('H:i:s');
             $status = "EDIT";
             $mto_no = $data['mto_no'];
             $userstaff = Auth::user()->FullName;
@@ -207,7 +208,7 @@ class MtoEntryController extends Controller
                 'mto_no' => $mto_no, 
                 'date' => $date,
                 'time' => $time,
-                'status_change' => $type,
+                'status_change' => $status,
                 'user' => $userstaff,
                 'note' => $note 
             ]);
@@ -258,8 +259,9 @@ class MtoEntryController extends Controller
                 $data->update();
 
                 // INSERT LOG UN-POSTED
+                date_default_timezone_set("Asia/Jakarta");
                 $date = Carbon::now();
-                $time = new datetime;
+                $time = Carbon::now()->format('H:i:s');
                 $status = "UN-POSTED";
                 $mto_no = $data['mto_no'];
                 $userstaff = Auth::user()->FullName;
@@ -279,8 +281,9 @@ class MtoEntryController extends Controller
                $data->save();
 
             // INSERT LOG POSTED MTO
+               date_default_timezone_set("Asia/Jakarta");
                $date = Carbon::now();
-               $time = new datetime;
+               $time = Carbon::now()->format('H:i:s');
                $status = "POSTED";
                $mto_no = $data['mto_no'];
                $userstaff = Auth::user()->FullName;
@@ -311,8 +314,9 @@ class MtoEntryController extends Controller
     public function viewLogMtoEntry($mto_no)
     {   
        $data =  DB::connection('db_tbs')
-                    ->table('entry_mto_log')
-                    ->where('mto_no','=', $mto_no)->get();         
+                  ->table('entry_mto_log')
+                  ->where('mto_no','=', $mto_no)
+                  ->get();         
        return response()->json($data);
     }
 

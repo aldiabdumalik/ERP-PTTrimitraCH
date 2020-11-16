@@ -13,6 +13,10 @@
                <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
               <i class="ti-plus"></i>  Add New Data
                 </button>
+
+                <button type="button" id="checkStockItem" class="btn btn-flat btn-sm btn-danger">
+                    <i class="fa fa-check"></i> Stock
+                    </button>
             </div>
         </div>
     </div>
@@ -26,12 +30,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row mt-3">
-                        <div class="col">
-                           <button type="button" id="checkStockItem" class="btn btn-flat btn-sm btn-danger">
-                            <i class="fa fa-check"></i> Stock
-                            </button>
-                            <br>
-                            <br>        
+                        <div class="col">      
                             <div class="">
                                 <div class="table-responsive">
                                 <table id="mto-datatables" class="table table-striped table-hover" style="width:100%">

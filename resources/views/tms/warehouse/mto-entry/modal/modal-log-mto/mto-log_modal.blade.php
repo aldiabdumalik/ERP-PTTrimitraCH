@@ -9,7 +9,7 @@
                 <div class="modal-body">
                        <div class="row">
                           <div class="col-12">
-                             <div class="data-tables datatable-primary">
+                             <div class="">
                               <table id="tbl-log" class="table table-bordered table-hover" width="100%" >
                                   <thead>
                                       <tr>
