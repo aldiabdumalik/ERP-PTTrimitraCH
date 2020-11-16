@@ -83,7 +83,7 @@
     @include('sweetalert::alert')
     <!-- Custom js -->
     <script src="{{ asset('vendor/sweetalert2/dist/sweetalert2.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> --}}
     <script src="{{ asset('js/custom-general.js') }}"></script>
     @stack('js')
 

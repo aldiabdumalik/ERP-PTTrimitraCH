@@ -28,8 +28,7 @@
                     <div class="row mt-3">
                         <div class="col">
                            <button type="button" id="checkStockItem" class="btn btn-flat btn-sm btn-danger">
-                               <i class="fas fa-inventory">
-                                   </i> Check Stock
+                            <i class="fa fa-check"></i> Stock
                             </button>
                             <br>
                             <br>        
@@ -61,6 +60,7 @@
     </div>
 </div>
 </div>
+@include('tms.warehouse.mto-entry.modal.modal-log-mto.mto-log_modal')
 @include('tms.warehouse.mto-entry.modal.stock.modal_stock')
 @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
 @include('tms.warehouse.mto-entry.modal.edit-mto-modal._edit')
@@ -161,6 +161,45 @@ $(document).on('click', '.posted', function(e){
         e.preventDefault();
         postedMTO(id, mto_no)
     }
+});
+// LOG ACTIVITY
+$(document).on('click', '.log', function(e){
+    e.preventDefault();
+    var mto_no = $(this).attr('data-id');
+    // alert(mto_no);
+    $('#logModal').modal('show');
+    $('.modal-title').text('View MTO Log');
+    // call 
+    var route  = "{{ route('tms.warehouse.mto-view_mto_entry_log', ':id') }}";
+        route  = route.replace(':id', mto_no);
+      $.ajax({
+            url:      route,
+            method:   'get',
+            dataType: 'json',
+            success:function(data){
+                var detailDataset = [];
+                for(var i = 0; i < data.length; i++){
+                    detailDataset.push([
+                        formatDate(data[i].date), data[i].time, data[i].status_change,
+                        data[i].user, data[i].note
+                    ]);
+                }
+                $('#tbl-log').DataTable().clear().destroy();
+                $('#tbl-log').DataTable({
+                    data: detailDataset,
+                    columns: [
+                        { title: 'Date'},
+                        { title: 'Time'},
+                        { title: 'Type'},
+                        { title: 'User' },
+                        { title: 'Note' }
+                    ]
+                });
+            }, 
+            error: function(){
+                alert('error');
+            }
+      })    
 });
 
 $(document).on('click','#checkStockItem', function(e){

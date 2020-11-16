@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DB;
 use Auth;
 use PDF;
+use DateTime;
 class MtoEntryController extends Controller
 {
     public function index(Request $request)
@@ -20,14 +21,17 @@ class MtoEntryController extends Controller
         $getDate = Carbon::now()->format('d/m/Y');
         $getDate1 =  Carbon::now()->format('Y/m');
         $data_mto = new MtoEntry();
+        // $cekdata_mto_entry =
         $get_no_mto = $data_mto->getMtoNo();
+
+        // dd($get_no_mto);
         return view('tms.warehouse.mto-entry.index', compact('getDate','getDate1','get_no_mto'));
     }
 
     public function getMtoDatatables(Request $request)
     {
         if ($request->ajax()) {
-            $data =  MtoEntry::all();
+            $data =  MtoEntry::get();
             // dd($data);
             // if ($get_data == 1) {
             //     $data->posted()->get();
@@ -86,41 +90,65 @@ class MtoEntryController extends Controller
         $data = new MtoEntry();
         $get_mto_no = $data->getMtoNo();
         $get_user_staff = Auth::user()->UserID;
-        $data = MtoEntry::create([
-            'mto_no' => $get_mto_no,
-            'fin_code' => $request->fin_code,
-            'frm_code' => $request->frm_code,
-            'descript' => $request->descript,
-            'fac_unit' => $request->fac_unit !== '' ? $request->fac_unit : null,
-            'fac_qty'=> $request->fac_qty !== '' ? $request->fac_unit : null,
-            'factor'=> $request->factor !== '' ? $request->factor : null,
-            'unit'=> $request->unit !== '' ? $request->unit : null,
-            'quantity'=> $request->quantity !== '' ? $request->quantity : null,
-            'qty_ng'=> $request->qty_ng !== '' ? $request->qty_ng : '0,00',
-            'cost'=> $request->cost !== '' ? $request->cost : null,
-            'glinv'=> $request->glinv !== '' ? $request->glinv : null,
-            'types'=> $request->types !== '' ? $request->types : null,
-            'written'=> Carbon::now(),
-            'posted'=> $request->posted !== '' ? $request->posted : null,
-            'printed'=> $request->printed  !== '' ? $request->printed : null,
-            'voided'=> $request->voided !== '' ? $request->voided : null,
-            'warehouse'=> '90',
-            'branch'=> 'HO',
-            'ip_type'=> '-',
-            'ref_no'=> $get_mto_no,
-            'uid_export'=> $request->uid_export !== '' ? $request->uid_export : null,
-            'period'=>  Carbon::now()->format('Y/m'),
-            'vperiode'=>  $request->vperiod !== '' ? $request->vperiod : null,
-            'staff'=>  $get_user_staff,
-            'remark'=> $request->remark !== '' ? $request->remark : null,
-            'lbom'=> $request->lbom !== '' ? $request->lbom : null,
-            'xprinted'=> $request->xprinted !== '' ? $request->xprinted : null,
-            'operator'=> $request->operator !== '' ? $request->operator : null
+        try {
+            DB::beginTransaction();
+            $data = MtoEntry::create([
+                'mto_no' => $get_mto_no,
+                'fin_code' => $request->fin_code,
+                'frm_code' => $request->frm_code,
+                'descript' => $request->descript,
+                'fac_unit' => $request->fac_unit !== '' ? $request->fac_unit : null,
+                'fac_qty'=> $request->fac_qty !== '' ? $request->fac_unit : null,
+                'factor'=> $request->factor !== '' ? $request->factor : null,
+                'unit'=> $request->unit !== '' ? $request->unit : null,
+                'quantity'=> $request->quantity !== '' ? $request->quantity : null,
+                'qty_ng'=> $request->qty_ng !== '' ? $request->qty_ng : '0,00',
+                'cost'=> $request->cost !== '' ? $request->cost : null,
+                'glinv'=> $request->glinv !== '' ? $request->glinv : null,
+                'types'=> $request->types !== '' ? $request->types : null,
+                'written'=> Carbon::now(),
+                'posted'=> $request->posted !== '' ? $request->posted : null,
+                'printed'=> $request->printed  !== '' ? $request->printed : null,
+                'voided'=> $request->voided !== '' ? $request->voided : null,
+                'warehouse'=> '90',
+                'branch'=> 'HO',
+                'ip_type'=> '-',
+                'ref_no'=> $get_mto_no,
+                'uid_export'=> $request->uid_export !== '' ? $request->uid_export : null,
+                'period'=>  Carbon::now()->format('Y/m'),
+                'vperiode'=>  $request->vperiod !== '' ? $request->vperiod : null,
+                'staff'=>  $get_user_staff,
+                'remark'=> $request->remark !== '' ? $request->remark : null,
+                'lbom'=> $request->lbom !== '' ? $request->lbom : null,
+                'xprinted'=> $request->xprinted !== '' ? $request->xprinted : null,
+                'operator'=> $request->operator !== '' ? $request->operator : null
+    
+            ]);
+               // INSERT LOG MTO
+            $date = Carbon::now();
+            $time = new datetime;
+            $status = "ADD";
+            $mto_no = $get_mto_no;
+            $userstaff = Auth::user()->FullName;
+            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+            DB::connection('db_tbs')->table('entry_mto_log')->insert([
+                'mto_no' => $mto_no, 
+                'date' => $date,
+                'time' => $time,
+                'status_change' => $status,
+                'user' => $userstaff,
+                'note' => $note 
+            ]);
 
-        ]);
-        return response()->json([
-            'success' => true
-        ]);
+            DB::commit();
+            return response()->json([ 'success' => true ]);
+
+        } catch (Exception  $ex) {
+            abort(404, $ex->getMessage());
+        }
+        
+
+       
     }
 
     public function show_view_detail($id)
@@ -145,7 +173,7 @@ class MtoEntryController extends Controller
 
     public function editMtoData($id)
     {
-        $data        = MtoEntry::find($id);
+        $data        = MtoEntry::where('id_mto', $id)->first();
         $MTODetail   = MtoEntry::select(
                             'id_mto', 'mto_no', 'fin_code', 'frm_code', 'descript', 'fac_unit',
                             'fac_qty', 'factor', 'unit', 'quantity', 'qty_ng','cost','glinv','types','written','posted',
@@ -155,19 +183,45 @@ class MtoEntryController extends Controller
                       ->get();
       
         $output = [
-            'detail' => $MTODetail,
-            'header' => $data
+            'header' => $data,
+            'detail' => $MTODetail
+           
         ];
         return response()->json($output);
     }
     public function updateMtoEntry(Request $request, $id)
     {
         $data = MtoEntry::find($id);
-        $data->update($request->all());
-        return response()->json([
-            'success' => true
-        ]);
+        try {
+            DB::beginTransaction();
+            $data->update($request->all());
 
+            // INSERT LOG MTO
+            $date = Carbon::now();
+            $time = new datetime;
+            $status = "EDIT";
+            $mto_no = $data['mto_no'];
+            $userstaff = Auth::user()->FullName;
+            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+            DB::connection('db_tbs')->table('entry_mto_log')->insert([
+                'mto_no' => $mto_no, 
+                'date' => $date,
+                'time' => $time,
+                'status_change' => $type,
+                'user' => $userstaff,
+                'note' => $note 
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true
+            ]);
+
+        } catch (Exception  $ex) {
+            abort(404, $ex->getMessage());
+        }
+        
     }
 
     public function DeleteMtoData($id)
@@ -195,20 +249,71 @@ class MtoEntryController extends Controller
     public function postedMtoData($id)
     {
         $data = MtoEntry::find($id);
+        try {
+            DB::beginTransaction();
+            $get_posted =  $data['posted'];
+            if ($get_posted != null) {
+                //un-posted
+                $data['posted'] = NULL;
+                $data->update();
 
-        $get_posted =  $data['posted'];
-        if ($get_posted != null) {
-            //un-posted
-            $data['posted'] = NULL;
-            $data->update();
-        } else {
-            // posted-mto
-           $data['posted'] = Carbon::now();
-           $data->save();
+                // INSERT LOG UN-POSTED
+                $date = Carbon::now();
+                $time = new datetime;
+                $status = "UN-POSTED";
+                $mto_no = $data['mto_no'];
+                $userstaff = Auth::user()->FullName;
+                $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+                DB::connection('db_tbs')->table('entry_mto_log')->insert([
+                    'mto_no' => $mto_no, 
+                    'date' => $date,
+                    'time' => $time,
+                    'status_change' => $status,
+                    'user' => $userstaff,
+                    'note' => $note 
+                ]);
+            } else {
+                // posted-mto
+
+               $data['posted'] = Carbon::now();
+               $data->save();
+
+            // INSERT LOG POSTED MTO
+               $date = Carbon::now();
+               $time = new datetime;
+               $status = "POSTED";
+               $mto_no = $data['mto_no'];
+               $userstaff = Auth::user()->FullName;
+               $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+               DB::connection('db_tbs')->table('entry_mto_log')->insert([
+                   'mto_no' => $mto_no, 
+                   'date' => $date,
+                   'time' => $time,
+                   'status_change' => $status,
+                   'user' => $userstaff,
+                   'note' => $note 
+               ]);
+            }
+
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true
+            ]);
+        } catch (Exception $ex) {
+            abort(404, $ex->getMessage());
         }
-        return response()->json([
-            'success' => true
-        ]);
+        
+       
+    }
+
+    public function viewLogMtoEntry($mto_no)
+    {   
+       $data =  DB::connection('db_tbs')
+                    ->table('entry_mto_log')
+                    ->where('mto_no','=', $mto_no)->get();         
+       return response()->json($data);
     }
 
     

@@ -413,7 +413,10 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'as' => 'tms.warehouse.mto-entry_posted_mto_entry_data'
         ]);
         
-
+        Route::get('/warehouse/mto_entry/{id}/view_mto_entry_log', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@viewLogMtoEntry', 
+            'as' => 'tms.warehouse.mto-view_mto_entry_log'
+        ]);
 
 
        
