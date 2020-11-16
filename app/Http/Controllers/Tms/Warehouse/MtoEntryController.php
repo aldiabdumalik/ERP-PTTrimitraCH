@@ -21,9 +21,7 @@ class MtoEntryController extends Controller
         $getDate = Carbon::now()->format('d/m/Y');
         $getDate1 =  Carbon::now()->format('Y/m');
         $data_mto = new MtoEntry();
-        // $cekdata_mto_entry =
         $get_no_mto = $data_mto->getMtoNo();
-        // dd($get_no_mto);
         return view('tms.warehouse.mto-entry.index', compact('getDate','getDate1','get_no_mto'));
     }
 
@@ -130,7 +128,7 @@ class MtoEntryController extends Controller
             $status = "ADD";
             $mto_no = $get_mto_no;
             $userstaff = Auth::user()->FullName;
-            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
             DB::connection('db_tbs')->table('entry_mto_log')->insert([
                 'mto_no' => $mto_no, 
                 'date' => $date,
@@ -203,7 +201,7 @@ class MtoEntryController extends Controller
             $status = "EDIT";
             $mto_no = $data['mto_no'];
             $userstaff = Auth::user()->FullName;
-            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
             DB::connection('db_tbs')->table('entry_mto_log')->insert([
                 'mto_no' => $mto_no, 
                 'date' => $date,
@@ -265,7 +263,7 @@ class MtoEntryController extends Controller
                 $status = "UN-POSTED";
                 $mto_no = $data['mto_no'];
                 $userstaff = Auth::user()->FullName;
-                $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+                $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
                 DB::connection('db_tbs')->table('entry_mto_log')->insert([
                     'mto_no' => $mto_no, 
                     'date' => $date,
@@ -287,7 +285,7 @@ class MtoEntryController extends Controller
                $status = "POSTED";
                $mto_no = $data['mto_no'];
                $userstaff = Auth::user()->FullName;
-               $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. $data['quantity'];
+               $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
                DB::connection('db_tbs')->table('entry_mto_log')->insert([
                    'mto_no' => $mto_no, 
                    'date' => $date,
