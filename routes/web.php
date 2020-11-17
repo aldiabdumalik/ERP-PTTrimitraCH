@@ -365,8 +365,60 @@ Route::group([ 'middleware' => 'app.user'], function (){
         Route::get('/warehouse/deliveryorder/getdatadodetail', ['uses' => 'TMS\Warehouse\DeliveryOrderController@getDataDeliveryOrder', 'as' => 'tms.warehouse.deliveryorder.dodetail']);
         Route::post('/warehouse/deliveryorder/save', ['uses' => 'TMS\Warehouse\DeliveryOrderController@saveDataDeliveryOrder', 'as' => 'tms.warehouse.deliveryorder.save']);
         Route::delete('/warehouse/deliveryorder/void/{do}', ['uses' => 'TMS\Warehouse\DeliveryOrderController@voidDataDeliveryOrder', 'as' => 'tms.warehouse.deliveryorder.void']);
-       
-       
+        
+        // 4. MTO Entry :: PAGE ::
+        Route::get('/warehouse/mto_entry', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@index', 
+            'as' => 'tms.warehouse.mto-entry'
+        ]);
+        Route::get('/warehouse/mto_entry/datatables', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@getMtoDatatables', 
+            'as' => 'tms.warehouse.mto-entry_datatables'
+        ]);
+
+        Route::get('/warehouse/mto_entry/datatables_choice_data', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@getPopUpChoiceDataDatatables', 
+            'as' => 'tms.warehouse.mto-entry_datatables_choice_data'
+        ]);
+        Route::post('/warehouse/mto_entry/store-mto', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@StoreMtoData', 
+            'as' => 'tms.warehouse.mto-entry_store_mto_data'
+        ]);
+
+        Route::get('/warehouse/mto_entry/{id}/show_detail_mto', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@show_view_detail', 
+            'as' => 'tms.warehouse.mto-entry_show_view_detail'
+        ]);
+
+        Route::get('/warehouse/mto_entry/{id}/edit_mto_data', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@editMtoData', 
+            'as' => 'tms.warehouse.mto-entry_edit_mto_data'
+        ]);
+        Route::put('/warehouse/mto_entry/update_mto_data/{id}', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@updateMtoEntry', 
+            'as' => 'tms.warehouse.mto-entry_update_mto_entry'
+        ]);
+
+        Route::post('/warehouse/mto_entry/voided_mto_data/{id}', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@voidedMtoData', 
+            'as' => 'tms.warehouse.mto-entry_voided_mto_data'
+        ]);
+        Route::get('/warehouse/mto_entry/{id}/report_pdf_mtodata', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@reportPdfMto', 
+            'as' => 'tms.warehouse.mto-entry_report_pdf_mtodata'
+        ]);
+
+        Route::post('/warehouse/mto_entry/posted_mto_data/{id}', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@postedMtoData', 
+            'as' => 'tms.warehouse.mto-entry_posted_mto_entry_data'
+        ]);
+        
+        Route::get('/warehouse/mto_entry/{id}/view_mto_entry_log', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@viewLogMtoEntry', 
+            'as' => 'tms.warehouse.mto-view_mto_entry_log'
+        ]);
+
+
        
        
         /*

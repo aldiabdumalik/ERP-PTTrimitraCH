@@ -30,7 +30,6 @@ class ModuleController extends Controller
         $UserID     = Auth::user()->id;
         $UserRole   = UserRole::where('ekanban_user_id', $UserID)->first();
         $RoleID     = $UserRole->role_id;
-
         $AddAccess  = RolePermissionControl::CheckPermission($RoleID, 'add_modules');
         if($AddAccess){
             $ActionButton = ButtonBuilder::Build('MAIN-LINK', 'ADD', 'add-btn', 'ti-plus', 'Add New Module', route('admin.modules.add'));
