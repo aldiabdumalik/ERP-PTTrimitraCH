@@ -13,7 +13,6 @@ use Carbon\Carbon;
 use DB;
 use Auth;
 use PDF;
-use DateTime;
 class MtoEntryController extends Controller
 {
     public function index(Request $request)
@@ -28,7 +27,7 @@ class MtoEntryController extends Controller
     public function getMtoDatatables(Request $request)
     {
         if ($request->ajax()) {
-            $data =  MtoEntry::get();
+            $data =  MtoEntry::where('voided','=', NULL)->get();
             // dd($data);
             // if ($get_data == 1) {
             //     $data->posted()->get();
@@ -71,6 +70,7 @@ class MtoEntryController extends Controller
     public function getPopUpChoiceDataDatatables(Request $request)
     {
         if ($request->ajax()) {
+            // GET DATA FROM TABLE ITEM
             $getItem = Item::get();
             return Datatables::of($getItem)->make(true);  
         }
@@ -86,7 +86,7 @@ class MtoEntryController extends Controller
 
         $data = new MtoEntry();
         $get_mto_no = $data->getMtoNo();
-        $get_user_staff = Auth::user()->UserID;
+        $get_user_staff = Auth::user()->FullName;
         try {
             DB::beginTransaction();
             $data = MtoEntry::create([
@@ -121,7 +121,7 @@ class MtoEntryController extends Controller
                 'operator'=> $request->operator !== '' ? $request->operator : null
     
             ]);
-               // INSERT LOG MTO
+            // INSERT LOG MTO
             date_default_timezone_set("Asia/Jakarta");
             $date = Carbon::now();
             $time = Carbon::now()->format('H:i:s');
@@ -142,7 +142,8 @@ class MtoEntryController extends Controller
             return response()->json([ 'success' => true ]);
 
         } catch (Exception  $ex) {
-            abort(404, $ex->getMessage());
+           DB::rollback();
+           return redirect()->back();
         }
         
 
@@ -159,8 +160,7 @@ class MtoEntryController extends Controller
                             'warehouse','branch','ip_type','ref_no','uid_export'
                             )   
                       ->where('mto_no', '=', $MTOHeaderNo)
-                      ->get();
-        // $format_des = ',00';              
+                      ->get();           
         $output = [
             'header' => $MTOHeader,
             'detail' => $MTODetail
@@ -179,7 +179,6 @@ class MtoEntryController extends Controller
                             )
                       ->where('id_mto', '=', $id)
                       ->get();
-      
         $output = [
             'header' => $data,
             'detail' => $MTODetail
@@ -218,20 +217,48 @@ class MtoEntryController extends Controller
             ]);
 
         } catch (Exception  $ex) {
-            abort(404, $ex->getMessage());
+            DB::rollback();
+            return redirect()->back();
         }
         
     }
 
-    public function DeleteMtoData($id)
+    public function voidedMtoData($id)
     {
         $data = MtoEntry::find($id);
-        $data['voided'] = Carbon::now();
-        $data->save();
-        $data->delete();
-        return response()->json([
-            'success' => true,
-        ]);
+        try {
+            DB::beginTransaction();
+            $data['voided'] = Carbon::now();
+            $data->save();
+            // INSERT LOG ACTIVITY
+            date_default_timezone_set("Asia/Jakarta");
+            $date = Carbon::now();
+            $time = Carbon::now()->format('H:i:s');
+            $status = "VOID";
+            $mto_no = $data['mto_no'];
+            $userstaff = Auth::user()->FullName;
+            $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
+            DB::connection('db_tbs')->table('entry_mto_log')->insert([
+                'mto_no' => $mto_no, 
+                'date' => $date,
+                'time' => $time,
+                'status_change' => $status,
+                'user' => $userstaff,
+                'note' => $note 
+            ]);
+            
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+            ]);
+        } catch (Exception $ex) {
+            DB::rollback();
+            return redirect()->back();
+        }
+        
+      
     }
 
     public function reportPdfMto($id)
@@ -245,7 +272,7 @@ class MtoEntryController extends Controller
         return $pdf->stream();
     }
 
-    public function postedMtoData($id)
+    public function postedMtoData(Request $request, $id)
     {
         $data = MtoEntry::find($id);
         try {
@@ -260,7 +287,7 @@ class MtoEntryController extends Controller
                 date_default_timezone_set("Asia/Jakarta");
                 $date = Carbon::now();
                 $time = Carbon::now()->format('H:i:s');
-                $status = "UN-POSTED";
+                $status = "UN-POST";
                 $mto_no = $data['mto_no'];
                 $userstaff = Auth::user()->FullName;
                 $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
@@ -270,11 +297,10 @@ class MtoEntryController extends Controller
                     'time' => $time,
                     'status_change' => $status,
                     'user' => $userstaff,
-                    'note' => $note 
+                    'note' => $request->note !== '' ? $request->note : $note 
                 ]);
             } else {
                 // posted-mto
-
                $data['posted'] = Carbon::now();
                $data->save();
 
@@ -282,7 +308,7 @@ class MtoEntryController extends Controller
                date_default_timezone_set("Asia/Jakarta");
                $date = Carbon::now();
                $time = Carbon::now()->format('H:i:s');
-               $status = "POSTED";
+               $status = "POST";
                $mto_no = $data['mto_no'];
                $userstaff = Auth::user()->FullName;
                $note = $data['warehouse'] . '/' . $data['fin_code'] .'/'. 'Qty:'. ' ' . $data['quantity'];
@@ -303,7 +329,8 @@ class MtoEntryController extends Controller
                 'success' => true
             ]);
         } catch (Exception $ex) {
-            abort(404, $ex->getMessage());
+            DB::rollback();
+            return redirect()->back();
         }
         
        
@@ -312,9 +339,10 @@ class MtoEntryController extends Controller
     public function viewLogMtoEntry($mto_no)
     {   
        $data =  DB::connection('db_tbs')
-                  ->table('entry_mto_log')
-                  ->where('mto_no','=', $mto_no)
-                  ->get();         
+                    ->table('entry_mto_log')
+                    ->where('mto_no','=', $mto_no)
+                    ->get();    
+
        return response()->json($data);
     }
 

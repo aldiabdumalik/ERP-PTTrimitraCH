@@ -4,19 +4,17 @@
 <!-- DATATABLES -->
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/Datatables/dataTables.bootstrap4.min.css') }}">
 @endsection
-@section('content')           
-
+@section('content')
 <div class="main-content-inner">
     <div class="row">
         <div class="col-12 mt-5">
             <div class="#">
-               <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
-              <i class="ti-plus"></i>  Add New Data
+                <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
+                <i class="ti-plus"></i>  Add New Data
                 </button>
-
                 <button type="button" id="checkStockItem" class="btn btn-flat btn-sm btn-danger">
-                    <i class="fa fa-check"></i> Stock
-                    </button>
+                <i class="fa fa-check"></i> Stock
+                </button>
             </div>
         </div>
     </div>
@@ -30,42 +28,43 @@
                 </div>
                 <div class="card-body">
                     <div class="row mt-3">
-                        <div class="col">      
+                        <div class="col">
                             <div class="">
                                 <div class="table-responsive">
-                                <table id="mto-datatables" class="table table-striped table-hover" style="width:100%">
-                                    <thead class="text-center" style="font-size: 15px;">
-                                        <tr>
-                                            <th>MTO No</th>
-                                            <th>Written</th>
-                                            <th>Posted</th>
-                                            <th>Voided</th>
-                                            <th>Item Code</th>
-                                            <th>Ref No</th>
-                                            <th>Remark</th>
-                                            <th>Brch</th>
-                                            <th width="30%">ACTION</th>
-                                        </tr>
-                                    </thead>
+                                    <table id="mto-datatables" class="table table-striped table-hover" style="width:100%">
+                                        <thead class="text-center" style="font-size: 15px;">
+                                            <tr>
+                                                <th>MTO No</th>
+                                                <th>Written</th>
+                                                <th>Posted</th>
+                                                <th>Voided</th>
+                                                <th>Item Code</th>
+                                                <th>Ref No</th>
+                                                <th>Remark</th>
+                                                <th>Brch</th>
+                                                <th width="30%">ACTION</th>
+                                            </tr>
+                                        </thead>
                                     <tbody></tbody>
                                 </table>
-                            </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-         </div>
+        </div>
     </div>
 </div>
 </div>
+</div>
+@include('tms.warehouse.mto-entry.modal.modal-log-mto.un_posted')
 @include('tms.warehouse.mto-entry.modal.modal-log-mto.mto-log_modal')
 @include('tms.warehouse.mto-entry.modal.stock.modal_stock')
 @include('tms.warehouse.mto-entry.modal.view-mto-modal._viewmto')
 @include('tms.warehouse.mto-entry.modal.edit-mto-modal._edit')
 {{-- @include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto2')  --}}
 @include('tms.warehouse.mto-entry.modal.create-mto-modal._create')
-@include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto') 
+@include('tms.warehouse.mto-entry.modal.popup-mto-choicedata.popUpMto')
 @endsection
 
 
@@ -129,8 +128,8 @@ $(document).on('click', '.view', function(e){
     $('.modal-title').text('Many To One Entry (New)');
     getDetail(id, 'VIEW')
 });
-// DELETE THIS DATA
-$(document).on('click', '.delete', function(e){
+// VOID THIS DATA
+$(document).on('click', '.voided', function(e){
     var id = $(this).attr('row-id');
     var mto_no = $(this).attr('data-id');
     var posted = $(this).attr('data-target');
@@ -139,11 +138,11 @@ $(document).on('click', '.delete', function(e){
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
-            text: 'MTO entry no.' + mto_no + ' '+'has been posted cant delete',
+            text: 'MTO entry no.' + mto_no + ' '+'has been posted cant void',
         });
     } else {
         e.preventDefault();
-        deleteData(id, mto_no)
+        voidedData(id, mto_no)
     }
     
 });
@@ -154,6 +153,19 @@ $(document).on('click', '.posted', function(e){
     var posted = $(this).attr('data-target');
     // alert(posted);
     if(posted !== ''){
+        e.preventDefault();
+        $('#ModalUnPost').modal('show');
+        $('.modal-title').text('MTO Entry (UN-POST)')
+        var route  = "{{ route('tms.warehouse.mto-entry_show_view_detail', ':id') }}";
+            route  = route.replace(':id', id);
+        $.ajax({
+            url:route,
+            type: 'GET',
+            dataType: 'JSON',
+            success:function(data){
+                $('.mto_no_unpost').val(data['header'].mto_no);
+            }
+        });
         UnPostedMTO(id, mto_no);
     } else {
         // alert(mto_no);
@@ -381,36 +393,36 @@ function UpdateData(id, mto_no){
         });
         
 }
-// CALL TOKEN FOR DELETE THIS DATA FROM AJAX
+// CALL TOKEN FOR VOIDED THIS DATA FROM AJAX
 $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
-function deleteData(id, mto_no){
+function voidedData(id, mto_no){
     Swal.fire({
         title: 'Are you sure?',
-        text: "delete this data mto no." + mto_no,
+        text: "void mto no." + mto_no + " " + "now?",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Yes, void it!'
         }).
-        then((willDelete) => {
-            var route  = "{{ route('tms.warehouse.mto-entry_delete_mto_entry', ':id') }}";
+        then((willVoided) => {
+            var route  = "{{ route('tms.warehouse.mto-entry_voided_mto_data', ':id') }}";
                 route  = route.replace(':id', id);
-            if(willDelete.value){
+            if(willVoided.value){
                     $.ajax({
                         url: route,
                         type: "POST",
                         data : {
-                            '_method' : 'DELETE'
+                            '_method' : 'POST'
                         },
                         success: function(data){   
                         Swal.fire(       
-                            'Deleted!',
-                            'Data has been deleted.',
+                            'Void!',
+                            'Data has been void',
                             'success'
                         ).then(function(){
                             location.reload();
@@ -426,7 +438,7 @@ function deleteData(id, mto_no){
                     }
                 })
             } else {
-                console.log(`data MTO was dismissed by ${willDelete.dismiss}`);
+                console.log(`data MTO was dismissed by ${willVoided.dismiss}`);
             }
          
         
@@ -485,49 +497,36 @@ function postedMTO(id, mto_no){
 }
 
 function UnPostedMTO(id, mto_no){
-    Swal.fire({
-        title: 'Are you sure UN-POSTED?',
-        text: "this data mto no." + mto_no,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, Un-Posted it!'
-        }).
-        then((willPosted) => {
-            var route  = "{{ route('tms.warehouse.mto-entry_posted_mto_entry_data', ':id') }}";
-                route  = route.replace(':id', id);
-            if(willPosted.value){
+        var route  = "{{ route('tms.warehouse.mto-entry_posted_mto_entry_data', ':id') }}";
+            route  = route.replace(':id', id);
+        //
+        $('.modal-footer').on('click','.ok_unpost', function(){
+                $('.ok_unpost').html('Saving...');
                     $.ajax({
                         url: route,
                         type: "POST",
-                        data : {
-                            '_method' : 'POST'
-                        },
-                        success: function(data){   
-                        Swal.fire(       
-                            'Succesfully!',
-                            'Data has been UN-POSTED.',
-                            'success'
-                        ).then(function(){
-                            location.reload();
-                        });
+                        data: $('#form-mto-un-post').serialize(),
+                        success: function(data){
+                        $("#ModalUnPost").modal('hide'); 
+                            Swal.fire(
+                                'Successfully!',
+                                'Data has been UN-POSTED no.' + mto_no,
+                                'success'
+                            ).then(function(){
+                                    location.reload();
+                            });
                             
                         }, 
-                        error: function(){
-                            Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Something went wrong!',
-                        })
-                    }
-                })
-            } else {
-                console.log(`data MTO was dismissed by ${willPosted.dismiss}`);
-            }
-         
+                            error: function(){
+                                Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Something went wrong!',
+                            })
+                        }
+                    });
+            });
         
-        })
 }
 function validateCreateMto(){
     var part_no = document.getElementById('part_no_create').value;
@@ -643,6 +642,7 @@ function formatDate (input) {
             },
         });
 
+        // LOOK STOCK
         var lookUpStock = $('#lookUpStock').DataTable({
             processing: true,
             serverSide: true,

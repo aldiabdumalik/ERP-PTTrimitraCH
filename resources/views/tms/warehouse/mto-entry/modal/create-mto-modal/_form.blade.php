@@ -48,7 +48,7 @@
                 </div>
                 <div class="col-6">
                     <div class="form-group">
-                    <input class="form-control form-control-sm" value="{{ Auth::user()->UserID }}" name="staff" type="text" id="staff_create" disabled>
+                    <input class="form-control form-control-sm" value="{{ Auth::user()->FullName }}" name="staff" type="text" id="staff_create" disabled>
                     </div>  
                 </div>
             </div> 

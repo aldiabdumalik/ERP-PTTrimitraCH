@@ -399,9 +399,9 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'as' => 'tms.warehouse.mto-entry_update_mto_entry'
         ]);
 
-        Route::delete('/warehouse/mto_entry/delete_mto_data/{id}', [
-            'uses' => 'TMS\Warehouse\MtoEntryController@DeleteMtoData', 
-            'as' => 'tms.warehouse.mto-entry_delete_mto_entry'
+        Route::post('/warehouse/mto_entry/voided_mto_data/{id}', [
+            'uses' => 'TMS\Warehouse\MtoEntryController@voidedMtoData', 
+            'as' => 'tms.warehouse.mto-entry_voided_mto_data'
         ]);
         Route::get('/warehouse/mto_entry/{id}/report_pdf_mtodata', [
             'uses' => 'TMS\Warehouse\MtoEntryController@reportPdfMto', 

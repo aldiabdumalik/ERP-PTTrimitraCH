@@ -11,7 +11,7 @@
                           <div class="col-12">
                              <div class="">
                               <table id="tbl-log" class="table table-bordered table-hover" width="100%" >
-                                  <thead>
+                                  <thead class="text-center">
                                       <tr>
                                         <th>Date</th>
                                         <th>Time</th>
