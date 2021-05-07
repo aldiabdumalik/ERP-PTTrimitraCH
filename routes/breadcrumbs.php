@@ -162,6 +162,12 @@ Breadcrumbs::for('tms.manufacturing.raw-material.reference-bom', function ($trai
     $trail->push('BoM Tree', route('tms.manufacturing.raw-material.reference-bom'));
 });
 
+// 2.3.2.7. - - - - - THP Entry
+Breadcrumbs::for('tms.manufacturing.thp_entry', function ($trail) {
+    $trail->push('Manufacturing', '#');
+    $trail->push('THP Entry', route('tms.manufacturing.thp_entry'));
+});
+
 //  2.4.    Warehouse
 
 //  2.4.1. Products

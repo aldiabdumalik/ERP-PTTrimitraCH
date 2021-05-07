@@ -418,8 +418,32 @@ Route::group([ 'middleware' => 'app.user'], function (){
             'as' => 'tms.warehouse.mto-view_mto_entry_log'
         ]);
 
-
-       
+        /*
+        | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        |   TMS - MANUFACTURING - THP
+        | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        |
+        */
+        Route::get('/manufacturing/thp_entry', [
+            'uses' => 'TMS\Manufacturing\ThpEntryController@index', 
+            'as' => 'tms.manufacturing.thp_entry'
+        ]);
+        Route::get('/manufacturing/thp_entry/dataTable_index', [
+            'uses' => 'TMS\Manufacturing\ThpEntryController@getThpTable', 
+            'as' => 'tms.manufacturing.thp_entry.dataTable_index'
+        ]);
+        Route::get('/manufacturing/thp_entry/dataTable_edit/{id}', [
+            'uses' => 'TMS\Manufacturing\ThpEntryController@editThpTable', 
+            'as' => 'tms.manufacturing.thp_entry.dataTable_edit'
+        ]);
+        Route::get('/manufacturing/thp_entry/dataTable_production', [
+            'uses' => 'TMS\Manufacturing\ThpEntryController@getProductionTable', 
+            'as' => 'tms.manufacturing.thp_entry.dataTable_production'
+        ]);
+        Route::post('/manufacturing/thp_entry/post/thpentrycreate', [
+            'uses' => 'TMS\Manufacturing\ThpEntryController@createTHP', 
+            'as' => 'tms.manufacturing.thp_entry.thpentry_create'
+        ]);
        
         /*
         | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
