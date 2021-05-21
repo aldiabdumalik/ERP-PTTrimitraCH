@@ -171,9 +171,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary " data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary thp-cancel-create" data-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary thp-create-btn">Simpan</button>
-                    <button type="button" id="thp-edit-btn" class="btn btn-primary thp-edit-btn" hidden>Edit</button>
+                    <button type="button" id="thp-edit-btn" class="btn btn-primary thp-edit-btn" hidden><span>Edit</span></button>
                 </div>
             </div>
         </form>

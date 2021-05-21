@@ -2,6 +2,7 @@
 @section('title', 'TMS | Manufacturing - THP Entry')
 @section('css')
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/Datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('/vendor/datepicker/bootstrap-datepicker.min.css') }}">
 @endsection
 @section('content')
 <style>
@@ -15,6 +16,9 @@
             <div class="#">
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
                     <i class="ti-plus"></i>  Add New Data
+                </button>
+                <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="printModal">
+                    <i class="fa fa-print"></i>  Print
                 </button>
             </div>
         </div>
@@ -36,26 +40,24 @@
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr>
                                                 <th rowspan="2" class="align-middle">id</th>
+                                                <th rowspan="2" class="align-middle">Written</th>
+                                                <th rowspan="2" class="align-middle">Closed</th>
                                                 <th rowspan="2" class="align-middle">Customer</th>
                                                 <th rowspan="2" class="align-middle">Production Code</th>
                                                 <th rowspan="2" class="align-middle">Part Name</th>
                                                 <th rowspan="2" class="align-middle">Part Type</th>
-                                                {{-- <th>Plan</th> --}}
-                                                {{-- <th>C/T</th> --}}
                                                 <th rowspan="2" class="align-middle">Route</th>
-                                                {{-- <th>TON</th> --}}
                                                 <th rowspan="2" class="align-middle">Process</th>
-                                                {{-- <th>Time</th> --}}
-                                                {{-- <th>Plan Hour</th> --}}
                                                 <th colspan="2">Plan THP</th>
-                                                <th colspan="2">Actual</th>
-                                                {{-- <th>Action</th> --}}
+                                                <th colspan="3">Actual</th>
+                                                <th rowspan="2" class="align-middle">Action</th>
                                             </tr>
                                             <tr>
                                                 <th>Shift 1</th>
                                                 <th>Shift 2</th>
                                                 <th>Shift 1</th>
                                                 <th>Shift 2</th>
+                                                <th>%</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -72,6 +74,9 @@
 </div>
 @include('tms.manufacturing.thp_entry._modal.create_thp_modal._createthp')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._productioncode')
+@include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
+@include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
+@include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
 
 
 @endsection
@@ -83,28 +88,57 @@ $(document).ready(function(){
         processing: true,
         serverSide: true,
         destroy: true,
-        ajax: "{{ route('tms.manufacturing.thp_entry.dataTable_index') }}",
+        ajax: {
+            url: "{{ route('tms.manufacturing.thp_entry.dataTable_index') }}",
+            type: "POST",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+        },
         columns: [
-            {data: 'id_thp', name: 'id_thp'},
+            {data: 'id_thp', name: 'id_thp', searchable: false},
+            {data: 'date', name: 'date', className: "text-center"},
+            {data: 'closed', name: 'closed', className: "text-center"},
             {data: 'id_cust', name: 'id_cust'},
             {data: 'production_code', name: 'production_code'},
             {data: 'part_name', name: 'part_name'},
             {data: 'part_type', name: 'part_type'},
             {data: 'route', name: 'route'},
-            {data: 'process', name: 'process'},
-            {data: 'plan_1', name: 'plan_1'},
-            {data: 'plan_2', name: 'plan_2'},
-            {data: 'actual_1', name: 'actual_1'},
-            {data: 'actual_2', name: 'actual_2'},
+            {data: 'process', name: 'process', orderable: false, searchable: false},
+            {data: 'plan_1', name: 'plan_1', orderable: false, searchable: false},
+            {data: 'plan_2', name: 'plan_2', orderable: false, searchable: false},
+            {data: 'actual_1', name: 'actual_1', orderable: false, searchable: false},
+            {data: 'actual_2', name: 'actual_2', orderable: false, searchable: false},
+            {data: 'persentase', name: 'persentase', orderable: false, searchable: false},
+            {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
+        "order": [[ 1, "desc" ]],
         initComplete: function(settings, json) {
-            $('#thp-datatables tbody').on('click', 'tr', function () {
-                var dataArr = [];
-                var rows = $(this);
-                var rowData = tbl_index.rows(rows).data();
-                $.each($(rowData),function(key, data){
-                    getThp(data.id_thp);
-                });
+            // $('#thp-datatables tbody').on('click', 'tr', function () {
+            //     var dataArr = [];
+            //     var rows = $(this);
+            //     var rowData = tbl_index.rows(rows).data();
+            //     $.each($(rowData),function(key, data){
+            //         getThp(data.id_thp);
+            //     });
+            // });
+            $('.thp-act-view').on('click', function () {
+                getThp($(this).data('thp'));
+            });
+            $('.thp-act-edit').on('click', function () {
+                getThp($(this).data('thp'));
+            }).on('mouseup',function(){
+                setTimeout(function(){ 
+                    $('#thp-edit-btn').trigger('click');
+                }, 1000);
+            });
+            $('.thp-act-log').on('click', function () {
+                $('#thp-log-modal').modal('show');
+                log_tbl($(this).data('thp'));
+            });
+            $('.thp-act-close').on('click', function () {
+                var id = $(this).data('thp');
+                close_thpentry(id);
             });
         }
     });
@@ -119,6 +153,11 @@ $(document).ready(function(){
         e.preventDefault();
         // $('#createModal').after('#mtoModal');
         $('#createModal').modal('show');
+    });
+    $(document).on('click', '#printModal', function(e) {
+        e.preventDefault();
+        // $('#createModal').after('#mtoModal');
+        $('#thp-print-modal').modal('show');
     });
     $(document).on('click', '#thp-btn-production-code', function(e) {
         e.preventDefault();
@@ -184,8 +223,8 @@ $(document).ready(function(){
                         text: response.message,
                         icon: 'success'
                     }).then(function(){
-                        tbl_index.ajax.reload();
-                        // window.location.reload();
+                        // tbl_index.ajax.reload();
+                        window.location.reload();
                     });
                 }else{
                     Swal.fire({
@@ -195,12 +234,12 @@ $(document).ready(function(){
                     }); 
                 }
             },
-            error: function(){
+            error: function(response, status, x){
                 Swal.fire({
-                    title: 'Oops...',
-                    text: 'Something went wrong data not saved please check form input',
-                    icon: 'warning',
-                });
+                    title: 'Error!',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                })
             }
         });
     });
@@ -269,12 +308,12 @@ $(document).ready(function(){
                     $('#thp-edit-btn').removeAttr('hidden');
                 }
             },
-            error: function(){
+            error: function(response, status, x){
                 Swal.fire({
-                    title: 'Oops...',
-                    text: 'Something went wrong data not saved please check form input',
-                    icon: 'warning',
-                });
+                    title: 'Error!',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                })
             }
         });
     }
@@ -286,7 +325,10 @@ $(document).ready(function(){
             destroy: true,
             ajax: {
                 url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
-                method: "GET",
+                method: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 data: {
                     "process": proc,
                     "cust": cust
@@ -325,6 +367,85 @@ $(document).ready(function(){
             }
         });
     }
+
+    function log_tbl(id_thp=null) {
+        var tbl_log = $('#thp-log-datatables').DataTable({
+            processing: true,
+            serverSide: true,
+            destroy: true,
+            ajax: {
+                url: "{{ route('tms.manufacturing.thp_entry.dataTable_log') }}",
+                method: "GET",
+                data: {
+                    "id": id_thp,
+                }
+            },
+            columns: [
+                {data: 'date_written', name: 'date_written'},
+                {data: 'time_written', name: 'time_written'},
+                {data: 'status_change', name: 'status_change'},
+                {data: 'user', name: 'user'},
+                {data: 'note', name: 'note'}
+            ],
+        });
+    }
+
+    function close_thpentry(id=null) {
+        $('#thp-close-modal').modal('show');
+        $('#thp-form-closed').submit(function () {
+        Swal.fire({
+            text: 'Do you want to closed the changes?',
+            showCancelButton: true,
+            confirmButtonText: `Closed`,
+            confirmButtonColor: '#DC3545',
+            }).then((result) => {
+                if (result.value == true) {
+                    $.ajax({
+                        url: "{{ route('tms.manufacturing.thp_entry.closeThpEntry') }}",
+                        type: "POST",
+                        dataType: "JSON",
+                        cache: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: {
+                            "id": id,
+                            "note": $('#thp-close-note').val()
+                        },
+                        success: function (response) {
+                            if(response.status == true){
+                                $('#thp-form-closed').trigger('reset');
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message,
+                                    icon: 'success'
+                                }).then(function(){
+                                    // tbl_index.ajax.reload();
+                                    window.location.reload();
+                                });
+                            }else{
+                                Swal.fire({
+                                    title: 'Warning!',
+                                    text: response.message,
+                                    icon: 'warning'
+                                })
+                            }
+                        },
+                        error: function(response, status, x){
+                            Swal.fire({
+                                title: 'Warning!',
+                                text: response.responseJSON.message,
+                                icon: 'warning'
+                            })
+                        }
+                    });
+                }else{
+                    $('#thp-close-modal').modal('hide');
+                    $('#thp-form-closed').trigger('reset');
+                }
+            })
+        });
+    }
 });
 </script>
 @endsection
@@ -333,7 +454,11 @@ $(document).ready(function(){
 @push('js')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
 <script>
-
+    $('.print-datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
 </script>
 @endpush
