@@ -79,6 +79,12 @@ class ThpEntryController extends Controller
         if($request->ajax()){
             if (isset($request->post_production_code)) {
                 $data = $this->_getProductionTableById($request);
+                if ($data[0]->shift_1 == null && $data[1]->shift_2 == null) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Data LHP tidak ditemukan',
+                    ], 404);
+                }
                 return response()->json([
                     'status' => true,
                     'data' => $data,
@@ -432,16 +438,31 @@ class ThpEntryController extends Controller
 
     private function _getProductionTableById(Request $request)
     {
+        $query = DB::connection('oee')
+            ->table('db_productioncode_tbl')
+            ->select(
+                'production_code',
+                'item_code'
+            )
+            ->where('production_code', $request->post_production_code)
+            ->where('code_status', 1)
+            ->first();
+
+        $kemarin = date('Y-m-d', strtotime('-1 days', strtotime( date('Y-m-d') )));
         $shift_1 = DB::connection('oee')
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as shift_1'))
             ->where('production_code', $request->post_production_code)
+            // ->where('item_code', $query->item_code)
+            ->where('date2', $kemarin)
             ->whereRaw('LEFT(remark, 1) = 1')
             ->first();
         $shift_2 = DB::connection('oee')
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as shift_2'))
             ->where('production_code', $request->post_production_code)
+            // ->where('item_code', $query->item_code)
+            ->where('date2', $kemarin)
             ->whereRaw('LEFT(remark, 1) = 2')
             ->first();
         return [
@@ -454,12 +475,12 @@ class ThpEntryController extends Controller
     {
         if (empty($request->process) && empty($request->cust)){
             $where = [
-                'production_process' => 'PRESSING',
+                // 'production_process' => 'PRESSING',
                 'code_status' => 1
             ];
         }elseif(empty($request->process) && !empty($request->cust)){
             $where = [
-                'production_process' => 'PRESSING',
+                // 'production_process' => 'PRESSING',
                 'customer_id' => $request->cust,
                 'code_status' => 1
             ];

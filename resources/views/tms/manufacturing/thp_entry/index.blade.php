@@ -324,7 +324,7 @@ $(document).ready(function(){
         });
     }
 
-    function productioncode_tbl(proc="PRESSING", cust="A01"){
+    function productioncode_tbl(proc="PRESSING", cust=""){
         var tbl_production_code = $('#thp-poduction-code-datatables').DataTable({
             processing: true,
             serverSide: true,
@@ -350,13 +350,73 @@ $(document).ready(function(){
                 {data: 'customer_id', name: 'customer_id'},
                 {data: 'ct_sph', name: 'ct_sph'}
             ],
-            initComplete: function(settings, json) {
-                $('#thp-poduction-code-datatables tbody').on('click', 'tr', function () {
-                    var dataArr = [];
-                    var rows = $(this);
-                    var rowData = tbl_production_code.rows(rows).data();
-                    var processs;
-                    $.each($(rowData),function(key, data){
+            // initComplete: function(settings, json) {
+            //     $('#thp-poduction-code-datatables tbody').on('click', 'tr', function () {
+            //         var dataArr = [];
+            //         var rows = $(this);
+            //         var rowData = tbl_production_code.rows(rows).data();
+            //         var processs;
+            //         $.each($(rowData),function(key, data){
+            //             $('#thp-part-number').val(data.part_number);
+            //             $('#thp-part-name').val(data.part_name);
+            //             $('#thp-part-type').val(data.part_type);
+            //             $('#thp-production-code').val(data.production_code);
+            //             $('#thp-customer-code').val(data.customer_id);
+            //             $('#thp-route').val(data.process_detailname);
+            //             processs = data.process.split('/');
+            //             $('#thp-process-1').val(processs[0]);
+            //             $('#thp-process-2').val(processs[1]);
+            //             $('#thp-ct').val(data.ct_sph);
+            //             $('#poduction-code-modal').modal('hide');
+            //         });
+            //         $.ajax({
+            //             url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
+            //             type: "POST",
+            //             data: {
+            //                 "post_production_code" : $('#thp-production-code').val()
+            //             },
+            //             headers: {
+            //                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            //             },
+            //             success: function (response) {
+            //                 if (response.status == true) {
+            //                     response = response.data;
+            //                     var shift_1 = response[0]['shift_1'] != null ? response[0]['shift_1'] : 0;
+            //                     var shift_2 = response[1]['shift_2'] != null ? response[0]['shift_2'] : 0;
+            //                     $('#thp-actual-1').val(shift_1);
+            //                     $('#thp-actual-2').val(shift_2);
+            //                 }
+            //             },
+            //             error: function(response, status, x){
+            //                 Swal.fire({
+            //                     title: 'Warning!',
+            //                     text: response.responseJSON.message,
+            //                     icon: 'warning'
+            //                 })
+            //             }
+            //         });
+            //     });
+            // }
+        });
+        $('#thp-poduction-code-datatables tbody').off('click').on('click', 'tr', function () {
+            var data = tbl_production_code.row(this).data();
+            $.ajax({
+                url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
+                type: "POST",
+                data: {
+                    "post_production_code" : data.production_code
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    if (response.status == true) {
+                        response = response.data;
+                        var shift_1 = response[0]['shift_1'] != null ? response[0]['shift_1'] : 0;
+                        var shift_2 = response[1]['shift_2'] != null ? response[0]['shift_2'] : 0;
+                        $('#thp-actual-1').val(shift_1);
+                        $('#thp-actual-2').val(shift_2);
+                        var process;
                         $('#thp-part-number').val(data.part_number);
                         $('#thp-part-name').val(data.part_name);
                         $('#thp-part-type').val(data.part_type);
@@ -368,26 +428,20 @@ $(document).ready(function(){
                         $('#thp-process-2').val(processs[1]);
                         $('#thp-ct').val(data.ct_sph);
                         $('#poduction-code-modal').modal('hide');
+                    }
+                },
+                error: function(response, status, x){
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: response.responseJSON.message,
+                        icon: 'warning'
                     });
-                    $.ajax({
-                        url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
-                        type: "POST",
-                        data: {
-                            "post_production_code" : $('#thp-production-code').val()
-                        },
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function (response) {
-                            if (response.status == true) {
-                                response = response.data;
-                                $('#thp-actual-1').val(response[0]['shift_1']);
-                                $('#thp-actual-2').val(response[1]['shift_2']);
-                            }
-                        }
-                    });
-                });
-            }
+                }
+            });
+
+        });
+        $(document).on('hidden.bs.modal', '#thp-poduction-code-datatables', function () {
+            tbl_production_code.clear();
         });
     }
 
@@ -417,9 +471,9 @@ $(document).ready(function(){
         $('#thp-close-modal').modal('show');
         $('#thp-form-closed').submit(function () {
         Swal.fire({
-            text: 'Do you want to closed the changes?',
+            text: 'Do you want to close the changes?',
             showCancelButton: true,
-            confirmButtonText: `Closed`,
+            confirmButtonText: `Close`,
             confirmButtonColor: '#DC3545',
             }).then((result) => {
                 if (result.value == true) {
@@ -495,7 +549,7 @@ $(document).ready(function(){
     setTimeout(function () {
         Swal.fire({
             title: 'Warning!',
-            text: '{{\Session::get('msg')}}',
+            text: "{{\Session::get('msg')}}",
             icon: 'warning'
         })
     }, 1000);
