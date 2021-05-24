@@ -20,15 +20,15 @@
         </thead>
         <tbody>
             <tr>
-                <td class="align-middle"><input type="text" name="thp-route" id="thp-route" class="form-control" autocomplete="off" required></td>
+                <td class="align-middle"><input type="text" name="thp-route" id="thp-route" class="form-control" autocomplete="off" required onkeydown="return false"></td>
                 <td class="align-middle">
                     <div class="row">
                         <div class="col-5">
-                            <input type="number" name="thp-process-1" id="thp-process-1" class="form-control" autocomplete="off" required>
+                            <input type="number" name="thp-process-1" id="thp-process-1" class="form-control" autocomplete="off" required onkeydown="return false">
                         </div>
                         <div class="col-2">/</div>
                         <div class="col-5">
-                            <input type="number" name="thp-process-2" id="thp-process-2" class="form-control" autocomplete="off" required>
+                            <input type="number" name="thp-process-2" id="thp-process-2" class="form-control" autocomplete="off" required onkeydown="return false">
                         </div>
                     </div>
                 </td>
@@ -37,7 +37,7 @@
                 <td class="align-middle"><input type="number" name="thp-actual-1" id="thp-actual-1" class="form-control" value="0" autocomplete="off" required></td>
                 <td class="align-middle"><input type="number" name="thp-actual-2" id="thp-actual-2" class="form-control" value="0" autocomplete="off" required></td>
                 {{-- <td class="align-middle"><input type="number" name="thp-act-hour" id="thp-act-hour" class="form-control" min="0" step="0.25" value="0.00" autocomplete="off" required></td> --}}
-                <td class="align-middle"><textarea name="thp-note" id="thp-note" class="form-control" autocomplete="off" cols="30" rows="5"></textarea></td>
+                <td class="align-middle"><textarea name="thp-note" id="thp-note" class="form-control" autocomplete="off" cols="30" rows="5">DEVELOPMENT/{{date('YmdHis')}}</textarea></td>
                 <td class="align-middle">
                     <select name="thp-apnormal" id="thp-apnormal" class="form-control">
                         <option value="">Pilih Apnormality</option>

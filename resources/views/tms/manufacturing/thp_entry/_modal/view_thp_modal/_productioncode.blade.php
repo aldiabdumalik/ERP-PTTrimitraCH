@@ -10,8 +10,10 @@
                         <div class="form-group">
                             <select name="pc-search-process" id="pc-search-process" class="form-control">
                                 <option value="">Pilih berdasarkan proses</option>
-                                <option value="PRESSING">PRESSING</option>
                                 <option value="ASSEMBLING">ASSEMBLING</option>
+                                <option value="PRESSING" selected>PRESSING</option>
+                                <option value="WELDING">WELDING</option>
+                                <option value="SPOT">SPOT</option>
                             </select>
                         </div>
                     </div>

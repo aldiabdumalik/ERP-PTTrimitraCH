@@ -129,7 +129,13 @@ $(document).ready(function(){
                 getThp($(this).data('thp'));
             }).on('mouseup',function(){
                 setTimeout(function(){ 
-                    $('#thp-edit-btn').trigger('click');
+                    // $('#thp-edit-btn').trigger('click');
+                    $('#thp-form-create input,textarea').removeAttr('readonly');
+                    $('#thp-form-create select').removeAttr('disabled');
+                    $('#thp-edit-btn').prop('hidden', 'hidden');
+                    $('#thp-btn-production-code').removeAttr('disabled');
+                    $('.thp-create-btn').text('Update');
+                    $('.thp-create-btn').css({'display': 'block'});
                 }, 1000);
             });
             $('.thp-act-log').on('click', function () {
@@ -363,6 +369,23 @@ $(document).ready(function(){
                         $('#thp-ct').val(data.ct_sph);
                         $('#poduction-code-modal').modal('hide');
                     });
+                    $.ajax({
+                        url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
+                        type: "POST",
+                        data: {
+                            "post_production_code" : $('#thp-production-code').val()
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function (response) {
+                            if (response.status == true) {
+                                response = response.data;
+                                $('#thp-actual-1').val(response[0]['shift_1']);
+                                $('#thp-actual-2').val(response[1]['shift_2']);
+                            }
+                        }
+                    });
                 });
             }
         });
@@ -446,6 +469,14 @@ $(document).ready(function(){
             })
         });
     }
+    $(document).on('submit', '#thp-form-print', function () {
+        var dari = $('#thp_print_dari').val();
+        var sampai = $('#thp_print_sampai').val();
+        var process = $('#thp_print_process').val();
+        var encrypt = btoa(`${$('#thp_print_dari').val()}&${$('#thp_print_sampai').val()}&${$('#thp_print_process').val()}`);
+        var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
+        window.open(url, '_blank');
+    });
 });
 </script>
 @endsection
@@ -460,5 +491,14 @@ $(document).ready(function(){
         format: 'yyyy-mm-dd',
         autoclose: true
     });
+    @if(\Session::has('msg'))
+    setTimeout(function () {
+        Swal.fire({
+            title: 'Warning!',
+            text: '{{\Session::get('msg')}}',
+            icon: 'warning'
+        })
+    }, 1000);
+    @endif
 </script>
 @endpush

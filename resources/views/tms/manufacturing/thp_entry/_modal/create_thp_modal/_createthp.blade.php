@@ -20,7 +20,7 @@
                                         <div class="col-10">
                                             <div class="">
                                                 <div class="input-group">
-                                                    <input type="text" name="thp-production-code" id="thp-production-code" class="form-control" autocomplete="off" placeholder="Search" required>
+                                                    <input type="text" name="thp-production-code" id="thp-production-code" class="form-control" autocomplete="off" placeholder="Search" required onkeydown="return false">
                                                     <span class="input-group-btn">
                                                         <button type="button" id="thp-btn-production-code" class="btn btn-info" data-toggle="modal" data-target="#productionModal"><i class="fa fa-search"></i></button>
                                                     </span>
@@ -36,7 +36,7 @@
                                         </div>
                                         <div class="col-10">
                                             <div class="">
-                                                <input type="text" name="thp-part-number" id="thp-part-number" class="form-control" autocomplete="off" placeholder="" required>
+                                                <input type="text" name="thp-part-number" id="thp-part-number" class="form-control" autocomplete="off" placeholder="" required onkeydown="return false">
                                             </div>
                                         </div> 
                                     </div>
@@ -48,7 +48,7 @@
                                         </div>
                                         <div class="col-10">
                                             <div class="">
-                                                <input type="text" name="thp-part-name" id="thp-part-name" class="form-control" autocomplete="off" placeholder="" required>
+                                                <input type="text" name="thp-part-name" id="thp-part-name" class="form-control" autocomplete="off" placeholder="" required onkeydown="return false">
                                             </div>
                                         </div> 
                                     </div>
@@ -60,7 +60,7 @@
                                         </div>
                                         <div class="col-10">
                                             <div class="">
-                                                <input type="text" name="thp-part-type" id="thp-part-type" class="form-control" autocomplete="off" placeholder="" required>
+                                                <input type="text" name="thp-part-type" id="thp-part-type" class="form-control" autocomplete="off" placeholder="" required onkeydown="return false">
                                             </div>
                                         </div> 
                                     </div>
@@ -72,7 +72,7 @@
                                         </div>
                                         <div class="col-10">
                                             <div class="">
-                                                <input type="text" name="thp-customer-code" id="thp-customer-code" class="form-control" autocomplete="off" placeholder="" required>
+                                                <input type="text" name="thp-customer-code" id="thp-customer-code" class="form-control" autocomplete="off" placeholder="" required onkeydown="return false">
                                             </div>
                                         </div> 
                                     </div>
@@ -173,7 +173,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary thp-cancel-create" data-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary thp-create-btn">Simpan</button>
-                    <button type="button" id="thp-edit-btn" class="btn btn-primary thp-edit-btn" hidden><span>Edit</span></button>
+                    {{-- <button type="button" id="thp-edit-btn" class="btn btn-primary thp-edit-btn" hidden><span>Edit</span></button> --}}
                 </div>
             </div>
         </form>

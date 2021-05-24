@@ -7,9 +7,11 @@ use App\Models\Oee\Customer;
 use App\Models\Oee\ThpEntry;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use Yajra\DataTables\Facades\DataTables;
 
 class ThpEntryController extends Controller
@@ -54,11 +56,6 @@ class ThpEntryController extends Controller
                 )
                 ->get();
         return DataTables::of($query)
-            // ->filter(function ($query) {
-            //     if (request()->has('part_name')) {
-            //         $query->where('part_name', 'like', "%{request('part_name')}%");
-            //     }
-            // })
             ->editColumn('closed', function($query){
                 if ($query->closed != NULL) {
                     return date('d/m/Y', strtotime($query->closed));
@@ -80,28 +77,15 @@ class ThpEntryController extends Controller
     public function getProductionTable(Request $request)
     {
         if($request->ajax()){
-            $where = $this->_whereProductionTable($request);
-            $query = DB::connection('oee')
-                ->table('db_productioncode_tbl')
-                ->select(
-                    'production_code', 
-                    'part_number', 
-                    'part_name', 
-                    'part_type', 
-                    'process_sequence_1', 
-                    'process_sequence_2', 
-                    'process_detailname', 
-                    'customer_id',
-                    'ct_sph'
-                )
-                ->where($where)
-                // ->limit(100)
-                ->get();
-            return DataTables::of($query)
-            ->editColumn('process', function($query){
-                return $query->process_sequence_1.'/'.$query->process_sequence_2;
-            })
-            ->make(true);
+            if (isset($request->post_production_code)) {
+                $data = $this->_getProductionTableById($request);
+                return response()->json([
+                    'status' => true,
+                    'data' => $data,
+                ], 200);
+            }else{
+                return $this->_getProductionTable($request);
+            }
         }
     }
 
@@ -210,12 +194,8 @@ class ThpEntryController extends Controller
 
     public function printThpentry(Request $request)
     {
-        // $skrg = Carbon::createFromFormat('Y-m-d', $request->thp_print_dari)->day;
-        // $smpi = Carbon::parse($request->thp_print_sampai)->format('Y-m-d');
-        // print_r($skrg);die;
-        // $where = [
-        //     'date' $request->thp_print_dari
-        // ];
+        $decode = base64_decode($request->print);
+        $arr_params = explode('&', $decode);
         $query = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->select(
@@ -245,9 +225,14 @@ class ThpEntryController extends Controller
                 'date',
                 DB::raw('round((actual_1 + actual_2)/plan, 2) as persentase'),
             )
-            ->where('date', '>=', $request->thp_print_dari)
-            ->where('date', '<=', $request->thp_print_sampai)
+            ->where('date', '>=', $arr_params[0])
+            ->where('date', '<=', $arr_params[1])
+            ->where('production_process', '=', $arr_params[2])
             ->get();
+        if (count($query) <= 0) {
+            $request->session()->flash('msg', 'Data tidak ditemukan!');
+            return Redirect::back();
+        }
         $sum = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->select(
@@ -259,12 +244,30 @@ class ThpEntryController extends Controller
                     SUM(actual_1) as total_actual_1, 
                     SUM(actual_2) as total_actual_2,
                     round((SUM(actual_1) + SUM(actual_2))/SUM(plan), 2) as total_persentase,
-                    SUM(act_hour) as total_act_hour
+                    round(SUM(act_hour), 2) as total_act_hour
                 '),
             )
-            ->where('date', '>=', $request->thp_print_dari)
-            ->where('date', '<=', $request->thp_print_sampai)
+            ->where('date', '>=', $arr_params[0])
+            ->where('date', '<=', $arr_params[1])
+            ->where('production_process', '=', $arr_params[2])
             ->get();
+        // $printed = ThpEntry::where('date', '>=', $request->thp_print_dari)->where('date', '<=', $request->thp_print_sampai)->update(['printed' => date('Y-m-d')]);
+        $printed = ThpEntry::where('date', '>=', $arr_params[0])
+            ->where('date', '<=', $arr_params[1])
+            ->where('production_process', '=', $arr_params[2])
+            ->update(['printed' => date('Y-m-d')]);
+        foreach ($query as $v) {
+            $log_print = DB::connection('oee')
+                ->table('entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $v->id_thp,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'PRINT',
+                    'user' => Auth::user()->FullName,
+                    'note' => date('YmdHis').'-TRIAL'
+                ]);
+        }
         $waktu_tersedia = 480+420;
         $eff = 85/100;
         $max_loading1 = ($waktu_tersedia*$eff)/60;
@@ -323,7 +326,7 @@ class ThpEntryController extends Controller
                 'plan_2' => $request->plan_2,
                 'actual_1' => $request->actual_1,
                 'actual_2' => $request->actual_2,
-                'act_hour' => $act_hour,
+                'act_hour' => round($act_hour, 2),
                 'note' => $request->note,
                 'apnormality' => $request->apnormal,
                 'action_plan' => $request->action_plan,
@@ -380,7 +383,7 @@ class ThpEntryController extends Controller
                 'plan_2' => $request->plan_2,
                 'actual_1' => $request->actual_1,
                 'actual_2' => $request->actual_2,
-                'act_hour' => $act_hour,
+                'act_hour' => round($act_hour, 2),
                 'note' => $request->note,
                 'apnormality' => $request->apnormal,
                 'action_plan' => $request->action_plan,
@@ -400,6 +403,51 @@ class ThpEntryController extends Controller
                 'note' => date('YmdHis').'-TRIAL'
             ]);
         return $query;
+    }
+
+    private function _getProductionTable(Request $request)
+    {
+        $where = $this->_whereProductionTable($request);
+        $query = DB::connection('oee')
+            ->table('db_productioncode_tbl')
+            ->select(
+                'production_code', 
+                'part_number', 
+                'part_name', 
+                'part_type', 
+                'process_sequence_1', 
+                'process_sequence_2', 
+                'process_detailname', 
+                'customer_id',
+                'ct_sph'
+            )
+            ->where($where)
+            ->get();
+        return DataTables::of($query)
+        ->editColumn('process', function($query){
+            return $query->process_sequence_1.'/'.$query->process_sequence_2;
+        })
+        ->make(true);
+    }
+
+    private function _getProductionTableById(Request $request)
+    {
+        $shift_1 = DB::connection('oee')
+            ->table('entry_lhp_tbl')
+            ->select(DB::raw('SUM(lhp_qty) as shift_1'))
+            ->where('production_code', $request->post_production_code)
+            ->whereRaw('LEFT(remark, 1) = 1')
+            ->first();
+        $shift_2 = DB::connection('oee')
+            ->table('entry_lhp_tbl')
+            ->select(DB::raw('SUM(lhp_qty) as shift_2'))
+            ->where('production_code', $request->post_production_code)
+            ->whereRaw('LEFT(remark, 1) = 2')
+            ->first();
+        return [
+            $shift_1,
+            $shift_2
+        ];
     }
 
     private function _whereProductionTable(Request $request)
