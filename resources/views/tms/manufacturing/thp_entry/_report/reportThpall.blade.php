@@ -109,24 +109,24 @@
 						<td>{{$v->status}}</td>
 					</tr>
 					@endforeach
-					@foreach ($sum as $v)
+					{{-- @foreach ($sum as $v) --}}
 					<tr>
 						<th colspan="3">TOTAL</th>
-						<td>{{$v->total_plan}}</td>
+						<td>{{$sum->total_plan}}</td>
 						<td colspan="5"></td>
-						<td>{{$v->total_plan_hour}}</td>
-						<td>{{$v->total_plan_1}}</td>
-						<td>{{$v->total_plan_2}}</td>
-						<td>{{$v->total_actual_1}}</td>
-						<td>{{$v->total_actual_2}}</td>
-						<td>{{$v->total_persentase}}</td>
-						<td>{{$v->total_act_hour}}</td>
+						<td>{{$sum->total_plan_hour}}</td>
+						<td>{{$sum->total_plan_1}}</td>
+						<td>{{$sum->total_plan_2}}</td>
+						<td>{{$sum->total_actual_1}}</td>
+						<td>{{$sum->total_actual_2}}</td>
+						<td>{{$sum->total_persentase}}</td>
+						<td>{{$sum->total_act_hour}}</td>
 						<td></td>
 						<td></td>
 						<td></td>
 						<td></td>
 					</tr>
-					@endforeach
+					{{-- @endforeach --}}
 				</table>
 			</td>
 		</tr>

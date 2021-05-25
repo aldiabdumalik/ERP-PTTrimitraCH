@@ -98,7 +98,7 @@
                                         </div>
                                         <div class="col-11">
                                             <div class="">
-                                                <input type="number" name="thp-ct" id="thp-ct" class="form-control" min="0" step="0.01" value="0.00" autocomplete="off" placeholder="" required>
+                                                <input type="text" name="thp-ct" id="thp-ct" class="form-control" min="0" step="0.01" value="0.00" autocomplete="off" placeholder="" required onkeydown="return false">
                                             </div>
                                         </div> 
                                     </div>

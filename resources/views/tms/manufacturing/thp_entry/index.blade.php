@@ -18,7 +18,7 @@
                     <i class="ti-plus"></i>  Add New Data
                 </button>
                 <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="printModal">
-                    <i class="fa fa-print"></i>  Print
+                    <i class="fa fa-print"></i>  Report
                 </button>
             </div>
         </div>
@@ -39,7 +39,8 @@
                                     <table id="thp-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr>
-                                                <th rowspan="2" class="align-middle">id</th>
+                                                <th rowspan="2" class="align-middle">Date</th>
+                                                <th rowspan="2" class="align-middle">THP Number</th>
                                                 <th rowspan="2" class="align-middle">Written</th>
                                                 <th rowspan="2" class="align-middle">Closed</th>
                                                 <th rowspan="2" class="align-middle">Customer</th>
@@ -49,15 +50,15 @@
                                                 <th rowspan="2" class="align-middle">Route</th>
                                                 <th rowspan="2" class="align-middle">Process</th>
                                                 <th colspan="2">Plan THP</th>
-                                                <th colspan="3">Actual</th>
+                                                {{-- <th colspan="3">Actual</th> --}}
                                                 <th rowspan="2" class="align-middle">Action</th>
                                             </tr>
                                             <tr>
                                                 <th>Shift 1</th>
                                                 <th>Shift 2</th>
-                                                <th>Shift 1</th>
+                                                {{-- <th>Shift 1</th>
                                                 <th>Shift 2</th>
-                                                <th>%</th>
+                                                <th>%</th> --}}
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -74,6 +75,7 @@
 </div>
 @include('tms.manufacturing.thp_entry._modal.create_thp_modal._createthp')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._productioncode')
+@include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewthp')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
@@ -96,6 +98,7 @@ $(document).ready(function(){
             },
         },
         columns: [
+            {data: 'date_ori', name: 'date_ori', searchable: false, visible: false},
             {data: 'id_thp', name: 'id_thp', searchable: false},
             {data: 'date', name: 'date', className: "text-center"},
             {data: 'closed', name: 'closed', className: "text-center"},
@@ -107,12 +110,12 @@ $(document).ready(function(){
             {data: 'process', name: 'process', orderable: false, searchable: false},
             {data: 'plan_1', name: 'plan_1', orderable: false, searchable: false},
             {data: 'plan_2', name: 'plan_2', orderable: false, searchable: false},
-            {data: 'actual_1', name: 'actual_1', orderable: false, searchable: false},
-            {data: 'actual_2', name: 'actual_2', orderable: false, searchable: false},
-            {data: 'persentase', name: 'persentase', orderable: false, searchable: false},
+            // {data: 'actual_1', name: 'actual_1', orderable: false, searchable: false},
+            // {data: 'actual_2', name: 'actual_2', orderable: false, searchable: false},
+            // {data: 'persentase', name: 'persentase', orderable: false, searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
-        "order": [[ 1, "desc" ]],
+        "order": [[ 2, "desc" ]],
         initComplete: function(settings, json) {
             // $('#thp-datatables tbody').on('click', 'tr', function () {
             //     var dataArr = [];
@@ -123,7 +126,9 @@ $(document).ready(function(){
             //     });
             // });
             $('.thp-act-view').on('click', function () {
-                getThp($(this).data('thp'));
+                $('#viewThpid').modal('show');
+                viewThp($(this).data('thp'));
+                // getThp($(this).data('thp'));
             });
             $('.thp-act-edit').on('click', function () {
                 getThp($(this).data('thp'));
@@ -148,8 +153,14 @@ $(document).ready(function(){
             });
         }
     });
-    tbl_index.column( 0 ).visible( false );
+    // tbl_index.column( 0 ).visible( false );
     var tbl_create = $('#thp-create-datatables').DataTable({
+        "lengthChange": false,
+        "searching": false,
+        "paging": false,
+        "ordering": false,
+    });
+    var tbl_view = $('#thp-view-datatables').DataTable({
         "lengthChange": false,
         "searching": false,
         "paging": false,
@@ -282,7 +293,8 @@ $(document).ready(function(){
             success: function (response) {
                 if (response.status == true) {
                     var data = response.data;
-                    // console.log(data.id_thp);
+                    var lhp = response.lhp;
+                    var action_plan, apnormality, note;
                     $('#thp-id').attr('data-id', data.id_thp);
                     $('#thp-production-code').val(data.production_code);
                     $('#thp-part-number').val(data.part_number);
@@ -300,8 +312,16 @@ $(document).ready(function(){
                     $('#thp-process-2').val(processs[1]);
                     $('#thp-plan-1').val(data.plan_1);
                     $('#thp-plan-2').val(data.plan_2);
-                    $('#thp-actual-1').val(data.actual_1);
-                    $('#thp-actual-2').val(data.actual_2);
+
+                    var shift_1 = lhp[0]['shift_1'] != null ? lhp[0]['shift_1'] : 0;
+                    var shift_2 = lhp[1]['shift_2'] != null ? lhp[1]['shift_2'] : 0;
+                    var persentase = (parseInt(shift_1)+parseInt(shift_2))/parseInt(data.plan);
+                    var act_hour = (parseInt(shift_1)+parseInt(shift_2))*parseInt(data.ct)/3600;
+                    $('#thp-actual-1').val(shift_1);
+                    $('#thp-actual-2').val(shift_2);
+
+                    // $('#thp-actual-1').val(data.actual_1);
+                    // $('#thp-actual-2').val(data.actual_2);
                     $('#thp-note').val(data.note);
                     $('#thp-apnormal').val(data.apnormality);
                     $('#thp-action-plan').val(data.action_plan);
@@ -312,6 +332,79 @@ $(document).ready(function(){
                     $('#thp-form-create button[type=submit]').hide();
                     $('#thp-btn-production-code').prop('disabled', 'true');
                     $('#thp-edit-btn').removeAttr('hidden');
+                }
+            },
+            error: function(response, status, x){
+                Swal.fire({
+                    title: 'Error!',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                })
+            }
+        });
+    }
+
+    function viewThp(id="") {
+        var route  = "{{ route('tms.manufacturing.thp_entry.dataTable_edit', ':id') }}";
+            route  = route.replace(':id', id);
+        $.ajax({
+            url: route,
+            type: "GET",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (response) {
+                if (response.status == true) {
+                    var data = response.data;
+                    var lhp = response.lhp;
+                    // $('#thp-id').attr('data-id', data.id_thp);
+                    $('#thp-view-production-code').val(data.production_code);
+                    $('#thp-view-part-number').val(data.part_number);
+                    $('#thp-view-part-name').val(data.part_name);
+                    $('#thp-view-part-type').val(data.part_type);
+                    $('#thp-view-customer-code').val(data.id_cust);
+                    $('#thp-view-plan').val(data.plan);
+                    $('#thp-view-ct').val(data.ct);
+                    $('#thp-view-ton').val(data.ton);
+                    $('#thp-view-time').val(data.time);
+                    $('#thp-view-plan-hour').val(data.plan_hour);
+
+                    var processs = data.process.split('/');
+                    var action_plan, apnormality, note;
+                    $('#thp-view-route').html(data.route);
+                    $('#thp-view-process-squance').html(data.process);
+                    $('#thp-view-plan-1').html(data.plan_1);
+                    $('#thp-view-plan-2').html(data.plan_2);
+
+                    var shift_1 = lhp[0]['shift_1'] != null ? lhp[0]['shift_1'] : 0;
+                    var shift_2 = lhp[1]['shift_2'] != null ? lhp[1]['shift_2'] : 0;
+                    var persentase = (parseInt(shift_1)+parseInt(shift_2))/parseInt(data.plan);
+                    var act_hour = (parseInt(shift_1)+parseInt(shift_2))*parseInt(data.ct)/3600;
+                    $('#thp-view-actual-1').html(shift_1);
+                    $('#thp-view-actual-2').html(shift_2);
+                    $('#thp-view-persentase').html(persentase.toFixed(2));
+                    $('#thp-view-act-hour').html(act_hour.toFixed(2));
+
+                    if (data.note != null) {
+                        note = data.note;
+                    }else{
+                        note = '//'
+                    }
+                    $('#thp-view-note').html(data.note);
+                    if (data.apnormality != null) {
+                        apnormality = data.apnormality;
+                    }else{
+                        apnormality = '//'
+                    }
+                    $('#thp-view-apnormal').html(apnormality);
+                    if (data.action_plan != null) {
+                        action_plan = data.action_plan;
+                    }else{
+                        action_plan = '//'
+                    }
+                    $('#thp-view-action-plan').html(action_plan);
+
+                    $('#thp-view-form-create input').prop('readonly', 'true');
                 }
             },
             error: function(response, status, x){
@@ -341,13 +434,14 @@ $(document).ready(function(){
                 }
             },
             columns: [
+                {data: 'customer_id', name: 'customer_id'},
+                {data: 'production_process', name: 'production_process'},
                 {data: 'production_code', name: 'production_code'},
                 {data: 'part_number', name: 'part_number'},
                 {data: 'part_name', name: 'part_name'},
                 {data: 'part_type', name: 'part_type'},
                 {data: 'process', name: 'process'},
                 {data: 'process_detailname', name: 'process_detailname'},
-                {data: 'customer_id', name: 'customer_id'},
                 {data: 'ct_sph', name: 'ct_sph'}
             ],
             // initComplete: function(settings, json) {
@@ -412,10 +506,10 @@ $(document).ready(function(){
                 success: function (response) {
                     if (response.status == true) {
                         response = response.data;
-                        var shift_1 = response[0]['shift_1'] != null ? response[0]['shift_1'] : 0;
-                        var shift_2 = response[1]['shift_2'] != null ? response[0]['shift_2'] : 0;
-                        $('#thp-actual-1').val(shift_1);
-                        $('#thp-actual-2').val(shift_2);
+                        // var shift_1 = response[0]['shift_1'] != null ? response[0]['shift_1'] : 0;
+                        // var shift_2 = response[1]['shift_2'] != null ? response[1]['shift_2'] : 0;
+                        // $('#thp-actual-1').val(shift_1);
+                        // $('#thp-actual-2').val(shift_2);
                         var process;
                         $('#thp-part-number').val(data.part_number);
                         $('#thp-part-name').val(data.part_name);
@@ -551,7 +645,9 @@ $(document).ready(function(){
             title: 'Warning!',
             text: "{{\Session::get('msg')}}",
             icon: 'warning'
-        })
+        }).then(function () {
+            window.close();
+        });
     }, 1000);
     @endif
 </script>

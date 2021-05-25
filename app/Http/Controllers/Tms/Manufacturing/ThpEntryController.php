@@ -66,6 +66,9 @@ class ThpEntryController extends Controller
             ->editColumn('date', function($query){
                 return date('d/m/Y', strtotime($query->date));
             })
+            ->addColumn('date_ori', function($query){
+                return $query->date;
+            })->rawColumns(['date_ori'])
             ->addColumn('action', function($query){
                 return view('tms.manufacturing.thp_entry.action._actionTableIndex', [
                     'data' => $query,
@@ -79,12 +82,6 @@ class ThpEntryController extends Controller
         if($request->ajax()){
             if (isset($request->post_production_code)) {
                 $data = $this->_getProductionTableById($request);
-                if ($data[0]->shift_1 == null && $data[1]->shift_2 == null) {
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Data LHP tidak ditemukan',
-                    ], 404);
-                }
                 return response()->json([
                     'status' => true,
                     'data' => $data,
@@ -144,15 +141,46 @@ class ThpEntryController extends Controller
 
     public function editThpTable(Request $request, $id)
     {
+        // $skrg = date('Y-m-d', strtotime('-2 days', strtotime( date('Y-m-d') )));
         $query = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->where(['id_thp' => $id])
-            ->get();
+            ->first();
+        $production = DB::connection('oee')
+            ->table('db_productioncode_tbl')
+            ->select(
+                'production_code',
+                'item_code'
+            )
+            ->where('production_code', $query->production_code)
+            ->where('code_status', 1)
+            ->first();
+        $lhp_where = [
+            'production_code' => $production->production_code,
+            'item_code' => $production->item_code,
+            'date2' => $query->date
+        ];
+        $shift_1 = DB::connection('oee')
+            ->table('entry_lhp_tbl')
+            ->select(DB::raw('SUM(lhp_qty) as shift_1'))
+            ->where($lhp_where)
+            ->whereRaw('LEFT(remark, 1) = 1')
+            ->first();
+        $shift_2 = DB::connection('oee')
+            ->table('entry_lhp_tbl')
+            ->select(DB::raw('SUM(lhp_qty) as shift_2'))
+            ->where($lhp_where)
+            ->whereRaw('LEFT(remark, 1) = 2')
+            ->first();
         if (!empty($query)) {
             return response()->json([
                 'status' => true,
                 'message' => 'Data berhasil ditemukan!',
-                'data' => $query[0]
+                'data' => $query,
+                'lhp' => [
+                    $shift_1,
+                    $shift_2
+                ]
             ], 200);
         }else{
             return response()->json([
@@ -165,9 +193,39 @@ class ThpEntryController extends Controller
     public function closeThpEntry(Request $request)
     {
         $data = ThpEntry::where('id_thp', $request->id)->first();
+        $production = DB::connection('oee')
+            ->table('db_productioncode_tbl')
+            ->select(
+                'production_code',
+                'item_code'
+            )
+            ->where('production_code', $data->production_code)
+            ->where('code_status', 1)
+            ->first();
+        $lhp_where = [
+            'production_code' => $production->production_code,
+            'item_code' => $production->item_code,
+            'date2' => $data->date
+        ];
+
+        $shift_1 = DB::connection('oee')
+            ->table('entry_lhp_tbl')
+            ->select(DB::raw('SUM(lhp_qty) as shift_1'))
+            ->where($lhp_where)
+            ->whereRaw('LEFT(remark, 1) = 1')
+            ->first();
+        $shift_2 = DB::connection('oee')
+            ->table('entry_lhp_tbl')
+            ->select(DB::raw('SUM(lhp_qty) as shift_2'))
+            ->where($lhp_where)
+            ->whereRaw('LEFT(remark, 1) = 2')
+            ->first();
+
         $plan_thp = (int)$data->plan_1 + (int)$data->plan_2;
         $actual_thp = (int)$data->actual_1 + (int)$data->actual_2;
-        if ($plan_thp == $actual_thp || $plan_thp >= $actual_thp) {
+        $actual_lhp = (int)$shift_1->shift_1 + (int)$shift_2->shift_2;
+
+        if ($plan_thp >= $actual_lhp && $actual_lhp != 0) {
             
             ThpEntry::where('id_thp', $data->id_thp)
                 ->update([
@@ -239,6 +297,83 @@ class ThpEntryController extends Controller
             $request->session()->flash('msg', 'Data tidak ditemukan!');
             return Redirect::back();
         }
+        else{
+            foreach ($query as $v) {
+                $production = DB::connection('oee')
+                    ->table('db_productioncode_tbl')
+                    ->select(
+                        'production_code',
+                        'item_code'
+                    )
+                    ->where('production_code', $v->production_code)
+                    ->where('code_status', 1)
+                    ->first();
+                $shift_1 = DB::connection('oee')
+                    ->table('entry_lhp_tbl')
+                    ->select(DB::raw('SUM(lhp_qty) as shift_1'))
+                    ->where([
+                        'production_code' => $production->production_code,
+                        'item_code' => $production->item_code,
+                        'date2' => $v->date
+                    ])
+                    ->whereRaw('LEFT(remark, 1) = 1')
+                    ->first();
+                $shift_2 = DB::connection('oee')
+                    ->table('entry_lhp_tbl')
+                    ->select(DB::raw('SUM(lhp_qty) as shift_2'))
+                    ->where([
+                        'production_code' => $production->production_code,
+                        'item_code' => $production->item_code,
+                        'date2' => $v->date
+                    ])
+                    ->whereRaw('LEFT(remark, 1) = 2')
+                    ->first();
+                $act_1 = ($shift_1->shift_1 != null) ? $shift_1->shift_1 : 0;
+                $act_2 = ($shift_2->shift_2 != null) ? $shift_2->shift_2 : 0;
+                $act_hour_fix = ($act_1 + $act_2)*$v->ct/3600;
+                $update = DB::connection('oee')
+                    ->table('entry_thp_tbl')
+                    ->where('id_thp', $v->id_thp)
+                    ->update([
+                        'actual_1' => $act_1,
+                        'actual_2' => $act_2,
+                        'act_hour' => $act_hour_fix
+                    ]);
+            }
+            $query = DB::connection('oee')
+                ->table('entry_thp_tbl')
+                ->select(
+                    'id_thp', 
+                    'production_code', 
+                    'id_cust',
+                    'part_name',
+                    'part_type',
+                    'plan',
+                    'ct',
+                    'route',
+                    'ton',
+                    'process',
+                    'time',
+                    'plan_hour',
+                    'plan_1',
+                    'plan_2',
+                    'actual_1',
+                    'actual_2',
+                    'act_hour',
+                    'note',
+                    'apnormality',
+                    'action_plan',
+                    'status',
+                    'closed',
+                    'printed',
+                    'date',
+                    DB::raw('round((actual_1 + actual_2)/plan, 2) as persentase'),
+                )
+                ->where('date', '>=', $arr_params[0])
+                ->where('date', '<=', $arr_params[1])
+                ->where('production_process', '=', $arr_params[2])
+                ->get();
+        }
         $sum = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->select(
@@ -256,8 +391,7 @@ class ThpEntryController extends Controller
             ->where('date', '>=', $arr_params[0])
             ->where('date', '<=', $arr_params[1])
             ->where('production_process', '=', $arr_params[2])
-            ->get();
-        // $printed = ThpEntry::where('date', '>=', $request->thp_print_dari)->where('date', '<=', $request->thp_print_sampai)->update(['printed' => date('Y-m-d')]);
+            ->first();
         $printed = ThpEntry::where('date', '>=', $arr_params[0])
             ->where('date', '<=', $arr_params[1])
             ->where('production_process', '=', $arr_params[2])
@@ -271,7 +405,7 @@ class ThpEntryController extends Controller
                     'time_written' => date('H:i:s'),
                     'status_change' => 'PRINT',
                     'user' => Auth::user()->FullName,
-                    'note' => date('YmdHis').'-TRIAL'
+                    'note' => date('YmdHis').'-DEVELOPMENT'
                 ]);
         }
         $waktu_tersedia = 480+420;
@@ -279,7 +413,7 @@ class ThpEntryController extends Controller
         $max_loading1 = ($waktu_tersedia*$eff)/60;
         $max_loading2 = $max_loading1*41;
         $man_power = 41*2;
-        $loading_time = $sum[0]->total_plan_hour;
+        $loading_time = $sum->total_plan_hour;
         $total_mp = round(($loading_time/$max_loading1)*2);
 
         $params = [
@@ -301,7 +435,7 @@ class ThpEntryController extends Controller
 
     private function _createTHP(Request $request)
     {
-        $act_hour = ((int)$request->actual_1 + (int)$request->actual_1)*(int)$request->ct/3600;
+        $act_hour = ((int)$request->actual_1 + (int)$request->actual_2)*(int)$request->ct/3600;
         $plan_thp = (int)$request->plan_1 + (int)$request->plan_2;
         $actual_thp = (int)$request->actual_1 + (int)$request->actual_2;
         if ($plan_thp == $actual_thp) {
@@ -425,7 +559,8 @@ class ThpEntryController extends Controller
                 'process_sequence_2', 
                 'process_detailname', 
                 'customer_id',
-                'ct_sph'
+                'ct_sph',
+                'production_process'
             )
             ->where($where)
             ->get();
@@ -447,22 +582,17 @@ class ThpEntryController extends Controller
             ->where('production_code', $request->post_production_code)
             ->where('code_status', 1)
             ->first();
-
-        $kemarin = date('Y-m-d', strtotime('-1 days', strtotime( date('Y-m-d') )));
+        $where = $this->_whereProductionTableById($request, $query);
         $shift_1 = DB::connection('oee')
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as shift_1'))
-            ->where('production_code', $request->post_production_code)
-            // ->where('item_code', $query->item_code)
-            ->where('date2', $kemarin)
+            ->where($where[0])
             ->whereRaw('LEFT(remark, 1) = 1')
             ->first();
         $shift_2 = DB::connection('oee')
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as shift_2'))
-            ->where('production_code', $request->post_production_code)
-            // ->where('item_code', $query->item_code)
-            ->where('date2', $kemarin)
+            ->where($where[1])
             ->whereRaw('LEFT(remark, 1) = 2')
             ->first();
         return [
@@ -497,6 +627,37 @@ class ThpEntryController extends Controller
             ];
         }
         return $where;
+    }
+
+    private function _whereProductionTableById(Request $request, $res)
+    {
+        $kemarin = date('Y-m-d', strtotime('-2 days', strtotime( date('Y-m-d') )));
+        $kemarin2 = date('Y-m-d', strtotime('-3 days', strtotime( date('Y-m-d') )));
+        if ($res->item_code != null) {
+            $where_1 = [
+                'production_code' => $request->post_production_code,
+                'item_code' => $res->item_code,
+                'date2' => $kemarin
+            ];
+            $where_2 = [
+                'production_code' => $request->post_production_code,
+                'item_code' => $res->item_code,
+                'date2' => $kemarin2
+            ];
+        }else{
+            $where_1 = [
+                'production_code' => $request->post_production_code,
+                'date2' => $kemarin
+            ];
+            $where_2 = [
+                'production_code' => $request->post_production_code,
+                'date2' => $kemarin2
+            ];
+        }
+        return [
+            $where_1,
+            $where_2
+        ];
     }
 
 }
