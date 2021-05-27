@@ -17,16 +17,6 @@
                             </select>
                         </div>
                     </div>
-                    {{-- <div class="col-3">
-                        <div class="form-group">
-                            <select name="pc-search-customer" id="pc-search-customer" class="form-control">
-                                <option value="">Pilih berdasarkan customer</option>
-                                @foreach ($customer as $cust)
-                                <option value="{{$cust->customer_id}}">{{$cust->customer_id}} - {{$cust->customer_name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div> --}}
                 </div>
                 <div class="datatable datatable-primary">
                     <div class="table-responsive">
@@ -39,6 +29,7 @@
                                     <th>part_number</th>
                                     <th>part_name</th>
                                     <th>part_type</th>
+                                    <th>item_code</th>
                                     <th>process</th>
                                     <th>process detail</th>
                                     <th>C/T</th>

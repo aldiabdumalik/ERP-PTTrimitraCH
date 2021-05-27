@@ -31,30 +31,28 @@ class ThpEntryController extends Controller
 
     public function getThpTable(Request $request)
     {
-        $query = DB::connection('oee')
-                ->table('entry_thp_tbl')
-                ->select(
-                    'id_thp', 
-                    'production_code', 
-                    'id_cust', 
-                    'part_name', 
-                    'part_type', 
-                    'plan', 
-                    'route', 
-                    'process', 
-                    'actual_1', 
-                    'actual_2', 
-                    'plan_1', 
-                    'plan_2', 
-                    'status',
-                    'closed',
-                    'printed',
-                    'date',
-                    DB::raw('(plan_1 + plan_2) as total_plan'),
-                    DB::raw('(actual_1 + actual_2) as total_actual'),
-                    DB::raw('round((actual_1 + actual_2)/plan, 2) as persentase'),
-                )
-                ->get();
+        // $query =  DB::connection('oee')
+        //     ->table('entry_thp_tbl AS t1')
+        //     ->selectRaw('
+        //         t1.*,
+        //         (
+        //             SELECT SUM(t2.thp_qty) FROM entry_thp_tbl t2
+        //             WHERE LEFT(t2.thp_remark, 1) = 1 
+        //             AND t1.production_code = t2.production_code
+        //             AND t1.thp_date = t2.thp_date
+        //         ) AS SHIFT_1,
+        //         (
+        //             SELECT SUM(t2.thp_qty) FROM entry_thp_tbl t2 
+        //             WHERE LEFT(t2.thp_remark, 1) = 2 
+        //             AND t1.production_code = t2.production_code
+        //             AND t1.thp_date = t2.thp_date
+        //         ) AS SHIFT_2
+        //     ')
+        //     ->groupByRaw('production_code, item_code, thp_date')
+        //     ->get();
+        $query =  DB::connection('oee')
+            ->table('entry_thp_tbl AS t1')
+            ->get();
         return DataTables::of($query)
             ->editColumn('closed', function($query){
                 if ($query->closed != NULL) {
@@ -63,12 +61,18 @@ class ThpEntryController extends Controller
                     return '//';
                 }
             })
-            ->editColumn('date', function($query){
-                return date('d/m/Y', strtotime($query->date));
+            ->editColumn('thp_date', function($query){
+                return date('d/m/Y', strtotime($query->thp_date));
             })
-            ->addColumn('date_ori', function($query){
-                return $query->date;
-            })->rawColumns(['date_ori'])
+            ->editColumn('process', function($query){
+                return $query->process_sequence_1.'/'.$query->process_sequence_2;
+            })
+            ->editColumn('shift', function($query){
+                return substr($query->thp_remark, 0, 1);
+            })
+            ->editColumn('group', function($query){
+                return substr($query->thp_remark, 1, 1);
+            })
             ->addColumn('action', function($query){
                 return view('tms.manufacturing.thp_entry.action._actionTableIndex', [
                     'data' => $query,
@@ -265,7 +269,7 @@ class ThpEntryController extends Controller
             ->select(
                 'id_thp', 
                 'production_code', 
-                'id_cust',
+                'customer_code',
                 'part_name',
                 'part_type',
                 'plan',
@@ -345,7 +349,7 @@ class ThpEntryController extends Controller
                 ->select(
                     'id_thp', 
                     'production_code', 
-                    'id_cust',
+                    'customer_code',
                     'part_name',
                     'part_type',
                     'plan',
@@ -433,59 +437,85 @@ class ThpEntryController extends Controller
         return $pdf->stream();
     }
 
+    public function getShiftGroupMachine(Request $request)
+    {
+        $query = [];
+        if ($request->type == 'SHIFT') {
+            $query = DB::connection('oee')
+                ->table('oee_worktime_tbl')
+                ->groupBy('oee_workshift')
+                ->get();
+        }elseif($request->type == 'GRUP'){
+            $query = DB::connection('oee')
+                ->table('db_employee_group_tbl')
+                ->get();
+        }elseif($request->type == 'MACHINE'){
+            $query = DB::connection('oee')
+                ->table('db_machinenumber_tbl')
+                ->where([
+                    'production_process' => $request->process,
+                    'status' => 'ACTIVE'
+                ])
+                ->get();
+        }
+        if (count($query) <= 0) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Silahkan tambahkan parameter!',
+            ], 404);
+        }
+        return response()->json([
+            'status' => true,
+            'data' => $query
+        ], 200);
+    }
+
     private function _createTHP(Request $request)
     {
-        $act_hour = ((int)$request->actual_1 + (int)$request->actual_2)*(int)$request->ct/3600;
-        $plan_thp = (int)$request->plan_1 + (int)$request->plan_2;
-        $actual_thp = (int)$request->actual_1 + (int)$request->actual_2;
-        if ($plan_thp == $actual_thp) {
-            $status = 'CLOSE';
-            $closed = date('Y-m-d');
-        }else{
-            $status = NULL;
-            $closed = NULL;
-        }
+        $cd = explode('/', $request->thp_date);
+        $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
 
         $query = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->insertGetId([
+                'customer_code' => $request->customer_code,
                 'production_code' => $request->production_code,
-                'id_cust' => $request->customer_code,
+                'item_code' => $request->item_code,
                 'part_number' => $request->part_number,
                 'part_name' => $request->part_name,
                 'part_type' => $request->part_type,
-                'plan' => $request->plan,
-                'ct' => $request->ct,
+                'production_process' => $request->production_process,
                 'route' => $request->route,
+                'process_sequence_1' => $request->process_1,
+                'process_sequence_2' => $request->process_2,
+                'ct' => $request->ct,
+                'plan' => $request->plan,
                 'ton' => $request->ton,
-                'process' => $request->process_1.'/'.$request->process_2,
-                'production_process' => 'PRESSING',
                 'time' => $request->time,
                 'plan_hour' => $request->plan_hour,
-                'plan_1' => $request->plan_1,
-                'plan_2' => $request->plan_2,
-                'actual_1' => $request->actual_1,
-                'actual_2' => $request->actual_2,
-                'act_hour' => round($act_hour, 2),
+                'thp_qty' => $request->thp_qty,
+                'thp_remark' => $request->shift.$request->grup.'_'.$request->machine,
                 'note' => $request->note,
                 'apnormality' => $request->apnormal,
                 'action_plan' => $request->action_plan,
-                'status' => $status,
-                'closed' => $closed,
+                'thp_date' => $date,
                 'user' => Auth::user()->FullName,
-                'date' => date('Y-m-d')
+                'thp_written' => date('Y-m-d H:i:s')
             ]);
         $query2 = DB::connection('oee')
             ->table('entry_thp_tbl_log')
             ->insert([
                 'id_thp' => $query,
+                'production_code' => $request->production_code,
+                'item_code' => $request->item_code,
+                'remark' => $request->shift.$request->grup.'_'.$request->machine,
+                'thp_date' => $date,
                 'date_written' => date('Y-m-d'),
                 'time_written' => date('H:i:s'),
                 'status_change' => 'ADD',
                 'user' => Auth::user()->FullName,
-                'note' => date('YmdHis').'-TRIAL'
+                'note' => date('YmdHis').'-DEV'
             ]);
-        // $return = [$query, true];
         return $query2;
     }
 
@@ -507,7 +537,7 @@ class ThpEntryController extends Controller
             ->where('id_thp', $request->id_thp)
             ->update([
                 'production_code' => $request->production_code,
-                'id_cust' => $request->customer_code,
+                'customer_code' => $request->customer_code,
                 'part_number' => $request->part_number,
                 'part_name' => $request->part_name,
                 'part_type' => $request->part_type,
@@ -554,7 +584,8 @@ class ThpEntryController extends Controller
                 'production_code', 
                 'part_number', 
                 'part_name', 
-                'part_type', 
+                'part_type',
+                'item_code',
                 'process_sequence_1', 
                 'process_sequence_2', 
                 'process_detailname', 

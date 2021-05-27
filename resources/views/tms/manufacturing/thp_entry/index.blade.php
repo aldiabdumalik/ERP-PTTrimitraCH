@@ -39,26 +39,19 @@
                                     <table id="thp-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr>
-                                                <th rowspan="2" class="align-middle">Date</th>
-                                                <th rowspan="2" class="align-middle">THP Number</th>
-                                                <th rowspan="2" class="align-middle">Written</th>
-                                                <th rowspan="2" class="align-middle">Closed</th>
-                                                <th rowspan="2" class="align-middle">Customer</th>
-                                                <th rowspan="2" class="align-middle">Production Code</th>
-                                                <th rowspan="2" class="align-middle">Part Name</th>
-                                                <th rowspan="2" class="align-middle">Part Type</th>
-                                                <th rowspan="2" class="align-middle">Route</th>
-                                                <th rowspan="2" class="align-middle">Process</th>
-                                                <th colspan="2">Plan THP</th>
-                                                {{-- <th colspan="3">Actual</th> --}}
-                                                <th rowspan="2" class="align-middle">Action</th>
-                                            </tr>
-                                            <tr>
-                                                <th>Shift 1</th>
-                                                <th>Shift 2</th>
-                                                {{-- <th>Shift 1</th>
-                                                <th>Shift 2</th>
-                                                <th>%</th> --}}
+                                                <th class="align-middle">THP Number</th>
+                                                <th class="align-middle">Date</th>
+                                                {{-- <th class="align-middle">Closed</th> --}}
+                                                <th class="align-middle">Customer</th>
+                                                <th class="align-middle">Production Code</th>
+                                                <th class="align-middle">Part Name</th>
+                                                <th class="align-middle">Part Type</th>
+                                                <th class="align-middle">Route</th>
+                                                <th class="align-middle">Process</th>
+                                                <th class="align-middle">Shift</th>
+                                                <th class="align-middle">Group</th>
+                                                <th class="align-middle">THP Qty</th>
+                                                <th class="align-middle">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -73,7 +66,8 @@
 </div>
 </div>
 </div>
-@include('tms.manufacturing.thp_entry._modal.create_thp_modal._createthp')
+{{-- @include('tms.manufacturing.thp_entry._modal.create_thp_modal._createthp') --}}
+@include('tms.manufacturing.thp_entry._modal.create.createForm')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._productioncode')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewthp')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
@@ -98,43 +92,30 @@ $(document).ready(function(){
             },
         },
         columns: [
-            {data: 'date_ori', name: 'date_ori', searchable: false, visible: false},
             {data: 'id_thp', name: 'id_thp', searchable: false},
-            {data: 'date', name: 'date', className: "text-center"},
-            {data: 'closed', name: 'closed', className: "text-center"},
-            {data: 'id_cust', name: 'id_cust'},
+            {data: 'thp_date', name: 'thp_date', className: "text-center"},
+            // {data: 'closed', name: 'closed', className: "text-center"},
+            {data: 'customer_code', name: 'customer_code'},
             {data: 'production_code', name: 'production_code'},
             {data: 'part_name', name: 'part_name'},
             {data: 'part_type', name: 'part_type'},
             {data: 'route', name: 'route'},
             {data: 'process', name: 'process', orderable: false, searchable: false},
-            {data: 'plan_1', name: 'plan_1', orderable: false, searchable: false},
-            {data: 'plan_2', name: 'plan_2', orderable: false, searchable: false},
-            // {data: 'actual_1', name: 'actual_1', orderable: false, searchable: false},
-            // {data: 'actual_2', name: 'actual_2', orderable: false, searchable: false},
-            // {data: 'persentase', name: 'persentase', orderable: false, searchable: false},
+            {data: 'shift', name: 'shift', searchable: false},
+            {data: 'group', name: 'group', searchable: false},
+            {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
         "order": [[ 2, "desc" ]],
         initComplete: function(settings, json) {
-            // $('#thp-datatables tbody').on('click', 'tr', function () {
-            //     var dataArr = [];
-            //     var rows = $(this);
-            //     var rowData = tbl_index.rows(rows).data();
-            //     $.each($(rowData),function(key, data){
-            //         getThp(data.id_thp);
-            //     });
-            // });
             $('.thp-act-view').on('click', function () {
                 $('#viewThpid').modal('show');
                 viewThp($(this).data('thp'));
-                // getThp($(this).data('thp'));
             });
             $('.thp-act-edit').on('click', function () {
                 getThp($(this).data('thp'));
             }).on('mouseup',function(){
                 setTimeout(function(){ 
-                    // $('#thp-edit-btn').trigger('click');
                     $('#thp-form-create input,textarea').removeAttr('readonly');
                     $('#thp-form-create select').removeAttr('disabled');
                     $('#thp-edit-btn').prop('hidden', 'hidden');
@@ -153,7 +134,6 @@ $(document).ready(function(){
             });
         }
     });
-    // tbl_index.column( 0 ).visible( false );
     var tbl_create = $('#thp-create-datatables').DataTable({
         "lengthChange": false,
         "searching": false,
@@ -168,12 +148,10 @@ $(document).ready(function(){
     });
     $(document).on('click', '#addModal', function(e) {
         e.preventDefault();
-        // $('#createModal').after('#mtoModal');
         $('#createModal').modal('show');
     });
     $(document).on('click', '#printModal', function(e) {
         e.preventDefault();
-        // $('#createModal').after('#mtoModal');
         $('#thp-print-modal').modal('show');
     });
     $(document).on('click', '#thp-btn-production-code', function(e) {
@@ -196,31 +174,32 @@ $(document).ready(function(){
     });
     $(document).on('submit', '#thp-form-create', function () {
         var data = {
-            "id_thp": $('#thp-id').data('id'),
+            // "id_thp": $('#thp-id').data('id'),
+            "thp_date": $('#thp-date').val(),
+            "customer_code": $('#thp-customer-code').val(),
             "production_code": $('#thp-production-code').val(),
+            "item_code": $('#thp-itemcode').val(),
             "part_number": $('#thp-part-number').val(),
             "part_name": $('#thp-part-name').val(),
             "part_type": $('#thp-part-type').val(),
-            "customer_code": $('#thp-customer-code').val(),
+            "production_process": $('#thp-production-process').val(),
             "route": $('#thp-route').val(),
             "process_1": $('#thp-process-1').val(),
             "process_2": $('#thp-process-2').val(),
-            "plan": $('#thp-plan').val(),
             "ct": $('#thp-ct').val(),
+            "plan": $('#thp-plan').val(),
             "ton": $('#thp-ton').val(),
             "time": $('#thp-time').val(),
             "plan_hour": $('#thp-plan-hour').val(),
-            "plan_1": $('#thp-plan-1').val(),
-            "plan_2": $('#thp-plan-2').val(),
-            "actual_1": $('#thp-actual-1').val(),
-            "actual_2": $('#thp-actual-2').val(),
-            // "act_hour": $('#thp-act-hour').val(),
+            "thp_qty": $('#thp-qty').val(),
+            "shift": $('#thp-shift').val(),
+            "grup": $('#thp-grup').val(),
+            "machine": $('#thp-machine').val(),
             "note": $('#thp-note').val(),
             "apnormal": $('#thp-apnormal').val(),
             "action_plan": $('#thp-action-plan').val(),
             "_token": $('meta[name="csrf-token"]').attr('content')
         };
-        // console.log(data);
         $.ajax({
             url: "{{ route('tms.manufacturing.thp_entry.thpentry_create') }}",
             type: "POST",
@@ -231,7 +210,6 @@ $(document).ready(function(){
             },
             data: data,
             success: function (response) {
-                // console.log(response);
                 if(response.status == true){
                     $('#createModal').modal('hide');
                     $('#thp-form-create').trigger("reset");
@@ -240,7 +218,6 @@ $(document).ready(function(){
                         text: response.message,
                         icon: 'success'
                     }).then(function(){
-                        // tbl_index.ajax.reload();
                         window.location.reload();
                     });
                 }else{
@@ -258,6 +235,27 @@ $(document).ready(function(){
                     icon: 'error'
                 })
             }
+        });
+    });
+
+    $(document).on('show.bs.modal', '#createModal', function () {
+        getShiftGrupMachine('SHIFT', null, function (response) {
+            $('#thp-shift option[value!=""]').remove();
+            $.each(response.responseJSON.data, function (res, data) {
+                $('#thp-shift').append($('<option>', {
+                    value: data.oee_workshift,
+                    text: data.oee_workshift
+                }));
+            });
+            getShiftGrupMachine('GRUP', null, function (response) {
+                $('#thp-grup option[value!=""]').remove();
+                $.each(response.responseJSON.data, function (res, data) {
+                    $('#thp-grup').append($('<option>', {
+                        value: data.employee_group,
+                        text: data.employee_group
+                    }));
+                });
+            });
         });
     });
 
@@ -320,8 +318,6 @@ $(document).ready(function(){
                     $('#thp-actual-1').val(shift_1);
                     $('#thp-actual-2').val(shift_2);
 
-                    // $('#thp-actual-1').val(data.actual_1);
-                    // $('#thp-actual-2').val(data.actual_2);
                     $('#thp-note').val(data.note);
                     $('#thp-apnormal').val(data.apnormality);
                     $('#thp-action-plan').val(data.action_plan);
@@ -357,7 +353,6 @@ $(document).ready(function(){
                 if (response.status == true) {
                     var data = response.data;
                     var lhp = response.lhp;
-                    // $('#thp-id').attr('data-id', data.id_thp);
                     $('#thp-view-production-code').val(data.production_code);
                     $('#thp-view-part-number').val(data.part_number);
                     $('#thp-view-part-name').val(data.part_name);
@@ -440,99 +435,39 @@ $(document).ready(function(){
                 {data: 'part_number', name: 'part_number'},
                 {data: 'part_name', name: 'part_name'},
                 {data: 'part_type', name: 'part_type'},
+                {data: 'item_code', name: 'item_code'},
                 {data: 'process', name: 'process'},
                 {data: 'process_detailname', name: 'process_detailname'},
                 {data: 'ct_sph', name: 'ct_sph'}
             ],
-            // initComplete: function(settings, json) {
-            //     $('#thp-poduction-code-datatables tbody').on('click', 'tr', function () {
-            //         var dataArr = [];
-            //         var rows = $(this);
-            //         var rowData = tbl_production_code.rows(rows).data();
-            //         var processs;
-            //         $.each($(rowData),function(key, data){
-            //             $('#thp-part-number').val(data.part_number);
-            //             $('#thp-part-name').val(data.part_name);
-            //             $('#thp-part-type').val(data.part_type);
-            //             $('#thp-production-code').val(data.production_code);
-            //             $('#thp-customer-code').val(data.customer_id);
-            //             $('#thp-route').val(data.process_detailname);
-            //             processs = data.process.split('/');
-            //             $('#thp-process-1').val(processs[0]);
-            //             $('#thp-process-2').val(processs[1]);
-            //             $('#thp-ct').val(data.ct_sph);
-            //             $('#poduction-code-modal').modal('hide');
-            //         });
-            //         $.ajax({
-            //             url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
-            //             type: "POST",
-            //             data: {
-            //                 "post_production_code" : $('#thp-production-code').val()
-            //             },
-            //             headers: {
-            //                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            //             },
-            //             success: function (response) {
-            //                 if (response.status == true) {
-            //                     response = response.data;
-            //                     var shift_1 = response[0]['shift_1'] != null ? response[0]['shift_1'] : 0;
-            //                     var shift_2 = response[1]['shift_2'] != null ? response[0]['shift_2'] : 0;
-            //                     $('#thp-actual-1').val(shift_1);
-            //                     $('#thp-actual-2').val(shift_2);
-            //                 }
-            //             },
-            //             error: function(response, status, x){
-            //                 Swal.fire({
-            //                     title: 'Warning!',
-            //                     text: response.responseJSON.message,
-            //                     icon: 'warning'
-            //                 })
-            //             }
-            //         });
-            //     });
-            // }
         });
         $('#thp-poduction-code-datatables tbody').off('click').on('click', 'tr', function () {
             var data = tbl_production_code.row(this).data();
-            $.ajax({
-                url: "{{ route('tms.manufacturing.thp_entry.dataTable_production') }}",
-                type: "POST",
-                data: {
-                    "post_production_code" : data.production_code
-                },
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (response) {
-                    if (response.status == true) {
-                        response = response.data;
-                        // var shift_1 = response[0]['shift_1'] != null ? response[0]['shift_1'] : 0;
-                        // var shift_2 = response[1]['shift_2'] != null ? response[1]['shift_2'] : 0;
-                        // $('#thp-actual-1').val(shift_1);
-                        // $('#thp-actual-2').val(shift_2);
-                        var process;
-                        $('#thp-part-number').val(data.part_number);
-                        $('#thp-part-name').val(data.part_name);
-                        $('#thp-part-type').val(data.part_type);
-                        $('#thp-production-code').val(data.production_code);
-                        $('#thp-customer-code').val(data.customer_id);
-                        $('#thp-route').val(data.process_detailname);
-                        processs = data.process.split('/');
-                        $('#thp-process-1').val(processs[0]);
-                        $('#thp-process-2').val(processs[1]);
-                        $('#thp-ct').val(data.ct_sph);
-                        $('#poduction-code-modal').modal('hide');
-                    }
-                },
-                error: function(response, status, x){
-                    Swal.fire({
-                        title: 'Warning!',
-                        text: response.responseJSON.message,
-                        icon: 'warning'
-                    });
-                }
-            });
+            var process;
+            $('#thp-part-number').val(data.part_number);
+            $('#thp-part-name').val(data.part_name);
+            $('#thp-part-type').val(data.part_type);
+            $('#thp-production-code').val(data.production_code);
+            $('#thp-customer-code').val(data.customer_id);
+            $('#thp-route').val(data.process_detailname);
+            processs = data.process.split('/');
+            $('#thp-process-1').val(processs[0]);
+            $('#thp-process-2').val(processs[1]);
+            $('#thp-ct').val(data.ct_sph);
+            $('#thp-itemcode').val(data.item_code);
+            $('#thp-production-process').val(data.production_process);
 
+            $('#poduction-code-modal').modal('hide');
+
+            getShiftGrupMachine('MACHINE', data.production_process, function (response) {
+                $('#thp-machine option[value!=""]').remove();
+                $.each(response.responseJSON.data, function (res, data) {
+                    $('#thp-machine').append($('<option>', {
+                        value: data.machine_number,
+                        text: data.machine_number
+                    }));
+                });
+            });
         });
         $(document).on('hidden.bs.modal', '#thp-poduction-code-datatables', function () {
             tbl_production_code.clear();
@@ -591,7 +526,6 @@ $(document).ready(function(){
                                     text: response.message,
                                     icon: 'success'
                                 }).then(function(){
-                                    // tbl_index.ajax.reload();
                                     window.location.reload();
                                 });
                             }else{
@@ -625,6 +559,36 @@ $(document).ready(function(){
         var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
         window.open(url, '_blank');
     });
+    function getShiftGrupMachine(type="", process=null, callback) {
+        var query1 = {
+            "type": type
+        }
+        var query2 = {
+            "type": type,
+            "process": process
+        }
+        var params = (process != null ? query2 : query1);
+        $.ajax({
+            url: "{{ route('tms.manufacturing.thp_entry.getShiftGroupMachine') }}",
+            type: "GET",
+            dataType: "JSON",
+            cache: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: params,
+            error: function(response, status, x){
+                Swal.fire({
+                    title: 'Error!',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                })
+            },
+            complete: function (response){
+                callback(response);
+            }
+        });
+    }
 });
 </script>
 @endsection
@@ -638,6 +602,14 @@ $(document).ready(function(){
     $('.print-datepicker').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true
+    });
+    $('.this-datepicker').datepicker({
+        format: 'dd/mm/yyyy',
+        autoclose: true,
+    }).datepicker("setDate",'now');
+    $("input[type=number]").on("input", function() {
+        var nonNumReg = /[^0-9.]/g
+        $(this).val($(this).val().replace(nonNumReg, ''));
     });
     @if(\Session::has('msg'))
     setTimeout(function () {
