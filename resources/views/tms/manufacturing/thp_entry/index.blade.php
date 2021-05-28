@@ -9,6 +9,11 @@
     .modal{
         overflow: auto;
     }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none !important; 
+        margin: 0 !important; 
+    }
 </style>
 <div class="main-content-inner">
     <div class="row">
@@ -69,7 +74,8 @@
 {{-- @include('tms.manufacturing.thp_entry._modal.create_thp_modal._createthp') --}}
 @include('tms.manufacturing.thp_entry._modal.create.createForm')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._productioncode')
-@include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewthp')
+{{-- @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewthp') --}}
+@include('tms.manufacturing.thp_entry._modal.detail.indexDetail')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
@@ -106,20 +112,127 @@ $(document).ready(function(){
             {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
-        "order": [[ 2, "desc" ]],
+        "order": [[ 1, "desc" ]],
         initComplete: function(settings, json) {
             $('.thp-act-view').on('click', function () {
-                $('#viewThpid').modal('show');
-                viewThp($(this).data('thp'));
+                // $('#viewThpid').modal('show');
+                // viewThp($(this).data('thp'));
+                getThp($(this).data('thp'), function (response) {
+                    response = response.responseJSON;
+                    $('#modalDetail').modal('show');
+                    if (response.status == true) {
+                        var data = response.data;
+                        var lhp = response.lhp;
+                        var action_plan, date, apnormality, note, sgm, shift, grup, machine, lhp_qty;
+                        date = data.thp_date.split('-');
+                        date = date[2] + '/' + date[1] + '/' + date[0];
+                        $('#thp-detail-id').val(data.id_thp);
+                        $('#thp-detail-date').val(date);
+                        $('#thp-detail-production-code').val(data.production_code);
+                        $('#thp-detail-part-number').val(data.part_number);
+                        $('#thp-detail-part-name').val(data.part_name);
+                        $('#thp-detail-part-type').val(data.part_type);
+                        $('#thp-detail-customer-code').val(data.customer_code);
+                        $('#thp-detail-route').val(data.route);
+                        $('#thp-detail-plan').val(data.plan);
+                        $('#thp-detail-ct').val(data.ct);
+                        $('#thp-detail-ton').val(data.ton);
+                        $('#thp-detail-time').val(data.time);
+                        $('#thp-detail-plan-hour').val(data.plan_hour);
+                        $('#thp-detail-process-1').val(data.process_sequence_1);
+                        $('#thp-detail-process-2').val(data.process_sequence_2);
+                        $('#thp-detail-qty').val(data.thp_qty);
+                        lhp_qty = (lhp.lhp_qty != null ? lhp.lhp_qty : 0)
+                        $('#lhp-detail-qty').val(lhp_qty);
+
+                        $('#thp-detail-itemcode').val(data.item_code);
+                        $('#thp-detail-production-process').val(data.production_process);
+                        $('#thp-detail-operator').val(data.user);
+                        sgm = data.thp_remark.split('_');
+                        shift = sgm[0].split('');
+                        $('#thp-detail-shift').val(shift[0]);
+                        $('#thp-detail-grup').val(shift[1]);
+                        $('#thp-detail-machine').val(sgm[1]);
+
+                        apnormality = (data.apnormality != null ? data.apnormality : '//');
+                        action_plan = (data.action_plan != null ? data.action_plan : '//');
+                        $('#thp-detail-note').val(data.note);
+                        $('#thp-detail-apnormal').val(apnormality);
+                        $('#thp-detail-action-plan').val(action_plan);
+                    }
+                });
             });
             $('.thp-act-edit').on('click', function () {
-                getThp($(this).data('thp'));
+                getThp($(this).data('thp'), function (response) {
+                    response = response.responseJSON;
+                    $('#createModal').modal('show');
+                    if (response.status == true) {
+                        var data = response.data;
+                        var action_plan, date, apnormality, note, sgm, shift, grup, machine;
+                        date = data.thp_date.split('-');
+                        date = date[2] + '/' + date[1] + '/' + date[0];
+                        $('#thp-id').val(data.id_thp);
+                        $('#thp-date').val(date);
+                        $('#thp-production-code').val(data.production_code);
+                        $('#thp-part-number').val(data.part_number);
+                        $('#thp-part-name').val(data.part_name);
+                        $('#thp-part-type').val(data.part_type);
+                        $('#thp-customer-code').val(data.customer_code);
+                        $('#thp-route').val(data.route);
+                        $('#thp-plan').val(data.plan);
+                        $('#thp-ct').val(data.ct);
+                        $('#thp-ton').val(data.ton);
+                        $('#thp-time').val(data.time);
+                        $('#thp-plan-hour').val(data.plan_hour);
+                        $('#thp-process-1').val(data.process_sequence_1);
+                        $('#thp-process-2').val(data.process_sequence_2);
+                        $('#thp-qty').val(data.thp_qty);
+                        $('#thp-itemcode').val(data.item_code);
+                        $('#thp-production-process').val(data.production_process);
+                        sgm = data.thp_remark.split('_');
+                        shift = sgm[0].split('');
+
+                        $('#thp-note').val(data.note);
+                        $('#thp-apnormal').val(data.apnormality);
+                        $('#thp-action-plan').val(data.action_plan);
+                        getShiftGrupMachine('SHIFT', null, function (response) {
+                            $('#thp-shift option[value!=""]').remove();
+                            $.each(response.responseJSON.data, function (res, data) {
+                                $('#thp-shift').append($('<option>', {
+                                    value: data.oee_workshift,
+                                    text: data.oee_workshift
+                                }));
+                            });
+                            $('#thp-shift').val(shift[0]);
+                            getShiftGrupMachine('GRUP', null, function (response) {
+                                $('#thp-grup option[value!=""]').remove();
+                                $.each(response.responseJSON.data, function (res, data) {
+                                    $('#thp-grup').append($('<option>', {
+                                        value: data.employee_group,
+                                        text: data.employee_group
+                                    }));
+                                });
+                                $('#thp-grup').val(shift[1]);
+                            });
+                        });
+                        getShiftGrupMachine('MACHINE', data.production_process, function (response) {
+                            $('#thp-machine option[value!=""]').remove();
+                            $.each(response.responseJSON.data, function (res, data) {
+                                $('#thp-machine').append($('<option>', {
+                                    value: data.machine_number,
+                                    text: data.machine_number
+                                }));
+                            });
+                            $('#thp-machine').val(sgm[1]);
+                        });
+                    }
+                });
             }).on('mouseup',function(){
                 setTimeout(function(){ 
-                    $('#thp-form-create input,textarea').removeAttr('readonly');
-                    $('#thp-form-create select').removeAttr('disabled');
-                    $('#thp-edit-btn').prop('hidden', 'hidden');
-                    $('#thp-btn-production-code').removeAttr('disabled');
+                    // $('#thp-form-create input,textarea').removeAttr('readonly');
+                    // $('#thp-form-create select').removeAttr('disabled');
+                    // $('#thp-edit-btn').prop('hidden', 'hidden');
+                    // $('#thp-btn-production-code').removeAttr('disabled');
                     $('.thp-create-btn').text('Update');
                     $('.thp-create-btn').css({'display': 'block'});
                 }, 1000);
@@ -149,6 +262,24 @@ $(document).ready(function(){
     $(document).on('click', '#addModal', function(e) {
         e.preventDefault();
         $('#createModal').modal('show');
+        getShiftGrupMachine('SHIFT', null, function (response) {
+            $('#thp-shift option[value!=""]').remove();
+            $.each(response.responseJSON.data, function (res, data) {
+                $('#thp-shift').append($('<option>', {
+                    value: data.oee_workshift,
+                    text: data.oee_workshift
+                }));
+            });
+            getShiftGrupMachine('GRUP', null, function (response) {
+                $('#thp-grup option[value!=""]').remove();
+                $.each(response.responseJSON.data, function (res, data) {
+                    $('#thp-grup').append($('<option>', {
+                        value: data.employee_group,
+                        text: data.employee_group
+                    }));
+                });
+            });
+        });
     });
     $(document).on('click', '#printModal', function(e) {
         e.preventDefault();
@@ -174,7 +305,7 @@ $(document).ready(function(){
     });
     $(document).on('submit', '#thp-form-create', function () {
         var data = {
-            // "id_thp": $('#thp-id').data('id'),
+            "id_thp": $('#thp-id').val(),
             "thp_date": $('#thp-date').val(),
             "customer_code": $('#thp-customer-code').val(),
             "production_code": $('#thp-production-code').val(),
@@ -238,48 +369,16 @@ $(document).ready(function(){
         });
     });
 
-    $(document).on('show.bs.modal', '#createModal', function () {
-        getShiftGrupMachine('SHIFT', null, function (response) {
-            $('#thp-shift option[value!=""]').remove();
-            $.each(response.responseJSON.data, function (res, data) {
-                $('#thp-shift').append($('<option>', {
-                    value: data.oee_workshift,
-                    text: data.oee_workshift
-                }));
-            });
-            getShiftGrupMachine('GRUP', null, function (response) {
-                $('#thp-grup option[value!=""]').remove();
-                $.each(response.responseJSON.data, function (res, data) {
-                    $('#thp-grup').append($('<option>', {
-                        value: data.employee_group,
-                        text: data.employee_group
-                    }));
-                });
-            });
-        });
-    });
+    $(document).on('show.bs.modal', '#createModal', function () {});
 
     $(document).on('hidden.bs.modal', '#createModal', function () {
-        $('#thp-form-create input,textarea').removeAttr('readonly');
-        $('#thp-form-create select').removeAttr('disabled');
-        $('#thp-edit-btn').prop('hidden', 'hidden');
-        $('#thp-btn-production-code').removeAttr('disabled');
         $('#thp-form-create').trigger('reset');
-        $('#thp-edit-btn').prop('hidden', 'hidden');
         $('.thp-create-btn').css({'display': 'block'});
         $('.thp-create-btn').text('Simpan');
-        $('#thp-id').attr('data-id', 0);
-    });
-    $(document).on('click', '#thp-edit-btn', function (e) {
-        $('#thp-form-create input,textarea').removeAttr('readonly');
-        $('#thp-form-create select').removeAttr('disabled');
-        $('#thp-edit-btn').prop('hidden', 'hidden');
-        $('#thp-btn-production-code').removeAttr('disabled');
-        $('.thp-create-btn').text('Update');
-        $('.thp-create-btn').css({'display': 'block'});
+        $('#thp-id').val(0);
     });
 
-    function getThp(id="") {
+    function getThp(id="", callback) {
         var route  = "{{ route('tms.manufacturing.thp_entry.dataTable_edit', ':id') }}";
             route  = route.replace(':id', id);
         $.ajax({
@@ -288,126 +387,15 @@ $(document).ready(function(){
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            success: function (response) {
-                if (response.status == true) {
-                    var data = response.data;
-                    var lhp = response.lhp;
-                    var action_plan, apnormality, note;
-                    $('#thp-id').attr('data-id', data.id_thp);
-                    $('#thp-production-code').val(data.production_code);
-                    $('#thp-part-number').val(data.part_number);
-                    $('#thp-part-name').val(data.part_name);
-                    $('#thp-part-type').val(data.part_type);
-                    $('#thp-customer-code').val(data.id_cust);
-                    $('#thp-route').val(data.route);
-                    $('#thp-plan').val(data.plan);
-                    $('#thp-ct').val(data.ct);
-                    $('#thp-ton').val(data.ton);
-                    $('#thp-time').val(data.time);
-                    $('#thp-plan-hour').val(data.plan_hour);
-                    var processs = data.process.split('/');
-                    $('#thp-process-1').val(processs[0]);
-                    $('#thp-process-2').val(processs[1]);
-                    $('#thp-plan-1').val(data.plan_1);
-                    $('#thp-plan-2').val(data.plan_2);
-
-                    var shift_1 = lhp[0]['shift_1'] != null ? lhp[0]['shift_1'] : 0;
-                    var shift_2 = lhp[1]['shift_2'] != null ? lhp[1]['shift_2'] : 0;
-                    var persentase = (parseInt(shift_1)+parseInt(shift_2))/parseInt(data.plan);
-                    var act_hour = (parseInt(shift_1)+parseInt(shift_2))*parseInt(data.ct)/3600;
-                    $('#thp-actual-1').val(shift_1);
-                    $('#thp-actual-2').val(shift_2);
-
-                    $('#thp-note').val(data.note);
-                    $('#thp-apnormal').val(data.apnormality);
-                    $('#thp-action-plan').val(data.action_plan);
-
-                    $('#createModal').modal('show');
-                    $('#thp-form-create input,textarea').prop('readonly', 'true');
-                    $('#thp-form-create select').prop('disabled', 'true');
-                    $('#thp-form-create button[type=submit]').hide();
-                    $('#thp-btn-production-code').prop('disabled', 'true');
-                    $('#thp-edit-btn').removeAttr('hidden');
-                }
-            },
             error: function(response, status, x){
                 Swal.fire({
                     title: 'Error!',
                     text: response.responseJSON.message,
                     icon: 'error'
                 })
-            }
-        });
-    }
-
-    function viewThp(id="") {
-        var route  = "{{ route('tms.manufacturing.thp_entry.dataTable_edit', ':id') }}";
-            route  = route.replace(':id', id);
-        $.ajax({
-            url: route,
-            type: "GET",
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            success: function (response) {
-                if (response.status == true) {
-                    var data = response.data;
-                    var lhp = response.lhp;
-                    $('#thp-view-production-code').val(data.production_code);
-                    $('#thp-view-part-number').val(data.part_number);
-                    $('#thp-view-part-name').val(data.part_name);
-                    $('#thp-view-part-type').val(data.part_type);
-                    $('#thp-view-customer-code').val(data.id_cust);
-                    $('#thp-view-plan').val(data.plan);
-                    $('#thp-view-ct').val(data.ct);
-                    $('#thp-view-ton').val(data.ton);
-                    $('#thp-view-time').val(data.time);
-                    $('#thp-view-plan-hour').val(data.plan_hour);
-
-                    var processs = data.process.split('/');
-                    var action_plan, apnormality, note;
-                    $('#thp-view-route').html(data.route);
-                    $('#thp-view-process-squance').html(data.process);
-                    $('#thp-view-plan-1').html(data.plan_1);
-                    $('#thp-view-plan-2').html(data.plan_2);
-
-                    var shift_1 = lhp[0]['shift_1'] != null ? lhp[0]['shift_1'] : 0;
-                    var shift_2 = lhp[1]['shift_2'] != null ? lhp[1]['shift_2'] : 0;
-                    var persentase = (parseInt(shift_1)+parseInt(shift_2))/parseInt(data.plan);
-                    var act_hour = (parseInt(shift_1)+parseInt(shift_2))*parseInt(data.ct)/3600;
-                    $('#thp-view-actual-1').html(shift_1);
-                    $('#thp-view-actual-2').html(shift_2);
-                    $('#thp-view-persentase').html(persentase.toFixed(2));
-                    $('#thp-view-act-hour').html(act_hour.toFixed(2));
-
-                    if (data.note != null) {
-                        note = data.note;
-                    }else{
-                        note = '//'
-                    }
-                    $('#thp-view-note').html(data.note);
-                    if (data.apnormality != null) {
-                        apnormality = data.apnormality;
-                    }else{
-                        apnormality = '//'
-                    }
-                    $('#thp-view-apnormal').html(apnormality);
-                    if (data.action_plan != null) {
-                        action_plan = data.action_plan;
-                    }else{
-                        action_plan = '//'
-                    }
-                    $('#thp-view-action-plan').html(action_plan);
-
-                    $('#thp-view-form-create input').prop('readonly', 'true');
-                }
-            },
-            error: function(response, status, x){
-                Swal.fire({
-                    title: 'Error!',
-                    text: response.responseJSON.message,
-                    icon: 'error'
-                })
+            complete: function (response){
+                callback(response);
             }
         });
     }

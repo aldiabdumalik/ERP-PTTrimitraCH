@@ -38,7 +38,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td style="text-align:center">TUGAS HARIAN PRODUKSI PRESSING</td>
+			<td style="text-align:center">TUGAS HARIAN PRODUKSI {{$dept}}</td>
 		</tr>
 		<tr>
 			<td>
@@ -46,7 +46,7 @@
 					<tr>
 						<td>Hari/Tanggal</td>
 						<td>:</td>
-						<td>{{date('D, d M Y')}}</td>
+						<td>{{date('D, d M Y', strtotime($date1))}}</td>
 					</tr>
 					<tr>
 						<td>Shif</td>
@@ -85,24 +85,40 @@
 						<th>Shift 2</th>
 						<th>%</th>
 					</tr>
+						@php
+							$sum_shift_1 = 0;
+							$sum_shift_2 = 0;
+							$sum_lhp_1 = 0;
+							$sum_lhp_2 = 0;
+							$sum_persentase = 0;
+							$sum_act_hour = 0;
+						@endphp
 					@foreach ($data as $v)
+						@php
+							$sum_shift_1 += $v->SHIFT_1;
+							$sum_shift_2 += $v->SHIFT_2;
+							$sum_lhp_1 += $v->LHP_1;
+							$sum_lhp_2 += $v->LHP_2;
+							$sum_persentase += $v->persentase;
+							$sum_act_hour += $v->act_hour_new;
+						@endphp
 					<tr>
-						<td>{{$v->id_cust}}</td>
+						<td>{{$v->customer_code}}</td>
 						<td>{{$v->part_name}}</td>
 						<td>{{$v->part_type}}</td>
 						<td>{{$v->plan}}</td>
 						<td>{{$v->ct}}</td>
 						<td>{{$v->route}}</td>
 						<td>{{$v->ton}}</td>
-						<td>{{$v->process}}</td>
+						<td>{{$v->process_sequence_1}}</td>
 						<td>{{$v->time}}</td>
 						<td>{{$v->plan_hour}}</td>
-						<td>{{$v->plan_1}}</td>
-						<td>{{$v->plan_2}}</td>
-						<td>{{$v->actual_1}}</td>
-						<td>{{$v->actual_2}}</td>
+						<td>{{$v->SHIFT_1}}</td>
+						<td>{{$v->SHIFT_2}}</td>
+						<td>{{$v->LHP_1}}</td>
+						<td>{{$v->LHP_2}}</td>
 						<td>{{$v->persentase}}</td>
-						<td>{{$v->act_hour}}</td>
+						<td>{{$v->act_hour_new}}</td>
 						<td>{{$v->note}}</td>
 						<td>{{$v->apnormality}}</td>
 						<td>{{$v->action_plan}}</td>
@@ -115,12 +131,12 @@
 						<td>{{$sum->total_plan}}</td>
 						<td colspan="5"></td>
 						<td>{{$sum->total_plan_hour}}</td>
-						<td>{{$sum->total_plan_1}}</td>
-						<td>{{$sum->total_plan_2}}</td>
-						<td>{{$sum->total_actual_1}}</td>
-						<td>{{$sum->total_actual_2}}</td>
-						<td>{{$sum->total_persentase}}</td>
-						<td>{{$sum->total_act_hour}}</td>
+						<td>{{$sum_shift_1}}</td>
+						<td>{{$sum_shift_2}}</td>
+						<td>{{$sum_lhp_1}}</td>
+						<td>{{$sum_lhp_2}}</td>
+						<td>{{round($sum_persentase, 2)}}</td>
+						<td>{{$sum_act_hour}}</td>
 						<td></td>
 						<td></td>
 						<td></td>

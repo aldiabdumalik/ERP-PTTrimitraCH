@@ -9,6 +9,11 @@
                     <div class="row">
                         <div class="col-xl-12">
                             <div class="row">
+                                <div class="col-12">
+                                    <input type="hidden" name="thp-id" id="thp-id">
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-xl-5 col-xs-12">
                                     @include('tms.manufacturing.thp_entry._modal.create.productionDetail')
                                 </div>

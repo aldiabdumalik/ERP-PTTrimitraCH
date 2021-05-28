@@ -26,7 +26,7 @@
                 </div>
             </div>
             <div class="col-2">
-                <label style="font-size:12px;" for="thp-shift" class="col-form-label text-bold">/</label>
+                <label style="font-size:12px;" for="thp-grup" class="col-form-label text-bold">/</label>
             </div>
             <div class="col-5">
                 <div class="">
