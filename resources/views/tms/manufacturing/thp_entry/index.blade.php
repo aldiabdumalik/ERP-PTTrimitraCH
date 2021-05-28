@@ -590,7 +590,7 @@ $(document).ready(function(){
     $('.print-datepicker').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true
-    });
+    }).datepicker("setDate",'now');
     $('.this-datepicker').datepicker({
         format: 'dd/mm/yyyy',
         autoclose: true,

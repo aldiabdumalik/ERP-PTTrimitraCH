@@ -200,7 +200,7 @@
 					<tr>
 						<td style="height:25px;"></td>
 						<td style="height:25px;">Eko H</td>
-						<td style="height:25px;">Andiko S</td>
+						<td style="height:25px;">{{Auth()->user()->FullName}}</td>
 					</tr>
 				</table>
 			</td>

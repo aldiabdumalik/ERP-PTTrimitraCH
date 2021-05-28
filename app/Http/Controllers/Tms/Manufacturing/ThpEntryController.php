@@ -31,25 +31,6 @@ class ThpEntryController extends Controller
 
     public function getThpTable(Request $request)
     {
-        // $query =  DB::connection('oee')
-        //     ->table('entry_thp_tbl AS t1')
-        //     ->selectRaw('
-        //         t1.*,
-        //         (
-        //             SELECT SUM(t2.thp_qty) FROM entry_thp_tbl t2
-        //             WHERE LEFT(t2.thp_remark, 1) = 1 
-        //             AND t1.production_code = t2.production_code
-        //             AND t1.thp_date = t2.thp_date
-        //         ) AS SHIFT_1,
-        //         (
-        //             SELECT SUM(t2.thp_qty) FROM entry_thp_tbl t2 
-        //             WHERE LEFT(t2.thp_remark, 1) = 2 
-        //             AND t1.production_code = t2.production_code
-        //             AND t1.thp_date = t2.thp_date
-        //         ) AS SHIFT_2
-        //     ')
-        //     ->groupByRaw('production_code, item_code, thp_date')
-        //     ->get();
         $query =  DB::connection('oee')
             ->table('entry_thp_tbl AS t1')
             ->get();
@@ -244,18 +225,18 @@ class ThpEntryController extends Controller
     {
         $decode = base64_decode($request->print);
         $arr_params = explode('&', $decode);
-        $query = DB::connection('oee')
+        $check = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->where('thp_date', '>=', $arr_params[0])
             ->where('thp_date', '<=', $arr_params[1])
             ->where('production_process', '=', $arr_params[2])
             ->get();
-        if (count($query) <= 0) {
+        if (count($check) <= 0) {
             $request->session()->flash('msg', 'Data tidak ditemukan!');
             return Redirect::back();
         }
         else{
-            foreach ($query as $v) {
+            foreach ($check as $v) {
                 $shift = substr($v->thp_remark, 0, 1);
                 if ($v->item_code != null) {
                     $lhp_where = [
@@ -284,12 +265,6 @@ class ThpEntryController extends Controller
                     ]);
             }
         }
-        // $query = DB::connection('oee')
-        //     ->table('entry_thp_tbl')
-        //     ->where('thp_date', '>=', $arr_params[0])
-        //     ->where('thp_date', '<=', $arr_params[1])
-        //     ->where('production_process', '=', $arr_params[2])
-        //     ->get();
         $query =  DB::connection('oee')
             ->table('entry_thp_tbl AS t1')
             ->selectRaw($this->_QueryRawReport())
@@ -305,22 +280,22 @@ class ThpEntryController extends Controller
             ->where('thp_date', '<=', $arr_params[1])
             ->where('production_process', '=', $arr_params[2])
             ->first();
-        // foreach ($query as $v) {
-        //     $log_print = DB::connection('oee')
-        //         ->table('entry_thp_tbl_log')
-        //         ->insert([
-        //             'id_thp' => $v->id_thp,
-        //             'production_code' => $v->production_code,
-        //             'item_code' => $v->item_code,
-        //             'remark' => $v->thp_remark,
-        //             'thp_date' => $v->thp_date,
-        //             'date_written' => date('Y-m-d'),
-        //             'time_written' => date('H:i:s'),
-        //             'status_change' => 'PRINT',
-        //             'user' => Auth::user()->FullName,
-        //             'note' => date('YmdHis').'-DEV'
-        //         ]);
-        // }
+        foreach ($check as $v) {
+            $log_print = DB::connection('oee')
+                ->table('entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $v->id_thp,
+                    'production_code' => $v->production_code,
+                    'item_code' => $v->item_code,
+                    'remark' => $v->thp_remark,
+                    'thp_date' => $v->thp_date,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'PRINT',
+                    'user' => Auth::user()->FullName,
+                    'note' => date('YmdHis').'-DEV'
+                ]);
+        }
         $waktu_tersedia = 480+420;
         $eff = 85/100;
         $max_loading1 = ($waktu_tersedia*$eff)/60;
@@ -343,21 +318,6 @@ class ThpEntryController extends Controller
             'date2' => $arr_params[1],
             'dept' => $arr_params[2]
         ];
-
-        // $last =  DB::connection('oee')
-        //     ->table('entry_thp_tbl AS t1')
-        //     ->selectRaw($this->_QueryRawReport())
-        //     ->where('thp_date', '>=', $arr_params[0])
-        //     ->where('thp_date', '<=', $arr_params[1])
-        //     ->where('production_process', '=', $arr_params[2])
-        //     ->groupByRaw('production_code, item_code, thp_date')
-        //     ->get();
-        // dd($last);
-        // $sum = 0;
-        // foreach($last as $key  =>  $value){
-        //     $sum+= $value->SHIFT_2;
-        // }
-        // echo $sum;
 
         $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpall', $params)->setPaper('a3', 'landscape');;
         return $pdf->stream();
