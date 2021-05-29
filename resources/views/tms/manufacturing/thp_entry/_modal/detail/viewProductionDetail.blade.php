@@ -6,7 +6,7 @@
     </div>
     <div class="col-10">
         <div class="">
-            <input type="text" name="thp-detail-date" id="thp-detail-date" class="form-control this-datepicker" autocomplete="off" placeholder="" required onkeydown="return false">
+            <input type="text" name="thp-detail-date" id="thp-detail-date" class="form-control" autocomplete="off" placeholder="" required onkeydown="return false">
         </div>
     </div> 
 </div>

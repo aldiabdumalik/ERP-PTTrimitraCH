@@ -49,7 +49,7 @@
 <div class="row">
     <div class="col-xl-2 col-md-4">
         <div class="">
-            <label style="font-size:12px;" for="thp-detail-qty" class="col-form-label text-bold">THP-detail Qty</label>
+            <label style="font-size:12px;" for="thp-detail-qty" class="col-form-label text-bold">THP Qty</label>
         </div>
     </div>
     <div class="col-xl-10 col-md-8">
