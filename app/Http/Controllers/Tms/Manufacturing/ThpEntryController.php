@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Tms\Manufacturing;
 
+use App\Exports\ThpEntryExport;
 use App\Http\Controllers\Controller;
+use App\Imports\ThpEntryImport;
 use App\Models\Oee\Customer;
 use App\Models\Oee\ThpEntry;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class ThpEntryController extends Controller
@@ -321,6 +324,23 @@ class ThpEntryController extends Controller
 
         $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpall', $params)->setPaper('a3', 'landscape');;
         return $pdf->stream();
+    }
+
+    public function importToDB(Request $request)
+    {
+        $validated = $request->validate([
+            'thp_import_file' => 'mimes:xls,xlsx,csv|max:25000',
+        ]);
+        $cd = explode('/', $request->thp_import_tanggal);
+        $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
+
+        if ($request->hasFile('thp_import_file')) {
+            Excel::import(new ThpEntryImport($date), $request->file('thp_import_file'));
+        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Excel berhasil di convert'
+        ], 200);
     }
 
     public function getShiftGroupMachine(Request $request)

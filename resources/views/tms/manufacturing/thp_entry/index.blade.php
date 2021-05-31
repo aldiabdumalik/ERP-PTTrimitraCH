@@ -22,6 +22,9 @@
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
                     <i class="ti-plus"></i>  Add New Data
                 </button>
+                <button type="button"  class="btn btn-outline-success btn-flat btn-sm" id="importModal">
+                    <i class="fa fa-upload"></i>  Import
+                </button>
                 <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="printModal">
                     <i class="fa fa-print"></i>  Report
                 </button>
@@ -78,6 +81,7 @@
 @include('tms.manufacturing.thp_entry._modal.detail.indexDetail')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
+@include('tms.manufacturing.thp_entry._modal.import.importThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
 
 
@@ -285,6 +289,10 @@ $(document).ready(function(){
         e.preventDefault();
         $('#thp-print-modal').modal('show');
     });
+    $(document).on('click', '#importModal', function(e) {
+        e.preventDefault();
+        $('#thp-import-modal').modal('show');
+    });
     $(document).on('click', '#thp-btn-production-code', function(e) {
         e.preventDefault();
         $('#poduction-code-modal').modal('show');
@@ -376,6 +384,71 @@ $(document).ready(function(){
         $('.thp-create-btn').css({'display': 'block'});
         $('.thp-create-btn').text('Simpan');
         $('#thp-id').val(0);
+    });
+
+    $(document).on('submit', '#thp-form-import', function () {
+        $('.thp-import-btn').prop('disabled', true);
+        $('.thp-import-btn').text('Loading...');
+        $('#thp_import_file').css('display', 'none');
+        $('.progress-import').css('display', 'block');
+        var timerId, percent;
+
+        // reset progress bar
+        percent = 0;
+        $('#progress-import').css('width', '0px');
+        $('#progress-import').addClass('progress-bar progress-bar-striped progress-bar-animated active');
+
+        timerId = setInterval(function() {
+            percent += 5;
+            $('#progress-import').css('width', percent + '%');
+            $('#progress-import').html(percent + '%');
+
+            // complete
+            if (percent >= 90) {
+                clearInterval(timerId);
+            }
+
+        }, 50);
+
+        var form = new FormData();
+        form.append("thp_import_file", $('#thp_import_file')[0].files[0]);
+        form.append("thp_import_tanggal", $('#thp_import_tanggal').val());
+        $.ajax({
+            url: "{{ route('tms.manufacturing.thp_entry.importToDB') }}",
+            type: "POST",
+            contentType: false,
+            processData: false,
+            cache: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: form,
+            success: function (response) {
+                $('#progress-import').css('width', '100%');
+                $('#progress-import').html('100%');
+                if(response.status == true){
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.message,
+                        icon: 'success'
+                    }).then(function(){
+                        window.location.reload();
+                    });
+                }
+            },
+            error: function(response, status, x){
+                $('#progress-import').addClass('bg-danger');
+                Swal.fire({
+                    title: 'Error!',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                }).then(function(){
+                    $('#progress-import').css('width', '100%');
+                    $('#progress-import').html('100%');
+                    window.location.reload();
+                });
+            }
+        });
     });
 
     function getThp(id="", callback) {

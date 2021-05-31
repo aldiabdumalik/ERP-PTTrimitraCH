@@ -42,3 +42,7 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@getShiftGroupMachine', 
         'as' => 'tms.manufacturing.thp_entry.getShiftGroupMachine'
     ]);
+    Route::post('/manufacturing/thp_entry/post/thpimport', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@importToDB', 
+        'as' => 'tms.manufacturing.thp_entry.importToDB'
+    ]);
