@@ -65,7 +65,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                         'thp_remark' => '1A_ ',
                         'note' => (isset($row[20])) ? $row[20]:null,
                         // 'apnormality' => $row[20],
-                        // 'action_plan' => $row[24],
+                        // 'action_plan' => $row[25],
                         'thp_date' => $this->date,
                         'user' => Auth::user()->FullName,
                         'thp_written' => date('Y-m-d H:i:s')
@@ -90,7 +90,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                         'thp_remark' => '2A_ ',
                         'note' => (isset($row[20])) ? $row[20]:null,
                         // 'apnormality' => $row[20],
-                        // 'action_plan' => $row[24],
+                        // 'action_plan' => $row[25],
                         'thp_date' => $this->date,
                         'user' => Auth::user()->FullName,
                         'thp_written' => date('Y-m-d H:i:s')
