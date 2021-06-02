@@ -1,4 +1,4 @@
-<div class="row">
+{{-- <div class="row">
     <div class="col-xl-2 col-md-4">
         <div class="">
             <label style="font-size:12px;" for="thp-detail-plan" class="col-form-label text-bold">Plan</label>
@@ -9,11 +9,11 @@
             <input type="number" name="thp-detail-plan" id="thp-detail-plan" class="form-control" value="0" autocomplete="off" placeholder="" required onkeydown="return false">
         </div>
     </div> 
-</div>
+</div> --}}
 <div class="row">
     <div class="col-xl-2 col-md-4">
         <div class="">
-            <label style="font-size:12px;" for="thp-detail-ton" class="col-form-label text-bold">TON</label>
+            <label style="font-size:12px;" for="thp-detail-ton" class="col-form-label text-bold">Machine (TON)</label>
         </div>
     </div>
     <div class="col-xl-10 col-md-8">

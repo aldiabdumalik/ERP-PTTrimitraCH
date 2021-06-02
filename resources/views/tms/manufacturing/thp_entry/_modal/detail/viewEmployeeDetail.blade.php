@@ -34,7 +34,7 @@
         </div>
     </div> 
 </div>
-<div class="row">
+{{-- <div class="row">
     <div class="col-2">
         <div class="">
             <label style="font-size:12px;" for="thp-detail-machine" class="col-form-label text-bold">Machine</label>
@@ -45,7 +45,7 @@
             <input type="text" name="thp-detail-machine" id="thp-detail-machine" class="form-control" onkeydown="return false">
         </div>
     </div> 
-</div>
+</div> --}}
 <div class="row">
     <div class="col-2">
         <div class="">

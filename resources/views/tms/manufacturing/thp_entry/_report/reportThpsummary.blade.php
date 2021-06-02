@@ -41,25 +41,13 @@
 			<td style="text-align:center">TUGAS HARIAN PRODUKSI {{$dept}}</td>
 		</tr>
 		<tr>
-			<td>
-				<table>
-					<tr>
-						<td>Hari/Tanggal</td>
-						<td>:</td>
-						<td>{{date('D, d M Y', strtotime($date1))}}</td>
-					</tr>
-					<tr>
-						<td>Shif</td>
-						<td>:</td>
-						<td>Shift 1 & 2</td>
-					</tr>
-				</table>
-			</td>
+			<td></td>
 		</tr>
 		<tr>
 			<td>
 				<table border="1" cellspacing="0" cellpadding="10" style="width:100%">
 					<tr>
+						<th rowspan="2">DATE</th>
 						<th rowspan="2">CUST</th>
 						<th rowspan="2">NAME PART</th>
 						<th rowspan="2">TYPE</th>
@@ -74,10 +62,6 @@
 						<th colspan="3">ACTUAL LHP</th>
 						<th rowspan="2">ACT HOUR</th>
 						<th rowspan="2">OUTSTANDING</th>
-						<th rowspan="2">NOTE</th>
-						<th rowspan="2">APNORMALITY</th>
-						<th rowspan="2">ACTION PLAN</th>
-						{{-- <th rowspan="2">STATUS</th> --}}
 					</tr>
 					<tr>
 						<th>Shift 1</th>
@@ -104,6 +88,7 @@
 							$sum_act_hour += $v->act_hour_new;
 						@endphp
 					<tr>
+						<td>{{date('d/m/Y', strtotime($v->thp_date))}}</td>
 						<td>{{$v->customer_code}}</td>
 						<td>{{$v->part_name}}</td>
 						<td>{{$v->part_type}}</td>
@@ -121,15 +106,10 @@
 						<td>{{$v->persentase}}</td>
 						<td>{{$v->act_hour_new}}</td>
 						<td>{{$v->outstanding_beta}}</td>
-						<td>{{$v->note}}</td>
-						<td>{{$v->apnormality}}</td>
-						<td>{{$v->action_plan}}</td>
-						{{-- <td>{{$v->status}}</td> --}}
 					</tr>
 					@endforeach
-					{{-- @foreach ($sum as $v) --}}
 					<tr>
-						<th colspan="8">TOTAL</th>
+						<th colspan="9">TOTAL</th>
 						{{-- <td>{{$sum->total_plan}}</td> --}}
 						{{-- <td></td> --}}
 						<td>{{$sum->total_plan_hour}}</td>
@@ -140,49 +120,12 @@
 						<td>{{round( (($sum_lhp_1 + $sum_lhp_2) / ($sum_shift_1 + $sum_shift_2)) * 100)}}</td>
 						<td>{{$sum_act_hour}}</td>
 						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						{{-- <td></td> --}}
 					</tr>
-					{{-- @endforeach --}}
 				</table>
 			</td>
 		</tr>
 		<tr>
-			<td>
-				<table border="0" cellspacing="0" cellpadding="10" style="width:100%">
-					<tr>
-						<td rowspan="4">LD-PPC-10</td>
-						<td>WAKTU TERSEDIA</td>
-						<td>{{$waktu_tersedia}}</td>
-						<td></td>
-						<td>LOADING TIME</td>
-						<td>{{$loading_time}} JAM</td>
-					</tr>
-					<tr>
-						<td>EFF</td>
-						<td>{{$eff * 100}} %</td>
-						<td></td>
-						<td>TOTAL MP</td>
-						<td>{{$total_mp}} ORANG</td>
-					</tr>
-					<tr>
-						<td>MAX LOADING TIME</td>
-						<td>{{$max_loading1}}</td>
-						<td>{{$max_loading2}}</td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>TOTAL MAN POWER</td>
-						<td>{{$man_power}}</td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-				</table>
-			</td>
+			<td></td>
 		</tr>
 		<tr>
 			<td></td>

@@ -228,102 +228,24 @@ class ThpEntryController extends Controller
     {
         $decode = base64_decode($request->print);
         $arr_params = explode('&', $decode);
-        $check = DB::connection('oee')
-            ->table('entry_thp_tbl')
-            ->where('thp_date', '>=', $arr_params[0])
-            ->where('thp_date', '<=', $arr_params[1])
-            ->where('production_process', '=', $arr_params[2])
-            ->get();
-        if (count($check) <= 0) {
-            $request->session()->flash('msg', 'Data tidak ditemukan!');
-            return Redirect::back();
-        }
-        else{
-            foreach ($check as $v) {
-                $shift = substr($v->thp_remark, 0, 1);
-                if ($v->item_code != null) {
-                    $lhp_where = [
-                        'production_code' => $v->production_code,
-                        'item_code' => $v->item_code,
-                        'date2' => $v->thp_date
-                    ];
-                }else{
-                    $lhp_where = [
-                        'production_code' => $v->production_code,
-                        'date2' => $v->thp_date
-                    ];
-                }
-                $lhp = DB::connection('oee')
-                    ->table('entry_lhp_tbl')
-                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
-                    ->where($lhp_where)
-                    ->whereRaw('LEFT(remark, 1) = '.$shift)
-                    ->first();
-                $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
-                $update = DB::connection('oee')
-                    ->table('entry_thp_tbl')
-                    ->where('id_thp', $v->id_thp)
-                    ->update([
-                        'lhp_qty' => $lhp_qty,
-                    ]);
+        
+        if ($arr_params[2] == 'reportDate') {
+            $params = $this->_reportByDate($request);
+            if (count($params['data']) <= 0) {
+                $request->session()->flash('msg', 'Data tidak ditemukan!');
+                return Redirect::back();
             }
+            $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpall', $params)->setPaper('a3', 'landscape');
+            return $pdf->stream();
+        }else{
+            $params = $this->_reportSummary($request);
+            if (count($params['data']) <= 0) {
+                $request->session()->flash('msg', 'Data tidak ditemukan!');
+                return Redirect::back();
+            }
+            $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpsummary', $params)->setPaper('a3', 'landscape');
+            return $pdf->stream();
         }
-        $query =  DB::connection('oee')
-            ->table('entry_thp_tbl AS t1')
-            ->selectRaw($this->_QueryRawReport())
-            ->where('thp_date', '>=', $arr_params[0])
-            ->where('thp_date', '<=', $arr_params[1])
-            ->where('production_process', '=', $arr_params[2])
-            ->groupByRaw('production_code, item_code, thp_date')
-            ->get();
-        $sum = DB::connection('oee')
-            ->table('entry_thp_tbl')
-            ->selectRaw('SUM(plan) as total_plan, round(SUM(plan_hour), 2) as total_plan_hour')
-            ->where('thp_date', '>=', $arr_params[0])
-            ->where('thp_date', '<=', $arr_params[1])
-            ->where('production_process', '=', $arr_params[2])
-            ->first();
-        foreach ($check as $v) {
-            $log_print = DB::connection('oee')
-                ->table('entry_thp_tbl_log')
-                ->insert([
-                    'id_thp' => $v->id_thp,
-                    'production_code' => $v->production_code,
-                    'item_code' => $v->item_code,
-                    'remark' => $v->thp_remark,
-                    'thp_date' => $v->thp_date,
-                    'date_written' => date('Y-m-d'),
-                    'time_written' => date('H:i:s'),
-                    'status_change' => 'PRINT',
-                    'user' => Auth::user()->FullName,
-                    'note' => date('YmdHis').'-DEV'
-                ]);
-        }
-        $waktu_tersedia = 480+420;
-        $eff = 85/100;
-        $max_loading1 = ($waktu_tersedia*$eff)/60;
-        $max_loading2 = $max_loading1*41;
-        $man_power = 41*2;
-        $loading_time = $sum->total_plan_hour;
-        $total_mp = round(($loading_time/$max_loading1)*2);
-
-        $params = [
-            'data' => $query,
-            'sum' => $sum,
-            'waktu_tersedia' => $waktu_tersedia,
-            'eff' => $eff,
-            'max_loading1' => $max_loading1,
-            'max_loading2' => $max_loading2,
-            'man_power' => $man_power,
-            'loading_time' => $loading_time,
-            'total_mp' => $total_mp,
-            'date1' => $arr_params[0],
-            'date2' => $arr_params[1],
-            'dept' => $arr_params[2]
-        ];
-
-        $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpall', $params)->setPaper('a3', 'landscape');;
-        return $pdf->stream();
     }
 
     public function importToDB(Request $request)
@@ -589,6 +511,216 @@ class ThpEntryController extends Controller
         ];
     }
 
+    private function _reportByDate(Request $request)
+    {
+        $decode = base64_decode($request->print);
+        $arr_params = explode('&', $decode);
+
+        $cd = explode('/', $arr_params[0]);
+        $fixDate = $cd[2].'-'.$cd[1].'-'.$cd[0];
+        $production_process = $arr_params[1];
+
+        $check = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where('thp_date', $fixDate)
+            ->where('production_process', $production_process)
+            ->get();
+        if (count($check) <= 0) {
+            // $request->session()->flash('msg', 'Data tidak ditemukan!');
+            // return Redirect::back();
+        }
+        else{
+            $thp_qty = 0;
+            foreach ($check as $v) {
+                $shift = substr($v->thp_remark, 0, 1);
+                if ($v->item_code != null) {
+                    $lhp_where = [
+                        'production_code' => $v->production_code,
+                        'item_code' => $v->item_code,
+                        'date2' => $v->thp_date
+                    ];
+                }else{
+                    $lhp_where = [
+                        'production_code' => $v->production_code,
+                        'date2' => $v->thp_date
+                    ];
+                }
+                $lhp = DB::connection('oee')
+                    ->table('entry_lhp_tbl')
+                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+                    ->where($lhp_where)
+                    ->whereRaw('LEFT(remark, 1) = '.$shift)
+                    ->first();
+                $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+                $update = DB::connection('oee')
+                    ->table('entry_thp_tbl')
+                    ->where('id_thp', $v->id_thp)
+                    ->update([
+                        'lhp_qty' => $lhp_qty,
+                    ]);
+            }
+        }
+        $query =  DB::connection('oee')
+            ->table('entry_thp_tbl AS t1')
+            ->selectRaw($this->_QueryRawReport())
+            ->where('thp_date', $fixDate)
+            ->where('production_process', $production_process)
+            ->groupByRaw('production_code, item_code, thp_date')
+            ->get();
+        $sum = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->selectRaw('SUM(plan) as total_plan, round(SUM(plan_hour), 2) as total_plan_hour')
+            ->where('thp_date', $fixDate)
+            ->where('production_process', $production_process)
+            ->first();
+        foreach ($check as $v) {
+            $log_print = DB::connection('oee')
+                ->table('entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $v->id_thp,
+                    'production_code' => $v->production_code,
+                    'item_code' => $v->item_code,
+                    'remark' => $v->thp_remark,
+                    'thp_date' => $v->thp_date,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'PRINT',
+                    'user' => Auth::user()->FullName,
+                    'note' => date('YmdHis').'-DEV'
+                ]);
+        }
+        $waktu_tersedia = 480+420;
+        $eff = 85/100;
+        $max_loading1 = ($waktu_tersedia*$eff)/60;
+        $max_loading2 = $max_loading1*41;
+        $man_power = 41*2;
+        $loading_time = $sum->total_plan_hour;
+        $total_mp = round(($loading_time/$max_loading1)*2);
+
+        $params = [
+            'data' => $query,
+            'sum' => $sum,
+            'waktu_tersedia' => $waktu_tersedia,
+            'eff' => $eff,
+            'max_loading1' => $max_loading1,
+            'max_loading2' => $max_loading2,
+            'man_power' => $man_power,
+            'loading_time' => $loading_time,
+            'total_mp' => $total_mp,
+            'date1' => $fixDate,
+            'dept' => $production_process
+        ];
+        return $params;
+    }
+
+    private function _reportSummary(Request $request)
+    {
+        $decode = base64_decode($request->print);
+        $arr_params = explode('&', $decode);
+
+        $cd_1 = explode('/', $arr_params[0]);
+        $fixDate_1 = $cd_1[2].'-'.$cd_1[1].'-'.$cd_1[0];
+
+        $cd_2 = explode('/', $arr_params[1]);
+        $fixDate_2 = $cd_2[2].'-'.$cd_2[1].'-'.$cd_2[0];
+
+        $production_process = $arr_params[2];
+
+        $check = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where('thp_date', '>=',$fixDate_1)
+            ->where('thp_date', '<=',$fixDate_2)
+            ->where('production_process', $production_process)
+            ->get();
+        if (count($check) <= 0) {
+            // $request->session()->flash('msg', 'Data tidak ditemukan!');
+            // return Redirect::back();
+        }
+        else{
+            foreach ($check as $v) {
+                $shift = substr($v->thp_remark, 0, 1);
+                if ($v->item_code != null) {
+                    $lhp_where = [
+                        'production_code' => $v->production_code,
+                        'item_code' => $v->item_code,
+                        'date2' => $v->thp_date
+                    ];
+                }else{
+                    $lhp_where = [
+                        'production_code' => $v->production_code,
+                        'date2' => $v->thp_date
+                    ];
+                }
+                $lhp = DB::connection('oee')
+                    ->table('entry_lhp_tbl')
+                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+                    ->where($lhp_where)
+                    ->whereRaw('LEFT(remark, 1) = '.$shift)
+                    ->first();
+                $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+                $update = DB::connection('oee')
+                    ->table('entry_thp_tbl')
+                    ->where('id_thp', $v->id_thp)
+                    ->update([
+                        'lhp_qty' => $lhp_qty,
+                    ]);
+            }
+        }
+        $query =  DB::connection('oee')
+            ->table('entry_thp_tbl AS t1')
+            ->selectRaw($this->_QueryRawReport())
+            ->where('thp_date', '>=',$fixDate_1)
+            ->where('thp_date', '<=',$fixDate_2)
+            ->where('production_process', $production_process)
+            ->groupByRaw('production_code, item_code, thp_date')
+            ->get();
+        $sum = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->selectRaw('SUM(plan) as total_plan, round(SUM(plan_hour), 2) as total_plan_hour')
+            ->where('thp_date', '>=',$fixDate_1)
+            ->where('thp_date', '<=',$fixDate_2)
+            ->where('production_process', $production_process)
+            ->first();
+        foreach ($check as $v) {
+            $log_print = DB::connection('oee')
+                ->table('entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $v->id_thp,
+                    'production_code' => $v->production_code,
+                    'item_code' => $v->item_code,
+                    'remark' => $v->thp_remark,
+                    'thp_date' => $v->thp_date,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'PRINT',
+                    'user' => Auth::user()->FullName,
+                    'note' => date('YmdHis').'-DEV'
+                ]);
+        }
+        // $waktu_tersedia = 480+420;
+        // $eff = 85/100;
+        // $max_loading1 = ($waktu_tersedia*$eff)/60;
+        // $max_loading2 = $max_loading1*41;
+        // $man_power = 41*2;
+        // $loading_time = $sum->total_plan_hour;
+        // $total_mp = round(($loading_time/$max_loading1)*2);
+
+        $params = [
+            'data' => $query,
+            'sum' => $sum,
+            // 'waktu_tersedia' => $waktu_tersedia,
+            // 'eff' => $eff,
+            // 'max_loading1' => $max_loading1,
+            // 'max_loading2' => $max_loading2,
+            // 'man_power' => $man_power,
+            // 'loading_time' => $loading_time,
+            // 'total_mp' => $total_mp,
+            'date1' => $fixDate_1,
+            'dept' => $production_process
+        ];
+        return $params;
+    }
+
     private function _QueryRawReport()
     {
         return '
@@ -621,22 +753,40 @@ class ThpEntryController extends Controller
             ), 0) AS LHP_2,
             ROUND((
                 (
-                CAST(IFNULL((
-                    SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                    WHERE LEFT(t2.thp_remark, 1) = 1 
-                    AND t1.production_code = t2.production_code
-                    AND t1.thp_date = t2.thp_date
-                    LIMIT 1
-                ), 0) AS UNSIGNED) +
-                CAST(IFNULL((
-                    SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                    WHERE LEFT(t2.thp_remark, 1) = 2 
-                    AND t1.production_code = t2.production_code
-                    AND t1.thp_date = t2.thp_date
-                    LIMIT 1
-                ), 0) AS UNSIGNED)
-                ) / t1.plan
-            ), 2) AS persentase,
+                    (
+                        CAST(IFNULL((
+                            SELECT t2.lhp_qty FROM entry_thp_tbl t2 
+                            WHERE LEFT(t2.thp_remark, 1) = 1 
+                            AND t1.production_code = t2.production_code
+                            AND t1.thp_date = t2.thp_date
+                            LIMIT 1
+                        ), 0) AS UNSIGNED) +
+                        CAST(IFNULL((
+                            SELECT t2.lhp_qty FROM entry_thp_tbl t2 
+                            WHERE LEFT(t2.thp_remark, 1) = 2 
+                            AND t1.production_code = t2.production_code
+                            AND t1.thp_date = t2.thp_date
+                            LIMIT 1
+                        ), 0) AS UNSIGNED)
+                    ) / 
+                    (
+                        CAST(IFNULL((
+                            SELECT t2.thp_qty FROM entry_thp_tbl t2 
+                            WHERE LEFT(t2.thp_remark, 1) = 1 
+                            AND t1.production_code = t2.production_code
+                            AND t1.thp_date = t2.thp_date
+                            LIMIT 1
+                        ), 0) AS UNSIGNED) +
+                        CAST(IFNULL((
+                            SELECT t2.thp_qty FROM entry_thp_tbl t2 
+                            WHERE LEFT(t2.thp_remark, 1) = 2 
+                            AND t1.production_code = t2.production_code
+                            AND t1.thp_date = t2.thp_date
+                            LIMIT 1
+                        ), 0) AS UNSIGNED)
+                    )
+                ) * 100
+            )) AS persentase,
             ROUND((
                 (CAST(IFNULL((
                     SELECT t2.lhp_qty FROM entry_thp_tbl t2 
@@ -652,7 +802,41 @@ class ThpEntryController extends Controller
                     AND t1.thp_date = t2.thp_date
                     LIMIT 1
                 ), 0) AS UNSIGNED)) * t1.ct/3600
-            ), 2) AS act_hour_new
+            ), 2) AS act_hour_new,
+            IFNULL((
+                (
+                    CAST(IFNULL((
+                        SELECT t2.lhp_qty FROM entry_thp_tbl t2 
+                        WHERE LEFT(t2.thp_remark, 1) = 1 
+                        AND t1.production_code = t2.production_code
+                        AND t1.thp_date = t2.thp_date
+                        LIMIT 1
+                    ), 0) AS SIGNED) +
+                    CAST(IFNULL((
+                        SELECT t2.lhp_qty FROM entry_thp_tbl t2 
+                        WHERE LEFT(t2.thp_remark, 1) = 2 
+                        AND t1.production_code = t2.production_code
+                        AND t1.thp_date = t2.thp_date
+                        LIMIT 1
+                    ), 0) AS SIGNED)
+                ) - 
+                (
+                    CAST(IFNULL((
+                        SELECT t2.thp_qty FROM entry_thp_tbl t2 
+                        WHERE LEFT(t2.thp_remark, 1) = 1 
+                        AND t1.production_code = t2.production_code
+                        AND t1.thp_date = t2.thp_date
+                        LIMIT 1
+                    ), 0) AS SIGNED) +
+                    CAST(IFNULL((
+                        SELECT t2.thp_qty FROM entry_thp_tbl t2 
+                        WHERE LEFT(t2.thp_remark, 1) = 2 
+                        AND t1.production_code = t2.production_code
+                        AND t1.thp_date = t2.thp_date
+                        LIMIT 1
+                    ), 0) AS SIGNED)
+                )
+                ), 0) AS outstanding_beta
         ';
     }
 

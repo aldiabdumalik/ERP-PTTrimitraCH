@@ -25,9 +25,18 @@
                 <button type="button"  class="btn btn-outline-success btn-flat btn-sm" id="importModal">
                     <i class="fa fa-upload"></i>  Import
                 </button>
-                <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="printModal">
+                {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="printModal">
                     <i class="fa fa-print"></i>  Report
-                </button>
+                </button> --}}
+                <div class="dropdown" style="display: inline !important;">
+                    <button class="btn btn-outline-primary btn-flat btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Report
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a id="printModal" class="dropdown-item" href="javascript:void(0)">Report Harian</a>
+                        <a id="printModalSummary" class="dropdown-item" href="javascript:void(0)">Summary Report</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,6 +90,7 @@
 @include('tms.manufacturing.thp_entry._modal.detail.indexDetail')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
+@include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThpsummary')
 @include('tms.manufacturing.thp_entry._modal.import.importThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
 
@@ -288,6 +298,10 @@ $(document).ready(function(){
     $(document).on('click', '#printModal', function(e) {
         e.preventDefault();
         $('#thp-print-modal').modal('show');
+    });
+    $(document).on('click', '#printModalSummary', function(e) {
+        e.preventDefault();
+        $('#thp-print-summary-modal').modal('show');
     });
     $(document).on('click', '#importModal', function(e) {
         e.preventDefault();
@@ -616,7 +630,17 @@ $(document).ready(function(){
         var dari = $('#thp_print_dari').val();
         var sampai = $('#thp_print_sampai').val();
         var process = $('#thp_print_process').val();
-        var encrypt = btoa(`${$('#thp_print_dari').val()}&${$('#thp_print_sampai').val()}&${$('#thp_print_process').val()}`);
+        var type = 'reportDate';
+        var encrypt = btoa(`${dari}&${process}&${type}`);
+        var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
+        window.open(url, '_blank');
+    });
+    $(document).on('submit', '#thp-form-print-summary', function () {
+        var dari = $('#thp_print_dari_summary').val();
+        var sampai = $('#thp_print_sampai_summary').val();
+        var process = $('#thp_print_process_summary').val();
+        var type = 'reportSummary';
+        var encrypt = btoa(`${dari}&${sampai}&${process}&${type}`);
         var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
         window.open(url, '_blank');
     });

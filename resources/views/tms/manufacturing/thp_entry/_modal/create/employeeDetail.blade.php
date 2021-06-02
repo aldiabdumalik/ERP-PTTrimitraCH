@@ -38,7 +38,7 @@
         </div>
     </div> 
 </div>
-<div class="row">
+{{-- <div class="row">
     <div class="col-2">
         <div class="">
             <label style="font-size:12px;" for="thp-machine" class="col-form-label text-bold">Machine</label>
@@ -51,7 +51,7 @@
             </select>
         </div>
     </div> 
-</div>
+</div> --}}
 <div class="row">
     <div class="col-2">
         <div class="">
