@@ -303,6 +303,16 @@ class ThpEntryController extends Controller
         $cd = explode('/', $request->thp_date);
         $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
 
+        $check = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where('production_code', $request->production_code)
+            ->where('thp_date', $date)
+            ->whereRaw('LEFT(thp_remark, 1) = '. $request->shift)
+            ->first();
+        if (isset($check)) {
+            return false;
+        }
+
         $query = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->insertGetId([
