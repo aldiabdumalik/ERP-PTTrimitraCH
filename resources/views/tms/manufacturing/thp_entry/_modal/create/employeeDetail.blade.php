@@ -13,19 +13,19 @@
 <div class="row">
     <div class="col-2">
         <div class="">
-            <label style="font-size:12px;" for="thp-shift" class="col-form-label text-bold">Shift/Grup</label>
+            <label style="font-size:12px;" for="thp-shift" class="col-form-label text-bold">Shift</label>
         </div>
     </div>
     <div class="col-10">
         <div class="row">
-            <div class="col-5">
+            <div class="col-12">
                 <div class="">
                     <select name="thp-shift" id="thp-shift" class="form-control" required>
                         <option value="">Shift</option>
                     </select>
                 </div>
             </div>
-            <div class="col-2">
+            {{-- <div class="col-2">
                 <label style="font-size:12px;" for="thp-grup" class="col-form-label text-bold">/</label>
             </div>
             <div class="col-5">
@@ -34,7 +34,7 @@
                         <option value="">Grup</option>
                     </select>
                 </div>
-            </div> 
+            </div>  --}}
         </div>
     </div> 
 </div>

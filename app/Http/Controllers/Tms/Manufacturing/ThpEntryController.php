@@ -169,6 +169,7 @@ class ThpEntryController extends Controller
     public function closeThpEntry(Request $request)
     {
         $data = ThpEntry::where('id_thp', $request->id)->first();
+        
         $shift = substr($data->thp_remark, 0, 1);
         if ($data->item_code != null) {
             $lhp_where = [

@@ -13,24 +13,24 @@
 <div class="row">
     <div class="col-2">
         <div class="">
-            <label style="font-size:12px;" for="thp-detail-shift" class="col-form-label text-bold">Shift/Grup</label>
+            <label style="font-size:12px;" for="thp-detail-shift" class="col-form-label text-bold">Shift</label>
         </div>
     </div>
     <div class="col-10">
         <div class="row">
-            <div class="col-5">
+            <div class="col-12">
                 <div class="">
                     <input type="text" name="thp-detail-shift" id="thp-detail-shift" class="form-control" onkeydown="return false">
                 </div>
             </div>
-            <div class="col-2">
+            {{-- <div class="col-2">
                 <label style="font-size:12px;" for="thp-detail-grup" class="col-form-label text-bold">/</label>
             </div>
             <div class="col-5">
                 <div class="">
                     <input type="text" name="thp-detail-grup" id="thp-detail-grup" class="form-control" onkeydown="return false">
                 </div>
-            </div> 
+            </div>  --}}
         </div>
     </div> 
 </div>

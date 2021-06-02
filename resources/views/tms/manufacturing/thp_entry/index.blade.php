@@ -66,7 +66,7 @@
                                                 <th class="align-middle">Route</th>
                                                 <th class="align-middle">Process</th>
                                                 <th class="align-middle">Shift</th>
-                                                <th class="align-middle">Group</th>
+                                                {{-- <th class="align-middle">Group</th> --}}
                                                 <th class="align-middle">THP Qty</th>
                                                 <th class="align-middle">Action</th>
                                             </tr>
@@ -122,7 +122,7 @@ $(document).ready(function(){
             {data: 'route', name: 'route'},
             {data: 'process', name: 'process', orderable: false, searchable: false},
             {data: 'shift', name: 'shift', searchable: false},
-            {data: 'group', name: 'group', searchable: false},
+            // {data: 'group', name: 'group', searchable: false},
             {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
@@ -165,8 +165,8 @@ $(document).ready(function(){
                         sgm = data.thp_remark.split('_');
                         shift = sgm[0].split('');
                         $('#thp-detail-shift').val(shift[0]);
-                        $('#thp-detail-grup').val(shift[1]);
-                        $('#thp-detail-machine').val(sgm[1]);
+                        // $('#thp-detail-grup').val(shift[1]);
+                        // $('#thp-detail-machine').val(sgm[1]);
 
                         apnormality = (data.apnormality != null ? data.apnormality : '//');
                         action_plan = (data.action_plan != null ? data.action_plan : '//');
@@ -218,16 +218,16 @@ $(document).ready(function(){
                                 }));
                             });
                             $('#thp-shift').val(shift[0]);
-                            getShiftGrupMachine('GRUP', null, function (response) {
-                                $('#thp-grup option[value!=""]').remove();
-                                $.each(response.responseJSON.data, function (res, data) {
-                                    $('#thp-grup').append($('<option>', {
-                                        value: data.employee_group,
-                                        text: data.employee_group
-                                    }));
-                                });
-                                $('#thp-grup').val(shift[1]);
-                            });
+                            // getShiftGrupMachine('GRUP', null, function (response) {
+                            //     $('#thp-grup option[value!=""]').remove();
+                            //     $.each(response.responseJSON.data, function (res, data) {
+                            //         $('#thp-grup').append($('<option>', {
+                            //             value: data.employee_group,
+                            //             text: data.employee_group
+                            //         }));
+                            //     });
+                            //     $('#thp-grup').val(shift[1]);
+                            // });
                         });
                         getShiftGrupMachine('MACHINE', data.production_process, function (response) {
                             $('#thp-machine option[value!=""]').remove();
@@ -284,15 +284,15 @@ $(document).ready(function(){
                     text: data.oee_workshift
                 }));
             });
-            getShiftGrupMachine('GRUP', null, function (response) {
-                $('#thp-grup option[value!=""]').remove();
-                $.each(response.responseJSON.data, function (res, data) {
-                    $('#thp-grup').append($('<option>', {
-                        value: data.employee_group,
-                        text: data.employee_group
-                    }));
-                });
-            });
+            // getShiftGrupMachine('GRUP', null, function (response) {
+            //     $('#thp-grup option[value!=""]').remove();
+            //     $.each(response.responseJSON.data, function (res, data) {
+            //         $('#thp-grup').append($('<option>', {
+            //             value: data.employee_group,
+            //             text: data.employee_group
+            //         }));
+            //     });
+            // });
         });
     });
     $(document).on('click', '#printModal', function(e) {
