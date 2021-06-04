@@ -38,11 +38,15 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@printThpEntry', 
         'as' => 'tms.manufacturing.thp_entry.printThpEntry'
     ]);
-    Route::get('/manufacturing/thp_entry/get/shiftgroupmachine', [
+    Route::post('/manufacturing/thp_entry/get/shiftgroupmachine', [
         'uses' => 'TMS\Manufacturing\ThpEntryController@getShiftGroupMachine', 
         'as' => 'tms.manufacturing.thp_entry.getShiftGroupMachine'
     ]);
     Route::post('/manufacturing/thp_entry/post/thpimport', [
         'uses' => 'TMS\Manufacturing\ThpEntryController@importToDB', 
         'as' => 'tms.manufacturing.thp_entry.importToDB'
+    ]);
+    Route::post('/manufacturing/thp_entry/post/thpsetting', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@settingThpEntry', 
+        'as' => 'tms.manufacturing.thp_entry.settingThpEntry'
     ]);

@@ -25,16 +25,21 @@
                 <button type="button"  class="btn btn-outline-success btn-flat btn-sm" id="importModal">
                     <i class="fa fa-upload"></i>  Import
                 </button>
-                {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="printModal">
-                    <i class="fa fa-print"></i>  Report
-                </button> --}}
                 <div class="dropdown" style="display: inline !important;">
-                    <button class="btn btn-outline-primary btn-flat btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Report
+                    <button class="btn btn-outline-danger btn-flat btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-download"></i> Report
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a id="printModal" class="dropdown-item" href="javascript:void(0)">Report Harian</a>
                         <a id="printModalSummary" class="dropdown-item" href="javascript:void(0)">Summary Report</a>
+                    </div>
+                </div>
+                <div class="dropdown" style="display: inline !important;">
+                    <button class="btn btn-outline-primary btn-flat btn-sm dropdown-toggle" type="button" id="dropdownSettingButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-cog"></i> Setting
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownSettingButton">
+                        <a id="settingPersentaseModal" class="dropdown-item" href="javascript:void(0)">Min Persentase</a>
                     </div>
                 </div>
             </div>
@@ -58,6 +63,7 @@
                                             <tr>
                                                 <th class="align-middle">THP Number</th>
                                                 <th class="align-middle">Date</th>
+                                                <th class="align-middle">Date Order</th>
                                                 {{-- <th class="align-middle">Closed</th> --}}
                                                 <th class="align-middle">Customer</th>
                                                 <th class="align-middle">Production Code</th>
@@ -65,8 +71,6 @@
                                                 <th class="align-middle">Part Type</th>
                                                 <th class="align-middle">Route</th>
                                                 <th class="align-middle">Process</th>
-                                                <th class="align-middle">Shift</th>
-                                                {{-- <th class="align-middle">Group</th> --}}
                                                 <th class="align-middle">THP Qty</th>
                                                 <th class="align-middle">Action</th>
                                             </tr>
@@ -83,16 +87,15 @@
 </div>
 </div>
 </div>
-{{-- @include('tms.manufacturing.thp_entry._modal.create_thp_modal._createthp') --}}
 @include('tms.manufacturing.thp_entry._modal.create.createForm')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._productioncode')
-{{-- @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewthp') --}}
 @include('tms.manufacturing.thp_entry._modal.detail.indexDetail')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThpsummary')
 @include('tms.manufacturing.thp_entry._modal.import.importThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
+@include('tms.manufacturing.thp_entry._modal.setting.setPersentase')
 
 
 @endsection
@@ -114,6 +117,7 @@ $(document).ready(function(){
         columns: [
             {data: 'id_thp', name: 'id_thp', searchable: false},
             {data: 'thp_date', name: 'thp_date', className: "text-center"},
+            {data: 'date_order', name: 'date_order', className: "text-center", visible: false},
             // {data: 'closed', name: 'closed', className: "text-center"},
             {data: 'customer_code', name: 'customer_code'},
             {data: 'production_code', name: 'production_code'},
@@ -121,16 +125,12 @@ $(document).ready(function(){
             {data: 'part_type', name: 'part_type'},
             {data: 'route', name: 'route'},
             {data: 'process', name: 'process', orderable: false, searchable: false},
-            {data: 'shift', name: 'shift', searchable: false},
-            // {data: 'group', name: 'group', searchable: false},
             {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
-        "order": [[ 1, "desc" ]],
+        "order": [[ 2, "desc" ]],
         initComplete: function(settings, json) {
             $('.thp-act-view').on('click', function () {
-                // $('#viewThpid').modal('show');
-                // viewThp($(this).data('thp'));
                 getThp($(this).data('thp'), function (response) {
                     response = response.responseJSON;
                     $('#modalDetail').modal('show');
@@ -162,11 +162,6 @@ $(document).ready(function(){
                         $('#thp-detail-itemcode').val(data.item_code);
                         $('#thp-detail-production-process').val(data.production_process);
                         $('#thp-detail-operator').val(data.user);
-                        sgm = data.thp_remark.split('_');
-                        shift = sgm[0].split('');
-                        $('#thp-detail-shift').val(shift[0]);
-                        // $('#thp-detail-grup').val(shift[1]);
-                        // $('#thp-detail-machine').val(sgm[1]);
 
                         apnormality = (data.apnormality != null ? data.apnormality : '//');
                         action_plan = (data.action_plan != null ? data.action_plan : '//');
@@ -209,36 +204,6 @@ $(document).ready(function(){
                         $('#thp-note').val(data.note);
                         $('#thp-apnormal').val(data.apnormality);
                         $('#thp-action-plan').val(data.action_plan);
-                        getShiftGrupMachine('SHIFT', null, function (response) {
-                            $('#thp-shift option[value!=""]').remove();
-                            $.each(response.responseJSON.data, function (res, data) {
-                                $('#thp-shift').append($('<option>', {
-                                    value: data.oee_workshift,
-                                    text: data.oee_workshift
-                                }));
-                            });
-                            $('#thp-shift').val(shift[0]);
-                            // getShiftGrupMachine('GRUP', null, function (response) {
-                            //     $('#thp-grup option[value!=""]').remove();
-                            //     $.each(response.responseJSON.data, function (res, data) {
-                            //         $('#thp-grup').append($('<option>', {
-                            //             value: data.employee_group,
-                            //             text: data.employee_group
-                            //         }));
-                            //     });
-                            //     $('#thp-grup').val(shift[1]);
-                            // });
-                        });
-                        getShiftGrupMachine('MACHINE', data.production_process, function (response) {
-                            $('#thp-machine option[value!=""]').remove();
-                            $.each(response.responseJSON.data, function (res, data) {
-                                $('#thp-machine').append($('<option>', {
-                                    value: data.machine_number,
-                                    text: data.machine_number
-                                }));
-                            });
-                            $('#thp-machine').val(sgm[1]);
-                        });
                     }
                 });
             }).on('mouseup',function(){
@@ -276,24 +241,6 @@ $(document).ready(function(){
     $(document).on('click', '#addModal', function(e) {
         e.preventDefault();
         $('#createModal').modal('show');
-        getShiftGrupMachine('SHIFT', null, function (response) {
-            $('#thp-shift option[value!=""]').remove();
-            $.each(response.responseJSON.data, function (res, data) {
-                $('#thp-shift').append($('<option>', {
-                    value: data.oee_workshift,
-                    text: data.oee_workshift
-                }));
-            });
-            // getShiftGrupMachine('GRUP', null, function (response) {
-            //     $('#thp-grup option[value!=""]').remove();
-            //     $.each(response.responseJSON.data, function (res, data) {
-            //         $('#thp-grup').append($('<option>', {
-            //             value: data.employee_group,
-            //             text: data.employee_group
-            //         }));
-            //     });
-            // });
-        });
     });
     $(document).on('click', '#printModal', function(e) {
         e.preventDefault();
@@ -533,16 +480,6 @@ $(document).ready(function(){
             $('#thp-production-process').val(data.production_process);
 
             $('#poduction-code-modal').modal('hide');
-
-            getShiftGrupMachine('MACHINE', data.production_process, function (response) {
-                $('#thp-machine option[value!=""]').remove();
-                $.each(response.responseJSON.data, function (res, data) {
-                    $('#thp-machine').append($('<option>', {
-                        value: data.machine_number,
-                        text: data.machine_number
-                    }));
-                });
-            });
         });
         $(document).on('hidden.bs.modal', '#thp-poduction-code-datatables', function () {
             tbl_production_code.clear();
@@ -644,6 +581,41 @@ $(document).ready(function(){
         var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
         window.open(url, '_blank');
     });
+    $('#settingPersentaseModal').on('click', function () {
+        $('#setPersentase').modal('show');
+        var data = {
+            "type": "GET",
+            "id": 1
+        }
+        setting(data, function (response) {
+            response = response.responseJSON;
+            if(response.status == true){
+                $('#setting-persentase-id').val(response.data.id);
+                $('#setting-persentase-name').val(response.data.name_setting);
+                $('#setting-persentase-value').val(response.data.value_setting);
+            }
+        });
+        $(document).on('submit', '#setting-persentase-form', function () {
+            var insert = {
+                "type": "POST",
+                "id": $('#setting-persentase-id').val(),
+                "setting_name": $('#setting-persentase-name').val(),
+                "setting_value": $('#setting-persentase-value').val()
+            }
+            setting(insert, function (response) {
+                response = response.responseJSON;
+                if(response.status == true){
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.message,
+                        icon: 'success'
+                    }).then(function () {
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+    });
     function getShiftGrupMachine(type="", process=null, callback) {
         var query1 = {
             "type": type
@@ -655,13 +627,35 @@ $(document).ready(function(){
         var params = (process != null ? query2 : query1);
         $.ajax({
             url: "{{ route('tms.manufacturing.thp_entry.getShiftGroupMachine') }}",
-            type: "GET",
+            type: "POST",
             dataType: "JSON",
             cache: false,
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             data: params,
+            error: function(response, status, x){
+                Swal.fire({
+                    title: 'Error!',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                })
+            },
+            complete: function (response){
+                callback(response);
+            }
+        });
+    }
+    function setting(data=null, callback) {
+        $.ajax({
+            url: "{{ route('tms.manufacturing.thp_entry.settingThpEntry') }}",
+            type: "POST",
+            dataType: "JSON",
+            cache: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: data,
             error: function(response, status, x){
                 Swal.fire({
                     title: 'Error!',

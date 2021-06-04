@@ -20,7 +20,7 @@
                 </div>
                 <div class="datatable datatable-primary">
                     <div class="table-responsive">
-                        <table id="thp-poduction-code-datatables" class="table table-bordered table-hover" style="width:100%:cursor:pointer">
+                        <table id="thp-poduction-code-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer!important;">
                             <thead class="text-center" style="font-size: 15px;">
                                 <tr>
                                     <th>customer</th>

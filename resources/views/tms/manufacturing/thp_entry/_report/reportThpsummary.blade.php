@@ -25,7 +25,6 @@
 				<table cellspacing="0" cellpadding="10" style="width:50%">
 					<tr>
 						<td style="width:15%">
-							{{-- <div style="height:100px;width:100px;border:1px solid #000"></div> --}}
 							<img src="{{public_path('images/tch-logo.png')}}" alt="">
 						</td>
 						<td style="width:75%">
@@ -51,14 +50,13 @@
 						<th rowspan="2">CUST</th>
 						<th rowspan="2">NAME PART</th>
 						<th rowspan="2">TYPE</th>
-						{{-- <th rowspan="2">PLAN</th> --}}
 						<th rowspan="2">C/T</th>
 						<th rowspan="2">ROUTE</th>
 						<th rowspan="2">TON</th>
 						<th rowspan="2">PROSES</th>
 						<th rowspan="2">TIME</th>
 						<th rowspan="2">PLAN HOUR</th>
-						<th colspan="2">PLAN THP</th>
+						<th rowspan="2">PLAN THP</th>
 						<th colspan="3">ACTUAL LHP</th>
 						<th rowspan="2">ACT HOUR</th>
 						<th rowspan="2">OUTSTANDING</th>
@@ -66,13 +64,10 @@
 					<tr>
 						<th>Shift 1</th>
 						<th>Shift 2</th>
-						<th>Shift 1</th>
-						<th>Shift 2</th>
 						<th>%</th>
 					</tr>
 						@php
-							$sum_shift_1 = 0;
-							$sum_shift_2 = 0;
+							$sum_thp = 0;
 							$sum_lhp_1 = 0;
 							$sum_lhp_2 = 0;
 							$sum_persentase = 0;
@@ -80,8 +75,7 @@
 						@endphp
 					@foreach ($data as $v)
 						@php
-							$sum_shift_1 += $v->SHIFT_1;
-							$sum_shift_2 += $v->SHIFT_2;
+							$sum_thp += $v->thp_qty;
 							$sum_lhp_1 += $v->LHP_1;
 							$sum_lhp_2 += $v->LHP_2;
 							$sum_persentase += $v->persentase;
@@ -92,15 +86,13 @@
 						<td>{{$v->customer_code}}</td>
 						<td>{{$v->part_name}}</td>
 						<td>{{$v->part_type}}</td>
-						{{-- <td>{{$v->plan}}</td> --}}
 						<td>{{$v->ct}}</td>
 						<td>{{$v->route}}</td>
 						<td>{{$v->ton}}</td>
 						<td>{{$v->process_sequence_1}}</td>
 						<td>{{$v->time}}</td>
 						<td>{{$v->plan_hour}}</td>
-						<td>{{$v->SHIFT_1}}</td>
-						<td>{{$v->SHIFT_2}}</td>
+						<td>{{$v->thp_qty}}</td>
 						<td>{{$v->LHP_1}}</td>
 						<td>{{$v->LHP_2}}</td>
 						<td>{{$v->persentase}}</td>
@@ -110,14 +102,11 @@
 					@endforeach
 					<tr>
 						<th colspan="9">TOTAL</th>
-						{{-- <td>{{$sum->total_plan}}</td> --}}
-						{{-- <td></td> --}}
 						<td>{{$sum->total_plan_hour}}</td>
-						<td>{{$sum_shift_1}}</td>
-						<td>{{$sum_shift_2}}</td>
+						<td>{{$sum_thp}}</td>
 						<td>{{$sum_lhp_1}}</td>
 						<td>{{$sum_lhp_2}}</td>
-						<td>{{round( (($sum_lhp_1 + $sum_lhp_2) / ($sum_shift_1 + $sum_shift_2)) * 100)}}</td>
+						<td>{{round( (($sum_lhp_1 + $sum_lhp_2) / ($sum_thp)) * 100)}}</td>
 						<td>{{$sum_act_hour}}</td>
 						<td></td>
 					</tr>

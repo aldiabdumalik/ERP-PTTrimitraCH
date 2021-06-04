@@ -48,6 +48,9 @@ class ThpEntryController extends Controller
             ->editColumn('thp_date', function($query){
                 return date('d/m/Y', strtotime($query->thp_date));
             })
+            ->editColumn('date_order', function($query){
+                return date('Ymd', strtotime($query->thp_date));
+            })
             ->editColumn('process', function($query){
                 return $query->process_sequence_1.'/'.$query->process_sequence_2;
             })
@@ -133,7 +136,6 @@ class ThpEntryController extends Controller
             ->table('entry_thp_tbl')
             ->where(['id_thp' => $id])
             ->first();
-        $shift = substr($query->thp_remark, 0, 1);
         if ($query->item_code != null) {
             $lhp_where = [
                 'production_code' => $query->production_code,
@@ -150,8 +152,16 @@ class ThpEntryController extends Controller
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
             ->where($lhp_where)
-            ->whereRaw('LEFT(remark, 1) = '.$shift)
             ->first();
+        $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+        if (isset($lhp)) {
+            $outstanding_qty =  $lhp_qty - $query->thp_qty;
+            $update = ThpEntry::where('id_thp', $query->id_thp)
+                ->update([
+                    'lhp_qty' => $lhp_qty,
+                    'outstanding_qty' => $outstanding_qty
+                ]);
+        }
         if (!empty($query)) {
             return response()->json([
                 'status' => true,
@@ -169,8 +179,8 @@ class ThpEntryController extends Controller
     public function closeThpEntry(Request $request)
     {
         $data = ThpEntry::where('id_thp', $request->id)->first();
-        
-        $shift = substr($data->thp_remark, 0, 1);
+
+        $outstanding_qty = 0;
         if ($data->item_code != null) {
             $lhp_where = [
                 'production_code' => $data->production_code,
@@ -187,42 +197,64 @@ class ThpEntryController extends Controller
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
             ->where($lhp_where)
-            ->whereRaw('LEFT(remark, 1) = '.$shift)
             ->first();
+        $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+        $outstanding_qty =  $lhp_qty - $data->thp_qty;
+        $update = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where('id_thp', $data->id_thp)
+            ->update([
+                'lhp_qty' => $lhp_qty,
+                'outstanding_qty' => $outstanding_qty
+            ]);
 
-        if ($lhp->lhp_qty >= $data->thp_qty && ($lhp->lhp_qty != 0 || $lhp->lhp_qty != null)) {
-            
-            ThpEntry::where('id_thp', $data->id_thp)
-                ->update([
-                    'status' => 'CLOSE',
-                    'closed' => date('Y-m-d'),
-                    'note' => $request->note
-                ]);
-
-            $query2 = DB::connection('oee')
-                ->table('entry_thp_tbl_log')
-                ->insert([
-                    'id_thp' => $data->id_thp,
-                    'production_code' => $data->production_code,
-                    'item_code' => $data->item_code,
-                    'remark' => $data->thp_remark,
-                    'thp_date' => $data->thp_date,
-                    'date_written' => date('Y-m-d'),
-                    'time_written' => date('H:i:s'),
-                    'status_change' => 'CLOSE',
-                    'user' => Auth::user()->FullName,
-                    'note' => date('YmdHis').'-DEV'
-                ]);
-            return response()->json([
-                'status' => true,
-                'message' => 'THP Entry CLOSED!',
-            ], 201);
-        }else{
-            return response()->json([
-                'status' => false,
-                'message' => 'Maaf THP Entry harus balance atau LHP lebih besar dari THP, silahkan coba kembali!',
-            ], 401);
+        $thp = ThpEntry::where('id_thp', $request->id)
+            ->first();
+        if (isset($thp)) {
+            $persentase = round(($thp->lhp_qty / $thp->thp_qty)*100);
+            $getsetting = DB::connection('oee')
+                ->table('entry_thp_tbl_setting')
+                ->select('value_setting')
+                ->where('id', 1)
+                ->first();
+            $min_persen = $getsetting->value_setting;
+            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->thp_qty);
+            if ($persentase >= $min_persen) {
+                $update = ThpEntry::where('production_code', $thp->production_code)
+                    ->where('thp_date', $thp->thp_date)
+                    ->update([
+                        'closed' => date('Y-m-d'),
+                        'status' => 'CLOSED'
+                    ]);
+                $query2 = DB::connection('oee')
+                    ->table('entry_thp_tbl_log')
+                    ->insert([
+                        'id_thp' => $data->id_thp,
+                        'production_code' => $data->production_code,
+                        'item_code' => $data->item_code,
+                        'remark' => $data->thp_remark,
+                        'thp_date' => $data->thp_date,
+                        'date_written' => date('Y-m-d'),
+                        'time_written' => date('H:i:s'),
+                        'status_change' => 'CLOSE',
+                        'user' => Auth::user()->FullName,
+                        'note' => date('YmdHis').'-DEV'
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'message' => 'THP Entry CLOSED!',
+                ], 201);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Maaf THP Entry tidak dapat diclose karena kurang dari '.$min_persen.'%, silahkan coba kembali!',
+                ], 401);
+            }
         }
+        return response()->json([
+            'status' => false,
+            'message' => 'Maaf THP Entry tidak dapat diclose, silahkan coba kembali!',
+        ], 401);
     }
 
     public function printThpentry(Request $request)
@@ -251,6 +283,12 @@ class ThpEntryController extends Controller
 
     public function importToDB(Request $request)
     {
+        $getsetting = DB::connection('oee')
+                ->table('entry_thp_tbl_setting')
+                ->select('value_setting')
+                ->where('id', 1)
+                ->first();
+        $min_persen = $getsetting->value_setting;
         $validated = $request->validate([
             'thp_import_file' => 'mimes:xls,xlsx,csv|max:25000',
         ]);
@@ -258,12 +296,58 @@ class ThpEntryController extends Controller
         $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
 
         if ($request->hasFile('thp_import_file')) {
-            Excel::import(new ThpEntryImport($date), $request->file('thp_import_file'));
+            Excel::import(new ThpEntryImport($date, $min_persen), $request->file('thp_import_file'));
         }
         return response()->json([
             'status' => true,
             'message' => 'Excel berhasil di convert'
         ], 200);
+    }
+
+    public function settingThpEntry(Request $request)
+    {
+        if ($request->type == 'GET') {
+            $res = $this->_getSetting($request);
+            if (isset($res)) {
+                return response()->json([
+                    'status' => true,
+                    'data' => $res
+                ], 200);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Setting tidak ditemukan'
+                ], 404);
+            }
+        }elseif ($request->type == 'POST') {
+            $data = (object)[
+                'where' => [
+                    'id' => $request->id
+                ],
+                'data' => [
+                    'name_setting' => $request->setting_name,
+                    'value_setting' => $request->setting_value,
+                    'user' => Auth::user()->FullName
+                ]
+            ];
+            $res = $this->_updateSetting($data);
+            if ($res) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Setting berhasil di perbaharui'
+                ], 201);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Setting gagal di perbaharui, silahkan coba kembali'
+                ], 401);
+            }
+        }else{
+            return response()->json([
+                'status' => false,
+                'message' => 'Perintah gagal'
+            ], 401);
+        }
     }
 
     public function getShiftGroupMachine(Request $request)
@@ -308,10 +392,37 @@ class ThpEntryController extends Controller
             ->table('entry_thp_tbl')
             ->where('production_code', $request->production_code)
             ->where('thp_date', $date)
-            ->whereRaw('LEFT(thp_remark, 1) = '. $request->shift)
             ->first();
         if (isset($check)) {
             return false;
+        }
+
+        $thp = ThpEntry::where('production_code', $request->production_code)
+            ->where('closed', NULL)
+            ->orderBy('thp_date', 'desc')
+            ->first();
+        if (isset($thp)) {
+            $persentase = round(($thp->lhp_qty / $thp->thp_qty)*100);
+            $getsetting = DB::connection('oee')
+                ->table('entry_thp_tbl_setting')
+                ->select('value_setting')
+                ->where('id', 1)
+                ->first();
+            $min_persen = $getsetting->value_setting;
+            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->thp_qty);
+            if ($persentase <= $min_persen) {
+                $thp_qty = $request->thp_qty + abs($outstanding_qty);
+            }else{
+                $thp_qty = $request->thp_qty;
+            }
+            $update = ThpEntry::where('production_code', $thp->production_code)
+                ->where('thp_date', $thp->thp_date)
+                ->update([
+                    'closed' => date('Y-m-d'),
+                    'status' => 'CLOSED'
+                ]);
+        }else{
+            $thp_qty = $request->thp_qty;
         }
 
         $query = DB::connection('oee')
@@ -332,7 +443,7 @@ class ThpEntryController extends Controller
                 'ton' => $request->ton,
                 'time' => $request->time,
                 'plan_hour' => $request->plan_hour,
-                'thp_qty' => $request->thp_qty,
+                'thp_qty' => $thp_qty,
                 'thp_remark' => $request->shift.$request->grup.'_'.$request->machine,
                 'note' => $request->note,
                 'apnormality' => $request->apnormal,
@@ -362,6 +473,16 @@ class ThpEntryController extends Controller
     {
         $cd = explode('/', $request->thp_date);
         $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
+
+        $check = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where('production_code', $request->production_code)
+            ->where('thp_date', $date)
+            ->where('id_thp', '!=', $request->id_thp)
+            ->first();
+        if (isset($check)) {
+            return false;
+        }
 
         $query = DB::connection('oee')
             ->table('entry_thp_tbl')
@@ -541,9 +662,8 @@ class ThpEntryController extends Controller
             // return Redirect::back();
         }
         else{
-            $thp_qty = 0;
+            $outstanding_qty = 0;
             foreach ($check as $v) {
-                $shift = substr($v->thp_remark, 0, 1);
                 if ($v->item_code != null) {
                     $lhp_where = [
                         'production_code' => $v->production_code,
@@ -560,14 +680,15 @@ class ThpEntryController extends Controller
                     ->table('entry_lhp_tbl')
                     ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
                     ->where($lhp_where)
-                    ->whereRaw('LEFT(remark, 1) = '.$shift)
                     ->first();
                 $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+                $outstanding_qty =  $lhp_qty - $v->thp_qty;
                 $update = DB::connection('oee')
                     ->table('entry_thp_tbl')
                     ->where('id_thp', $v->id_thp)
                     ->update([
                         'lhp_qty' => $lhp_qty,
+                        'outstanding_qty' => $outstanding_qty
                     ]);
             }
         }
@@ -648,8 +769,8 @@ class ThpEntryController extends Controller
             // return Redirect::back();
         }
         else{
+            $outstanding_qty = 0;
             foreach ($check as $v) {
-                $shift = substr($v->thp_remark, 0, 1);
                 if ($v->item_code != null) {
                     $lhp_where = [
                         'production_code' => $v->production_code,
@@ -666,14 +787,15 @@ class ThpEntryController extends Controller
                     ->table('entry_lhp_tbl')
                     ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
                     ->where($lhp_where)
-                    ->whereRaw('LEFT(remark, 1) = '.$shift)
                     ->first();
                 $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+                $outstanding_qty =  $lhp_qty - $v->thp_qty;
                 $update = DB::connection('oee')
                     ->table('entry_thp_tbl')
                     ->where('id_thp', $v->id_thp)
                     ->update([
                         'lhp_qty' => $lhp_qty,
+                        'outstanding_qty' => $outstanding_qty
                     ]);
             }
         }
@@ -708,146 +830,55 @@ class ThpEntryController extends Controller
                     'note' => date('YmdHis').'-DEV'
                 ]);
         }
-        // $waktu_tersedia = 480+420;
-        // $eff = 85/100;
-        // $max_loading1 = ($waktu_tersedia*$eff)/60;
-        // $max_loading2 = $max_loading1*41;
-        // $man_power = 41*2;
-        // $loading_time = $sum->total_plan_hour;
-        // $total_mp = round(($loading_time/$max_loading1)*2);
 
         $params = [
             'data' => $query,
             'sum' => $sum,
-            // 'waktu_tersedia' => $waktu_tersedia,
-            // 'eff' => $eff,
-            // 'max_loading1' => $max_loading1,
-            // 'max_loading2' => $max_loading2,
-            // 'man_power' => $man_power,
-            // 'loading_time' => $loading_time,
-            // 'total_mp' => $total_mp,
             'date1' => $fixDate_1,
             'dept' => $production_process
         ];
         return $params;
     }
 
+    private function _getSetting(Request $request)
+    {
+        $query = DB::connection('oee')
+            ->table('entry_thp_tbl_setting')
+            ->where('id', $request->id)
+            ->first();
+        return $query;
+    }
+
+    private function _updateSetting($data)
+    {
+        $query = DB::connection('oee')
+            ->table('entry_thp_tbl_setting')
+            ->where($data->where)
+            ->update($data->data);
+        return $query;
+    }
+
     private function _QueryRawReport()
     {
         return '
             t1.*,
-            CAST(IFNULL((
-                SELECT SUM(t2.thp_qty) as thp_1 FROM entry_thp_tbl t2
-                WHERE LEFT(t2.thp_remark, 1) = 1 
-                AND t1.production_code = t2.production_code
-                AND t1.thp_date = t2.thp_date
-            ), 0) AS UNSIGNED) AS SHIFT_1,
-            CAST(IFNULL((
-                SELECT SUM(t2.thp_qty) FROM entry_thp_tbl t2 
-                WHERE LEFT(t2.thp_remark, 1) = 2 
-                AND t1.production_code = t2.production_code
-                AND t1.thp_date = t2.thp_date
-            ), 0) AS UNSIGNED) AS SHIFT_2,
             IFNULL((
-                SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                WHERE LEFT(t2.thp_remark, 1) = 1 
+                SELECT t2.lhp_qty FROM entry_lhp_tbl t2 
+                WHERE LEFT(t2.remark, 1) = 1 
                 AND t1.production_code = t2.production_code
-                AND t1.thp_date = t2.thp_date
+                AND t1.thp_date = t2.date2
                 LIMIT 1
             ), 0) AS LHP_1,
             IFNULL((
-                SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                WHERE LEFT(t2.thp_remark, 1) = 2 
+                SELECT t2.lhp_qty FROM entry_lhp_tbl t2 
+                WHERE LEFT(t2.remark, 1) = 2 
                 AND t1.production_code = t2.production_code
-                AND t1.thp_date = t2.thp_date
+                AND t1.thp_date = t2.date2
                 LIMIT 1
             ), 0) AS LHP_2,
-            ROUND((
-                (
-                    (
-                        CAST(IFNULL((
-                            SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                            WHERE LEFT(t2.thp_remark, 1) = 1 
-                            AND t1.production_code = t2.production_code
-                            AND t1.thp_date = t2.thp_date
-                            LIMIT 1
-                        ), 0) AS UNSIGNED) +
-                        CAST(IFNULL((
-                            SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                            WHERE LEFT(t2.thp_remark, 1) = 2 
-                            AND t1.production_code = t2.production_code
-                            AND t1.thp_date = t2.thp_date
-                            LIMIT 1
-                        ), 0) AS UNSIGNED)
-                    ) / 
-                    (
-                        CAST(IFNULL((
-                            SELECT t2.thp_qty FROM entry_thp_tbl t2 
-                            WHERE LEFT(t2.thp_remark, 1) = 1 
-                            AND t1.production_code = t2.production_code
-                            AND t1.thp_date = t2.thp_date
-                            LIMIT 1
-                        ), 0) AS UNSIGNED) +
-                        CAST(IFNULL((
-                            SELECT t2.thp_qty FROM entry_thp_tbl t2 
-                            WHERE LEFT(t2.thp_remark, 1) = 2 
-                            AND t1.production_code = t2.production_code
-                            AND t1.thp_date = t2.thp_date
-                            LIMIT 1
-                        ), 0) AS UNSIGNED)
-                    )
-                ) * 100
-            )) AS persentase,
-            ROUND((
-                (CAST(IFNULL((
-                    SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                    WHERE LEFT(t2.thp_remark, 1) = 1 
-                    AND t1.production_code = t2.production_code
-                    AND t1.thp_date = t2.thp_date
-                    LIMIT 1
-                ), 0) AS UNSIGNED) +
-                CAST(IFNULL((
-                    SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                    WHERE LEFT(t2.thp_remark, 1) = 2 
-                    AND t1.production_code = t2.production_code
-                    AND t1.thp_date = t2.thp_date
-                    LIMIT 1
-                ), 0) AS UNSIGNED)) * t1.ct/3600
-            ), 2) AS act_hour_new,
-            IFNULL((
-                (
-                    CAST(IFNULL((
-                        SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                        WHERE LEFT(t2.thp_remark, 1) = 1 
-                        AND t1.production_code = t2.production_code
-                        AND t1.thp_date = t2.thp_date
-                        LIMIT 1
-                    ), 0) AS SIGNED) +
-                    CAST(IFNULL((
-                        SELECT t2.lhp_qty FROM entry_thp_tbl t2 
-                        WHERE LEFT(t2.thp_remark, 1) = 2 
-                        AND t1.production_code = t2.production_code
-                        AND t1.thp_date = t2.thp_date
-                        LIMIT 1
-                    ), 0) AS SIGNED)
-                ) - 
-                (
-                    CAST(IFNULL((
-                        SELECT t2.thp_qty FROM entry_thp_tbl t2 
-                        WHERE LEFT(t2.thp_remark, 1) = 1 
-                        AND t1.production_code = t2.production_code
-                        AND t1.thp_date = t2.thp_date
-                        LIMIT 1
-                    ), 0) AS SIGNED) +
-                    CAST(IFNULL((
-                        SELECT t2.thp_qty FROM entry_thp_tbl t2 
-                        WHERE LEFT(t2.thp_remark, 1) = 2 
-                        AND t1.production_code = t2.production_code
-                        AND t1.thp_date = t2.thp_date
-                        LIMIT 1
-                    ), 0) AS SIGNED)
-                )
-                ), 0) AS outstanding_beta
+            ROUND((t1.lhp_qty/t1.thp_qty)*100) AS persentase,
+            ROUND((t1.lhp_qty * t1.ct/3600), 2) AS act_hour_new,
+            IFNULL((t1.lhp_qty - t1.thp_qty), 0) AS outstanding_beta
         ';
     }
 
