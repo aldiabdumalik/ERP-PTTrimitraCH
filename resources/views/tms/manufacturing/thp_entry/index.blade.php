@@ -14,11 +14,24 @@
         -webkit-appearance: none !important; 
         margin: 0 !important; 
     }
+    #thp-select-datepicker .datepicker table tr td, #thp-select-datepicker .datepicker table tr th{
+        text-align:center;
+        width: 50px !important;
+        height: 50px !important;
+        border-radius:4px;
+        border:none
+    }
+    #thp-select-datepicker .datepicker {
+        width: 100% !important;
+    }
 </style>
 <div class="main-content-inner">
     <div class="row">
         <div class="col-12 mt-5">
             <div class="#">
+                <button type="button"  class="btn btn-info btn-flat btn-sm" id="searchModal">
+                    <i class="fa fa-calendar"></i>  Search By Date
+                </button>
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="addModal">
                     <i class="ti-plus"></i>  Add New Data
                 </button>
@@ -61,18 +74,17 @@
                                     <table id="thp-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr>
-                                                <th class="align-middle">THP Number</th>
-                                                <th class="align-middle">Date</th>
-                                                <th class="align-middle">Date Order</th>
-                                                {{-- <th class="align-middle">Closed</th> --}}
-                                                <th class="align-middle">Customer</th>
-                                                <th class="align-middle">Production Code</th>
-                                                <th class="align-middle">Part Name</th>
-                                                <th class="align-middle">Part Type</th>
-                                                <th class="align-middle">Route</th>
-                                                <th class="align-middle">Process</th>
-                                                <th class="align-middle">THP Qty</th>
-                                                <th class="align-middle">Action</th>
+                                                <th>THP Number</th>
+                                                <th>Date</th>
+                                                {{-- <th>Date Order</th> --}}
+                                                <th>Customer</th>
+                                                <th>Production Code</th>
+                                                <th>Part Name</th>
+                                                <th>Part Type</th>
+                                                <th>Route</th>
+                                                <th>Process</th>
+                                                <th>THP Qty</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -96,6 +108,7 @@
 @include('tms.manufacturing.thp_entry._modal.import.importThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
 @include('tms.manufacturing.thp_entry._modal.setting.setPersentase')
+@include('tms.manufacturing.thp_entry._modal.view_thp_modal.shortThpByDate')
 
 
 @endsection
@@ -103,6 +116,7 @@
 @section('script')
 <script>
 $(document).ready(function(){
+    // dtbl_index();
     var tbl_index = $('#thp-datatables').DataTable({
         processing: true,
         serverSide: true,
@@ -113,12 +127,12 @@ $(document).ready(function(){
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
+            data: {"date_thp":null}
         },
         columns: [
             {data: 'id_thp', name: 'id_thp', searchable: false},
             {data: 'thp_date', name: 'thp_date', className: "text-center"},
-            {data: 'date_order', name: 'date_order', className: "text-center", visible: false},
-            // {data: 'closed', name: 'closed', className: "text-center"},
+            // {data: 'date_order', name: 'date_order', className: "text-center", visible: false}
             {data: 'customer_code', name: 'customer_code'},
             {data: 'production_code', name: 'production_code'},
             {data: 'part_name', name: 'part_name'},
@@ -128,103 +142,141 @@ $(document).ready(function(){
             {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
-        "order": [[ 2, "desc" ]],
-        initComplete: function(settings, json) {
-            $('.thp-act-view').on('click', function () {
-                getThp($(this).data('thp'), function (response) {
-                    response = response.responseJSON;
-                    $('#modalDetail').modal('show');
-                    if (response.status == true) {
-                        var data = response.data;
-                        var lhp = response.lhp;
-                        var action_plan, date, apnormality, note, sgm, shift, grup, machine, lhp_qty;
-                        date = data.thp_date.split('-');
-                        date = date[2] + '/' + date[1] + '/' + date[0];
-                        $('#thp-detail-id').val(data.id_thp);
-                        $('#thp-detail-date').val(date);
-                        $('#thp-detail-production-code').val(data.production_code);
-                        $('#thp-detail-part-number').val(data.part_number);
-                        $('#thp-detail-part-name').val(data.part_name);
-                        $('#thp-detail-part-type').val(data.part_type);
-                        $('#thp-detail-customer-code').val(data.customer_code);
-                        $('#thp-detail-route').val(data.route);
-                        $('#thp-detail-plan').val(data.plan);
-                        $('#thp-detail-ct').val(data.ct);
-                        $('#thp-detail-ton').val(data.ton);
-                        $('#thp-detail-time').val(data.time);
-                        $('#thp-detail-plan-hour').val(data.plan_hour);
-                        $('#thp-detail-process-1').val(data.process_sequence_1);
-                        $('#thp-detail-process-2').val(data.process_sequence_2);
-                        $('#thp-detail-qty').val(data.thp_qty);
-                        lhp_qty = (lhp.lhp_qty != null ? lhp.lhp_qty : 0)
-                        $('#lhp-detail-qty').val(lhp_qty);
+        "order": [[ 1, "desc" ]],
+    });
+    $('#searchModal').on('click', function () {
+        $('#thp-view-by-date-modal').modal('show');
+        $('#thp-select-datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+        }).on('changeDate', function(e) {
+            var date = e.format(0,"dd/mm/yyyy");
+            $('#thp-view-by-date-modal').modal('hide');
+            tbl_index.clear();
+            dtbl_index(date);
+        });
+    });
+    function dtbl_index(date=null) {   
+        $('#thp-datatables').DataTable({
+            processing: true,
+            serverSide: true,
+            destroy: true,
+            ajax: {
+                url: "{{ route('tms.manufacturing.thp_entry.dataTable_index') }}",
+                type: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {"date_thp":date}
+            },
+            columns: [
+                {data: 'id_thp', name: 'id_thp', searchable: false},
+                {data: 'thp_date', name: 'thp_date', className: "text-center"},
+                // {data: 'date_order', name: 'date_order', className: "text-center", visible: false},
+                {data: 'customer_code', name: 'customer_code'},
+                {data: 'production_code', name: 'production_code'},
+                {data: 'part_name', name: 'part_name'},
+                {data: 'part_type', name: 'part_type'},
+                {data: 'route', name: 'route'},
+                {data: 'process', name: 'process', orderable: false, searchable: false},
+                {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
+                {data: 'action', name: 'action', orderable: false, searchable: false},
+            ],
+            "order": [[ 1, "desc" ]],
+        });
+    }
+    $(document).on('click', '.thp-act-view', function () {
+        getThp($(this).data('thp'), function (response) {
+            response = response.responseJSON;
+            $('#modalDetail').modal('show');
+            if (response.status == true) {
+                var data = response.data;
+                var lhp = response.lhp;
+                var action_plan, date, apnormality, note, sgm, shift, grup, machine, lhp_qty;
+                date = data.thp_date.split('-');
+                date = date[2] + '/' + date[1] + '/' + date[0];
+                $('#thp-detail-id').val(data.id_thp);
+                $('#thp-detail-date').val(date);
+                $('#thp-detail-production-code').val(data.production_code);
+                $('#thp-detail-part-number').val(data.part_number);
+                $('#thp-detail-part-name').val(data.part_name);
+                $('#thp-detail-part-type').val(data.part_type);
+                $('#thp-detail-customer-code').val(data.customer_code);
+                $('#thp-detail-route').val(data.route);
+                $('#thp-detail-plan').val(data.plan);
+                $('#thp-detail-ct').val(data.ct);
+                $('#thp-detail-ton').val(data.ton);
+                $('#thp-detail-time').val(data.time);
+                $('#thp-detail-plan-hour').val(data.plan_hour);
+                $('#thp-detail-process-1').val(data.process_sequence_1);
+                $('#thp-detail-process-2').val(data.process_sequence_2);
+                $('#thp-detail-qty').val(data.thp_qty);
+                lhp_qty = (lhp.lhp_qty != null ? lhp.lhp_qty : 0)
+                $('#lhp-detail-qty').val(lhp_qty);
 
-                        $('#thp-detail-itemcode').val(data.item_code);
-                        $('#thp-detail-production-process').val(data.production_process);
-                        $('#thp-detail-operator').val(data.user);
+                $('#thp-detail-itemcode').val(data.item_code);
+                $('#thp-detail-production-process').val(data.production_process);
+                $('#thp-detail-operator').val(data.user);
 
-                        apnormality = (data.apnormality != null ? data.apnormality : '//');
-                        action_plan = (data.action_plan != null ? data.action_plan : '//');
-                        $('#thp-detail-note').val(data.note);
-                        $('#thp-detail-apnormal').val(apnormality);
-                        $('#thp-detail-action-plan').val(action_plan);
-                    }
-                });
-            });
-            $('.thp-act-edit').on('click', function () {
-                getThp($(this).data('thp'), function (response) {
-                    response = response.responseJSON;
-                    $('#createModal').modal('show');
-                    if (response.status == true) {
-                        var data = response.data;
-                        var action_plan, date, apnormality, note, sgm, shift, grup, machine;
-                        date = data.thp_date.split('-');
-                        date = date[2] + '/' + date[1] + '/' + date[0];
-                        $('#thp-id').val(data.id_thp);
-                        $('#thp-date').val(date);
-                        $('#thp-production-code').val(data.production_code);
-                        $('#thp-part-number').val(data.part_number);
-                        $('#thp-part-name').val(data.part_name);
-                        $('#thp-part-type').val(data.part_type);
-                        $('#thp-customer-code').val(data.customer_code);
-                        $('#thp-route').val(data.route);
-                        $('#thp-plan').val(data.plan);
-                        $('#thp-ct').val(data.ct);
-                        $('#thp-ton').val(data.ton);
-                        $('#thp-time').val(data.time);
-                        $('#thp-plan-hour').val(data.plan_hour);
-                        $('#thp-process-1').val(data.process_sequence_1);
-                        $('#thp-process-2').val(data.process_sequence_2);
-                        $('#thp-qty').val(data.thp_qty);
-                        $('#thp-itemcode').val(data.item_code);
-                        $('#thp-production-process').val(data.production_process);
-                        sgm = data.thp_remark.split('_');
-                        shift = sgm[0].split('');
+                apnormality = (data.apnormality != null ? data.apnormality : '//');
+                action_plan = (data.action_plan != null ? data.action_plan : '//');
+                $('#thp-detail-note').val(data.note);
+                $('#thp-detail-apnormal').val(apnormality);
+                $('#thp-detail-action-plan').val(action_plan);
+            }
+        });
+    });
+    $(document).on('click', '.thp-act-edit', function () {
+        getThp($(this).data('thp'), function (response) {
+            response = response.responseJSON;
+            $('#createModal').modal('show');
+            if (response.status == true) {
+                var data = response.data;
+                var action_plan, date, apnormality, note, sgm, shift, grup, machine;
+                date = data.thp_date.split('-');
+                date = date[2] + '/' + date[1] + '/' + date[0];
+                $('#thp-id').val(data.id_thp);
+                $('#thp-date').val(date);
+                $('#thp-production-code').val(data.production_code);
+                $('#thp-part-number').val(data.part_number);
+                $('#thp-part-name').val(data.part_name);
+                $('#thp-part-type').val(data.part_type);
+                $('#thp-customer-code').val(data.customer_code);
+                $('#thp-route').val(data.route);
+                $('#thp-plan').val(data.plan);
+                $('#thp-ct').val(data.ct);
+                $('#thp-ton').val(data.ton);
+                $('#thp-time').val(data.time);
+                $('#thp-plan-hour').val(data.plan_hour);
+                $('#thp-process-1').val(data.process_sequence_1);
+                $('#thp-process-2').val(data.process_sequence_2);
+                $('#thp-qty').val(data.thp_qty);
+                $('#thp-itemcode').val(data.item_code);
+                $('#thp-production-process').val(data.production_process);
+                sgm = data.thp_remark.split('_');
+                shift = sgm[0].split('');
 
-                        $('#thp-note').val(data.note);
-                        $('#thp-apnormal').val(data.apnormality);
-                        $('#thp-action-plan').val(data.action_plan);
-                    }
-                });
-            }).on('mouseup',function(){
-                setTimeout(function(){ 
-                    // $('#thp-form-create input,textarea').removeAttr('readonly');
-                    // $('#thp-form-create select').removeAttr('disabled');
-                    // $('#thp-edit-btn').prop('hidden', 'hidden');
-                    // $('#thp-btn-production-code').removeAttr('disabled');
-                    $('.thp-create-btn').text('Update');
-                    $('.thp-create-btn').css({'display': 'block'});
-                }, 1000);
-            });
-            $('.thp-act-log').on('click', function () {
-                $('#thp-log-modal').modal('show');
-                log_tbl($(this).data('thp'));
-            });
-            $('.thp-act-close').on('click', function () {
-                var id = $(this).data('thp');
-                close_thpentry(id);
-            });
-        }
+                $('#thp-note').val(data.note);
+                $('#thp-apnormal').val(data.apnormality);
+                $('#thp-action-plan').val(data.action_plan);
+            }
+        });
+    }).on('mouseup',function(){
+        setTimeout(function(){ 
+            // $('#thp-form-create input,textarea').removeAttr('readonly');
+            // $('#thp-form-create select').removeAttr('disabled');
+            // $('#thp-edit-btn').prop('hidden', 'hidden');
+            // $('#thp-btn-production-code').removeAttr('disabled');
+            $('.thp-create-btn').text('Update');
+            $('.thp-create-btn').css({'display': 'block'});
+        }, 1000);
+    });
+    $(document).on('click', '.thp-act-log', function () {
+        $('#thp-log-modal').modal('show');
+        log_tbl($(this).data('thp'));
+    });
+    $(document).on('click', '.thp-act-close', function () {
+        var id = $(this).data('thp');
+        close_thpentry(id);
     });
     var tbl_create = $('#thp-create-datatables').DataTable({
         "lengthChange": false,

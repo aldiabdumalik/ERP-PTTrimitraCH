@@ -34,8 +34,16 @@ class ThpEntryController extends Controller
 
     public function getThpTable(Request $request)
     {
+        if ($request->date_thp == null) {
+            $thpdate = date('Y-m-d');
+        }else{
+            $cd = explode('/', $request->date_thp);
+            $thpdate = $cd[2].'-'.$cd[1].'-'.$cd[0];
+        }
         $query =  DB::connection('oee')
-            ->table('entry_thp_tbl AS t1')
+            ->table('entry_thp_tbl')
+            ->where('thp_date', $thpdate)
+            ->whereNull('closed')
             ->get();
         return DataTables::of($query)
             ->editColumn('closed', function($query){
