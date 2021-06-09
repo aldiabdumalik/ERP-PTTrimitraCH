@@ -5,10 +5,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-customercode" id="claim-create-customercode" class="form-control form-control-sm" required>
+                <input type="text" name="claim-create-customercode" id="claim-create-customercode" class="form-control form-control-sm" autocomplete="off" required>
             </div>
             <div class="col-6">
-                <input type="text" name="claim-create-customerdoaddr" id="claim-create-customerdoaddr" class="form-control form-control-sm">
+                <input type="text" name="claim-create-customerdoaddr" id="claim-create-customerdoaddr" class="form-control form-control-sm" autocomplete="off" required>
             </div>
         </div>
     </div>

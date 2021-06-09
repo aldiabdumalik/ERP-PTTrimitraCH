@@ -13,3 +13,7 @@ Route::post('/warehouse/claim_entry/header_tools', [
     'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntryHeader', 
     'as' => 'tms.warehouse.claim_entry.header_tools'
 ]);
+Route::post('/warehouse/claim_entry/create', [
+    'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntryCreate', 
+    'as' => 'tms.warehouse.claim_entry.create'
+]);

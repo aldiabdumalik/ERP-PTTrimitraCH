@@ -16,6 +16,8 @@
     }
     input[readonly] {
         background-color: #fff !important;
+        cursor: not-allowed;
+        pointer-events: all !important;
     }
     .row.no-gutters {
         margin-right: 0;
@@ -26,6 +28,10 @@
             padding-right: 0;
             padding-left: 0;
         }
+    }
+    button:disabled {
+        cursor: not-allowed;
+        pointer-events: all !important;
     }
     .selected {
         background-color: #dddddd;
@@ -287,7 +293,7 @@ $(document).ready(function(){
     $(document).on('click', '#claim-btn-additem-submit', function () {
         var index = tbl_create.data().length;
         if ($('#claim-additem-index').val() == 0) {
-            tbl_create.row.add([
+            var add = tbl_create.row.add([
                 index+1,
                 $('#claim-additem-itemcode').val(),
                 $('#claim-additem-partno').val(),
@@ -296,7 +302,13 @@ $(document).ready(function(){
                 $('#claim-additem-qtysj').val(),
                 $('#claim-additem-qtyrg').val(),
                 $('#claim-additem-note').val(),
-            ]).draw(false);
+            ]).node();
+            $(add).attr('data-id', index+1);
+            // $(add).attr('data-toggle', 'popover');
+            // $(add).attr('data-content', 'id '+index+1);
+            // $(add).attr('data-placement', 'top');
+            // $(add).attr('title', 'top');
+            tbl_create.draw(false);
         }else{
             var idx = parseInt($('#claim-additem-index').val()) - 1;
             tbl_create.row( idx ).data([
@@ -316,30 +328,95 @@ $(document).ready(function(){
     $(document).on('keypress', '#claim-additem-itemcode', function (e) {
         var tbl_item;
         if(e.which == 13) {
-            modalAction('#claim-modal-itemtable');
             var customercode = ($('#claim-create-customercode').val() == "") ? null : $('#claim-create-customercode').val();
-            var params = {"type": "item", "cust_code": customercode}
-            var column = [
-                {data: 'ITEMCODE', name: 'ITEMCODE'},
-                {data: 'PART_NO', name: 'PART_NO'},
-                {data: 'DESCRIPT', name: 'DESCRIPT'},
-                {data: 'UNIT', name: 'UNIT'},
-            ];
-            tbl_item = $('#claim-datatables-items').DataTable(dataTables(
-                "{{ route('tms.warehouse.claim_entry.header_tools') }}",
-                "POST",
-                params,
-                column
-            ));
+            if (customercode == null) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: "Silahkan mengisi customer code terlebih dahulu!",
+                    icon: 'warning'
+                });
+            }else{
+                modalAction('#claim-modal-itemtable');
+                var params = {"type": "item", "cust_code": customercode}
+                var column = [
+                    {data: 'ITEMCODE', name: 'ITEMCODE'},
+                    {data: 'PART_NO', name: 'PART_NO'},
+                    {data: 'DESCRIPT', name: 'DESCRIPT'},
+                    {data: 'UNIT', name: 'UNIT'},
+                ];
+                tbl_item = $('#claim-datatables-items').DataTable(dataTables(
+                    "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                    "POST",
+                    params,
+                    column
+                ));
+            }
             $('#claim-datatables-items').off('click').on('click', 'tr', function () {
                 var data = tbl_item.row(this).data();
-                modalAction('#claim-modal-itemtable', 'hide');
-                $('#claim-additem-itemcode').val(data.ITEMCODE);
-                $('#claim-additem-partno').val(data.PART_NO);
-                $('#claim-additem-description').val(data.DESCRIPT);
-                $('#claim-additem-unit').val(data.UNIT);
+                var cek = tbl_create.rows().data().toArray();
+                var isExist = false;
+                if (cek.length > 0) {
+                    for (let i = 0; i < cek.length; i++) {
+                        if (data.ITEMCODE == cek[i][1]) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                }
+                if (isExist == true) {
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: "Itemcode ini tersedia, silahkan klik edit pada tabel untuk melakukan perubahan!",
+                        icon: 'warning'
+                    });
+                }else{
+                    modalAction('#claim-modal-itemtable', 'hide');
+                    $('#claim-additem-itemcode').val(data.ITEMCODE);
+                    $('#claim-additem-partno').val(data.PART_NO);
+                    $('#claim-additem-description').val(data.DESCRIPT);
+                    $('#claim-additem-unit').val(data.UNIT);
+                }
             });
         }
+    });
+
+    $(document).on('submit', '#claim-form-create', function () {
+        var data = {
+            "cl_no": $('#claim-create-clno').val(),
+            "branch": $('#claim-create-branch').val(),
+            "warehouse": $('#claim-create-warehouse').val(),
+            "priod": $('#claim-create-priod').val(),
+            "date": $('#claim-create-date').val(),
+            "pono": $('#claim-create-pono').val(),
+            "refno": $('#claim-create-refno').val(),
+            "delivery": $('#claim-create-delivery').val(),
+            "delivery2": $('#claim-create-delivery2').val(),
+            "remark": $('#claim-create-remark').val(),
+            "customercode": $('#claim-create-customercode').val(),
+            "customerdoaddr": $('#claim-create-customerdoaddr').val(),
+            "customername": $('#claim-create-remark').val(),
+            "customeradd1": $('#claim-create-customeradd1').val(),
+            "customeradd2": $('#claim-create-customeradd2').val(),
+            "customeradd3": $('#claim-create-customeradd3').val(),
+            "customeradd4": $('#claim-create-customeradd4').val(),
+            "user": $('#claim-create-user').val(),
+            "printed": $('#claim-create-printed').val(),
+            "voided": $('#claim-create-voided').val(),
+            "rgdate": $('#claim-create-rgdate').val(),
+            "dodate": $('#claim-create-dodate').val(),
+            "closed": $('#claim-create-closed').val(),
+            "rrno": $('#claim-create-rrno').val(),
+            "items": tbl_create.rows().data().toArray()
+        };
+        ajax(
+            "{{route('tms.warehouse.claim_entry.create')}}",
+            "POST",
+            data,
+            function (response) {
+                response = response.responseJSON;
+                console.log(response);
+            }
+        );
     });
 
     const dataTables = (route, method, params=null, columns) => {

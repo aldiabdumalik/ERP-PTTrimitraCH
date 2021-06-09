@@ -21,6 +21,14 @@ class ClaimEntryController extends Controller
         dd($query);
     }
 
+    public function claimEntryCreate(Request $request)
+    {
+        return response()->json([
+            'status' => true,
+            'content' => $request->items,
+        ], 200);
+    }
+
     public function claimEntryHeader(Request $request)
     {
         switch ($request->type) {
