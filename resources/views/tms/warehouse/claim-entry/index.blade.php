@@ -14,15 +14,21 @@
         -webkit-appearance: none !important; 
         margin: 0 !important; 
     }
-    .row.no-gutters {
-    margin-right: 0;
-    margin-left: 0;
-
-    & > [class^="col-"],
-    & > [class*=" col-"] {
-    padding-right: 0;
-    padding-left: 0;
+    input[readonly] {
+        background-color: #fff !important;
     }
+    .row.no-gutters {
+        margin-right: 0;
+        margin-left: 0;
+
+        & > [class^="col-"],
+        & > [class*=" col-"] {
+            padding-right: 0;
+            padding-left: 0;
+        }
+    }
+    .selected {
+        background-color: #dddddd;
     }
 </style>
 <div class="main-content-inner">
@@ -77,6 +83,10 @@
 @include('tms.warehouse.claim-entry.modal.create.index')
 @include('tms.warehouse.claim-entry.modal.header.branch')
 @include('tms.warehouse.claim-entry.modal.header.warehouse')
+@include('tms.warehouse.claim-entry.modal.header.customer')
+@include('tms.warehouse.claim-entry.modal.header.doaddr')
+@include('tms.warehouse.claim-entry.modal.item.addItem')
+@include('tms.warehouse.claim-entry.modal.item.tableItem')
 
 @endsection
 
@@ -94,6 +104,57 @@ $(document).ready(function(){
     }, 1000);
     $('#claim-btn-modal-create').on('click', function () {
         modalAction('#claim-modal-create');
+        var now = new Date();
+        var currentMonth = ('0'+(now.getMonth()+1)).slice(-2);
+        $('#claim-create-priod').val(`${now.getFullYear()}-${currentMonth}`);
+        var params = {"type": "CLNo"};
+        ajax("{{ route('tms.warehouse.claim_entry.header_tools') }}",
+            "POST",
+            params,
+            function (response) {
+            response = response.responseJSON;
+            $('#claim-create-no').val(response);
+        });
+    });
+    $('#claim-datatables-create tbody').off('click', 'tr').on('click', 'tr', function () {
+        var data = tbl_create.row(this).data();
+        if (data != undefined) {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                $('#claim-btn-edit-item').prop('disabled', true);
+                $('#claim-btn-delete-item').prop('disabled', true);
+            }else {
+                tbl_create.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                $('#claim-btn-edit-item').removeAttr('disabled');
+                $('#claim-btn-delete-item').removeAttr('disabled');
+            }
+        }
+    });
+    $(document).on('click', '#claim-btn-delete-item', function () {
+        tbl_create.row('.selected').remove().draw( false );
+        $('#claim-btn-edit-item').prop('disabled', true);
+        $('#claim-btn-delete-item').prop('disabled', true);
+    });
+    $(document).on('click', '#claim-btn-edit-item', function () {
+        var data = tbl_create.row('.selected').data();
+        modalAction('#claim-modal-additem');
+        $('#claim-additem-index').val(data[0]);
+        $('#claim-additem-itemcode').val(data[1]);
+        $('#claim-additem-partno').val(data[2]);
+        $('#claim-additem-description').val(data[3]);
+        $('#claim-additem-unit').val(data[4]);
+        $('#claim-additem-qtysj').val(data[5]);
+        $('#claim-additem-qtyrg').val(data[6]);
+        $('#claim-additem-note').val(data[7]);
+    });
+
+    $('#claim-create-date').datepicker({
+        format: 'dd/mm/yyyy',
+        autoclose: true,
+    }).datepicker("setDate",'now').on('changeDate', function(e) {
+        var date = e.format(0, "yyyy-mm");
+        $('#claim-create-priod').val(date);
     });
 
     $(document).on('keypress', '#claim-create-branch', function (e) {
@@ -125,6 +186,7 @@ $(document).ready(function(){
     });
 
     $(document).on('keypress', '#claim-create-warehouse', function (e) {
+        var tbl_wh;
         if(e.which == 13) {
             modalAction('#claim-modal-warehouse');
             var branch = ($('#claim-create-branch').val() == "") ? null : $('#claim-create-branch').val();
@@ -133,12 +195,150 @@ $(document).ready(function(){
                 {data: 'code', name: 'code'},
                 {data: 'name', name: 'name'},
             ];
-            $('#claim-datatables-warehouse').DataTable(dataTables(
+            tbl_wh = $('#claim-datatables-warehouse').DataTable(dataTables(
                 "{{ route('tms.warehouse.claim_entry.header_tools') }}",
                 "POST",
                 params,
                 column
             ));
+            $('#claim-datatables-warehouse').off('click').on('click', 'tr', function () {
+                modalAction('#claim-modal-warehouse', 'hide');
+                var data = tbl_wh.row(this).data();
+                $('#claim-create-warehouse').val(data.code);
+            });
+        }
+    });
+
+    $(document).on('keypress', '#claim-create-customercode', function (e) {
+        var tbl_customer;
+        if(e.which == 13) {
+            modalAction('#claim-modal-customer');
+            var params = {"type": "customer"}
+            var column = [
+                {data: 'code', name: 'code'},
+                {data: 'name', name: 'name'},
+            ];
+            tbl_customer = $('#claim-datatables-customer').DataTable(dataTables(
+                "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                "POST",
+                params,
+                column
+            ));
+            $('#claim-datatables-customer').off('click').on('click', 'tr', function () {
+                modalAction('#claim-modal-customer', 'hide');
+                var data = tbl_customer.row(this).data();
+                $('#claim-create-customercode').val(data.code);
+                var params = {"type": "customerclick", "cust_code": data.code};
+                ajax("{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                    "POST",
+                    params,
+                    function (response) {
+                    response = response.responseJSON;
+                    $('#claim-create-customerdoaddr').val(response.content.code);
+                    $('#claim-create-customername').val(response.content.name);
+                    $('#claim-create-customeraddr1').val(response.content.do_addr1);
+                    $('#claim-create-customeraddr2').val(response.content.do_addr2);
+                    $('#claim-create-customeraddr3').val(response.content.do_addr3);
+                    $('#claim-create-customeraddr4').val(response.content.do_addr4);
+                });
+            });
+        }
+    });
+
+    $(document).on('keypress', '#claim-create-customerdoaddr', function (e) {
+        var tbl_doaddr;
+        if(e.which == 13) {
+            modalAction('#claim-modal-doaddr');
+            var customercode = ($('#claim-create-customercode').val() == "") ? null : $('#claim-create-customercode').val();
+            var params = {"type": "doaddr", "cust_code": customercode}
+            var column = [
+                {data: 'code', name: 'code'},
+                {data: 'name', name: 'name'},
+                {data: 'do_addr1', name: 'do_addr1'},
+                {data: 'do_addr2', name: 'do_addr2'},
+                {data: 'do_addr3', name: 'do_addr3'},
+                {data: 'do_addr4', name: 'do_addr4'},
+            ];
+            tbl_doaddr = $('#claim-datatables-doaddr').DataTable(dataTables(
+                "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                "POST",
+                params,
+                column
+            ));
+            $('#claim-datatables-doaddr').off('click').on('click', 'tr', function () {
+                modalAction('#claim-modal-doaddr', 'hide');
+                var data = tbl_doaddr.row(this).data();
+                $('#claim-create-customerdoaddr').val(data.code);
+                $('#claim-create-customername').val(data.name);
+                $('#claim-create-customeraddr1').val(data.do_addr1);
+                $('#claim-create-customeraddr2').val(data.do_addr2);
+                $('#claim-create-customeraddr3').val(data.do_addr3);
+                $('#claim-create-customeraddr4').val(data.do_addr4);
+            });
+        }
+    });
+
+    $(document).on('click', '#claim-btn-add-item', function () {
+        modalAction('#claim-modal-additem');
+    });
+    $(document).on('hidden.bs.modal', '#claim-modal-additem', function () {
+        $(this).find('form').trigger('reset');
+    });
+    $(document).on('click', '#claim-btn-additem-submit', function () {
+        var index = tbl_create.data().length;
+        if ($('#claim-additem-index').val() == 0) {
+            tbl_create.row.add([
+                index+1,
+                $('#claim-additem-itemcode').val(),
+                $('#claim-additem-partno').val(),
+                $('#claim-additem-description').val(),
+                $('#claim-additem-unit').val(),
+                $('#claim-additem-qtysj').val(),
+                $('#claim-additem-qtyrg').val(),
+                $('#claim-additem-note').val(),
+            ]).draw(false);
+        }else{
+            var idx = parseInt($('#claim-additem-index').val()) - 1;
+            tbl_create.row( idx ).data([
+                $('#claim-additem-index').val(),
+                $('#claim-additem-itemcode').val(),
+                $('#claim-additem-partno').val(),
+                $('#claim-additem-description').val(),
+                $('#claim-additem-unit').val(),
+                $('#claim-additem-qtysj').val(),
+                $('#claim-additem-qtyrg').val(),
+                $('#claim-additem-note').val(),
+            ]).draw(false);
+        }
+        $('#claim-form-additem').trigger('reset');
+        modalAction('#claim-modal-additem', 'hide');
+    });
+    $(document).on('keypress', '#claim-additem-itemcode', function (e) {
+        var tbl_item;
+        if(e.which == 13) {
+            modalAction('#claim-modal-itemtable');
+            var customercode = ($('#claim-create-customercode').val() == "") ? null : $('#claim-create-customercode').val();
+            var params = {"type": "item", "cust_code": customercode}
+            var column = [
+                {data: 'ITEMCODE', name: 'ITEMCODE'},
+                {data: 'PART_NO', name: 'PART_NO'},
+                {data: 'DESCRIPT', name: 'DESCRIPT'},
+                {data: 'UNIT', name: 'UNIT'},
+            ];
+            tbl_item = $('#claim-datatables-items').DataTable(dataTables(
+                "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                "POST",
+                params,
+                column
+            ));
+            $('#claim-datatables-items').off('click').on('click', 'tr', function () {
+                var data = tbl_item.row(this).data();
+                modalAction('#claim-modal-itemtable', 'hide');
+                $('#claim-additem-itemcode').val(data.ITEMCODE);
+                $('#claim-additem-partno').val(data.PART_NO);
+                $('#claim-additem-description').val(data.DESCRIPT);
+                $('#claim-additem-unit').val(data.UNIT);
+            });
         }
     });
 

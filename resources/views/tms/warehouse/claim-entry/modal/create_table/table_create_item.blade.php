@@ -1,6 +1,6 @@
 <div class="table-responsive">
     <div class="datatable datatable-primary">
-        <table id="claim-datatables-create" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
+        <table id="claim-datatables-create" class="table table-bordered" style="width:100%;cursor:pointer">
             <thead class="text-center" style="font-size: 15px;">
                 <tr style="font-size: 14px;">
                     <th class="align-middle">#</th>

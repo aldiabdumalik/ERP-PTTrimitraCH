@@ -5,7 +5,7 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-no" id="claim-create-no" class="form-control form-control-sm" required>
+                <input type="text" name="claim-create-no" id="claim-create-no" class="form-control form-control-sm" readonly required>
             </div>
             <div class="col-3">
                 <input type="text" name="claim-create-branch" id="claim-create-branch" class="form-control form-control-sm" required>
@@ -23,10 +23,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-priod" id="claim-create-priod" class="form-control form-control-sm" required>
+                <input type="text" name="claim-create-priod" id="claim-create-priod" class="form-control form-control-sm" readonly required>
             </div>
             <div class="col-6">
-                <input type="text" name="claim-create-date" id="claim-create-date" class="form-control form-control-sm this-datepicker" required>
+                <input type="text" name="claim-create-date" id="claim-create-date" class="form-control form-control-sm" required>
             </div>
         </div>
     </div>
@@ -54,10 +54,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-delivery" id="claim-create-delivery" class="form-control form-control-sm" required>
+                <input type="text" name="claim-create-delivery" id="claim-create-delivery" class="form-control form-control-sm" readonly value="/ /">
             </div>
             <div class="col-6">
-                <input type="text" name="claim-create-delivery2" id="claim-create-delivery2" class="form-control form-control-sm" required>
+                <input type="text" name="claim-create-delivery2" id="claim-create-delivery2" class="form-control form-control-sm" readonly>
             </div>
         </div>
     </div>

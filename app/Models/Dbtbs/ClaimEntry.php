@@ -74,4 +74,5 @@ class ClaimEntry extends Model
    
    public $timestamps = false;
    
+   
 }

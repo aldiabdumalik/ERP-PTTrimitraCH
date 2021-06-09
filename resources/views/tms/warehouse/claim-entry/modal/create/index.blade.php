@@ -22,6 +22,12 @@
                             <button type="button" id="claim-btn-add-item" class="btn btn-sm btn-info">
                                 Add Item
                             </button>
+                            <button type="button" id="claim-btn-edit-item" class="btn btn-sm btn-info" disabled>
+                                Edit
+                            </button>
+                            <button type="button" id="claim-btn-delete-item" class="btn btn-sm btn-info" disabled>
+                                Delete
+                            </button>
                         </div>
                         <div class="col-12">
                             @include('tms.warehouse.claim-entry.modal.create_table.table_create_item')
