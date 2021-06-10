@@ -99,6 +99,7 @@
 @include('tms.warehouse.claim-entry.modal.header.doaddr')
 @include('tms.warehouse.claim-entry.modal.item.addItem')
 @include('tms.warehouse.claim-entry.modal.item.tableItem')
+@include('tms.warehouse.claim-entry.modal.log.tableLog')
 
 @endsection
 
@@ -118,15 +119,16 @@ $(document).ready(function(){
         },
         columns: [
             {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-            {data:'cl_no', name: 'cl_no'},
-        ]
+            {data:'written', name: 'written'},
+            {data:'date_do', name: 'date_do', className: "text-center",},
+            {data:'date_rg', name: 'date_rg', className: "text-center",},
+            {data:'rr_no', name: 'rr_no', className: "text-center",},
+            {data:'ref_no', name: 'ref_no'},
+            {data:'po_no', name: 'po_no'},
+            {data:'cust_code', name: 'cust_code'},
+            {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center",},
+        ],
+        order: [[ 0, "asc" ]],
     });
     var tbl_create = $('#claim-datatables-create').DataTable({
         "lengthChange": false,
@@ -372,14 +374,27 @@ $(document).ready(function(){
                     {data: 'DESCRIPT', name: 'DESCRIPT'},
                     {data: 'UNIT', name: 'UNIT'},
                 ];
-                tbl_item = $('#claim-datatables-items').DataTable(dataTables(
-                    "{{ route('tms.warehouse.claim_entry.header_tools') }}",
-                    "POST",
-                    params,
-                    column
-                ));
+                tbl_item = $('#claim-datatables-items').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ajax: {
+                        url: "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                        method: "POST",
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: params
+                    },
+                    columns: column,
+                    createdRow: function( row, data, dataIndex ) {
+                        $(row).attr('data-id', data.ITEMCODE);
+                        $(row).attr('id', `row-${data.ITEMCODE}`);
+                    },
+                });
             }
             $('#claim-datatables-items').off('click').on('click', 'tr', function () {
+                var row_id = $(this).data('id');
                 var data = tbl_item.row(this).data();
                 var cek = tbl_create.rows().data().toArray();
                 var isExist = false;
@@ -408,70 +423,151 @@ $(document).ready(function(){
         }
     });
 
-    $(document).on('hidden.bs.modal', '#claim-modal-create', function () {
-        $(this).find('form').trigger('reset');
-    });
-
-    $(document).on('submit', '#claim-form-create', function () {
-        // $('#claim-btn-create-submit').prop('disabled', true);
-        var route = null;
+    $(document).on('click', '.claim-act-view', function () {
+        var id = $(this).data('clno');
         ajax(
             "{{route('tms.warehouse.claim_entry.read')}}",
             "POST",
-            {"cl_no": $('#claim-create-no').val()},
+            {"cl_no": id},
             function (response) {
                 response = response.responseJSON;
                 if (response.status == true) {
-                    route = "{{route('tms.warehouse.claim_entry.update')}}";
-                }else{
-                    route = "{{route('tms.warehouse.claim_entry.create')}}";
-                }
-            }
-        );
-        var data = {
-            "cl_no": $('#claim-create-no').val(),
-            "branch": $('#claim-create-branch').val(),
-            "warehouse": $('#claim-create-warehouse').val(),
-            "priod": $('#claim-create-priod').val(),
-            "date": $('#claim-create-date').val(),
-            "pono": $('#claim-create-pono').val(),
-            "refno": $('#claim-create-refno').val(),
-            "delivery": $('#claim-create-delivery').val(),
-            "delivery2": $('#claim-create-delivery2').val(),
-            "remark": $('#claim-create-remark').val(),
-            "customercode": $('#claim-create-customercode').val(),
-            "customerdoaddr": $('#claim-create-customerdoaddr').val(),
-            "customername": $('#claim-create-remark').val(),
-            "customeraddr1": $('#claim-create-customeraddr1').val(),
-            "customeraddr2": $('#claim-create-customeraddr2').val(),
-            "customeraddr3": $('#claim-create-customeraddr3').val(),
-            "customeraddr4": $('#claim-create-customeraddr4').val(),
-            "user": $('#claim-create-user').val(),
-            "printed": $('#claim-create-printed').val(),
-            "voided": $('#claim-create-voided').val(),
-            "rgdate": $('#claim-create-rgdate').val(),
-            "dodate": $('#claim-create-dodate').val(),
-            "closed": $('#claim-create-closed').val(),
-            "rrno": $('#claim-create-rrno').val(),
-            "items": tbl_create.rows().data().toArray()
-        };
-        ajax(
-            route,
-            "POST",
-            data,
-            function (response) {
-                response = response.responseJSON;
-                if (response.status == true) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: response.msg,
-                        icon: 'success'
-                    }).then(function(){
-                        window.location.reload();
+                    modalAction('#claim-modal-create');
+                    var no=1;
+                    $.each(response.content, function (i, data) {
+                        $('#claim-create-no').val(data.cl_no);
+                        $('#claim-create-branch').val(data.branch);
+                        $('#claim-create-warehouse').val(data.warehouse);
+                        $('#claim-create-priod').val(data.priod);
+                        $('#claim-create-date').val(data.written);
+                        $('#claim-create-pono').val(data.po_no);
+                        $('#claim-create-refno').val(data.ref_no);
+                        // $('#claim-create-delivery').val(data.);
+                        // $('#claim-create-delivery2').val(data.);
+                        $('#claim-create-remark').val(data.remark);
+                        $('#claim-create-customercode').val(data.cust_code);
+                        $('#claim-create-customerdoaddr').val(data.do_addr);
+                        $('#claim-create-customername').val(data.company);
+                        $('#claim-create-customeraddr1').val(data.addr1);
+                        $('#claim-create-customeraddr2').val(data.addr2);
+                        $('#claim-create-customeraddr3').val(data.addr3);
+                        $('#claim-create-customeraddr4').val(data.addr4);
+                        // $('#claim-create-user').val(data.oprator);
+                        $('#claim-create-printed').val((data.printed != null)?data.printed:'//');
+                        $('#claim-create-voided').val((data.voided != null)?data.voided:'//');
+                        $('#claim-create-rgdate').val((data.date_rg != null)?data.date_rg:'//');
+                        $('#claim-create-dodate').val((data.date_do != null)?data.date_do:'//');
+                        $('#claim-create-closed').val((data.closed != null)?data.closed:'//');
+                        $('#claim-create-rrno').val((data.rr_no != null)?data.rr_no:'//');
+                        tbl_create.row.add([
+                            no,
+                            data.itemcode,
+                            data.part_no,
+                            data.descript,
+                            data.unit_item,
+                            data.qty,
+                            data.qty_rg,
+                            data.notes
+                        ]);
+                        no++;
                     });
+                    tbl_create.draw();
+                }else{
                 }
             }
         );
+    });
+    $(document).on('click', '.claim-act-log', function () {
+        var id = $(this).data('clno');
+        modalAction('#claim-modal-log');
+        var column = [
+            {data: 'date_written', name: 'date_written'},
+            {data: 'time_written', name: 'time_written'},
+            {data: 'status_change', name: 'status_change'},
+            {data: 'user', name: 'user'},
+            {data: 'note', name: 'note'}
+        ];
+        var tbl_log = $('#claim-datatables-log').DataTable(dataTables(
+            "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+            "POST",
+            {"type":"log", "cl_no":id},
+            column
+        ));
+    });
+
+    $(document).on('hidden.bs.modal', '#claim-modal-create', function () {
+        $(this).find('form').trigger('reset');
+        tbl_create.clear();
+    });
+
+    $(document).on('submit', '#claim-form-create', function () {
+        if (tbl_create.rows().data().toArray().length > 0) {
+            $('#claim-btn-create-submit').prop('disabled', true);
+            var route;
+            ajax(
+                "{{route('tms.warehouse.claim_entry.read')}}",
+                "POST",
+                {"cl_no": $('#claim-create-no').val()},
+                function (response) {
+                    var route;
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        route = "{{route('tms.warehouse.claim_entry.update')}}";
+                    }else{
+                        route = "{{route('tms.warehouse.claim_entry.create')}}";
+                    }
+                    postData(route);
+                }
+            );
+
+            function postData(route) {
+                var data = {
+                    "cl_no": $('#claim-create-no').val(),
+                    "branch": $('#claim-create-branch').val(),
+                    "warehouse": $('#claim-create-warehouse').val(),
+                    "priod": $('#claim-create-priod').val(),
+                    "date": $('#claim-create-date').val(),
+                    "pono": $('#claim-create-pono').val(),
+                    "refno": $('#claim-create-refno').val(),
+                    "delivery": $('#claim-create-delivery').val(),
+                    "delivery2": $('#claim-create-delivery2').val(),
+                    "remark": $('#claim-create-remark').val(),
+                    "customercode": $('#claim-create-customercode').val(),
+                    "customerdoaddr": $('#claim-create-customerdoaddr').val(),
+                    "customername": $('#claim-create-remark').val(),
+                    "customeraddr1": $('#claim-create-customeraddr1').val(),
+                    "customeraddr2": $('#claim-create-customeraddr2').val(),
+                    "customeraddr3": $('#claim-create-customeraddr3').val(),
+                    "customeraddr4": $('#claim-create-customeraddr4').val(),
+                    "user": $('#claim-create-user').val(),
+                    "printed": $('#claim-create-printed').val(),
+                    "voided": $('#claim-create-voided').val(),
+                    "rgdate": $('#claim-create-rgdate').val(),
+                    "dodate": $('#claim-create-dodate').val(),
+                    "closed": $('#claim-create-closed').val(),
+                    "rrno": $('#claim-create-rrno').val(),
+                    "items": tbl_create.rows().data().toArray()
+                };
+                ajax(
+                    route,
+                    "POST",
+                    data,
+                    function (response) {
+                        response = response.responseJSON;
+                        if (response.status == true) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success'
+                            }).then(function(){
+                                window.location.reload();
+                            });
+                        }
+                    }
+                );
+            }
+            
+        }
     });
 
     const dataTables = (route, method, params=null, columns) => {
@@ -534,11 +630,11 @@ $(document).ready(function(){
         var nonNumReg = /[^0-9.]/g
         $(this).val($(this).val().replace(nonNumReg, ''));
     });
-    @if(\Session::has('msg'))
+    @if(\Session::has('message'))
     setTimeout(function () {
         Swal.fire({
             title: 'Warning!',
-            text: "{{\Session::get('msg')}}",
+            text: "{{\Session::get('message')}}",
             icon: 'warning'
         }).then(function () {
             window.close();

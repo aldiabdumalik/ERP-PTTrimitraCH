@@ -10,6 +10,11 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ClaimEntryController extends Controller
 {
+    public function __construct() 
+    {
+        date_default_timezone_set('Asia/Jakarta');
+    }
+
     public function index()
     {
         return view('tms.warehouse.claim-entry.index');
@@ -19,22 +24,40 @@ class ClaimEntryController extends Controller
     {
         if (isset($request->cl_no)) {
             $query = ClaimEntry::where('cl_no', $request->cl_no)->get();
-            if (!empty($query)) {
+            if (!$query->isEmpty()) {
                 return response()->json([
                     'status' => true,
                     'content' => $query,
-                    'msg' => 'Data tersedia!'
+                    'message' => 'Data tersedia!'
                 ], 201);
             }else{
                 return response()->json([
                     'status' => false,
                     'content' => null,
-                    'msg' => 'Data tidak ditemukan!'
-                ], 404);
+                    'message' => 'Data tidak ditemukan!'
+                ], 200);
             }
         }else{
             $query = ClaimEntry::groupBy('cl_no')->get();
-            return DataTables::of($query)->make(true);
+            return DataTables::of($query)
+                ->editColumn('written', function($query) {
+                    return date('d/m/Y', strtotime($query->written));
+                })
+                ->editColumn('date_do', function($query) {
+                    return ($query->date_do == NULL) ? '/ /' : date('d/m/Y', strtotime($query->date_do));
+                })
+                ->editColumn('date_rg', function($query) {
+                    return ($query->date_rg == NULL) ? '/ /' : date('d/m/Y', strtotime($query->date_rg));
+                })
+                ->editColumn('rr_no', function($query) {
+                    return ($query->rr_no == NULL) ? '/ /' : date('d/m/Y', strtotime($query->rr_no));
+                })
+                ->addColumn('action', function($query){
+                    return view('tms.warehouse.claim-entry.button.btnTableIndex', [
+                        'data' => $query,
+                    ]);
+                })->rawColumns(['action'])
+                ->make(true);
         }
     }
 
@@ -98,13 +121,13 @@ class ClaimEntryController extends Controller
             return response()->json([
                 'status' => true,
                 'content' => null,
-                'msg' => 'Claim berhasil di input!'
+                'message' => 'Claim berhasil di input!'
             ], 201);   
         }else{
             return response()->json([
                 'status' => true,
                 'content' => null,
-                'msg' => 'Claim gagal di input, periksa kembali form Anda!'
+                'message' => 'Claim gagal di input, periksa kembali form Anda!'
             ], 401);
         }
     }
@@ -138,6 +161,9 @@ class ClaimEntryController extends Controller
             case "item":
                     return DataTables::of($this->headerToolsItem($request))->make(true);
                     break;
+            case "log":
+                return DataTables::of($this->headerToolsLog($request))->make(true);
+                break;
             default:
                 return response()->json([
                     'status' => true,
@@ -226,6 +252,16 @@ class ClaimEntryController extends Controller
             ->table('item')
             ->selectRaw('ITEMCODE, PART_NO, DESCRIPT, UNIT')
             ->where('CUSTCODE', $request->cust_code)
+            ->get();
+        return $query;
+    }
+
+    private function headerToolsLog(Request $request)
+    {
+        $query = 
+            DB::connection('db_tbs')
+            ->table('entry_cl_log')
+            ->where('cl_no', $request->cl_no)
             ->get();
         return $query;
     }

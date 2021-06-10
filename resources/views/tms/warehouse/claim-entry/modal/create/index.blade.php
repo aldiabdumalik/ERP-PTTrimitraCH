@@ -18,7 +18,7 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <div class="col-12 text-right">
+                        <div id="item-button-div" class="col-12 text-right">
                             <button type="button" id="claim-btn-add-item" class="btn btn-sm btn-info">
                                 Add Item
                             </button>
