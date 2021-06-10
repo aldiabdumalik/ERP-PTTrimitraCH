@@ -9,6 +9,14 @@ Route::get('/warehouse/claim_entry/index_table', [
     'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntry', 
     'as' => 'tms.warehouse.claim_entry.index_table'
 ]);
+Route::post('/warehouse/claim_entry/read', [
+    'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntry', 
+    'as' => 'tms.warehouse.claim_entry.read'
+]);
+Route::post('/warehouse/claim_entry/update', [
+    'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntryUpdate', 
+    'as' => 'tms.warehouse.claim_entry.update'
+]);
 Route::post('/warehouse/claim_entry/header_tools', [
     'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntryHeader', 
     'as' => 'tms.warehouse.claim_entry.header_tools'

@@ -17,16 +17,101 @@ class ClaimEntryController extends Controller
 
     public function claimEntry(Request $request)
     {
-        $query = ClaimEntry::all();
-        dd($query);
+        if (isset($request->cl_no)) {
+            $query = ClaimEntry::where('cl_no', $request->cl_no)->get();
+            if (!empty($query)) {
+                return response()->json([
+                    'status' => true,
+                    'content' => $query,
+                    'msg' => 'Data tersedia!'
+                ], 201);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'content' => null,
+                    'msg' => 'Data tidak ditemukan!'
+                ], 404);
+            }
+        }else{
+            $query = ClaimEntry::groupBy('cl_no')->get();
+            return DataTables::of($query)->make(true);
+        }
     }
 
     public function claimEntryCreate(Request $request)
     {
-        return response()->json([
-            'status' => true,
-            'content' => $request->items,
-        ], 200);
+        $cd = explode('/', $request->date);
+        $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
+        $data = [];
+        $items = $request->items;
+        if (!empty($request->items)) {
+            for ($i=0; $i < count($items); $i++) {
+                $tblItem =
+                    DB::connection('db_tbs')
+                        ->table('item')
+                        ->selectRaw('ITEMCODE, PART_NO, DESCRIPT, UNIT, PRICE, COST, FAC_UNIT, FACTOR, WAREHOUSE, GROUPS, TYPES')
+                        ->where('ITEMCODE', $items[$i][1])
+                        ->first();
+
+                $data[] = [
+                    'cl_no' => $request->cl_no,
+                    'ref_no' => $request->refno,
+                    'po_no' => $request->pono,
+                    'rr_no' => $request->rrno,
+                    'period' => $request->priod,
+                    'written' => $date,
+                    'cust_code' => $request->customercode,
+                    'do_addr' => $request->customerdoaddr,
+                    'company' => $request->customername,
+                    'addr1' => $request->customeraddr1,
+                    'addr2' => $request->customeraddr2,
+                    'addr3' => $request->customeraddr3,
+                    'addr4' => $request->customeraddr4,
+                    'remark' => $request->remark,
+                    'branch' => $request->branch,
+                    'warehouse' => $request->warehouse,
+                    'operator' => $request->user,
+                    'itemcode' => $tblItem->ITEMCODE,
+                    'part_no' => $tblItem->PART_NO,
+                    'descript' => $tblItem->DESCRIPT,
+                    'fac_unit' => $tblItem->FAC_UNIT,
+                    'factor' => $tblItem->FACTOR,
+                    'unit_item' => $tblItem->UNIT,
+                    'warehouse_item' => $tblItem->WAREHOUSE,
+                    'groups' => $tblItem->GROUPS,
+                    'types' => $tblItem->TYPES,
+                    'price' => $tblItem->PRICE,
+                    'cost' => $tblItem->COST,
+                    'tmp_qty' => 0,
+                    'qty' => $items[$i][5],
+                    'qty_rg' => 0,
+                    'notes' => $items[$i][7],
+                    'creation_by' => $request->user,
+                    'creation_date' => date('Y-m-d'),
+                    'cl_date' => $date,
+                    'cl_time' => date('H:i:s'),
+                ];
+            }
+        }
+        $query = ClaimEntry::insert($data);
+        if ($query) {
+            return response()->json([
+                'status' => true,
+                'content' => null,
+                'msg' => 'Claim berhasil di input!'
+            ], 201);   
+        }else{
+            return response()->json([
+                'status' => true,
+                'content' => null,
+                'msg' => 'Claim gagal di input, periksa kembali form Anda!'
+            ], 401);
+        }
+    }
+
+    public function claimEntryUpdate(Request $request)
+    {
+        # code...
     }
 
     public function claimEntryHeader(Request $request)
