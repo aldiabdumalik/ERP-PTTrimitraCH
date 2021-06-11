@@ -225,6 +225,8 @@ $(document).ready(function(){
             }
             $('#claim-create-branch').val(data.code);
         });
+        e.preventDefault();
+        return false;
     });
 
     $(document).on('keypress', '#claim-create-warehouse', function (e) {
@@ -243,12 +245,14 @@ $(document).ready(function(){
                 params,
                 column
             ));
-            $('#claim-datatables-warehouse').off('click').on('click', 'tr', function () {
-                modalAction('#claim-modal-warehouse', 'hide');
-                var data = tbl_wh.row(this).data();
-                $('#claim-create-warehouse').val(data.code);
-            });
         }
+        $('#claim-datatables-warehouse').off('click').on('click', 'tr', function () {
+            modalAction('#claim-modal-warehouse', 'hide');
+            var data = tbl_wh.row(this).data();
+            $('#claim-create-warehouse').val(data.code);
+        });
+        e.preventDefault();
+        return false;
     });
 
     $(document).on('keypress', '#claim-create-customercode', function (e) {
@@ -266,25 +270,27 @@ $(document).ready(function(){
                 params,
                 column
             ));
-            $('#claim-datatables-customer').off('click').on('click', 'tr', function () {
-                modalAction('#claim-modal-customer', 'hide');
-                var data = tbl_customer.row(this).data();
-                $('#claim-create-customercode').val(data.code);
-                var params = {"type": "customerclick", "cust_code": data.code};
-                ajax("{{ route('tms.warehouse.claim_entry.header_tools') }}",
-                    "POST",
-                    params,
-                    function (response) {
-                    response = response.responseJSON;
-                    $('#claim-create-customerdoaddr').val(response.content.code);
-                    $('#claim-create-customername').val(response.content.name);
-                    $('#claim-create-customeraddr1').val(response.content.do_addr1);
-                    $('#claim-create-customeraddr2').val(response.content.do_addr2);
-                    $('#claim-create-customeraddr3').val(response.content.do_addr3);
-                    $('#claim-create-customeraddr4').val(response.content.do_addr4);
-                });
-            });
         }
+        $('#claim-datatables-customer').off('click').on('click', 'tr', function () {
+            modalAction('#claim-modal-customer', 'hide');
+            var data = tbl_customer.row(this).data();
+            $('#claim-create-customercode').val(data.code);
+            var params = {"type": "customerclick", "cust_code": data.code};
+            ajax("{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                "POST",
+                params,
+                function (response) {
+                response = response.responseJSON;
+                $('#claim-create-customerdoaddr').val(response.content.code);
+                $('#claim-create-customername').val(response.content.name);
+                $('#claim-create-customeraddr1').val(response.content.do_addr1);
+                $('#claim-create-customeraddr2').val(response.content.do_addr2);
+                $('#claim-create-customeraddr3').val(response.content.do_addr3);
+                $('#claim-create-customeraddr4').val(response.content.do_addr4);
+            });
+        });
+        e.preventDefault();
+        return false;
     });
 
     $(document).on('keypress', '#claim-create-customerdoaddr', function (e) {
@@ -307,17 +313,19 @@ $(document).ready(function(){
                 params,
                 column
             ));
-            $('#claim-datatables-doaddr').off('click').on('click', 'tr', function () {
-                modalAction('#claim-modal-doaddr', 'hide');
-                var data = tbl_doaddr.row(this).data();
-                $('#claim-create-customerdoaddr').val(data.code);
-                $('#claim-create-customername').val(data.name);
-                $('#claim-create-customeraddr1').val(data.do_addr1);
-                $('#claim-create-customeraddr2').val(data.do_addr2);
-                $('#claim-create-customeraddr3').val(data.do_addr3);
-                $('#claim-create-customeraddr4').val(data.do_addr4);
-            });
         }
+        $('#claim-datatables-doaddr').off('click').on('click', 'tr', function () {
+            modalAction('#claim-modal-doaddr', 'hide');
+            var data = tbl_doaddr.row(this).data();
+            $('#claim-create-customerdoaddr').val(data.code);
+            $('#claim-create-customername').val(data.name);
+            $('#claim-create-customeraddr1').val(data.do_addr1);
+            $('#claim-create-customeraddr2').val(data.do_addr2);
+            $('#claim-create-customeraddr3').val(data.do_addr3);
+            $('#claim-create-customeraddr4').val(data.do_addr4);
+        });
+        e.preventDefault();
+        return false;
     });
 
     $(document).on('click', '#claim-btn-add-item', function () {
@@ -595,7 +603,7 @@ $(document).ready(function(){
                         icon: 'warning',
                     }).then((result) => {
                         if (result.value == true) {
-                            
+
                         }
                     });
                 }
@@ -699,6 +707,12 @@ $(document).ready(function(){
                 );
             }
             
+        }else{
+            Swal.fire({
+                title: 'warning!',
+                text: 'Periksa kembali form Anda!',
+                icon: 'warning'
+            })
         }
     });
 

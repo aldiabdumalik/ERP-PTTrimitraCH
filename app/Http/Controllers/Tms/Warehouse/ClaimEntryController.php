@@ -234,17 +234,17 @@ class ClaimEntryController extends Controller
                 return DataTables::of($this->headerToolsWarehouse($request))->make(true);
                 break;
             case "customer":
-                    return DataTables::of($this->headerToolsCustomer($request))->make(true);
-                    break;
+                return DataTables::of($this->headerToolsCustomer($request))->make(true);
+                break;
             case "customerclick":
                 return $this->headerToolsCustomerClick($request);
                 break;
             case "doaddr":
-                    return DataTables::of($this->headerToolsCustomerAddr($request))->make(true);
-                    break;
+                return DataTables::of($this->headerToolsCustomerAddr($request))->make(true);
+                break;
             case "item":
-                    return DataTables::of($this->headerToolsItem($request))->make(true);
-                    break;
+                return DataTables::of($this->headerToolsItem($request))->make(true);
+                break;
             case "log":
                 return DataTables::of($this->headerToolsLog($request))->make(true);
                 break;
@@ -285,6 +285,73 @@ class ClaimEntryController extends Controller
                     'status' => true,
                     'content' => null,
                     'message' => 'Claim has been unvoided!'
+                ], 200);
+            }
+        }
+    }
+
+    public function claimEntryDO(Request $request)
+    {
+        if (isset($request->cl_no)) {
+            $date_do = ClaimEntry::where('cl_no', $request->cl_no)
+                ->whereNull('date_do')
+                ->get();
+            if (!$date_do->isEmpty()) {
+                // data bisa do
+                $query = ClaimEntry::where('cl_no', $request->cl_no)
+                    ->update([
+                        'date_do' => date('Y-m-d')
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Claim has been delivered!'
+                ], 200);
+            }else{
+                // undo
+                $query = ClaimEntry::where('cl_no', $request->cl_no)
+                    ->update([
+                        'date_do' => null
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Claim has been undelivered!'
+                ], 200);
+            }
+        }
+    }
+
+    public function claimEntryClosed(Request $request)
+    {
+        if (isset($request->cl_no)) {
+            $closed = ClaimEntry::where('cl_no', $request->cl_no)
+                ->whereNull('closed')
+                ->where(function (Builder $query){
+                    
+                })
+                ->get();
+            if (!$closed->isEmpty()) {
+                // data bisa do
+                $query = ClaimEntry::where('cl_no', $request->cl_no)
+                    ->update([
+                        'closed' => date('Y-m-d')
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Claim has been delivered!'
+                ], 200);
+            }else{
+                // undo
+                $query = ClaimEntry::where('cl_no', $request->cl_no)
+                    ->update([
+                        'closed' => null
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Claim has been undelivered!'
                 ], 200);
             }
         }
