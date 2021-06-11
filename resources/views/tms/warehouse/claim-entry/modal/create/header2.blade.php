@@ -15,26 +15,26 @@
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-12">
-        <input type="text" name="claim-create-customername" id="claim-create-customername" class="form-control form-control-sm" readonly>
+        <input type="text" name="claim-create-customername" id="claim-create-customername" class="form-control form-control-sm readonly-first" readonly>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-12">
-        <input type="text" name="claim-create-customeraddr1" id="claim-create-customeraddr1" class="form-control form-control-sm" readonly>
+        <input type="text" name="claim-create-customeraddr1" id="claim-create-customeraddr1" class="form-control form-control-sm readonly-first" readonly>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-12">
-        <input type="text" name="claim-create-customeraddr2" id="claim-create-customeraddr2" class="form-control form-control-sm" readonly>
+        <input type="text" name="claim-create-customeraddr2" id="claim-create-customeraddr2" class="form-control form-control-sm readonly-first" readonly>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-12">
-        <input type="text" name="claim-create-customeraddr3" id="claim-create-customeraddr3" class="form-control form-control-sm" readonly>
+        <input type="text" name="claim-create-customeraddr3" id="claim-create-customeraddr3" class="form-control form-control-sm readonly-first" readonly>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-12">
-        <input type="text" name="claim-create-customeraddr4" id="claim-create-customeraddr4" class="form-control form-control-sm" readonly>
+        <input type="text" name="claim-create-customeraddr4" id="claim-create-customeraddr4" class="form-control form-control-sm readonly-first" readonly>
     </div>
 </div>

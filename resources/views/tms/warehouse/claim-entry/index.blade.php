@@ -14,11 +14,11 @@
         -webkit-appearance: none !important; 
         margin: 0 !important; 
     }
-    input[readonly] {
+    /* input[readonly] {
         background-color: #fff !important;
         cursor: not-allowed;
         pointer-events: all !important;
-    }
+    } */
     .row.no-gutters {
         margin-right: 0;
         margin-left: 0;
@@ -100,6 +100,7 @@
 @include('tms.warehouse.claim-entry.modal.item.addItem')
 @include('tms.warehouse.claim-entry.modal.item.tableItem')
 @include('tms.warehouse.claim-entry.modal.log.tableLog')
+@include('tms.warehouse.claim-entry.modal.status.do')
 
 @endsection
 
@@ -192,6 +193,7 @@ $(document).ready(function(){
     $('#claim-create-date').datepicker({
         format: 'dd/mm/yyyy',
         autoclose: true,
+        enableOnReadonly: false
     }).datepicker("setDate",'now').on('changeDate', function(e) {
         var date = e.format(0, "yyyy-mm");
         $('#claim-create-priod').val(date);
@@ -433,13 +435,23 @@ $(document).ready(function(){
                 response = response.responseJSON;
                 if (response.status == true) {
                     modalAction('#claim-modal-create');
+                    hideShow('#item-button-div', true);
+                    hideShow('#claim-btn-create-submit', true);
+                    $('#claim-form-create input').prop('readonly', true);
                     var no=1;
                     $.each(response.content, function (i, data) {
+                        var written = data.written.split('-');
+                        var printed = (data.printed != null) ? data.printed.split('-') : null;
+                        var voided = (data.voided != null) ? data.voided.split('-') : null;
+                        var date_rg = (data.date_rg != null) ? data.date_rg.split('-') : null;
+                        var date_do = (data.date_do != null) ? data.date_do.split('-') : null;
+                        var closed = (data.closed != null) ? data.closed.split('-') : null;
+
                         $('#claim-create-no').val(data.cl_no);
                         $('#claim-create-branch').val(data.branch);
                         $('#claim-create-warehouse').val(data.warehouse);
-                        $('#claim-create-priod').val(data.priod);
-                        $('#claim-create-date').val(data.written);
+                        $('#claim-create-priod').val(data.period);
+                        $('#claim-create-date').val(`${written[2]}/${written[1]}/${written[0]}`);
                         $('#claim-create-pono').val(data.po_no);
                         $('#claim-create-refno').val(data.ref_no);
                         // $('#claim-create-delivery').val(data.);
@@ -452,13 +464,13 @@ $(document).ready(function(){
                         $('#claim-create-customeraddr2').val(data.addr2);
                         $('#claim-create-customeraddr3').val(data.addr3);
                         $('#claim-create-customeraddr4').val(data.addr4);
-                        // $('#claim-create-user').val(data.oprator);
-                        $('#claim-create-printed').val((data.printed != null)?data.printed:'//');
-                        $('#claim-create-voided').val((data.voided != null)?data.voided:'//');
-                        $('#claim-create-rgdate').val((data.date_rg != null)?data.date_rg:'//');
-                        $('#claim-create-dodate').val((data.date_do != null)?data.date_do:'//');
-                        $('#claim-create-closed').val((data.closed != null)?data.closed:'//');
-                        $('#claim-create-rrno').val((data.rr_no != null)?data.rr_no:'//');
+                        $('#claim-create-user').val(data.operator);
+                        $('#claim-create-printed').val((printed != null) ? `${printed[2]}/${printed[1]}/${printed[0]}` : '//');
+                        $('#claim-create-voided').val((voided != null) ? `${voided[2]}/${voided[1]}/${voided[0]}` : '//');
+                        $('#claim-create-rgdate').val((date_rg != null) ? `${date_rg[2]}/${date_rg[1]}/${date_rg[0]}` : '//');
+                        $('#claim-create-dodate').val((date_do != null) ? `${date_do[2]}/${date_do[1]}/${date_do[0]}` : '//');
+                        $('#claim-create-closed').val((closed != null) ? `${written[2]}/${written[1]}/${written[0]}` : '//');
+                        $('#claim-create-rrno').val((data.rr_no != null) ? data.rr_no : '//');
                         tbl_create.row.add([
                             no,
                             data.itemcode,
@@ -477,6 +489,122 @@ $(document).ready(function(){
             }
         );
     });
+    $(document).on('click', '.claim-act-edit', function () {
+        var id = $(this).data('clno');
+        ajax(
+            "{{route('tms.warehouse.claim_entry.read')}}",
+            "POST",
+            {"cl_no": id, "cek":"all"},
+            function (response) {
+                response = response.responseJSON;
+                if (response.message != null) {
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: response.message,
+                        icon: 'warning'
+                    });
+                }else{
+                    edit();
+                }
+            }
+        );
+        function edit() {
+            ajax(
+                "{{route('tms.warehouse.claim_entry.read')}}",
+                "POST",
+                {"cl_no": id},
+                function (response) {
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        modalAction('#claim-modal-create');
+                        var no=1;
+                        $.each(response.content, function (i, data) {
+                            var written = data.written.split('-');
+                            var printed = (data.printed != null) ? data.printed.split('-') : null;
+                            var voided = (data.voided != null) ? data.voided.split('-') : null;
+                            var date_rg = (data.date_rg != null) ? data.date_rg.split('-') : null;
+                            var date_do = (data.date_do != null) ? data.date_do.split('-') : null;
+                            var closed = (data.closed != null) ? data.closed.split('-') : null;
+
+                            $('#claim-create-no').val(data.cl_no);
+                            $('#claim-create-branch').val(data.branch);
+                            $('#claim-create-warehouse').val(data.warehouse);
+                            $('#claim-create-priod').val(data.period);
+                            $('#claim-create-date').val(`${written[2]}/${written[1]}/${written[0]}`);
+                            $('#claim-create-pono').val(data.po_no);
+                            $('#claim-create-refno').val(data.ref_no);
+                            $('#claim-create-remark').val(data.remark);
+                            $('#claim-create-customercode').val(data.cust_code);
+                            $('#claim-create-customerdoaddr').val(data.do_addr);
+                            $('#claim-create-customername').val(data.company);
+                            $('#claim-create-customeraddr1').val(data.addr1);
+                            $('#claim-create-customeraddr2').val(data.addr2);
+                            $('#claim-create-customeraddr3').val(data.addr3);
+                            $('#claim-create-customeraddr4').val(data.addr4);
+                            // $('#claim-create-user').val(data.operator);
+                            $('#claim-create-printed').val((printed != null) ? `${printed[2]}/${printed[1]}/${printed[0]}` : '');
+                            $('#claim-create-voided').val((voided != null) ? `${voided[2]}/${voided[1]}/${voided[0]}` : '');
+                            $('#claim-create-rgdate').val((date_rg != null) ? `${date_rg[2]}/${date_rg[1]}/${date_rg[0]}` : '');
+                            $('#claim-create-dodate').val((date_do != null) ? `${date_do[2]}/${date_do[1]}/${date_do[0]}` : '');
+                            $('#claim-create-closed').val((closed != null) ? `${written[2]}/${written[1]}/${written[0]}` : '');
+                            $('#claim-create-rrno').val((data.rr_no != null) ? data.rr_no : '');
+                            tbl_create.row.add([
+                                no,
+                                data.itemcode,
+                                data.part_no,
+                                data.descript,
+                                data.unit_item,
+                                data.qty,
+                                data.qty_rg,
+                                data.notes
+                            ]);
+                            no++;
+                        });
+                        tbl_create.draw();
+                    }else{
+                    }
+                }
+            );
+        }
+    });
+    $(document).on('click', '.claim-act-do', function () {
+        var id = $(this).data('clno');
+        modalAction('#claim-modal-status-do');
+    });
+    $(document).on('click', '.claim-act-voided', function () {
+        var id = $(this).data('clno');
+        ajax(
+            "{{route('tms.warehouse.claim_entry.read')}}",
+            "POST",
+            {"cl_no": id, "cek":"all"},
+            function (response) {
+                response = response.responseJSON;
+                if (response.message != null) {
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: response.message,
+                        icon: 'warning'
+                    });
+                }else{
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: `Do you want to void Claim no. ${id}, now ?`,
+                        showCancelButton: true,
+                        confirmButtonText: `Yes, Void it!`,
+                        confirmButtonColor: '#DC3545',
+                        icon: 'warning',
+                    }).then((result) => {
+                        if (result.value == true) {
+                            
+                        }
+                    });
+                }
+            }
+        );
+    });
+
+
+
     $(document).on('click', '.claim-act-log', function () {
         var id = $(this).data('clno');
         modalAction('#claim-modal-log');
@@ -497,7 +625,11 @@ $(document).ready(function(){
 
     $(document).on('hidden.bs.modal', '#claim-modal-create', function () {
         $(this).find('form').trigger('reset');
-        tbl_create.clear();
+        tbl_create.clear().draw(false);
+        hideShow('#item-button-div', false);
+        hideShow('#claim-btn-create-submit', false);
+        $('#claim-form-create input').not('.readonly-first').removeAttr('readonly');
+        $('#claim-btn-create-submit').text('Simpan');
     });
 
     $(document).on('submit', '#claim-form-create', function () {
@@ -534,7 +666,7 @@ $(document).ready(function(){
                     "remark": $('#claim-create-remark').val(),
                     "customercode": $('#claim-create-customercode').val(),
                     "customerdoaddr": $('#claim-create-customerdoaddr').val(),
-                    "customername": $('#claim-create-remark').val(),
+                    "customername": $('#claim-create-customername').val(),
                     "customeraddr1": $('#claim-create-customeraddr1').val(),
                     "customeraddr2": $('#claim-create-customeraddr2').val(),
                     "customeraddr3": $('#claim-create-customeraddr3').val(),
@@ -598,7 +730,7 @@ $(document).ready(function(){
             },
             data: params,
             error: function(response, status, x){
-                $(this).find('button[disabled=true]').removeAttr('disabled');
+                $('#claim-btn-create-submit').removeAttr('disabled');
                 Swal.fire({
                     title: 'Error!',
                     text: response.responseJSON.message,
@@ -612,6 +744,14 @@ $(document).ready(function(){
     }
     const modalAction = (elementId=null, action='show') => {
         $(elementId).modal(action);
+    }
+
+    const hideShow = (elelemt=null, hide=true) => {
+        if (hide == true) {
+            $(elelemt).addClass('d-none');
+        }else{
+            $(elelemt).removeClass('d-none');
+        }
     }
 });
 </script>

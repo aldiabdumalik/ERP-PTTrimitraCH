@@ -5,7 +5,7 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-no" id="claim-create-no" class="form-control form-control-sm" readonly autocomplete="off" required>
+                <input type="text" name="claim-create-no" id="claim-create-no" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
             <div class="col-3">
                 <input type="text" name="claim-create-branch" id="claim-create-branch" class="form-control form-control-sm" autocomplete="off" required>
@@ -23,7 +23,7 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-priod" id="claim-create-priod" class="form-control form-control-sm" readonly autocomplete="off" required>
+                <input type="text" name="claim-create-priod" id="claim-create-priod" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
             <div class="col-6">
                 <input type="text" name="claim-create-date" id="claim-create-date" class="form-control form-control-sm" autocomplete="off" required>
@@ -54,10 +54,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="claim-create-delivery" id="claim-create-delivery" class="form-control form-control-sm" readonly value="/ /">
+                <input type="text" name="claim-create-delivery" id="claim-create-delivery" class="form-control form-control-sm readonly-first" readonly value="/ /">
             </div>
             <div class="col-6">
-                <input type="text" name="claim-create-delivery2" id="claim-create-delivery2" class="form-control form-control-sm" readonly>
+                <input type="text" name="claim-create-delivery2" id="claim-create-delivery2" class="form-control form-control-sm readonly-first" readonly>
             </div>
         </div>
     </div>

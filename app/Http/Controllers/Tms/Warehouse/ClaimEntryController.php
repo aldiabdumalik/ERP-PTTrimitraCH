@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tms\Warehouse;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dbtbs\ClaimEntry;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -23,19 +24,27 @@ class ClaimEntryController extends Controller
     public function claimEntry(Request $request)
     {
         if (isset($request->cl_no)) {
-            $query = ClaimEntry::where('cl_no', $request->cl_no)->get();
-            if (!$query->isEmpty()) {
+            if (isset($request->cek)) {
                 return response()->json([
                     'status' => true,
-                    'content' => $query,
-                    'message' => 'Data tersedia!'
+                    'content' => null,
+                    'message' => $this->claimEntryCheck($request)
                 ], 201);
             }else{
-                return response()->json([
-                    'status' => false,
-                    'content' => null,
-                    'message' => 'Data tidak ditemukan!'
-                ], 200);
+                $cek = ClaimEntry::where('cl_no', $request->cl_no)->get();
+                if (!$cek->isEmpty()) {
+                    return response()->json([
+                        'status' => true,
+                        'content' => $cek,
+                        'message' => 'Data tersedia!'
+                    ], 201);
+                }else{
+                    return response()->json([
+                        'status' => false,
+                        'content' => null,
+                        'message' => 'Data tidak ditemukan!'
+                    ], 200);
+                }
             }
         }else{
             $query = ClaimEntry::groupBy('cl_no')->get();
@@ -134,7 +143,82 @@ class ClaimEntryController extends Controller
 
     public function claimEntryUpdate(Request $request)
     {
-        # code...
+        $cd = explode('/', $request->date);
+        $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
+        $data = [];
+        $items = $request->items;
+        if (!empty($request->items)) {
+            $old = ClaimEntry::where('cl_no', $request->cl_no)->first();
+            $creation_by = $old->operator;
+            $creation_date = $old->written;
+            $cl_date = $old->cl_date;
+            $cl_time = $old->cl_time;
+            $delete_first = ClaimEntry::where('cl_no', $request->cl_no)->delete();
+            for ($i=0; $i < count($items); $i++) {
+                $tblItem =
+                    DB::connection('db_tbs')
+                        ->table('item')
+                        ->selectRaw('ITEMCODE, PART_NO, DESCRIPT, UNIT, PRICE, COST, FAC_UNIT, FACTOR, WAREHOUSE, GROUPS, TYPES')
+                        ->where('ITEMCODE', $items[$i][1])
+                        ->first();
+
+                $data[] = [
+                    'cl_no' => $request->cl_no,
+                    'ref_no' => $request->refno,
+                    'po_no' => $request->pono,
+                    'rr_no' => $request->rrno,
+                    'period' => $request->priod,
+                    'written' => $date,
+                    'cust_code' => $request->customercode,
+                    'do_addr' => $request->customerdoaddr,
+                    'company' => $request->customername,
+                    'addr1' => $request->customeraddr1,
+                    'addr2' => $request->customeraddr2,
+                    'addr3' => $request->customeraddr3,
+                    'addr4' => $request->customeraddr4,
+                    'remark' => $request->remark,
+                    'branch' => $request->branch,
+                    'warehouse' => $request->warehouse,
+                    'operator' => $request->user,
+                    'itemcode' => $tblItem->ITEMCODE,
+                    'part_no' => $tblItem->PART_NO,
+                    'descript' => $tblItem->DESCRIPT,
+                    'fac_unit' => $tblItem->FAC_UNIT,
+                    'factor' => $tblItem->FACTOR,
+                    'unit_item' => $tblItem->UNIT,
+                    'warehouse_item' => $tblItem->WAREHOUSE,
+                    'groups' => $tblItem->GROUPS,
+                    'types' => $tblItem->TYPES,
+                    'price' => $tblItem->PRICE,
+                    'cost' => $tblItem->COST,
+                    'tmp_qty' => 0,
+                    'qty' => $items[$i][5],
+                    'qty_rg' => 0,
+                    'notes' => $items[$i][7],
+                    'cl_date' => $cl_date,
+                    'cl_time' =>$cl_time,
+
+                    'creation_by' => $creation_by,
+                    'creation_date' => $creation_date,
+                    'update_by' => $request->user,
+                    'update_date' => date('Y-m-d')
+                ];
+            }
+        }
+        $query = ClaimEntry::insert($data);
+        if ($query) {
+            return response()->json([
+                'status' => true,
+                'content' => null,
+                'message' => 'Claim berhasil di update!'
+            ], 201);   
+        }else{
+            return response()->json([
+                'status' => true,
+                'content' => null,
+                'message' => 'Claim gagal di update, periksa kembali form Anda!'
+            ], 401);
+        }
     }
 
     public function claimEntryHeader(Request $request)
@@ -169,6 +253,67 @@ class ClaimEntryController extends Controller
                     'status' => true,
                     'content' => null,
                 ], 200);
+        }
+    }
+
+    public function claimEntryVoid(Request $request)
+    {
+        if (isset($request->cl_no)) {
+            $voided = ClaimEntry::where('cl_no', $request->cl_no)
+                ->whereNull('voided')
+                ->get();
+            if (!$voided->isEmpty()) {
+                // data bisa divoid
+                $query = ClaimEntry::where('cl_no', $request->cl_no)
+                    ->update([
+                        'voided' => date('Y-m-d'),
+                        'closed' => date('Y-m-d')
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Claim has been voided!'
+                ], 200);
+            }else{
+                // Unvoid
+                $query = ClaimEntry::where('cl_no', $request->cl_no)
+                    ->update([
+                        'voided' => null,
+                        'closed' => null
+                    ]);
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Claim has been unvoided!'
+                ], 200);
+            }
+        }
+    }
+
+    private function claimEntryCheck(Request $request)
+    {
+        $closed = ClaimEntry::where('cl_no', $request->cl_no)
+            ->whereNotNull('closed')
+            ->get();
+        $date_do = ClaimEntry::where('cl_no', $request->cl_no)
+            ->whereNotNull('date_do')
+            ->get();
+        $date_rg = ClaimEntry::where('cl_no', $request->cl_no)
+            ->whereNotNull('date_rg')
+            ->get();
+        $voided = ClaimEntry::where('cl_no', $request->cl_no)
+            ->whereNotNull('voided')
+            ->get();
+        if ($request->cek == 'all') {
+            if (!$closed->isEmpty()) {
+                return 'Claim has been closed';
+            }elseif (!$voided->isEmpty()) {
+                return 'Claim has been voided';
+            }elseif (!$date_do->isEmpty()) {
+                return 'Claim has been delivered';
+            }elseif (!$date_rg->isEmpty()) {
+                return 'Claim has been received';
+            }
         }
     }
 
