@@ -1,5 +1,5 @@
 <div class="modal fade bd-example-modal-lg claim-modal-create" style="z-index: 1041" tabindex="-1" id="claim-modal-create" data-target="#claim-modal-create" data-whatever="@claimmodalcreate"  role="dialog">
-    <div class="modal-dialog modal-80">
+    <div class="modal-dialog modal-xl">
         <form id="claim-form-create" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">

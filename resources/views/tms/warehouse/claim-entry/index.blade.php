@@ -138,6 +138,7 @@ $(document).ready(function(){
         "ordering": false,
         "scrollY": "200px",
         "scrollCollapse": true,
+        "fixedHeader":true,
     });
     $('#claim-btn-modal-create').on('click', function () {
         modalAction('#claim-modal-create');
@@ -524,6 +525,7 @@ $(document).ready(function(){
                 function (response) {
                     response = response.responseJSON;
                     if (response.status == true) {
+                        $('#claim-btn-create-submit').text('Update');
                         modalAction('#claim-modal-create');
                         var no=1;
                         $.each(response.content, function (i, data) {
@@ -568,7 +570,7 @@ $(document).ready(function(){
                             ]);
                             no++;
                         });
-                        tbl_create.draw();
+                        tbl_create.draw(false);
                     }else{
                     }
                 }
@@ -638,6 +640,9 @@ $(document).ready(function(){
         hideShow('#claim-btn-create-submit', false);
         $('#claim-form-create input').not('.readonly-first').removeAttr('readonly');
         $('#claim-btn-create-submit').text('Simpan');
+    });
+    $(document).on('shown.bs.modal', '#claim-modal-create', function () {
+        tbl_create.columns.adjust().draw();
     });
 
     $(document).on('submit', '#claim-form-create', function () {
