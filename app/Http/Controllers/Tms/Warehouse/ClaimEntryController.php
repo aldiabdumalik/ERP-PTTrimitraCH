@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dbtbs\ClaimEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -29,7 +30,7 @@ class ClaimEntryController extends Controller
                     'status' => true,
                     'content' => null,
                     'message' => $this->claimEntryCheck($request)
-                ], 201);
+                ], 200);
             }else{
                 $cek = ClaimEntry::where('cl_no', $request->cl_no)->get();
                 if (!$cek->isEmpty()) {
@@ -126,6 +127,7 @@ class ClaimEntryController extends Controller
             }
         }
         $query = ClaimEntry::insert($data);
+        $log = $this->createLOG($request->cl_no, 'ADD');
         if ($query) {
             return response()->json([
                 'status' => true,
@@ -206,6 +208,7 @@ class ClaimEntryController extends Controller
             }
         }
         $query = ClaimEntry::insert($data);
+        $log = $this->createLOG($request->cl_no, 'EDIT');
         if ($query) {
             return response()->json([
                 'status' => true,
@@ -219,6 +222,85 @@ class ClaimEntryController extends Controller
                 'message' => 'Claim gagal di update, periksa kembali form Anda!'
             ], 401);
         }
+    }
+
+    public function claimEntryRG(Request $request)
+    {
+        $cd = explode('/', $request->date);
+        $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
+        $data = [];
+        $items = $request->items;
+        if (!empty($items)) {
+            for ($i=0; $i < count($items); $i++) {
+                if ($items[$i][6] != 0) {
+                    $data[] = [
+                        'cl_no' => $request->cl_no,
+                        'doc_no' => $request->doc_no,
+                        'creation_at' => $date,
+                        'creation_by' => Auth::user()->fullName,
+                        'itemcode' => $items[$i][1],
+                        'descript' => $items[$i][2],
+                        'unit' => $items[$i][3],
+                        'qty_rg' => $items[$i][6]
+                    ];
+                    $cl_tbl = ClaimEntry::where([
+                        'cl_no' => $request->cl_no,
+                        'itemcode' => $items[$i][1]
+                    ])->first();
+                    $update_rg = ClaimEntry::where([
+                        'cl_no' => $request->cl_no,
+                        'itemcode' => $items[$i][1]
+                    ])->update([
+                        'qty_rg' => (int)$cl_tbl->qty_rg + (int)$items[$i][6]
+                    ]);
+                }
+            }
+            $update_rg_date = ClaimEntry::where([
+                'cl_no' => $request->cl_no,
+            ])->update([
+                'date_rg' => $date
+            ]);
+            $claim = DB::connection('db_tbs')
+                ->table('entry_cl_tbl')
+                ->selectRaw('SUM(qty) as tot_qty')
+                ->where('cl_no', $request->cl_no)
+                ->first();
+            $rg = DB::connection('db_tbs')
+                ->table('entry_cl_tbl')
+                ->selectRaw('SUM(qty_rg) as tot_qty')
+                ->where('cl_no', $request->cl_no)
+                ->first();
+            if ($claim->tot_qty == $rg->tot_qty) {
+                $update_rg = ClaimEntry::where([
+                    'cl_no' => $request->cl_no,
+                ])->update([
+                    'closed' => date('Y-m-d')
+                ]);
+            }
+            $query = DB::connection('db_tbs')
+                ->table('entry_cl_rg')
+                ->insert($data);
+            if ($query) {
+                return response()->json([
+                    'status' => true,
+                    'content' => null,
+                    'message' => 'Qty RG Updated!'
+                ], 201);   
+            }
+        }
+    }
+
+    public function claimEntryRGRead(Request $request)
+    {
+        $query = DB::connection('db_tbs')
+            ->table('entry_cl_rg')
+            ->where('cl_no', $request->cl_no)
+            ->get();
+        return DataTables::of($query)
+            ->editColumn('creation_at', function($query) {
+                return ($query->creation_at == NULL) ? '/ /' : date('d/m/Y', strtotime($query->creation_at));
+            })
+            ->make(true);
     }
 
     public function claimEntryHeader(Request $request)
@@ -248,6 +330,13 @@ class ClaimEntryController extends Controller
             case "log":
                 return DataTables::of($this->headerToolsLog($request))->make(true);
                 break;
+            case "cek_rg":
+                return response()->json([
+                    'status' => true,
+                    'content' => $this->claimEntryCheckRG($request),
+                    'message' => 'Claim has been received!'
+                ], 200);
+                break;
             default:
                 return response()->json([
                     'status' => true,
@@ -269,23 +358,46 @@ class ClaimEntryController extends Controller
                         'voided' => date('Y-m-d'),
                         'closed' => date('Y-m-d')
                     ]);
+                $log = $this->createLOG($request->cl_no, 'VOID');
                 return response()->json([
                     'status' => true,
                     'content' => null,
                     'message' => 'Claim has been voided!'
                 ], 200);
             }else{
-                // Unvoid
+                return response()->json([
+                    'status' => false,
+                    'content' => null,
+                    'message' => 'Perintah ditolak! Coba beberapa saat lagi.'
+                ], 401);
+            }
+        }
+    }
+
+    public function claimEntryUnVoid(Request $request)
+    {
+        if (isset($request->cl_no)) {
+            $voided = ClaimEntry::where('cl_no', $request->cl_no)
+                ->whereNull('voided')
+                ->get();
+            if ($voided->isEmpty()) {
                 $query = ClaimEntry::where('cl_no', $request->cl_no)
                     ->update([
                         'voided' => null,
                         'closed' => null
                     ]);
+                $log = $this->createLOG($request->cl_no, 'UNVOID', $request->note);
                 return response()->json([
                     'status' => true,
                     'content' => null,
                     'message' => 'Claim has been unvoided!'
                 ], 200);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'content' => null,
+                    'message' => 'Perintah ditolak! Coba beberapa saat lagi.'
+                ], 401);
             }
         }
     }
@@ -297,27 +409,49 @@ class ClaimEntryController extends Controller
                 ->whereNull('date_do')
                 ->get();
             if (!$date_do->isEmpty()) {
-                // data bisa do
                 $query = ClaimEntry::where('cl_no', $request->cl_no)
                     ->update([
                         'date_do' => date('Y-m-d')
                     ]);
+                $log = $this->createLOG($request->cl_no, 'DELIVER');
                 return response()->json([
                     'status' => true,
                     'content' => null,
                     'message' => 'Claim has been delivered!'
                 ], 200);
             }else{
-                // undo
+                return response()->json([
+                    'status' => false,
+                    'content' => null,
+                    'message' => 'Perintah ditolak! Coba beberapa saat lagi.'
+                ], 401);
+            }
+        }
+    }
+
+    public function claimEntryUnDO(Request $request)
+    {
+        if (isset($request->cl_no)) {
+            $date_do = ClaimEntry::where('cl_no', $request->cl_no)
+                ->whereNull('date_do')
+                ->get();
+            if ($date_do->isEmpty()) {
                 $query = ClaimEntry::where('cl_no', $request->cl_no)
                     ->update([
                         'date_do' => null
                     ]);
+                $log = $this->createLOG($request->cl_no, 'UNDELIVER', $request->note);
                 return response()->json([
                     'status' => true,
                     'content' => null,
                     'message' => 'Claim has been undelivered!'
                 ], 200);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'content' => null,
+                    'message' => 'Perintah ditolak! Coba beberapa saat lagi.'
+                ], 401);
             }
         }
     }
@@ -357,6 +491,29 @@ class ClaimEntryController extends Controller
         }
     }
 
+    private function claimEntryCheckRG(Request $request)
+    {
+        $claim = DB::connection('db_tbs')
+            ->table('entry_cl_tbl')
+            ->selectRaw('SUM(qty) as tot_qty')
+            ->where('cl_no', $request->cl_no)
+            ->first();
+        $rg = DB::connection('db_tbs')
+            ->table('entry_cl_rg')
+            ->selectRaw('SUM(qty_rg) as tot_qty')
+            ->where('cl_no', $request->cl_no)
+            ->first();
+        if ($claim->tot_qty == $rg->tot_qty) {
+            $query = DB::connection('db_tbs')
+                ->table('entry_cl_rg')
+                ->where('cl_no', $request->cl_no)
+                ->get();
+            return $query;
+        }else{
+            return null;
+        }
+    }
+
     private function claimEntryCheck(Request $request)
     {
         $closed = ClaimEntry::where('cl_no', $request->cl_no)
@@ -380,6 +537,16 @@ class ClaimEntryController extends Controller
                 return 'Claim has been delivered';
             }elseif (!$date_rg->isEmpty()) {
                 return 'Claim has been received';
+            }
+        }elseif ($request->cek == 'deliver') {
+            if (!$closed->isEmpty()) {
+                return 'Claim has been closed';
+            }elseif (!$voided->isEmpty()) {
+                return 'Claim has been voided';
+            }
+        }elseif ($request->cek == 'receive') {
+            if (!$voided->isEmpty()) {
+                return 'Claim has been voided';
             }
         }
     }
@@ -535,5 +702,20 @@ class ClaimEntryController extends Controller
                 return $clNo;
             }
         }  
+    }
+
+    private function createLOG($id, $status, $note=null)
+    {
+        $log = DB::connection('db_tbs')
+            ->table('entry_cl_log')
+            ->insert([
+                'cl_no' => $id,
+                'date_written' => date('Y-m-d'),
+                'time_written' => date('H:i:s'),
+                'status_change' => $status,
+                'user' => Auth::user()->FullName,
+                'note' => ($note != null) ? $note : ""
+            ]);
+        return $log;
     }
 }
