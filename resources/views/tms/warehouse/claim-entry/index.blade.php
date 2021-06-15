@@ -152,6 +152,15 @@ $(document).ready(function(){
         "scrollCollapse": true,
         "fixedHeader":true,
     });
+    var tbl_rg_complete = $('#claim-datatables-rg-complete').DataTable({
+        "lengthChange": false,
+        "searching": false,
+        "paging": false,
+        "ordering": false,
+        "scrollY": "200px",
+        "scrollCollapse": true,
+        "fixedHeader":true,
+    });
     $('#claim-btn-modal-create').on('click', function () {
         modalAction('#claim-modal-create');
         var now = new Date();
@@ -748,7 +757,6 @@ $(document).ready(function(){
         var id = $(this).data('clno');
         var po = $(this).data('pono');
         var customer = $(this).data('customer').split('|');
-        var tbl_rg_complete;
         ajax(
             "{{route('tms.warehouse.claim_entry.read')}}",
             "POST",
@@ -831,12 +839,6 @@ $(document).ready(function(){
                 }
             }
         );
-        $('#claim-modal-status-rg-complete').on('shown.bs.modal', function () {
-            tbl_rg_complete.columns.adjust().draw();
-        });
-        $('#claim-modal-status-rg-complete').on('hidden.bs.modal', function () {
-            tbl_rg_complete.clear().draw();
-        });
         $('#claim-datatables-rg-complete tbody').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_rg_complete.row(this).data();
             if (data != undefined) {
@@ -920,7 +922,6 @@ $(document).ready(function(){
                     "doc_no": $('#claim-status-rg-docno').val(),
                     "items": tbl_rg.rows().data().toArray(),
                 }
-                console.log(data);
                 ajax(
                     "{{ route('tms.warehouse.claim_entry.receive_good.rg') }}",
                     "POST",
@@ -980,6 +981,12 @@ $(document).ready(function(){
                 );
             });
         } 
+    });
+    $(document).on('shown.bs.modal', '#claim-modal-status-rg-complete', function () {
+        tbl_rg_complete.columns.adjust().draw();
+    });
+    $(document).on('hidden.bs.modal', '#claim-modal-status-rg-complete', function () {
+        tbl_rg_complete.clear().draw();
     });
     $(document).on('click', '.claim-act-voided', function () {
         var id = $(this).data('clno');
