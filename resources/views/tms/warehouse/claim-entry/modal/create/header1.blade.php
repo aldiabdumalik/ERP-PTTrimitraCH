@@ -44,7 +44,7 @@
         <label for="claim-create-refno">Refs. No</label>
     </div>
     <div class="col-10">
-        <input type="number" name="claim-create-refno" id="claim-create-refno" class="form-control form-control-sm" autocomplete="off" required>
+        <input type="text" name="claim-create-refno" id="claim-create-refno" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">

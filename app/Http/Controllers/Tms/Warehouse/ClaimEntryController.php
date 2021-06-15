@@ -322,10 +322,8 @@ class ClaimEntryController extends Controller
                 ->selectRaw('SUM(qty) as tot_qty, SUM(qty_rg) as tot_qty_rg')
                 ->where('cl_no', $request->cl_no)
                 ->first();
-            if ($sum->tot_qty == $sum->tot_qty_rg) {
-                $update_rg = ClaimEntry::where([
-                    'cl_no' => $request->cl_no,
-                ])->update([
+            if ($sum->tot_qty_rg == 0) {
+                $update_rg = ClaimEntry::where('cl_no', $request->cl_no)->update([
                     'date_rg' => null
                 ]);
             }
@@ -482,13 +480,15 @@ class ClaimEntryController extends Controller
     public function claimEntryDO(Request $request)
     {
         if (isset($request->cl_no)) {
+            $cd = explode('/', $request->date_sj);
+            $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
             $date_do = ClaimEntry::where('cl_no', $request->cl_no)
                 ->whereNull('date_do')
                 ->get();
             if (!$date_do->isEmpty()) {
                 $query = ClaimEntry::where('cl_no', $request->cl_no)
                     ->update([
-                        'date_do' => date('Y-m-d')
+                        'date_do' => $date
                     ]);
                 $log = $this->createLOG($request->cl_no, 'DELIVER');
                 return response()->json([
@@ -496,12 +496,6 @@ class ClaimEntryController extends Controller
                     'content' => null,
                     'message' => 'Claim has been delivered!'
                 ], 200);
-            }else{
-                return response()->json([
-                    'status' => false,
-                    'content' => null,
-                    'message' => 'Perintah ditolak! Coba beberapa saat lagi.'
-                ], 401);
             }
         }
     }
@@ -523,12 +517,6 @@ class ClaimEntryController extends Controller
                     'content' => null,
                     'message' => 'Claim has been undelivered!'
                 ], 200);
-            }else{
-                return response()->json([
-                    'status' => false,
-                    'content' => null,
-                    'message' => 'Perintah ditolak! Coba beberapa saat lagi.'
-                ], 401);
             }
         }
     }

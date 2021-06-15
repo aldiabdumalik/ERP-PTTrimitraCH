@@ -162,8 +162,11 @@ $(document).ready(function(){
             "POST",
             params,
             function (response) {
-            response = response.responseJSON;
-            $('#claim-create-no').val(response);
+                var resText = response.responseText;
+                response = response.responseJSON;
+                $('#claim-create-no').val(response);
+                var refno = `CL/${resText.substr(resText.length - 3)}/${toRoman(currentMonth)}/${now.getFullYear()}`;
+                $('#claim-create-refno').val(refno);
         });
     });
     $('#claim-datatables-create tbody').off('click', 'tr').on('click', 'tr', function () {
@@ -209,7 +212,11 @@ $(document).ready(function(){
         enableOnReadonly: false
     }).datepicker("setDate",'now').on('changeDate', function(e) {
         var date = e.format(0, "yyyy-mm");
+        var bln = e.format(0, "mm");
+        var thn = e.format(0, "yyyy");
         $('#claim-create-priod').val(date);
+        var refno = `CL/${$('#claim-create-no').val().substr($('#claim-create-no').val().length - 3)}/${toRoman(bln)}/${thn}`;
+        $('#claim-create-refno').val(refno);
     });
 
     $(document).on('keypress', '#claim-create-branch', function (e) {
@@ -906,13 +913,14 @@ $(document).ready(function(){
         });
         
         function onSubmit() {
-            $('#form-status-rg').on('submit', function () {
+            $('#form-status-rg').off('submit').on('submit', function () {
                 var data = {
                     "cl_no": $('#claim-status-rg-no').val(),
                     "date": $('#claim-status-rg-date').val(),
                     "doc_no": $('#claim-status-rg-docno').val(),
                     "items": tbl_rg.rows().data().toArray(),
                 }
+                console.log(data);
                 ajax(
                     "{{ route('tms.warehouse.claim_entry.receive_good.rg') }}",
                     "POST",
@@ -940,7 +948,7 @@ $(document).ready(function(){
             });
         }
         function deleteRG() {
-            $('#claim-btn-rg-complete-delete').on('click', function () {
+            $('#claim-btn-rg-complete-delete').off('click').on('click', function () {
                 var items = tbl_rg_complete.rows('.selected').data().toArray();
                 var data = {
                     "cl_no": $('#claim-status-rg-complete-no').val(),
@@ -1172,7 +1180,7 @@ $(document).ready(function(){
     });
     $(document).on('hidden.bs.modal', '#claim-modal-status-rg', function () {
         $(this).find('form').trigger('reset');
-        tbl_rg.clear().draw(false);
+        tbl_rg.clear().draw();
     });
 
     $(document).on('submit', '#claim-form-create', function () {
@@ -1235,7 +1243,9 @@ $(document).ready(function(){
                                 text: response.message,
                                 icon: 'success'
                             }).then(function(){
-                                window.location.reload();
+                                // window.location.reload();
+                                modalAction('#claim-modal-create', 'hide');
+                                tbl_index.ajax.reload();
                             });
                         }
                     }
@@ -1301,6 +1311,31 @@ $(document).ready(function(){
         }else{
             $(elelemt).removeClass('d-none');
         }
+    }
+
+    const toRoman = (num) => {
+        var roman = {
+            M: 1000,
+            CM: 900,
+            D: 500,
+            CD: 400,
+            C: 100,
+            XC: 90,
+            L: 50,
+            XL: 40,
+            X: 10,
+            IX: 9,
+            V: 5,
+            IV: 4,
+            I: 1
+        };
+        var str = '';
+        for (var i of Object.keys(roman)) {
+            var q = Math.floor(num / roman[i]);
+            num -= q * roman[i];
+            str += i.repeat(q);
+        }
+        return str;
     }
 });
 </script>
