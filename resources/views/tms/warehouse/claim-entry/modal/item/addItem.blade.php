@@ -75,7 +75,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="claim-btn-additem-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="button" id="claim-btn-additem-submit" class="btn btn-info">Add item</button>
+                    <button type="submit" id="claim-btn-additem-submit" class="btn btn-info">Add item</button>
                 </div>
             </div>
         </form>

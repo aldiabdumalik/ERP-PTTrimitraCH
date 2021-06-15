@@ -37,20 +37,13 @@
                         </div>
                     </div>
                     <div class="row mt-4">
-                        <div id="item-button-div-rg-complete" class="col-12 text-right">
-                            <button type="button" id="claim-btn-rg-complete" class="btn btn-sm btn-info" disabled>
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-12">
                             <div class="table-responsive">
                                 <div class="datatable datatable-primary">
                                     <table id="claim-datatables-rg-complete" class="table table-bordered" style="width:100%;cursor:pointer">
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr style="font-size: 14px;">
-                                                {{-- <th class="align-middle">#</th> --}}
+                                                <th class="align-middle">#</th>
                                                 <th class="align-middle">Claim No.</th>
                                                 <th class="align-middle">Itemcode</th>
                                                 <th class="align-middle">Description</th>
@@ -68,9 +61,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" id="claim-btn-rg-complete-delete" class="btn btn-sm btn-info" disabled>
+                        Delete
+                    </button>
                     <button type="button" id="claim-btn-status-rg-complete-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    {{-- <button type="button" id="claim-btn-status-rg-complete-del" class="btn btn-danger" disabled>Del</button> --}}
-                    <button type="submit" id="claim-btn-status-rg-complete-submit" class="btn btn-info">Ok</button>
                 </div>
             </div>
         </form>

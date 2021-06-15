@@ -221,12 +221,25 @@ $(document).ready(function(){
                 {data: 'code', name: 'code'},
                 {data: 'name', name: 'name'},
             ];
-            tbl_branch = $('#claim-datatables-branch').DataTable(dataTables(
-                "{{ route('tms.warehouse.claim_entry.header_tools') }}",
-                "POST",
-                params,
-                column
-            ));
+            tbl_branch =  $('#claim-datatables-branch').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                    method: 'POST',
+                    data: params,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                },
+                columns: column,
+                lengthChange: false,
+                searching: false,
+                paging: false,
+                ordering: false
+            });
+            
         }
         $('#claim-datatables-branch').off('click').on('click', 'tr', function () {
             modalAction('#claim-modal-branch', 'hide');
@@ -252,12 +265,25 @@ $(document).ready(function(){
                 {data: 'code', name: 'code'},
                 {data: 'name', name: 'name'},
             ];
-            tbl_wh = $('#claim-datatables-warehouse').DataTable(dataTables(
-                "{{ route('tms.warehouse.claim_entry.header_tools') }}",
-                "POST",
-                params,
-                column
-            ));
+            tbl_wh =  $('#claim-datatables-warehouse').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                    method: 'POST',
+                    data: params,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                },
+                columns: column,
+                lengthChange: false,
+                searching: false,
+                paging: false,
+                ordering: false
+            });
+            
         }
         $('#claim-datatables-warehouse').off('click').on('click', 'tr', function () {
             modalAction('#claim-modal-warehouse', 'hide');
@@ -347,7 +373,7 @@ $(document).ready(function(){
     $(document).on('hidden.bs.modal', '#claim-modal-additem', function () {
         $(this).find('form').trigger('reset');
     });
-    $(document).on('click', '#claim-btn-additem-submit', function () {
+    $(document).on('submit', '#claim-form-additem', function () {
         var index = tbl_create.data().length;
         if ($('#claim-additem-index').val() == 0) {
             var add = tbl_create.row.add([
@@ -754,6 +780,7 @@ $(document).ready(function(){
                                         }
                                     },
                                     columns: [
+                                        {data:'id', name: 'id', visible: false},
                                         {data:'cl_no', name: 'cl_no'},
                                         {data:'itemcode', name: 'itemcode'},
                                         {data:'descript', name: 'descript'},
@@ -770,6 +797,7 @@ $(document).ready(function(){
                                     scrollCollapse: true,
                                     fixedHeader:true,
                                 });
+                                deleteRG();
                             }else{
                                 modalAction('#claim-modal-status-rg');
                                 $('#claim-status-rg-customer-id').val(customer[0]);
@@ -801,6 +829,17 @@ $(document).ready(function(){
         });
         $('#claim-modal-status-rg-complete').on('hidden.bs.modal', function () {
             tbl_rg_complete.clear().draw();
+        });
+        $('#claim-datatables-rg-complete tbody').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_rg_complete.row(this).data();
+            if (data != undefined) {
+                $(this).toggleClass('selected');
+                if ($('#claim-datatables-rg-complete tbody tr').hasClass('selected')) {
+                    $('#claim-btn-rg-complete-delete').removeAttr('disabled');
+                }else{
+                    $('#claim-btn-rg-complete-delete').prop('disabled', true);
+                }
+            }
         });
         function getData() {
             ajax(
@@ -900,6 +939,39 @@ $(document).ready(function(){
                 );
             });
         }
+        function deleteRG() {
+            $('#claim-btn-rg-complete-delete').on('click', function () {
+                var items = tbl_rg_complete.rows('.selected').data().toArray();
+                var data = {
+                    "cl_no": $('#claim-status-rg-complete-no').val(),
+                    "items": items
+                };
+                ajax(
+                    "{{ route('tms.warehouse.claim_entry.receive_good.unrg') }}",
+                    "POST",
+                    data,
+                    function (response) {
+                        response = response.responseJSON;
+                        if (response.status == true) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success'
+                            }).then(()=>{
+                                modalAction('#claim-modal-status-rg-complete', 'hide');
+                                tbl_index.ajax.reload();
+                            });
+                        }else{
+                            Swal.fire({
+                                title: 'Warning!',
+                                text: response.message,
+                                icon: 'warning'
+                            });
+                        }
+                    }
+                );
+            });
+        } 
     });
     $(document).on('click', '.claim-act-voided', function () {
         var id = $(this).data('clno');
@@ -998,8 +1070,72 @@ $(document).ready(function(){
             }
         });
     });
+    $(document).on('click', '.claim-act-unclose', function () {
+        var id = $(this).data('clno');
+        ajax(
+            "{{route('tms.warehouse.claim_entry.read')}}",
+            "POST",
+            {"cl_no": id, "cek":"unclose"},
+            function (response) {
+                response = response.responseJSON;
+                if (response.message != null) {
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: response.message,
+                        icon: 'warning'
+                    });
+                }else{
+                    Swal.fire({
+                        title: `Do you want to unclosed Claim no. ${id}, now ?`,
+                        input: 'text',
+                        inputPlaceholder: 'Type your note here...',
+                        showCancelButton: true,
+                        confirmButtonText: `Yes, unclose it!`,
+                        confirmButtonColor: '#DC3545',
+                        icon: 'warning',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'You need to write something!'
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.value != "" && result.value != undefined) {
+                            var note = result.value;
+                            ajax(
+                                "{{route('tms.warehouse.claim_entry.close.unclosed')}}",
+                                "POST",
+                                {"cl_no": id, "note": note},
+                                function (response) {
+                                    response = response.responseJSON;
+                                    if (response.status == true) {
+                                        Swal.fire({
+                                            title: 'Success!',
+                                            text: response.message,
+                                            icon: 'success'
+                                        }).then(()=>{
+                                            tbl_index.ajax.reload();
+                                        });
+                                    }else{
+                                        Swal.fire({
+                                            title: 'Warning!',
+                                            text: response.message,
+                                            icon: 'warning'
+                                        });
+                                    }
+                                }
+                            );
+                        }
+                    });
+                }
+            }
+        );
+    });
 
-
+    $(document).on('click', '.claim-act-report', function () {
+        var encrypt = btoa(`${$(this).data('clno')}`);
+        var url = "{{route('tms.warehouse.claim_entry.report')}}?print=" + encrypt;
+        window.open(url, '_blank');
+    });
 
     $(document).on('click', '.claim-act-log', function () {
         var id = $(this).data('clno');

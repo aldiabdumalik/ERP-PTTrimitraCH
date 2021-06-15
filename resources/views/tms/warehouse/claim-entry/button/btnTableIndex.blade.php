@@ -24,7 +24,7 @@
         @if ($data->closed != NULL)
         <a class="dropdown-item text-danger claim-act-unclose" href="javascript:void(0)" data-clno="{{ $data->cl_no }}"><i class="fa fa-times"></i> Unclose</a>
         @endif
-        <a class="dropdown-item text-primary claim-act-print" href="javascript:void(0)" data-clno="{{ $data->cl_no }}"><i class="fa fa-print"></i> Print</a>
+        <a class="dropdown-item text-primary claim-act-report" href="javascript:void(0)" data-clno="{{ $data->cl_no }}"><i class="fa fa-print"></i> Print</a>
         <a class="dropdown-item text-primary claim-act-log" href="javascript:void(0)" data-clno="{{ $data->cl_no }}"><i class="fa fa-share"></i> Log</a>
     </div>
 </div>

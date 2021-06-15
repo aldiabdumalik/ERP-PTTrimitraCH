@@ -13,7 +13,6 @@
                                     <th class="align-middle">Date</th>
                                     <th class="align-middle">Time</th>
                                     <th class="align-middle">Status</th>
-                                    <th class="align-middle">Status</th>
                                     <th class="align-middle">User</th>
                                     <th class="align-middle">Note</th>
                                 </tr>

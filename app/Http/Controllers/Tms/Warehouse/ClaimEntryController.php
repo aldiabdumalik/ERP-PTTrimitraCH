@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Tms\Warehouse;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dbtbs\ClaimEntry;
+use App\Models\Dbtbs\ClaimEntryRG;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Redirect;
 
 class ClaimEntryController extends Controller
 {
@@ -260,17 +263,12 @@ class ClaimEntryController extends Controller
             ])->update([
                 'date_rg' => $date
             ]);
-            $claim = DB::connection('db_tbs')
+            $sum = DB::connection('db_tbs')
                 ->table('entry_cl_tbl')
-                ->selectRaw('SUM(qty) as tot_qty')
+                ->selectRaw('SUM(qty) as tot_qty, SUM(qty_rg) as tot_qty_rg')
                 ->where('cl_no', $request->cl_no)
                 ->first();
-            $rg = DB::connection('db_tbs')
-                ->table('entry_cl_tbl')
-                ->selectRaw('SUM(qty_rg) as tot_qty')
-                ->where('cl_no', $request->cl_no)
-                ->first();
-            if ($claim->tot_qty == $rg->tot_qty) {
+            if ($sum->tot_qty == $sum->tot_qty_rg) {
                 $update_rg = ClaimEntry::where([
                     'cl_no' => $request->cl_no,
                 ])->update([
@@ -289,6 +287,55 @@ class ClaimEntryController extends Controller
             }
         }
     }
+    public function claimEntryUnRG(Request $request)
+    {
+        $cek = ClaimEntry::where([
+            'cl_no' => $request->cl_no,
+            'closed' => null
+        ])->first();
+        if (!isset($cek)) {
+            return response()->json([
+                'status' => false,
+                'content' => null,
+                'message' => 'Claim has been closed, please contact your manager!'
+            ], 404);
+        }
+
+        $items = $request->items;
+        if (!empty($items)) {
+            for ($i=0; $i < count($items); $i++) { 
+                $where = [
+                    'cl_no' => $items[$i]['cl_no'],
+                    'itemcode' => $items[$i]['itemcode']
+                ];
+                $claim = ClaimEntry::where($where)
+                    ->first();
+                $rg = ClaimEntryRG::where('id', $items[$i]['id'])
+                    ->first();
+                
+                $claim->qty_rg = (int)$claim->qty_rg - (int)$rg->qty_rg;
+                $claim->save();
+                $rg->delete();
+            }
+            $sum = DB::connection('db_tbs')
+                ->table('entry_cl_tbl')
+                ->selectRaw('SUM(qty) as tot_qty, SUM(qty_rg) as tot_qty_rg')
+                ->where('cl_no', $request->cl_no)
+                ->first();
+            if ($sum->tot_qty == $sum->tot_qty_rg) {
+                $update_rg = ClaimEntry::where([
+                    'cl_no' => $request->cl_no,
+                ])->update([
+                    'date_rg' => null
+                ]);
+            }
+            return response()->json([
+                'status' => true,
+                'content' => null,
+                'message' => 'Claim Entry updated!'
+            ], 200);
+        }
+    }
 
     public function claimEntryRGRead(Request $request)
     {
@@ -301,6 +348,36 @@ class ClaimEntryController extends Controller
                 return ($query->creation_at == NULL) ? '/ /' : date('d/m/Y', strtotime($query->creation_at));
             })
             ->make(true);
+    }
+
+    public function claimEntryUnClose(Request $request)
+    {
+        if (isset($request->cl_no)) {
+            $claim = ClaimEntry::where('cl_no', $request->cl_no)->update([
+                'closed' => null
+            ]);
+            $log = $this->createLOG($request->cl_no, 'UNCLOSE', $request->note);
+            return response()->json([
+                'status' => true,
+                'content' => null,
+                'message' => 'Claim has been unclose!'
+            ], 200);
+        }
+    }
+
+    public function claimEntryReport(Request $request)
+    {
+        if (isset($request->print) && $request->print != "") {
+            $cl_no = base64_decode($request->print);
+            $data = ClaimEntry::where('cl_no', $cl_no)->get();
+            if ($data->isEmpty()) {
+                $request->session()->flash('message', 'Data tidak ditemukan!');
+                return Redirect::back();
+            }
+            $log = $this->createLOG($cl_no, 'PRINT', $request->note);
+            $pdf = PDF::loadView('tms.warehouse.claim-entry.report.report', compact('data'))->setPaper('a4', 'potrait');
+            return $pdf->stream();
+        }
     }
 
     public function claimEntryHeader(Request $request)
@@ -456,41 +533,6 @@ class ClaimEntryController extends Controller
         }
     }
 
-    public function claimEntryClosed(Request $request)
-    {
-        if (isset($request->cl_no)) {
-            $closed = ClaimEntry::where('cl_no', $request->cl_no)
-                ->whereNull('closed')
-                ->where(function (Builder $query){
-                    
-                })
-                ->get();
-            if (!$closed->isEmpty()) {
-                // data bisa do
-                $query = ClaimEntry::where('cl_no', $request->cl_no)
-                    ->update([
-                        'closed' => date('Y-m-d')
-                    ]);
-                return response()->json([
-                    'status' => true,
-                    'content' => null,
-                    'message' => 'Claim has been delivered!'
-                ], 200);
-            }else{
-                // undo
-                $query = ClaimEntry::where('cl_no', $request->cl_no)
-                    ->update([
-                        'closed' => null
-                    ]);
-                return response()->json([
-                    'status' => true,
-                    'content' => null,
-                    'message' => 'Claim has been undelivered!'
-                ], 200);
-            }
-        }
-    }
-
     private function claimEntryCheckRG(Request $request)
     {
         $claim = DB::connection('db_tbs')
@@ -530,7 +572,7 @@ class ClaimEntryController extends Controller
             ->get();
         if ($request->cek == 'all') {
             if (!$closed->isEmpty()) {
-                return 'Claim has been closed';
+                return 'Claim has been closed, please contact your manager!';
             }elseif (!$voided->isEmpty()) {
                 return 'Claim has been voided';
             }elseif (!$date_do->isEmpty()) {
@@ -540,11 +582,15 @@ class ClaimEntryController extends Controller
             }
         }elseif ($request->cek == 'deliver') {
             if (!$closed->isEmpty()) {
-                return 'Claim has been closed';
+                return 'Claim has been closed, please contact your manager!';
             }elseif (!$voided->isEmpty()) {
                 return 'Claim has been voided';
             }
         }elseif ($request->cek == 'receive') {
+            if (!$voided->isEmpty()) {
+                return 'Claim has been voided';
+            }
+        }elseif ($request->cek == 'unclose') {
             if (!$voided->isEmpty()) {
                 return 'Claim has been voided';
             }
