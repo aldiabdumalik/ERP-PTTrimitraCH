@@ -69,7 +69,7 @@
                                                 <th class="align-middle">Itemcode</th>
                                                 <th class="align-middle">Description</th>
                                                 <th class="align-middle">Unit</th>
-                                                <th class="align-middle">Qty Claim</th>
+                                                <th class="align-middle">Qty SJ</th>
                                                 <th class="align-middle">Qty RG</th>
                                                 <th class="align-middle">Tobe RG</th>
                                             </tr>

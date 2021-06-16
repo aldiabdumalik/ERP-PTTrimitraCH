@@ -9,7 +9,7 @@
                     <input type="hidden" name="claim-status-rgqty-id" id="claim-status-rgqty-id" class="form-control form-control-sm" autocomplete="off" readonly>
                     <div class="form-row align-items-center mb-1" style="font-size: 11px;">
                         <div class="col-2">
-                            <label for="claim-status-rgqty-qtyclaim">Qty Claim</label>
+                            <label for="claim-status-rgqty-qtyclaim">Qty SJ</label>
                         </div>
                         <div class="col-10">
                             <input type="number" name="claim-status-rgqty-qtyclaim" id="claim-status-rgqty-qtyclaim" class="form-control form-control-sm readonly-first" autocomplete="off" readonly>

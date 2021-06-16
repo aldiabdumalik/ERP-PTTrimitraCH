@@ -1253,6 +1253,7 @@ $(document).ready(function(){
                                 // window.location.reload();
                                 modalAction('#claim-modal-create', 'hide');
                                 tbl_index.ajax.reload();
+                                $('#claim-btn-create-submit').prop('disabled', true);
                             });
                         }
                     }
