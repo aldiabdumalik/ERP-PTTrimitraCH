@@ -860,6 +860,9 @@ $(document).ready(function(){
                     if (response.status == true) {
                         var no=1;
                         $.each(response.content, function (i, data) {
+                            if (data.qty == data.qty_rg) {
+                                return;
+                            }
                             tbl_rg.row.add([
                                 no,
                                 data.itemcode,
@@ -882,8 +885,9 @@ $(document).ready(function(){
             $('#claim-btn-tobe-rg').on('click', function () {
                 modalAction('#claim-modal-status-rgqty');
                 var data = tbl_rg.row('.selected').data();
+                var qty_sj = parseInt(data[4]) - parseInt(data[5]);
                 $('#claim-status-rgqty-id').val(data[0]);
-                $('#claim-status-rgqty-qtyclaim').val(data[4]);
+                $('#claim-status-rgqty-qtyclaim').val(qty_sj);
                 $('#claim-status-rgqty-qty').val(data[6]);
             });
             $('#form-status-rgqty').on('submit', function () {
@@ -891,7 +895,7 @@ $(document).ready(function(){
                 if (parseInt($('#claim-status-rgqty-qtyclaim').val()) < parseInt($('#claim-status-rgqty-qty').val())) {
                     Swal.fire({
                         title: 'Warning!',
-                        text: 'Maaf, qty claim kurang!',
+                        text: 'Invalid quantity!',
                         icon: 'warning'
                     });
                 }else{
