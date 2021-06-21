@@ -20,7 +20,7 @@
                                 <label for="claim-additem-itemcode">Item Code</label>
                             </div>
                             <div class="col-10">
-                                <input type="text" name="claim-additem-itemcode" id="claim-additem-itemcode" class="form-control form-control-sm" required>
+                                <input type="text" name="claim-additem-itemcode" id="claim-additem-itemcode" class="form-control form-control-sm" autocomplete="off" required>
                             </div>
                         </div>
                         <div class="form-row align-items-center mb-1">

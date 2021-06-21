@@ -36,12 +36,19 @@
     .selected {
         background-color: #dddddd;
     }
-    .dataTables_scrollHeadInner {
+    /* .dataTables_scrollHeadInner {
         width: 100% !important;
     }
     .dataTables_scrollHeadInner table {
         width: 100% !important;
     }
+    .dataTables_scrollBody::-webkit-scrollbar { 
+        display: none;
+    }
+    .dataTables_scrollBody {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    } */
 </style>
 <div class="main-content-inner">
     <div class="row">
@@ -153,6 +160,15 @@ $(document).ready(function(){
         "fixedHeader":true,
     });
     var tbl_rg_complete = $('#claim-datatables-rg-complete').DataTable({
+        "lengthChange": false,
+        "searching": false,
+        "paging": false,
+        "ordering": false,
+        "scrollY": "200px",
+        "scrollCollapse": true,
+        "fixedHeader":true,
+    });
+    var tbl_log = $('#claim-datatables-log').DataTable({
         "lengthChange": false,
         "searching": false,
         "paging": false,
@@ -1166,12 +1182,37 @@ $(document).ready(function(){
             {data: 'user', name: 'user'},
             {data: 'note', name: 'note'}
         ];
-        var tbl_log = $('#claim-datatables-log').DataTable(dataTables(
-            "{{ route('tms.warehouse.claim_entry.header_tools') }}",
-            "POST",
-            {"type":"log", "cl_no":id},
-            column
-        ));
+        tbl_log = $('#claim-datatables-log').DataTable({
+            processing: true,
+            serverSide: true,
+            destroy: true,
+            ajax: {
+                url: "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+                method: 'POST',
+                data: {"type":"log", "cl_no":id},
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            },
+            columns: column,
+            lengthChange: false,
+            searching: false,
+            paging: false,
+            ordering: false,
+            scrollY: "200px",
+            scrollCollapse: true,
+            fixedHeader:true,
+        });
+        // var tbl_log = $('#claim-datatables-log').DataTable(dataTables(
+        //     "{{ route('tms.warehouse.claim_entry.header_tools') }}",
+        //     "POST",
+        //     {"type":"log", "cl_no":id},
+        //     column
+        // ));
+    });
+    $(document).on('shown.bs.modal', '#claim-modal-log', function () {
+        tbl_log.columns.adjust().draw();
+        console.log('p');
     });
 
     $(document).on('hidden.bs.modal', '#claim-modal-create', function () {

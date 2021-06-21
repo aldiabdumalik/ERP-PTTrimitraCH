@@ -7,7 +7,7 @@
             <div class="modal-body">
                 <div class="table-responsive">
                     <div class="datatable datatable-primary">
-                        <table id="claim-datatables-log" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
+                        <table id="claim-datatables-log" class="table table-bordered table-hover" style="width:100%;cursor:pointer;overflow: hidden;">
                             <thead class="text-center" style="font-size: 15px;">
                                 <tr style="font-size: 14px;">
                                     <th class="align-middle">Date</th>
