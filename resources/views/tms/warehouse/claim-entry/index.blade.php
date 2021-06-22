@@ -1203,16 +1203,9 @@ $(document).ready(function(){
             scrollCollapse: true,
             fixedHeader:true,
         });
-        // var tbl_log = $('#claim-datatables-log').DataTable(dataTables(
-        //     "{{ route('tms.warehouse.claim_entry.header_tools') }}",
-        //     "POST",
-        //     {"type":"log", "cl_no":id},
-        //     column
-        // ));
     });
     $(document).on('shown.bs.modal', '#claim-modal-log', function () {
         tbl_log.columns.adjust().draw();
-        console.log('p');
     });
 
     $(document).on('hidden.bs.modal', '#claim-modal-create', function () {
@@ -1222,6 +1215,8 @@ $(document).ready(function(){
         hideShow('#claim-btn-create-submit', false);
         $('#claim-form-create input').not('.readonly-first').removeAttr('readonly');
         $('#claim-btn-create-submit').text('Simpan');
+        $('#claim-btn-edit-item').prop('disabled', true);
+        $('#claim-btn-delete-item').prop('disabled', true);
     });
     $(document).on('shown.bs.modal', '#claim-modal-create', function () {
         tbl_create.columns.adjust().draw();
@@ -1308,7 +1303,7 @@ $(document).ready(function(){
         }else{
             Swal.fire({
                 title: 'warning!',
-                text: 'Periksa kembali form Anda!',
+                text: 'Masukan item terlebih dahulu!',
                 icon: 'warning'
             })
         }
