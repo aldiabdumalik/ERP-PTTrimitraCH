@@ -67,3 +67,25 @@ Route::get('/warehouse/claim_entry/report', [
     'uses' => 'TMS\Warehouse\ClaimEntryController@claimEntryReport',
     'as' => 'tms.warehouse.claim_entry.report'
 ]);
+/*
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |   TMS - WAREHOUSE - DO ENTRY
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |
+*/
+Route::get('/warehouse/do_entry', [
+    'uses' => 'TMS\Warehouse\DoEntryController@index', 
+    'as' => 'tms.warehouse.do_entry.index'
+]);
+Route::get('/warehouse/do_entry/read', [
+    'uses' => 'TMS\Warehouse\DoEntryController@read', 
+    'as' => 'tms.warehouse.do_entry.read'
+]);
+Route::post('/warehouse/do_entry/table_index', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntry', 
+    'as' => 'tms.warehouse.do_entry.table_index'
+]);
+Route::get('/warehouse/do_entry/table_index_setting', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryTableSetting', 
+    'as' => 'tms.warehouse.do_entry.table_index_setting'
+]);
