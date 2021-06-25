@@ -2,6 +2,7 @@
 namespace App\Http\Traits\TMS\Warehouse;
 
 use App\Models\Dbtbs\DoEntry;
+use App\Models\Dbtbs\DoEntrySetting;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +22,29 @@ trait DoEntryTrait {
             ->where('status', 'ACTIVE')
             ->get();
         return $query;
+    }
+
+    protected function headerToolsTableSetting(Request $request)
+    {
+        $data = [];
+        $setting = $request->setting;
+        $query = DoEntrySetting::where(function ($query){
+            $query->where('user', Auth::user()->FullName);
+        })->orderBy('idx', 'asc')->get();
+        if (!$query->isEmpty()) {
+            $delete_first = DoEntrySetting::where('user', Auth::user()->FullName)->delete();
+        }
+        for ($i=0; $i < count($setting); $i++) { 
+            $data[] = [
+                'title' => $setting[$i]['title'],
+                'data' => $setting[$i]['data'],
+                'user' => Auth::user()->FullName,
+                'status' => $setting[$i]['status_ori'],
+                'idx' => $setting[$i]['idx']
+            ];
+        }
+        $insert = DoEntrySetting::insert($data);
+        return $data;
     }
 
     protected function headerToolsWarehouse(Request $request)

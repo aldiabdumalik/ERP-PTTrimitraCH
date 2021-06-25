@@ -44,9 +44,9 @@
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="do-btn-modal-create">
                     <i class="ti-plus"></i>  Add New Data
                 </button>
-                {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="do-btn-modal-table-setting">
+                <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="do-btn-modal-table-setting">
                     <i class="fa fa-cogs"></i>
-                </button> --}}
+                </button>
             </div>
         </div>
     </div>
@@ -98,7 +98,7 @@ $(document).ready(function () {
     };
     const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
     const get_index = new Promise(function(resolve, reject) {
-        ajax("{{route('tms.warehouse.do_entry.table_index_setting')}}", 'GET', null, function (response) {
+        ajax("{{route('tms.warehouse.do_entry.table_index_setting')}}", 'GET', {"tbl_index":1}, function (response) {
             var index_header = [];
             $.each(response.responseJSON.content, function( key, value ) {
                 var my_item = {};
@@ -506,24 +506,76 @@ $(document).ready(function () {
         modalAction('#do-modal-setting').then((resolve) => {
             resolve.on('shown.bs.modal', () => {
                 tbl_do_setting.columns.adjust().draw();
-                ajax("{{route('tms.warehouse.do_entry.table_index_setting')}}", 'GET', null, function (response) {
-                    response = response.responseJSON;
-                    $.each(response.content, function (i, val) {
-                        if ($('#do-setting-datatables tbody tr').is(`[data-sett=${val.data}]`) == true) {
-                            $(`#do-setting-datatables tbody tr td[data-tdsett=${val.data}]`).html("");
-                            $(`#do-setting-datatables tbody tr td[data-tdsett=${val.data}]`).append(`<i class="fa fa-check"></i>`);
-                        }
-                    });
-                    // tbl_do_setting.rows().data().draw();
-                    
+                var column = [
+                    {data: 'DT_RowIndex', name: 'DT_RowIndex'},
+                    {data: 'data', name: 'data'},
+                    {data: 'title', name: 'title'},
+                    {data: 'status', name: 'status'},
+                    // {data: 'status_ori', name: 'status_ori'},
+                    // {data: 'idx', name: 'idx'},
+                ];
+                tbl_do_setting = $('#do-setting-datatables').DataTable({
+                    processing: false,
+                    serverSide: false,
+                    destroy: true,
+                    ajax: {
+                        url: "{{ route('tms.warehouse.do_entry.table_index_setting') }}",
+                        method: 'GET',
+                        headers: token_header
+                    },
+                    columns: column,
+                    lengthChange: false,
+                    searching: false,
+                    paging: false,
+                    ordering: false,
+                    scrollY: "200px",
+                    scrollCollapse: true,
+                    fixedHeader: true,
                 });
+                // tbl_do_setting.columns([4,5]).visible(false);
             });
         });
     });
     $('#do-setting-datatables').off('click', 'tr').on('click', 'tr', function () {
         var data = tbl_do_setting.row(this).data();
-        console.log(data);
+        if (data.data !== 'action') {
+            var status_change;
+            if (data.status_ori == 1) {
+                status_change = `<i class="fa fa-times text-danger">`;
+            }else{
+                status_change = `<i class="fa fa-check text-success">`;
+            }
+            tbl_do_setting.row(this).data({
+                "DT_RowIndex": data.DT_RowIndex,
+                "data": data.data,
+                "title": data.title,
+                "status": status_change,
+                "status_ori": (data.status_ori == 1 ? 0 : 1),
+                "idx": data.idx,
+            }).draw();
+        }
     });
+    $(document).on('click', '#do-btn-setting-save', () => {
+        var data = tbl_do_setting.rows().data().toArray();
+        ajax(
+            "{{ route('tms.warehouse.do_entry.header_tools') }}",
+            "POST",
+            {"type":"setting", "setting":data},
+            (response) => {
+                response = response.responseJSON;
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message,
+                    icon: 'success'
+                }).then(() => {
+                    modalAction('#do-modal-setting', 'hide').then((resolve) => {
+                        location.reload();
+                    });
+                });
+            }
+        );
+    });
+
     function ajax(route, method, params=null, callback) {
         $.ajax({
             url: route,

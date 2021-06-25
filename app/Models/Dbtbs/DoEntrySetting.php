@@ -13,7 +13,9 @@ class DoEntrySetting extends Model
         'id',
         'title',
         'data',
-        'user'
+        'user',
+        'status',
+        'idx',
     ];
     protected $hidden = [];
     public $timestamps = false;

@@ -50,9 +50,37 @@ class DoEntryController extends Controller
 
     public function DoEntryTableSetting(Request $request)
     {
-        $query = DoEntrySetting::where('user', Auth::user()->fullName)->get();
-        if ($query->isEmpty()) {
-            $query = DoEntrySetting::where('user', 'default')->get();
+        if (isset($request->tbl_index)) {
+            $query = DoEntrySetting::where(function ($query){
+                $query->where('user', Auth::user()->FullName);
+                $query->where('status', 1);
+            })->orderBy('idx', 'asc')->get();
+            if ($query->isEmpty()) {
+                $query = DoEntrySetting::where(function ($query){
+                    $query->where('user', 'default');
+                    $query->where('status', 1);
+                })->orderBy('idx', 'asc')->get();
+            }
+        }else{
+            $query = DoEntrySetting::where(function ($query){
+                $query->where('user', Auth::user()->FullName);
+            })->orderBy('idx', 'asc')->get();
+            if ($query->isEmpty()) {
+                $query = DoEntrySetting::where(function ($query){
+                    $query->where('user', 'default');
+                })->orderBy('idx', 'asc')->get();
+            }
+            return DataTables::of($query)
+                ->editColumn('status', function($query) {
+                    return view('tms.warehouse.do-entry.button.statusTableSetting', [
+                        'query' => $query,
+                    ]);
+                })
+                ->addColumn('status_ori', function($query){
+                    return $query->status;
+                })->rawColumns(['status_ori'])
+                ->addIndexColumn()
+                ->make(true);
         }
         return $this->_Success('Default', 200, $query);
     }
@@ -98,6 +126,9 @@ class DoEntryController extends Controller
                 break;
             case "log":
                 return DataTables::of($this->headerToolsLog($request))->make(true);
+                break;
+            case "setting":
+                return $this->_Success('Setting saved!', 201, $this->headerToolsTableSetting($request));
                 break;
             default:
                 return $this->_Error('Methode Not Found');
