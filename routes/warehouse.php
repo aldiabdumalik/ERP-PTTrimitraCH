@@ -89,3 +89,7 @@ Route::get('/warehouse/do_entry/table_index_setting', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryTableSetting', 
     'as' => 'tms.warehouse.do_entry.table_index_setting'
 ]);
+Route::post('/warehouse/do_entry/header_tools', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryHeader', 
+    'as' => 'tms.warehouse.do_entry.header_tools'
+]);

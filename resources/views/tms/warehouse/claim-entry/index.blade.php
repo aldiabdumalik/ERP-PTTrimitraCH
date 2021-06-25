@@ -273,7 +273,7 @@ $(document).ready(function(){
             });
             
         }
-        $('#claim-datatables-branch').off('click').on('click', 'tr', function () {
+        $('#claim-datatables-branch').off('click', 'tr').on('click', 'tr', function () {
             modalAction('#claim-modal-branch', 'hide');
             var data = tbl_branch.row(this).data();
             if (data.code == 'CP') {
@@ -317,7 +317,7 @@ $(document).ready(function(){
             });
             
         }
-        $('#claim-datatables-warehouse').off('click').on('click', 'tr', function () {
+        $('#claim-datatables-warehouse').off('click', 'tr').on('click', 'tr', function () {
             modalAction('#claim-modal-warehouse', 'hide');
             var data = tbl_wh.row(this).data();
             $('#claim-create-warehouse').val(data.code);
@@ -342,7 +342,7 @@ $(document).ready(function(){
                 column
             ));
         }
-        $('#claim-datatables-customer').off('click').on('click', 'tr', function () {
+        $('#claim-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
             modalAction('#claim-modal-customer', 'hide');
             var data = tbl_customer.row(this).data();
             $('#claim-create-customercode').val(data.code);
@@ -385,7 +385,7 @@ $(document).ready(function(){
                 column
             ));
         }
-        $('#claim-datatables-doaddr').off('click').on('click', 'tr', function () {
+        $('#claim-datatables-doaddr').off('click', 'tr').on('click', 'tr', function () {
             modalAction('#claim-modal-doaddr', 'hide');
             var data = tbl_doaddr.row(this).data();
             $('#claim-create-customerdoaddr').val(data.code);
@@ -404,6 +404,7 @@ $(document).ready(function(){
     });
     $(document).on('hidden.bs.modal', '#claim-modal-additem', function () {
         $(this).find('form').trigger('reset');
+        $('#claim-additem-index').val(0);
     });
     $(document).on('submit', '#claim-form-additem', function () {
         var index = tbl_create.data().length;
@@ -474,7 +475,7 @@ $(document).ready(function(){
                     },
                 });
             }
-            $('#claim-datatables-items').off('click').on('click', 'tr', function () {
+            $('#claim-datatables-items').off('click', 'tr').on('click', 'tr', function () {
                 var row_id = $(this).data('id');
                 var data = tbl_item.row(this).data();
                 var cek = tbl_create.rows().data().toArray();
@@ -969,7 +970,7 @@ $(document).ready(function(){
             });
         }
         function deleteRG() {
-            $('#claim-btn-rg-complete-delete').off('click').on('click', function () {
+            $('#claim-btn-rg-complete-delete').off('click', 'tr').on('click', function () {
                 var items = tbl_rg_complete.rows('.selected').data().toArray();
                 var data = {
                     "cl_no": $('#claim-status-rg-complete-no').val(),

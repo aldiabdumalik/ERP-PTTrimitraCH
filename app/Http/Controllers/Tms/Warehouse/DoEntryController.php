@@ -72,8 +72,35 @@ class DoEntryController extends Controller
         
     }
 
-    public function headerTools(Request $request)
+    public function DoEntryHeader(Request $request)
     {
-        
+        switch ($request->type) {
+            case "DONo":
+                return $this->headerToolsDoEntryNo($request);
+                break;
+            case "branch":
+                return DataTables::of($this->headerToolsBranch($request))->make(true);
+                break;
+            case "warehouse":
+                return DataTables::of($this->headerToolsWarehouse($request))->make(true);
+                break;
+            case "customer":
+                return DataTables::of($this->headerToolsCustomer($request))->make(true);
+                break;
+            case "customerclick":
+                return $this->headerToolsCustomerClick($request);
+                break;
+            case "doaddr":
+                return DataTables::of($this->headerToolsCustomerAddr($request))->make(true);
+                break;
+            case "item":
+                return DataTables::of($this->headerToolsItem($request))->make(true);
+                break;
+            case "log":
+                return DataTables::of($this->headerToolsLog($request))->make(true);
+                break;
+            default:
+                return $this->_Error('Methode Not Found');
+        }
     }
 }

@@ -126,9 +126,9 @@ trait ClaimEntryTrait {
     protected function headerToolsCustomer(Request $request)
     {
         $query = 
-            DB::connection('oee')
-            ->table('db_customername_tbl')
-            ->selectRaw('customer_id as code, customer_name as name')
+            DB::connection('ekanban')
+            ->table('ekanban_customermaster')
+            ->selectRaw('CustomerCode_eKanban as code, CustomerName as name')
             ->get();
         return $query;
     }
