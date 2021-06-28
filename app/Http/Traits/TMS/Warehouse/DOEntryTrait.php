@@ -16,11 +16,35 @@ trait DoEntryTrait {
 
     protected function headerToolsSSOHeader(Request $request)
     {
-        $query = DB::connection('db_tbs')
-            ->table('branch')
-            ->selectRaw('Branch as code, descript as name')
-            ->where('status', 'ACTIVE')
-            ->get();
+        $query = DB::table('db_tbs.entry_sso_tbl')
+            ->where('db_tbs.entry_sso_tbl.sso_header', $request->sso_header)
+            ->where('db_tbs.entry_sso_tbl.active_cls','1')
+            ->leftJoin('db_tbs.entry_so_tbl', 'db_tbs.entry_so_tbl.so_header', '=', 'db_tbs.entry_sso_tbl.so_header')
+            ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'db_tbs.entry_so_tbl.cust_id')
+            ->leftJoin('db_tbs.sys_do_address', function ($join) {
+                $join->on('db_tbs.entry_so_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
+                $join->on('db_tbs.entry_so_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+            })
+            ->select(
+                'db_tbs.entry_so_tbl.so_header as so_header',
+                'db_tbs.entry_so_tbl.cust_id as cust_id',
+                'ekanban.ekanban_customermaster.CustomerName as customer',
+                'db_tbs.entry_so_tbl.po_no as po_no',
+                'db_tbs.entry_sso_tbl.dn_no as dn_no',
+                'db_tbs.sys_do_address.do_addr1 as Address1',
+                'db_tbs.sys_do_address.do_addr2 as Address2',
+                'db_tbs.sys_do_address.do_addr3 as Address3',
+                'db_tbs.sys_do_address.do_addr4 as Address4',
+                'db_tbs.sys_do_address.id_do',
+                'db_tbs.entry_so_tbl.branch as branch',
+                'db_tbs.entry_sso_tbl.closed_date as closed_date',
+                'db_tbs.entry_so_tbl.warehouse as wh',
+                'db_tbs.entry_sso_tbl.sso_header as sso_header',
+                'ekanban.ekanban_customermaster.Cus_Group as gr_customer',
+                'db_tbs.entry_so_tbl.do_address as id_do_addr'
+            )
+            ->groupBy('db_tbs.entry_so_tbl.so_header')
+            ->first();
         return $query;
     }
 
@@ -82,7 +106,7 @@ trait DoEntryTrait {
         $query = 
             DB::connection('ekanban')
             ->table('ekanban_customermaster')
-            ->selectRaw('CustomerCode_eKanban as code, CustomerName as name')
+            ->selectRaw('CustomerCode_eKanban as code, CustomerName as name, Cus_Group as cg')
             ->get();
         return $query;
     }

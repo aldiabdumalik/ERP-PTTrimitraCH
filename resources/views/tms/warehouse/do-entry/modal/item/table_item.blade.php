@@ -10,10 +10,17 @@
                         <table id="do-datatables-items" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
                             <thead class="text-center" style="font-size: 15px;">
                                 <tr style="font-size: 14px;">
+                                    <th class="align-middle">DN No</th>
                                     <th class="align-middle">Itemcode</th>
                                     <th class="align-middle">Part No.</th>
+                                    <th class="align-middle">SSO No</th>
+                                    <th class="align-middle">SO No</th>
                                     <th class="align-middle">Description</th>
+                                    <th class="align-middle">Type</th>
+                                    <th class="align-middle">SO Qty</th>
+                                    <th class="align-middle">Already Sent</th>
                                     <th class="align-middle">Unit</th>
+                                    <th class="align-middle">Will be sent</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

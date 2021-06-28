@@ -180,16 +180,27 @@ $(document).ready(function () {
                         $('#do-create-no').val(response);
                         var refno = `DO/${resText.substr(resText.length - 3)}/${toRoman(currentMonth)}/${now.getFullYear()}`;
                         $('#do-create-refno').val(refno);
+                        $('#do-create-date').datepicker("setDate",'now');
                     });
             });
         });
+    });
+    $('#do-modal-create').on('hidden.bs.modal', () => {
+        $('#do-form-create').trigger('reset');
+        tbl_additem.clear().draw(false);
+        hideShow('#item-button-div', false);
+        hideShow('#do-btn-create-submit', false);
+        $('#do-form-create input').not('.readonly-first').removeAttr('readonly');
+        $('#do-btn-create-submit').text('Simpan');
+        $('#do-btn-edit-item').prop('disabled', true);
+        $('#do-btn-delete-item').prop('disabled', true);
     });
 
     $('#do-create-date').datepicker({
         format: 'dd/mm/yyyy',
         autoclose: true,
         enableOnReadonly: false
-    }).datepicker("setDate",'now').on('changeDate', function(e) {
+    }).on('changeDate', function(e) {
         var date = e.format(0, "yyyy-mm");
         var bln = e.format(0, "mm");
         var thn = e.format(0, "yyyy");
@@ -198,84 +209,6 @@ $(document).ready(function () {
         $('#do-create-refno').val(refno);
     });
 
-    $(document).on('keypress', '#do-create-branch', function (e) {
-        var tbl_branch;
-        if(e.which == 13) {
-            modalAction('#do-modal-branch').then((resolve) => {
-                var params = {"type": "branch"}
-                var column = [
-                    {data: 'code', name: 'code'},
-                    {data: 'name', name: 'name'},
-                ];
-                tbl_branch =  $('#do-datatables-branch').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    destroy: true,
-                    ajax: {
-                        url: "{{ route('tms.warehouse.do_entry.header_tools') }}",
-                        method: 'POST',
-                        data: params,
-                        headers: token_header
-                    },
-                    columns: column,
-                    lengthChange: false,
-                    searching: false,
-                    paging: false,
-                    ordering: false
-                });
-            });
-        }
-        $('#do-datatables-branch').off('click', 'tr').on('click', 'tr', function () {
-            modalAction('#do-modal-branch', 'hide').then((resolve) => {
-                var data = tbl_branch.row(this).data();
-                if (data.code == 'CP') {
-                    $('#do-create-warehouse').val(data.code);
-                }else{
-                    $('#do-create-warehouse').val("");
-                }
-                $('#do-create-branch').val(data.code);
-            });
-        });
-        e.preventDefault();
-        return false;
-    });
-    $(document).on('keypress', '#do-create-warehouse', function (e) {
-        var tbl_wh;
-        if(e.which == 13) {
-            modalAction('#do-modal-warehouse').then((resolve) => {
-                var branch = ($('#do-create-branch').val() == "") ? null : $('#do-create-branch').val();
-                var params = {"type": "warehouse", "branch": branch}
-                var column = [
-                    {data: 'code', name: 'code'},
-                    {data: 'name', name: 'name'},
-                ];
-                tbl_wh =  $('#do-datatables-warehouse').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    destroy: true,
-                    ajax: {
-                        url: "{{ route('tms.warehouse.do_entry.header_tools') }}",
-                        method: 'POST',
-                        data: params,
-                        headers: token_header
-                    },
-                    columns: column,
-                    lengthChange: false,
-                    searching: false,
-                    paging: false,
-                    ordering: false
-                });
-            });
-        }
-        $('#do-datatables-warehouse').off('click', 'tr').on('click', 'tr', function () {
-            modalAction('#do-modal-warehouse', 'hide').then((resolve) => {
-                var data = tbl_wh.row(this).data();
-                $('#do-create-warehouse').val(data.code);
-            });
-        });
-        e.preventDefault();
-        return false;
-    });
     $(document).on('keypress', '#do-create-customercode', function (e) {
         var tbl_customer;
         if(e.which == 13) {
@@ -301,72 +234,79 @@ $(document).ready(function () {
         }
         $('#do-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
             modalAction('#do-modal-customer', 'hide').then((resolve) => {
+                resetCreateForm();
                 var data = tbl_customer.row(this).data();
                 $('#do-create-customercode').val(data.code);
+                $('#do-create-customergroup').val(data.cg);
+                if (data.code == 'H03' || data.code == 'H10' || data.code == 'Y01') {
+                    $('#do-create-so').prop('readonly', false);
+                    $('#do-create-sso').prop('readonly', true);
+                }else{
+                    $('#do-create-sso').prop('readonly', false);
+                    $('#do-create-so').prop('readonly', true);
+                }
                 var params = {"type": "customerclick", "cust_code": data.code};
                 ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
                     "POST",
                     params,
                     (response) => {
                     response = response.responseJSON;
-                        $('#do-create-customerdoaddr').val(response.content.code);
                         $('#do-create-customername').val(response.content.name);
-                        $('#do-create-customeraddr1').val(response.content.do_addr1);
-                        $('#do-create-customeraddr2').val(response.content.do_addr2);
-                        $('#do-create-customeraddr3').val(response.content.do_addr3);
-                        $('#do-create-customeraddr4').val(response.content.do_addr4);
                     });
             });
         });
         e.preventDefault();
         return false;
     });
-    $(document).on('keypress', '#do-create-customerdoaddr', function (e) {
-        var tbl_doaddr;
+    $('#do-create-sso').on('keypress', (e) => {
+        var sso = $('#do-create-sso').val();
         if(e.which == 13) {
-            modalAction('#do-modal-doaddr').then((resolve) => {
-                var customercode = ($('#do-create-customercode').val() == "") ? null : $('#do-create-customercode').val();
-                var params = {"type": "doaddr", "cust_code": customercode}
-                var column = [
-                    {data: 'code', name: 'code'},
-                    {data: 'name', name: 'name'},
-                    {data: 'do_addr1', name: 'do_addr1'},
-                    {data: 'do_addr2', name: 'do_addr2'},
-                    {data: 'do_addr3', name: 'do_addr3'},
-                    {data: 'do_addr4', name: 'do_addr4'},
-                ];
-                tbl_doaddr = $('#do-datatables-doaddr').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    destroy: true,
-                    ajax: {
-                        url: "{{ route('tms.warehouse.do_entry.header_tools') }}",
-                        method: 'POST',
-                        data: params,
-                        headers: token_header
-                    },
-                    columns: column,
-                    lengthChange: false,
-                    searching: false,
-                    paging: false,
-                    ordering: false
+            if (sso == "") {
+                showNotif({
+                    'title': 'Warning',
+                    'message': 'Silahkan input SSO',
+                    'icon': 'warning'
                 });
-            });
+            }else{
+                ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
+                    "POST",
+                    {"type": "sso_header", "sso_header": sso},
+                    (response) => {
+                        response = response.responseJSON;
+                        if (response.status == true) {
+                            var data = response.content;
+                            if (data.cust_id == $('#do-create-customercode').val()) {
+                                if (data.closed_date == null) {
+                                    $('#do-create-customerdoaddr').val(data.id_do);
+                                    $('#do-create-customeraddr1').val(data.Address1);
+                                    $('#do-create-customeraddr2').val(data.Address2);
+                                    $('#do-create-customeraddr3').val(data.Address3);
+                                    $('#do-create-customeraddr4').val(data.Address4);
+                                    $('#do-create-so').val(data.so_header);
+                                    $('#do-create-dnno').val(data.dn_no);
+                                    $('#do-create-pono').val(data.po_no);
+                                    $('#do-create-sso').prop('readonly', true);
+                                }else{
+                                    showNotif({
+                                        'title': 'Warning',
+                                        'message': 'SSO/SO hass been closed',
+                                        'icon': 'error'
+                                    });
+                                }
+                            }else{
+                                showNotif({
+                                    'title': 'Warning',
+                                    'message': 'Customer tidak sesuai dengan SSO No',
+                                    'icon': 'warning'
+                                });
+                            }
+                            console.log(data);
+                        }
+                    });
+            }
         }
-        $('#do-datatables-doaddr').off('click', 'tr').on('click', 'tr', function () {
-            modalAction('#do-modal-doaddr', 'hide').then((resolve) => {
-                var data = tbl_doaddr.row(this).data();
-                $('#do-create-customerdoaddr').val(data.code);
-                $('#do-create-customername').val(data.name);
-                $('#do-create-customeraddr1').val(data.do_addr1);
-                $('#do-create-customeraddr2').val(data.do_addr2);
-                $('#do-create-customeraddr3').val(data.do_addr3);
-                $('#do-create-customeraddr4').val(data.do_addr4);
-            });
-        });
-        e.preventDefault();
-        return false;
     });
+    
     $(document).on('click', '#do-btn-add-item', function () {
         addItem();
     });
@@ -610,6 +550,22 @@ $(document).ready(function () {
         return ((hide == true) ? $(element).addClass('d-none') : $(element).removeClass('d-none'));
     }
 
+    function showNotif(params) {
+        return new Promise((resolve, reject) => {
+            Swal.fire({
+                title: params.title,
+                text: params.message,
+                icon: params.icon
+            }).then(function (res) {
+                if (params.icon != 'error') {
+                    resolve(res);
+                }else{
+                    reject(res);
+                }
+            });
+        });
+    }
+
     function toRoman(num){
         var roman = {
             M: 1000,
@@ -633,6 +589,14 @@ $(document).ready(function () {
             str += i.repeat(q);
         }
         return str;
+    }
+
+    function resetCreateForm() {
+        $('#do-create-sso').val('');
+        $('#do-create-so').val('');
+        $('#do-create-pono').val('');
+        $('#do-create-dnno').val('');
+        tbl_additem.clear().draw(false);
     }
 });
 </script>

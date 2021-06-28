@@ -130,6 +130,14 @@ class DoEntryController extends Controller
             case "setting":
                 return $this->_Success('Setting saved!', 201, $this->headerToolsTableSetting($request));
                 break;
+            case "sso_header":
+                $sso = $this->headerToolsSSOHeader($request);
+                if (!isset($sso)) {
+                    return $this->_Error('SSO data not found!', 404);
+                }else{
+                    return $this->_Success('OK!', 200, $sso);
+                }
+                break;
             default:
                 return $this->_Error('Methode Not Found');
         }
