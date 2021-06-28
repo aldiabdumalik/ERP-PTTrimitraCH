@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\Redirect;
 
 trait DoEntryTrait {
 
+    protected function headerToolsSSOHeader(Request $request)
+    {
+        $query = DB::connection('db_tbs')
+            ->table('branch')
+            ->selectRaw('Branch as code, descript as name')
+            ->where('status', 'ACTIVE')
+            ->get();
+        return $query;
+    }
+
     protected function headerToolsBranch(Request $request)
     {
         $query = DB::connection('db_tbs')

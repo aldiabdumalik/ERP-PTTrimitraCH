@@ -10,7 +10,7 @@
                     <th class="align-middle">Qty SJ</th>
                     <th class="align-middle">Qty Billed</th>
                     <th class="align-middle">Qty Tag</th>
-                    {{-- <th class="align-middle">SSO No.</th> --}}
+                    <th class="align-middle">SSO No.</th>
                     <th class="align-middle">Description</th>
                 </tr>
             </thead>
