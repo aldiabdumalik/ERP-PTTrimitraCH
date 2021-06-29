@@ -11,7 +11,7 @@
                     <th class="align-middle">Qty Billed</th>
                     <th class="align-middle">Qty Tag</th>
                     <th class="align-middle">SSO No.</th>
-                    <th class="align-middle">Description</th>
+                    <th class="align-middle">Descript</th>
                 </tr>
             </thead>
             <tbody></tbody>

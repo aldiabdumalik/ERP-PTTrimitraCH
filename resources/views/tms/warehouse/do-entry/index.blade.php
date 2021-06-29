@@ -286,6 +286,7 @@ $(document).ready(function () {
                                     $('#do-create-dnno').val(data.dn_no);
                                     $('#do-create-pono').val(data.po_no);
                                     $('#do-create-sso').prop('readonly', true);
+                                    $('#do-create-so').prop('readonly', true);
                                 }else{
                                     showNotif({
                                         'title': 'Warning',
@@ -300,27 +301,195 @@ $(document).ready(function () {
                                     'icon': 'warning'
                                 });
                             }
-                            console.log(data);
                         }
                     });
             }
+            e.preventDefault();
+            return false;
+        }
+    });
+    $('#do-create-so').on('keypress', (e) => {
+        var so = $('#do-create-so').val();
+        if(e.which == 13) {
+            if (so == "") {
+                showNotif({
+                    'title': 'Warning',
+                    'message': 'Silahkan input SO',
+                    'icon': 'warning'
+                });
+            }else{
+                ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
+                    "POST",
+                    {"type": "so_header", "so_header": so},
+                    (response) => {
+                        response = response.responseJSON;
+                        if (response.status == true) {
+                            var data = response.content;
+                            if (data.cust_id == $('#do-create-customercode').val()) {
+                                if (data.closed_date == null) {
+                                    $('#do-create-customerdoaddr').val(data.id_do);
+                                    $('#do-create-customeraddr1').val(data.Address1);
+                                    $('#do-create-customeraddr2').val(data.Address2);
+                                    $('#do-create-customeraddr3').val(data.Address3);
+                                    $('#do-create-customeraddr4').val(data.Address4);
+                                    $('#do-create-so').val(data.so_header);
+                                    $('#do-create-sso').val('*');
+                                    $('#do-create-dnno').val(data.dn_no);
+                                    $('#do-create-pono').val(data.po_no);
+                                    $('#do-create-sso').prop('readonly', true);
+                                    $('#do-create-so').prop('readonly', true);
+                                }else{
+                                    showNotif({
+                                        'title': 'Warning',
+                                        'message': 'SSO/SO hass been closed',
+                                        'icon': 'error'
+                                    });
+                                }
+                            }else{
+                                showNotif({
+                                    'title': 'Warning',
+                                    'message': 'Customer tidak sesuai dengan SO No',
+                                    'icon': 'warning'
+                                });
+                            }
+                        }
+                    });
+            }
+            e.preventDefault();
+            return false;
         }
     });
     
+    var tbl_items = $('#do-datatables-items').DataTable(obj_tbl);
     $(document).on('click', '#do-btn-add-item', function () {
-        addItem();
-    });
-    $(document).on('keypress', '#do-additem-itemcode', function (e) {
-        if(e.which == 13) {
-            addItem();
+        tbl_items.clear().draw();
+        var sso = $('#do-create-sso').val();
+        var so = $('#do-create-so').val();
+        var send;
+        if ($('#do-create-sso').val() != "" && $('#do-create-so').val() != "") {
+            if ($('#do-create-sso').val() == "*") {
+                send = {
+                    "type": "sso_detail",
+                    "so_header": $('#do-create-so').val()
+                };
+            }else{
+                send = {
+                    "type": "sso_detail",
+                    "sso_header": $('#do-create-sso').val()
+                }; 
+            }
+            modalAction('#do-modal-itemtable').then(resolve => {
+                ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
+                    "POST",
+                    send,
+                    (response) => {
+                        response = response.responseJSON;
+                        if (response.status == true) {
+                            var data = response.content;
+                            var sum_qty_sj = 0;
+                            var sum_qty_sso = 0;
+                            var id=0;
+                            for (i=0; i < data.length; i++){
+                                sum_qty_sj += parseInt(data[i].qty_sj);
+                                sum_qty_sso += parseInt(data[i].qty_sso);
+                            }
+                            var max_qty = sum_qty_sso - sum_qty_sj;
+                            if(max_qty > 0){
+                                for (i=0; i < data.length; i++){
+                                    if(data[i].qty_sj < data[i].qty_sso){
+                                        id++;
+                                        tbl_items.row.add([
+                                            data[i].dn_no,
+                                            data[i].itemcode,
+                                            data[i].part_no,
+                                            data[i].sso_no,
+                                            data[i].so_no,
+                                            data[i].part_name,
+                                            data[i].model,
+                                            data[i].qty_so,
+                                            data[i].qty_sso,
+                                            data[i].qty_sj,
+                                            data[i].unit,
+                                            '<input autocomplete="off" type="number" class="insj form-control-sm" id="rowid-'+id+'">'
+                                        ]).draw();
+                                    }
+                                }
+                            }else{
+                                showNotif({
+                                    'title': 'error',
+                                    'message': 'Qty SSO/SO has all been sent',
+                                    'icon': 'error'
+                                }).then(reject => {
+                                    resetCreateForm();
+                                });
+                            }
+                        }
+                    });
+                resolve.on('shown.bs.modal', function () {
+                    tbl_items.columns.adjust().draw();
+                });
+            });
+        }else{
+            showNotif({
+                'title': 'Warning',
+                'message': 'Silahkan input SO/SSO terlebih dahulu',
+                'icon': 'warning'
+            });
         }
-        e.preventDefault();
-        return false;
     });
 
-    $(document).on('hidden.bs.modal', '#do-modal-additem', () => {
-        $('#do-form-additem').trigger('reset');
-        $('#do-additem-index').val(0);
+    $(document).on('click', '#do-btn-itemtable-selectall', () => {
+        var item = tbl_items.rows().data().toArray();
+        for (i=0;i < item.length; i++){
+            var qty =  item[i][8] - item[i][9];
+            tbl_items.rows().cell(i,11).nodes().to$().find('input').val(qty);
+        }
+    });
+    $(document).on('click', '#do-btn-itemtable-submit', () => {
+        tbl_additem.clear().draw();
+        var item = tbl_items.rows().data().toArray();
+        var id = 0;
+        var count = 0;
+        var nu = 0;
+        for (i=0;i < item.length; i++){
+            var max_val_sj  =  item[i][8] - item[i][9];
+            var qty_sj = tbl_items.rows().cell(i, 11).nodes().to$().find('input').val();
+            if(qty_sj > max_val_sj){
+                count++;
+                id++;
+                if(qty_sj > 0){
+                    $(`#rowid-${id}`).removeClass('alert-success');
+                    $(`#rowid-${id}`).addClass('alert-danger'); 
+                }    
+            }else if(qty_sj <= max_val_sj){
+                id++;
+                if(qty_sj > 0){
+                    $(`#rowid-${id}`).removeClass('alert-danger');
+                    $(`#rowid-${id}`).addClass('alert-success'); 
+                }
+            }
+        }
+        if(count == 0){
+            for (i=0;i < item.length; i++){
+                var max_val_sj  =  item[i][8] - item[i][9];
+                var qty_sj = tbl_items.rows().cell(i, 11).nodes().to$().find('input').val();
+                if (qty_sj > 0){
+                    nu++;
+                    tbl_additem.row.add([
+                        nu,
+                        item[i][1],
+                        item[i][2],
+                        item[i][10],
+                        qty_sj,
+                        0,
+                        0,
+                        item[i][3],
+                        item[i][5]
+                    ]).draw();
+                    modalAction('#do-modal-itemtable', 'hide');
+                }
+            }
+        }
     });
 
     $(document).on('submit', '#do-form-additem', function () {

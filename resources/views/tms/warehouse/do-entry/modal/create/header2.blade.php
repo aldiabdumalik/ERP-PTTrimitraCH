@@ -50,7 +50,7 @@
         <label for="do-create-pono">PO No</label>
     </div>
     <div class="col-10">
-        <input type="number" name="do-create-pono" id="do-create-pono" class="form-control form-control-sm readonly-first" autocomplete="off" readonly required>
+        <input type="text" name="do-create-pono" id="do-create-pono" class="form-control form-control-sm readonly-first" autocomplete="off" readonly required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">

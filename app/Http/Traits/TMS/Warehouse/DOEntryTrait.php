@@ -47,6 +47,80 @@ trait DoEntryTrait {
             ->first();
         return $query;
     }
+    protected function headerToolsSOHeader(Request $request)
+    {
+        $query = DB::table('db_tbs.entry_sso_tbl')
+            ->where('db_tbs.entry_sso_tbl.so_header', $request->so_header)
+            ->where('db_tbs.entry_sso_tbl.active_cls', '1')
+            ->leftJoin('db_tbs.entry_so_tbl', 'db_tbs.entry_so_tbl.so_header', '=', 'db_tbs.entry_sso_tbl.so_header')
+            ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'db_tbs.entry_so_tbl.cust_id')
+            ->leftJoin('db_tbs.sys_do_address', function ($join) {
+                $join->on('db_tbs.entry_so_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
+                $join->on('db_tbs.entry_so_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+            })
+            ->select(
+                'db_tbs.entry_so_tbl.so_header as so_header',
+                'db_tbs.entry_so_tbl.cust_id as cust_id',
+                'ekanban.ekanban_customermaster.CustomerName as customer',
+                'db_tbs.entry_so_tbl.po_no as po_no',
+                'db_tbs.entry_sso_tbl.dn_no as dn_no',
+                'db_tbs.sys_do_address.do_addr1 as Address1',
+                'db_tbs.sys_do_address.do_addr2 as Address2',
+                'db_tbs.sys_do_address.do_addr3 as Address3',
+                'db_tbs.sys_do_address.do_addr4 as Address4',
+                'db_tbs.sys_do_address.id_do',
+                'db_tbs.entry_so_tbl.branch as branch',
+                'db_tbs.entry_sso_tbl.closed_date as closed_date',
+                'db_tbs.entry_so_tbl.warehouse as wh',
+                'db_tbs.entry_sso_tbl.sso_header as sso_header',
+                'ekanban.ekanban_customermaster.Cus_Group as gr_customer',
+                'db_tbs.entry_so_tbl.do_address as id_do_addr'
+            )
+            ->groupBy('db_tbs.entry_so_tbl.so_header')
+            ->first();
+        return $query;
+    }
+    protected function headerToolsSSODetail(Request $request)
+    {
+        $where = [];
+        if (isset($request->sso_header)) {
+           $where = [
+                'db_tbs.entry_sso_tbl.sso_header' => $request->sso_header
+            ];
+        }else{
+            $where = [
+                'db_tbs.entry_sso_tbl.so_header' => $request->so_header
+            ];
+        }
+        $query = DB::table('db_tbs.entry_sso_tbl')
+            ->where($where)
+            ->where('db_tbs.entry_sso_tbl.active_cls', '1')
+            ->leftJoin('db_tbs.item','db_tbs.entry_sso_tbl.item_code','=','db_tbs.item.itemcode')
+            ->leftJoin('db_tbs.entry_so_tbl', function($join){
+                $join->on('db_tbs.entry_sso_tbl.so_header','=','db_tbs.entry_so_tbl.so_header');
+                $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_so_tbl.item_code');
+            })
+            ->leftJoin('db_tbs.entry_do_tbl', function($join){
+                $join->on('db_tbs.entry_sso_tbl.sso_header','=','db_tbs.entry_do_tbl.sso_no');
+                $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_do_tbl.item_code');
+            })
+            ->select([
+                'db_tbs.entry_sso_tbl.dn_no as dn_no',
+                'db_tbs.item.part_no as part_no',
+                'db_tbs.entry_sso_tbl.item_code as itemcode',
+                'db_tbs.item.unit as unit',
+                'db_tbs.item.descript1 as model',
+                'db_tbs.entry_so_tbl.qty_so as qty_so',
+                'db_tbs.entry_sso_tbl.sso_header as sso_no',
+                'db_tbs.entry_so_tbl.so_header as so_no',
+                'db_tbs.item.descript as part_name',
+                'db_tbs.entry_sso_tbl.qty_sso as qty_sso',
+                DB::raw('IFNULL(sum(db_tbs.entry_do_tbl.quantity),0) as qty_sj, date(db_tbs.entry_sso_tbl.closed_date) as closed_date')
+            ])
+            ->groupBy('db_tbs.entry_sso_tbl.item_code')
+            ->get();
+        return $query;
+    }
 
     protected function headerToolsBranch(Request $request)
     {

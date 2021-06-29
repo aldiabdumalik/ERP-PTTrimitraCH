@@ -138,6 +138,22 @@ class DoEntryController extends Controller
                     return $this->_Success('OK!', 200, $sso);
                 }
                 break;
+            case "so_header":
+                $so = $this->headerToolsSOHeader($request);
+                if (!isset($so)) {
+                    return $this->_Error('SO data not found!', 404);
+                }else{
+                    return $this->_Success('OK!', 200, $so);
+                }
+                break;
+            case "sso_detail":
+                $result = $this->headerToolsSSODetail($request);
+                if ($result->isEmpty()) {
+                    return $this->_Error('SO data not found!', 404);
+                }else{
+                    return $this->_Success('OK!', 200, $result);
+                }
+                break;
             default:
                 return $this->_Error('Methode Not Found');
         }
