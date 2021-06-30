@@ -283,6 +283,8 @@ $(document).ready(function () {
                                     $('#do-create-customeraddr3').val(data.Address3);
                                     $('#do-create-customeraddr4').val(data.Address4);
                                     $('#do-create-so').val(data.so_header);
+                                    $('#do-create-branch').val(data.branch);
+                                    $('#do-create-warehouse').val(data.wh);
                                     $('#do-create-dnno').val(data.dn_no);
                                     $('#do-create-pono').val(data.po_no);
                                     $('#do-create-sso').prop('readonly', true);
@@ -334,6 +336,8 @@ $(document).ready(function () {
                                     $('#do-create-customeraddr4').val(data.Address4);
                                     $('#do-create-so').val(data.so_header);
                                     $('#do-create-sso').val('*');
+                                    $('#do-create-branch').val(data.branch);
+                                    $('#do-create-warehouse').val(data.wh);
                                     $('#do-create-dnno').val(data.dn_no);
                                     $('#do-create-pono').val(data.po_no);
                                     $('#do-create-sso').prop('readonly', true);
@@ -492,38 +496,6 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on('submit', '#do-form-additem', function () {
-        var index = tbl_additem.data().length;
-        if ($('#do-additem-index').val() == 0) {
-            var add = tbl_additem.row.add([
-                index+1,
-                $('#do-additem-itemcode').val(),
-                $('#do-additem-partno').val(),
-                $('#do-additem-unit').val(),
-                $('#do-additem-qtysj').val(),
-                $('#do-additem-qtybilled').val(),
-                $('#do-additem-qtytag').val(),
-                $('#do-additem-description').val(),
-            ]).node();
-            $(add).attr('data-id', index+1);
-            tbl_additem.draw();
-        }else{
-            var idx = parseInt($('#do-additem-index').val()) - 1;
-            tbl_additem.row( idx ).data([
-                $('#do-additem-index').val(),
-                $('#do-additem-itemcode').val(),
-                $('#do-additem-partno').val(),
-                $('#do-additem-unit').val(),
-                $('#do-additem-qtysj').val(),
-                $('#do-additem-qtybilled').val(),
-                $('#do-additem-qtytag').val(),
-                $('#do-additem-description').val(),
-            ]).draw();
-        }
-        $('#do-form-additem').trigger('reset');
-        modalAction('#do-modal-additem', 'hide');
-    });
-
     $('#do-datatables-create tbody').off('click', 'tr').on('click', 'tr', function () {
         var data = tbl_additem.row(this).data();
         if (data != undefined) {
@@ -539,76 +511,86 @@ $(document).ready(function () {
             }
         }
     });
-    $(document).on('click', '#do-btn-delete-item', function () {
-        tbl_additem.row('.selected').remove().draw();
-        for (let i = 0; i < tbl_additem.rows().data().toArray().length; i++) {
-           var drw = tbl_additem.cell( i, 0 ).data(1+i); 
-        }
-        tbl_additem.draw();
-        $('#do-btn-edit-item').prop('disabled', true);
-        $('#do-btn-delete-item').prop('disabled', true);
-    });
-    $(document).on('click', '#do-btn-edit-item', function () {
-        var data = tbl_additem.row('.selected').data();
-        modalAction('#do-modal-additem').then((resolve) => {
-            $('#do-additem-index').val(data[0]);
-            $('#do-additem-itemcode').val(data[1]);
-            $('#do-additem-partno').val(data[2]);
-            $('#do-additem-unit').val(data[3]);
-            $('#do-additem-qtysj').val(data[4]);
-            $('#do-additem-qtybilled').val(data[5]);
-            $('#do-additem-qtytag').val(data[6]);
-            $('#do-additem-description').val(data[7]);
-        });
-    });
 
-    function addItem() {
-        return get_tbl_item().then((resolve) => {
-            if (resolve != false) {
-                tbl_item = resolve;
-                resolve.ajax.reload();
-                modalAction('#do-modal-itemtable').then((resolve) => {
-                    $('#do-datatables-items').off('click', 'tr').on('click', 'tr', function () {
-                        var row_id = $(this).data('id');
-                        var data = tbl_item.row(this).data();
-                        var cek = tbl_additem.rows().data().toArray();
-                        var isExist = false;
-                        if (cek.length > 0) {
-                            for (let i = 0; i < cek.length; i++) {
-                                if (data.ITEMCODE == cek[i][1]) {
-                                    isExist = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (isExist == true) {
-                            Swal.fire({
-                                title: 'Warning!',
-                                text: "Itemcode ini tersedia, silahkan klik edit pada tabel untuk melakukan perubahan!",
-                                icon: 'warning'
+    $(document).on('submit', '#do-form-create', () => {
+        var form_data = {
+            "do_no": $('#do-create-no').val(),
+            "branch": $('#do-create-branch').val(),
+            "warehouse": $('#do-create-warehouse').val(),
+            "direct": $('#do-create-direct').val(),
+            "priod": $('#do-create-priod').val(),
+            "date": $('#do-create-date').val(),
+            "sso": $('#do-create-sso').val(),
+            "so": $('#do-create-so').val(),
+            "pono": $('#do-create-pono').val(),
+            "dnno": $('#do-create-dnno').val(),
+            "refno": $('#do-create-refno').val(),
+            "delivery": $('#do-create-delivery').val(),
+            "delivery2": $('#do-create-delivery2').val(),
+            "remark": $('#do-create-remark').val(),
+            "customercode": $('#do-create-customercode').val(),
+            "customerdoaddr": $('#do-create-customerdoaddr').val(),
+            "customername": $('#do-create-customername').val(),
+            "customergroup": $('#do-create-customergroup').val(),
+            "customeraddr1": $('#do-create-customeraddr1').val(),
+            "customeraddr2": $('#do-create-customeraddr2').val(),
+            "customeraddr3": $('#do-create-customeraddr3').val(),
+            "customeraddr4": $('#do-create-customeraddr4').val(),
+            "user": $('#do-create-user').val(),
+            "printed": $('#do-create-printed').val(),
+            "voided": $('#do-create-voided').val(),
+            "posted": $('#do-create-posted').val(),
+            "finished": $('#do-create-finished').val(),
+            "inv": $('#do-create-inv').val(),
+            "rgno": $('#do-create-rgno').val(),
+            "rrno": $('#do-create-rrno').val(),
+            "items": tbl_additem.rows().data().toArray()
+        };
+        if (tbl_additem.rows().data().toArray().length > 0) {
+            $('#do-btn-create-submit').prop('disabled', true);
+            var params = {
+                "route": "{{route('tms.warehouse.do_entry.read')}}",
+                "method": "GET",
+                "data": {
+                    "do_no": $('#do-create-no').val()
+                }
+            };
+            ajaxWithPromise(params).then(resolve => {
+                var response = resolve;
+                var route;
+                if (response.message == 'false') {
+                    route = "{{route('tms.warehouse.do_entry.create')}}";
+                }else{
+                    route = "{{route('tms.warehouse.do_entry.update')}}";
+                }
+                var post = {
+                    "route": route,
+                    "method": "POST",
+                    "data": form_data
+                };
+                ajaxWithPromise(post).then(resolve => {
+                    var response = resolve;
+                    if (response.status == true) {
+                        showNotif({
+                            'title': 'Success',
+                            'message': response.message,
+                            'icon': 'success'
+                        }).then(resolve => {
+                            modalAction('#do-create-modal', 'hide').then(resolve => {
+                                get_index.then(resolve => {
+                                    resolve.ajax().reload();
+                                });
                             });
-                        }else{
-                            modalAction('#do-modal-itemtable', 'hide').then((resolve) => {
-                                if (!$('#do-modal-additem').hasClass('show')) {
-                                    modalAction('#do-modal-additem');
-                                }
-                                $('#do-additem-itemcode').val(data.ITEMCODE);
-                                $('#do-additem-partno').val(data.PART_NO);
-                                $('#do-additem-description').val(data.DESCRIPT);
-                                $('#do-additem-unit').val(data.UNIT);
-                            });
-                        }
-                    });
+                        });
+                    }
+                    $('#do-btn-create-submit').prop('disabled', false);
+                }, reject => {
+                    var response = reject;
+                    $('#do-btn-create-submit').prop('disabled', false);
                 });
-            }
-        }, (reject) => {
-            Swal.fire({
-                title: 'Warning!',
-                text: "Silahkan mengisi customer code terlebih dahulu!",
-                icon: 'warning'
             });
-        });
-    }
+        }
+    });
     
     var tbl_do_setting = $('#do-setting-datatables').DataTable(obj_tbl);
     $('#do-btn-modal-table-setting').on('click', function () {
@@ -705,6 +687,31 @@ $(document).ready(function () {
             complete: function (response){
                 callback(response);
             }
+        });
+    }
+    function ajaxWithPromise(params) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: params.route,
+                method: params.method,
+                dataType: "JSON",
+                cache: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: params.data,
+                error: function(response, status, x){
+                    Swal.fire({
+                        title: 'Error!',
+                        text: response.responseJSON.message,
+                        icon: 'error'
+                    });
+                    reject(response);
+                },
+                complete: function (response){
+                    resolve(response);
+                }
+            });
         });
     }
     function modalAction(elementId=null, action='show'){

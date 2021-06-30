@@ -78,8 +78,16 @@ Route::get('/warehouse/do_entry', [
     'as' => 'tms.warehouse.do_entry.index'
 ]);
 Route::get('/warehouse/do_entry/read', [
-    'uses' => 'TMS\Warehouse\DoEntryController@read', 
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryRead', 
     'as' => 'tms.warehouse.do_entry.read'
+]);
+Route::post('/warehouse/do_entry/create', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryCreate', 
+    'as' => 'tms.warehouse.do_entry.create'
+]);
+Route::post('/warehouse/do_entry/update', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryUpdate', 
+    'as' => 'tms.warehouse.do_entry.update'
 ]);
 Route::post('/warehouse/do_entry/table_index', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntry', 

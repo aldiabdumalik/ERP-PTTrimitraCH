@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\DoEntryTrait;
 use App\Models\Dbtbs\DoEntry;
 use App\Models\Dbtbs\DoEntrySetting;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
@@ -85,19 +87,105 @@ class DoEntryController extends Controller
         return $this->_Success('Default', 200, $query);
     }
 
-    public function read(Request $request)
+    public function DoEntryRead(Request $request)
     {
-        return $this->_Success('test promise');
+        if (isset($request->do_no)) {
+            $query = DoEntry::where('do_no', $request->do_no)->get();
+            if ($query->isEmpty()) {
+                return $this->_Success('false');
+            }else{
+                return $this->_Success('Data exist!', 200, $query);
+            }
+        }
+        return $this->_Error('Methode not exist!');
     }
 
-    public function create(Request $request)
+    public function DoEntryCreate(Request $request)
     {
-        
+        $items = $request->items;
+        $data = [];
+        for ($i=0; $i < count($items); $i++) { 
+            $data[] = [
+                'do_no' => $request->do_no,
+                'row_no' => $items[$i][0],
+                'item_code' => $items[$i][1],
+                'quantity' => $items[$i][4],
+                'unit' => $items[$i][3],
+                'so_no' => $request->sso,
+                'sso_no' => $request->so,
+                'ref_no' => $request->refno,
+                'po_no' => $request->pono,
+                'dn_no' => $request->dnno,
+                'invoice' => $request->inv,
+                'period' => $request->priod,
+                'cust_id' => $request->customercode,
+                'do_address' => $request->customerdoaddr,
+                'cust_name' => $request->customername,
+                'source' => "",
+                'id_driver' => "",
+                'remark' => $request->remark,
+                'branch' => $request->branch,
+                'warehouse' => $request->warehouse,
+                'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
+                'direct_date' => null,
+                'do_trans' => 0,
+                'created_by' => Auth::user()->FullName,
+                'created_date' => date('Y-m-d H:i:s')
+            ];
+        }
+        try {
+            $query = DoEntry::insert($data);
+            return $this->_Success('Saved successfully!', 201);
+        } catch (Exception $e) {
+            return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+        }
     }
 
-    public function update(Request $request)
+    public function DoEntryUpdate(Request $request)
     {
-        
+        $items = $request->items;
+        $data = [];
+        $old_data = DoEntry::where('do_no', $request->do_no)->first();
+        $create_by = $old_data->create_by;
+        $create_date = $old_data->create_date;
+        $old_data = DoEntry::where('do_no', $request->do_no)->delete();
+        for ($i=0; $i < count($items); $i++) { 
+            $data[] = [
+                'do_no' => $request->do_no,
+                'row_no' => $items[$i][0],
+                'item_code' => $items[$i][1],
+                'quantity' => $items[$i][4],
+                'unit' => $items[$i][3],
+                'so_no' => $request->sso,
+                'sso_no' => $request->so,
+                'ref_no' => $request->refno,
+                'po_no' => $request->pono,
+                'dn_no' => $request->dnno,
+                'invoice' => $request->inv,
+                'period' => $request->priod,
+                'cust_id' => $request->customercode,
+                'do_address' => $request->customerdoaddr,
+                'cust_name' => $request->customername,
+                'source' => "",
+                'id_driver' => "",
+                'remark' => $request->remark,
+                'branch' => $request->branch,
+                'warehouse' => $request->warehouse,
+                'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
+                'direct_date' => null,
+                'do_trans' => 0,
+                'create_by' => $create_by,
+                'create_date' => $create_date,
+                'update_by' => Auth::user()->FullName,
+                'update_date' => date('Y-m-d H:i:s')
+            ];
+        }
+        try {
+            $query = DoEntry::insert($data);
+            return $this->_Success('Saved successfully!', 201);
+        } catch (Exception $e) {
+            return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+        }
     }
 
     public function DoEntryHeader(Request $request)
