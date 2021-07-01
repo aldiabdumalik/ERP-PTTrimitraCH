@@ -91,6 +91,24 @@ class DoEntryController extends Controller
     {
         if (isset($request->do_no)) {
             $query = DoEntry::where('do_no', $request->do_no)->get();
+            if (isset($request->view_do)) {
+                $check = $query->first();
+                if ($check->sso_no !== '*') {
+                    $check_by = 'sso';
+                }else{
+                    $check_by = 'so';
+                }
+
+                $data = (object)[
+                    'do_no' => $request->do_no,
+                    'check_by' => $check_by
+                ];
+                $query = $this->headerToolsViewDo($data);
+                return $this->_Success('Data exist!', 200, $query);
+            }elseif (isset($request->check)) {
+                $message = $this->headerToolsCheckDO($request);
+                return $this->_Success($message);
+            }
             if ($query->isEmpty()) {
                 return $this->_Success('false');
             }else{
@@ -126,6 +144,7 @@ class DoEntryController extends Controller
                 'remark' => $request->remark,
                 'branch' => $request->branch,
                 'warehouse' => $request->warehouse,
+                'sj_type' => $request->sj_type,
                 'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
                 'direct_date' => null,
                 'do_trans' => 0,
@@ -171,6 +190,7 @@ class DoEntryController extends Controller
                 'remark' => $request->remark,
                 'branch' => $request->branch,
                 'warehouse' => $request->warehouse,
+                'sj_type' => $request->sj_type,
                 'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
                 'direct_date' => null,
                 'do_trans' => 0,
@@ -186,6 +206,40 @@ class DoEntryController extends Controller
         } catch (Exception $e) {
             return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
         }
+    }
+
+    public function DoEntryVoid(Request $request)
+    {
+        $query = DoEntry::where('do_no', $request->do_no)->first();
+        if (isset($query)) {
+            $voided = DoEntry::where('do_no', $request->do_no)->update([
+                'voided_date' => date('Y-m-d H:i:s'),
+                'voided_by' => Auth::user()->FullName
+            ]);
+            if ($voided) {
+                return $this->_Success("DO No. $request->do_no, has been voided!", 201);
+            }else{
+                return $this->_Error("DO No. $request->do_no, failed to void!");
+            }
+        }
+        return $this->_Error('Data or Method Not Found!');
+    }
+
+    public function DoEntryUnvoid(Request $request)
+    {
+        $query = DoEntry::where('do_no', $request->do_no)->first();
+        if (isset($query)) {
+            $voided = DoEntry::where('do_no', $request->do_no)->update([
+                'voided_date' => null,
+                'voided_by' => null
+            ]);
+            if ($voided) {
+                return $this->_Success("DO No. $request->do_no, has been unvoided!", 201);
+            }else{
+                return $this->_Error("DO No. $request->do_no, failed to unvoid!");
+            }
+        }
+        return $this->_Error('Data or Method Not Found!');
     }
 
     public function DoEntryHeader(Request $request)

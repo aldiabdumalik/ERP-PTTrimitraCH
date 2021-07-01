@@ -101,3 +101,11 @@ Route::get('/warehouse/do_entry/table_index_setting', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryTableSetting', 
     'as' => 'tms.warehouse.do_entry.table_index_setting'
 ]);
+Route::post('/warehouse/do_entry/void', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryVoid', 
+    'as' => 'tms.warehouse.do_entry.void'
+]);
+Route::post('/warehouse/do_entry/unvoid', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryUnvoid', 
+    'as' => 'tms.warehouse.do_entry.unvoid'
+]);

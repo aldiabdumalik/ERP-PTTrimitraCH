@@ -191,6 +191,7 @@ $(document).ready(function () {
         hideShow('#item-button-div', false);
         hideShow('#do-btn-create-submit', false);
         $('#do-form-create input').not('.readonly-first').removeAttr('readonly');
+        $('#do-form-create select').prop('disabled', false);
         $('#do-btn-create-submit').text('Simpan');
         $('#do-btn-edit-item').prop('disabled', true);
         $('#do-btn-delete-item').prop('disabled', true);
@@ -382,57 +383,57 @@ $(document).ready(function () {
                     "sso_header": $('#do-create-sso').val()
                 }; 
             }
-            modalAction('#do-modal-itemtable').then(resolve => {
-                ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
-                    "POST",
-                    send,
-                    (response) => {
-                        response = response.responseJSON;
-                        if (response.status == true) {
-                            var data = response.content;
-                            var sum_qty_sj = 0;
-                            var sum_qty_sso = 0;
-                            var id=0;
-                            for (i=0; i < data.length; i++){
-                                sum_qty_sj += parseInt(data[i].qty_sj);
-                                sum_qty_sso += parseInt(data[i].qty_sso);
-                            }
-                            var max_qty = sum_qty_sso - sum_qty_sj;
-                            if(max_qty > 0){
-                                for (i=0; i < data.length; i++){
-                                    if(data[i].qty_sj < data[i].qty_sso){
-                                        id++;
-                                        tbl_items.row.add([
-                                            data[i].dn_no,
-                                            data[i].itemcode,
-                                            data[i].part_no,
-                                            data[i].sso_no,
-                                            data[i].so_no,
-                                            data[i].part_name,
-                                            data[i].model,
-                                            data[i].qty_so,
-                                            data[i].qty_sso,
-                                            data[i].qty_sj,
-                                            data[i].unit,
-                                            '<input autocomplete="off" type="number" class="insj form-control-sm" id="rowid-'+id+'">'
-                                        ]).draw();
-                                    }
-                                }
-                            }else{
-                                showNotif({
-                                    'title': 'error',
-                                    'message': 'Qty SSO/SO has all been sent',
-                                    'icon': 'error'
-                                }).then(reject => {
-                                    resetCreateForm();
-                                });
-                            }
+            ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
+                "POST",
+                send,
+                (response) => {
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        var data = response.content;
+                        var sum_qty_sj = 0;
+                        var sum_qty_sso = 0;
+                        var id=0;
+                        for (i=0; i < data.length; i++){
+                            sum_qty_sj += parseInt(data[i].qty_sj);
+                            sum_qty_sso += parseInt(data[i].qty_sso);
                         }
-                    });
-                resolve.on('shown.bs.modal', function () {
-                    tbl_items.columns.adjust().draw();
+                        var max_qty = sum_qty_sso - sum_qty_sj;
+                        if(max_qty > 0){
+                            for (i=0; i < data.length; i++){
+                                if(data[i].qty_sj < data[i].qty_sso){
+                                    id++;
+                                    tbl_items.row.add([
+                                        data[i].dn_no,
+                                        data[i].itemcode,
+                                        data[i].part_no,
+                                        data[i].sso_no,
+                                        data[i].so_no,
+                                        data[i].part_name,
+                                        data[i].model,
+                                        data[i].qty_so,
+                                        data[i].qty_sso,
+                                        data[i].qty_sj,
+                                        data[i].unit,
+                                        '<input autocomplete="off" type="number" class="insj form-control-sm" id="rowid-'+id+'">'
+                                    ]).draw();
+                                }
+                            }
+                            modalAction('#do-modal-itemtable').then(resolve => {
+                                resolve.on('shown.bs.modal', function () {
+                                    tbl_items.columns.adjust().draw();
+                                });
+                            });
+                        }else{
+                            showNotif({
+                                'title': 'error',
+                                'message': 'All Qty SSO/SO has been sent',
+                                'icon': 'error'
+                            }).then(resolve => {}, reject => {
+                                // resetCreateForm();
+                            });
+                        }
+                    }
                 });
-            });
         }else{
             showNotif({
                 'title': 'Warning',
@@ -512,12 +513,201 @@ $(document).ready(function () {
         }
     });
 
+    $(document).off('click', '.do-act-view').on('click', '.do-act-view', function () {
+        var id = $(this).data('dono');
+        hideShow('#item-button-div', true);
+        hideShow('#do-btn-create-submit', true);
+        $('#do-form-create input').prop('readonly', true);
+        $('#do-form-create select').prop('disabled', true);
+        ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "view_do": true}, (response) => {
+            response = response.responseJSON;
+            var header = response.content.header;
+            var items = response.content.items;
+
+            var date = date_convert(header.delivery_date);
+            var voided = date_convert(header.voided);
+            var posted = date_convert(header.posted);
+            var finished = date_convert(header.finished);
+            var printed = date_convert(header.printed);
+
+            $('#do-create-no').val(header.do_no);
+            $('#do-create-branch').val(header.branch);
+            $('#do-create-warehouse').val(header.warehouse);
+            $('#do-create-direct').val(((header.sj_type != null) ? header.sj_type : 'Regular'));
+            $('#do-create-priod').val(header.period);
+            $('#do-create-date').val(date);
+            $('#do-create-sso').val(header.sso_no);
+            $('#do-create-so').val(header.so_no);
+            $('#do-create-pono').val(header.po_no);
+            $('#do-create-dnno').val(header.dn_no);
+            $('#do-create-refno').val(header.ref_no);
+            $('#do-create-remark').val(header.remark);
+            $('#do-create-customercode').val(header.cust_id);
+            $('#do-create-customerdoaddr').val(header.id_do);
+            $('#do-create-customername').val(header.cust_name);
+            $('#do-create-customergroup').val(10);
+            $('#do-create-customeraddr1').val(header.address1);
+            $('#do-create-customeraddr2').val(header.address2);
+            $('#do-create-customeraddr3').val(header.address3);
+            $('#do-create-customeraddr4').val(header.address4);
+            $('#do-create-user').val(header.user);
+            $('#do-create-printed').val(printed);
+            $('#do-create-voided').val(voided);
+            $('#do-create-posted').val(posted);
+            $('#do-create-finished').val(finished);
+            $('#do-create-inv').val(header.invoice);
+            // $('#do-create-rgno').val(header.);
+            // $('#do-create-rrno').val(header.);
+
+            var no = 1;
+            $.each(items, function (i, item) {
+                tbl_additem.row.add([
+                    no,
+                    item['item_code'],
+                    item['part_no'],
+                    item['unit'],
+                    item['quantity'],
+                    0,
+                    0,
+                    item['sso_no'],
+                    item['part_name']
+                ]).draw();
+                no++;
+            });
+
+            modalAction('#do-modal-create').then(resolve => {
+                resolve.on('shown.bs.modal', function () {
+                    tbl_additem.columns.adjust().draw();
+                });
+            })
+        });
+    });
+
+    $(document).off('click', '.do-act-edit').on('click', '.do-act-edit', function () {
+        var id = $(this).data('dono');
+        ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "view_do": true}, (response) => {
+            response = response.responseJSON;
+            var header = response.content.header;
+            var items = response.content.items;
+            if (header.voided == null) {
+                if (header.finished == null) {
+                    if (header.posted == null) {
+                        var date = date_convert(header.delivery_date);
+                        var voided = date_convert(header.voided);
+                        var posted = date_convert(header.posted);
+                        var finished = date_convert(header.finished);
+                        var printed = date_convert(header.printed);
+
+                        $('#do-create-no').val(header.do_no);
+                        $('#do-create-branch').val(header.branch);
+                        $('#do-create-warehouse').val(header.warehouse);
+                        $('#do-create-direct').val(((header.sj_type != null) ? header.sj_type : 'Regular'));
+                        $('#do-create-priod').val(header.period);
+                        $('#do-create-date').val(date);
+                        $('#do-create-sso').val(header.sso_no);
+                        $('#do-create-so').val(header.so_no);
+                        $('#do-create-pono').val(header.po_no);
+                        $('#do-create-dnno').val(header.dn_no);
+                        $('#do-create-refno').val(header.ref_no);
+                        $('#do-create-remark').val(header.remark);
+                        $('#do-create-customercode').val(header.cust_id);
+                        $('#do-create-customerdoaddr').val(header.id_do);
+                        $('#do-create-customername').val(header.cust_name);
+                        $('#do-create-customergroup').val(10);
+                        $('#do-create-customeraddr1').val(header.address1);
+                        $('#do-create-customeraddr2').val(header.address2);
+                        $('#do-create-customeraddr3').val(header.address3);
+                        $('#do-create-customeraddr4').val(header.address4);
+                        $('#do-create-user').val(header.user);
+                        $('#do-create-printed').val(printed);
+                        $('#do-create-voided').val(voided);
+                        $('#do-create-posted').val(posted);
+                        $('#do-create-finished').val(finished);
+                        $('#do-create-inv').val(header.invoice);
+                        // $('#do-create-rgno').val(header.);
+                        // $('#do-create-rrno').val(header.);
+
+                        var no = 1;
+                        $.each(items, function (i, item) {
+                            tbl_additem.row.add([
+                                no,
+                                item['item_code'],
+                                item['part_no'],
+                                item['unit'],
+                                item['quantity'],
+                                0,
+                                0,
+                                item['sso_no'],
+                                item['part_name']
+                            ]).draw();
+                            no++;
+                        });
+
+                        modalAction('#do-modal-create').then(resolve => {
+                            resolve.on('shown.bs.modal', function () {
+                                tbl_additem.columns.adjust().draw();
+                            });
+                        })
+                    }else{
+                        showNotif({
+                            'title': 'Access Denied!',
+                            'message': 'DO has been posted!',
+                            'icon': 'error'
+                        });
+                    }
+                }else{
+                    showNotif({
+                        'title': 'Access Denied!',
+                        'message': 'DO has been finished!',
+                        'icon': 'error'
+                    });
+                }
+            }else{
+                showNotif({
+                    'title': 'Access Denied!',
+                    'message': 'DO has been voided!',
+                    'icon': 'error'
+                });
+            }
+        });
+    });
+
+    $(document).off('click', '.do-act-voided').on('click', '.do-act-voided', function () {
+        var id = $(this).data('dono');
+        ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "check": true}, (response) => {
+            response = response.responseJSON;
+            if (response.message == null) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Void DO No." + id + " Now?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, void it!'
+                }).then(answer => {
+                    if (answer.value == true) {
+                        // ajax( (response) => {
+                            
+                        // });
+                    }
+                });
+            }else{
+                showNotif({
+                    'title': 'Access Denied!',
+                    'message': response.message,
+                    'icon': 'error'
+                });
+            }
+        });
+    });
+
     $(document).on('submit', '#do-form-create', () => {
         var form_data = {
             "do_no": $('#do-create-no').val(),
             "branch": $('#do-create-branch').val(),
             "warehouse": $('#do-create-warehouse').val(),
-            "direct": $('#do-create-direct').val(),
+            "sj_type": $('#do-create-direct').val(),
             "priod": $('#do-create-priod').val(),
             "date": $('#do-create-date').val(),
             "sso": $('#do-create-sso').val(),
@@ -719,7 +909,6 @@ $(document).ready(function () {
             $(elementId).modal(action);
             resolve($(elementId));
         });
-        // return $(elementId).modal(action);
     }
 
     function hideShow(element=null, hide=true){
@@ -773,6 +962,11 @@ $(document).ready(function () {
         $('#do-create-pono').val('');
         $('#do-create-dnno').val('');
         tbl_additem.clear().draw(false);
+    }
+
+    function date_convert($date) {
+        var convert = ($date !== null) ? $date.split('-') : null;
+        return (convert !== null) ? `${convert[2]}/${convert[1]}/${convert[0]}` : null;
     }
 });
 </script>

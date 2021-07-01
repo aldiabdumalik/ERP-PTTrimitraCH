@@ -122,6 +122,54 @@ trait DoEntryTrait {
         return $query;
     }
 
+    protected function headerToolsViewDo($data)
+    {
+        $query = DoEntry::where('db_tbs.entry_do_tbl.do_no', $data->do_no)
+            ->leftJoin('db_tbs.item','item_code','=','db_tbs.item.itemcode')
+            ->leftJoin('db_tbs.sys_do_address', function($join) {
+                $join->on('db_tbs.entry_do_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
+                $join->on('db_tbs.entry_do_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+            })
+            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
+                $join->on('db_tbs.entry_do_tbl.sso_no','=','db_tbs.entry_sso_tbl.sso_header');
+                $join->on('db_tbs.entry_do_tbl.item_code','=','db_tbs.entry_sso_tbl.item_code');
+            })
+            ->leftJoin('db_tbs.entry_so_tbl',function($join){
+                $join->on('db_tbs.entry_do_tbl.so_no','=','db_tbs.entry_so_tbl.so_header');
+                $join->on('db_tbs.entry_do_tbl.item_code','=','db_tbs.entry_so_tbl.item_code');
+            })
+            ->select($this->columnOfDoView())
+            ->get();
+        $data = [
+            'header' => $query->first(),
+            'items' => $query
+        ];
+        return $data;
+    }
+
+    protected function headerToolsCheckDO(Request $request)
+    {
+        $message = null;
+        $query = DoEntry::where('do_no', $request->do_no)
+            ->selectRaw('do_no, voided_date, voided_by, finished_date, finished_by, posted_date, posted_by')
+            ->first();
+        if (isset($query)) {
+            if ($query->voided_date != null) {
+                $voided = $this->carbonCreateFormFormat($query->voided_date);
+                $message = "DO has been voided at $voided, by $query->voided_by";
+            }elseif ($query->finished_date != null) {
+                $finished = $this->carbonCreateFormFormat($query->finished_date);
+                $message = "DO has been finished at $finished, by $query->finished_by";
+            }elseif ($query->posted_date != null) {
+                $posted = $this->carbonCreateFormFormat($query->posted_date);
+                $message = "DO has been posted at $posted, by $query->posted_by";
+            }
+        }else{
+            $message = 'DO Not Found!';
+        }
+        return $message;
+    }
+
     protected function headerToolsBranch(Request $request)
     {
         $query = DB::connection('db_tbs')
@@ -239,6 +287,38 @@ trait DoEntryTrait {
         return $query;
     }
 
+    private function getDataBySSO($where)
+    {
+        $query = DoEntry::where('db_tbs.entry_do_tbl.do_no', $where)
+            ->leftJoin('db_tbs.item','item_code','=','db_tbs.item.itemcode')
+            ->leftJoin('db_tbs.sys_do_address', function($join) {
+                $join->on('db_tbs.entry_do_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
+                $join->on('db_tbs.entry_do_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+            })
+            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
+                $join->on('db_tbs.entry_do_tbl.sso_no','=','db_tbs.entry_sso_tbl.sso_header');
+                $join->on('db_tbs.entry_do_tbl.item_code','=','db_tbs.entry_sso_tbl.item_code');
+            })
+            ->get();
+        return $query;
+    }
+
+    private function getDataBySO($where)
+    {
+        $query = DoEntry::where('db_tbs.entry_do_tbl.do_no', $where)
+            ->leftJoin('db_tbs.item','item_code','=','db_tbs.item.itemcode')
+            ->leftJoin('db_tbs.sys_do_address', function($join) {
+                $join->on('db_tbs.entry_do_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
+                $join->on('db_tbs.entry_do_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+            })
+            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
+                $join->on('db_tbs.entry_do_tbl.sso_no','=','db_tbs.entry_sso_tbl.sso_header');
+                $join->on('db_tbs.entry_do_tbl.item_code','=','db_tbs.entry_sso_tbl.item_code');
+            })
+            ->get();
+        return $query;
+    }
+
     protected function headerToolsDoEntryNo(Request $request)
     {
         $reference = 
@@ -314,5 +394,53 @@ trait DoEntryTrait {
             'content' => $content,
             'message' => $message
         ], $code);
+    }
+
+    private function columnOfDoView()
+    {
+        return [
+            'db_tbs.entry_do_tbl.so_no',
+            'db_tbs.entry_do_tbl.sso_no',
+            'db_tbs.entry_do_tbl.cust_id',
+            'db_tbs.entry_do_tbl.delivery_date',
+            'db_tbs.entry_do_tbl.period',
+            'db_tbs.entry_do_tbl.do_no',
+            'db_tbs.sys_do_address.cust_name',
+            'db_tbs.sys_do_address.id_do',
+            'db_tbs.sys_do_address.do_addr1 as address1',
+            'db_tbs.sys_do_address.do_addr2 as address2',
+            'db_tbs.sys_do_address.do_addr3 as address3',
+            'db_tbs.sys_do_address.do_addr4 as address4',
+            'db_tbs.entry_do_tbl.row_no',
+            'db_tbs.entry_do_tbl.item_code',
+            'db_tbs.item.part_no as part_no',
+            'db_tbs.item.descript as part_name',
+            'db_tbs.item.descript1 as model',
+            'db_tbs.item.unit as unit',
+            'db_tbs.item.fac_unit as fac_unit',
+            'db_tbs.entry_so_tbl.qty_so as qty_so',
+            'db_tbs.entry_sso_tbl.qty_sso as qty_sso',
+            'db_tbs.entry_do_tbl.quantity',
+            'db_tbs.entry_do_tbl.branch',
+            'db_tbs.entry_do_tbl.warehouse',
+            'db_tbs.entry_do_tbl.dn_no',
+            'db_tbs.entry_do_tbl.po_no',
+            'db_tbs.entry_do_tbl.ref_no',
+            'db_tbs.entry_do_tbl.remark',
+            'db_tbs.entry_do_tbl.invoice',
+            'db_tbs.entry_do_tbl.created_by as user',
+            'db_tbs.entry_do_tbl.sj_type',
+            DB::raw('
+                date(db_tbs.entry_do_tbl.printed_date) as printed,
+                date(db_tbs.entry_do_tbl.posted_date) as posted,
+                date(db_tbs.entry_do_tbl.finished_date) as finished,
+                date(db_tbs.entry_do_tbl.voided_date) as voided
+            ')
+        ];
+    }
+
+    protected function carbonCreateFormFormat($date, $from='Y-m-d', $to='d/m/Y')
+    {
+        return Carbon::createFromFormat($from, $date)->format($to);
     }
 }
