@@ -51,8 +51,5 @@ class DoEntry extends Model
         'do_trans',
     ];
     protected $hidden = [];
-    public $timestamps = [
-        'created_date',
-        'update_date'
-    ];
+    public $timestamps = false;
 }

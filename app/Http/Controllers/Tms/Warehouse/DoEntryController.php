@@ -154,6 +154,7 @@ class DoEntryController extends Controller
         }
         try {
             $query = DoEntry::insert($data);
+            $log = $this->createLOG($request->do_no, 'ADD');
             return $this->_Success('Saved successfully!', 201);
         } catch (Exception $e) {
             return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
@@ -202,10 +203,29 @@ class DoEntryController extends Controller
         }
         try {
             $query = DoEntry::insert($data);
+            $log = $this->createLOG($request->do_no, 'EDIT');
             return $this->_Success('Saved successfully!', 201);
         } catch (Exception $e) {
             return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
         }
+    }
+
+    public function DoEntryPost(Request $request)
+    {
+        $query = DoEntry::where('do_no', $request->do_no)->first();
+        if (isset($query)) {
+            $posted = DoEntry::where('do_no', $request->do_no)->update([
+                'posted_date' => date('Y-m-d H:i:s'),
+                'posted_by' => Auth::user()->FullName
+            ]);
+            $log = $this->createLOG($request->do_no, 'POST');
+            if ($posted) {
+                return $this->_Success("DO No. $request->do_no, has been posted!", 201);
+            }else{
+                return $this->_Error("DO No. $request->do_no, failed to posting!");
+            }
+        }
+        return $this->_Error('Data or Method Not Found!');
     }
 
     public function DoEntryVoid(Request $request)
@@ -216,10 +236,29 @@ class DoEntryController extends Controller
                 'voided_date' => date('Y-m-d H:i:s'),
                 'voided_by' => Auth::user()->FullName
             ]);
+            $log = $this->createLOG($request->do_no, 'VOID');
             if ($voided) {
                 return $this->_Success("DO No. $request->do_no, has been voided!", 201);
             }else{
                 return $this->_Error("DO No. $request->do_no, failed to void!");
+            }
+        }
+        return $this->_Error('Data or Method Not Found!');
+    }
+
+    public function DoEntryUnpost(Request $request)
+    {
+        $query = DoEntry::where('do_no', $request->do_no)->first();
+        if (isset($query)) {
+            $posted = DoEntry::where('do_no', $request->do_no)->update([
+                'posted_date' => null,
+                'posted_by' => null
+            ]);
+            $log = $this->createLOG($request->do_no, 'UNPOST', $request->note);
+            if ($posted) {
+                return $this->_Success("DO No. $request->do_no, has been unposted!", 201);
+            }else{
+                return $this->_Error("DO No. $request->do_no, failed to unposting!");
             }
         }
         return $this->_Error('Data or Method Not Found!');
@@ -233,6 +272,7 @@ class DoEntryController extends Controller
                 'voided_date' => null,
                 'voided_by' => null
             ]);
+            $log = $this->createLOG($request->do_no, 'UNVOID', $request->note);
             if ($voided) {
                 return $this->_Success("DO No. $request->do_no, has been unvoided!", 201);
             }else{

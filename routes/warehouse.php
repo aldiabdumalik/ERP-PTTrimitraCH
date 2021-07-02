@@ -109,3 +109,11 @@ Route::post('/warehouse/do_entry/unvoid', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryUnvoid', 
     'as' => 'tms.warehouse.do_entry.unvoid'
 ]);
+Route::post('/warehouse/do_entry/post', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryPost', 
+    'as' => 'tms.warehouse.do_entry.post'
+]);
+Route::post('/warehouse/do_entry/unpost', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryUnpost', 
+    'as' => 'tms.warehouse.do_entry.unpost'
+]);

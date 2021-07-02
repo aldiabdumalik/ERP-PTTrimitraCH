@@ -319,6 +319,21 @@ trait DoEntryTrait {
         return $query;
     }
 
+    protected function createLOG($id, $status, $note=null)
+    {
+        $log = DB::connection('db_tbs')
+            ->table('entry_do_tbl_log')
+            ->insert([
+                'do_no' => $id,
+                'date_log' => date('Y-m-d'),
+                'time_log' => date('H:i:s'),
+                'status_log' => $status,
+                'user' => Auth::user()->FullName,
+                'note' => ($note != null) ? $note : ""
+            ]);
+        return $log;
+    }
+
     protected function headerToolsDoEntryNo(Request $request)
     {
         $reference = 

@@ -6,13 +6,13 @@
         <a class="dropdown-item text-primary do-act-view" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-eye"></i> View</a>
         <a class="dropdown-item text-warning do-act-edit" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-pencil"></i> Edit</a>
         
-        @if ($data->voided == NULL)
+        @if ($data->posted_date == NULL)
         <a class="dropdown-item text-success do-act-posted" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Posted</a>
         @else
         <a class="dropdown-item text-danger do-act-unposted" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Unposted</a>
         @endif
 
-        @if ($data->voided == NULL)
+        @if ($data->voided_date == NULL)
         <a class="dropdown-item text-danger do-act-voided" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-ban"></i> Void</a>
         @else
         <a class="dropdown-item text-danger do-act-unvoided" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-ban"></i> Unvoided</a>

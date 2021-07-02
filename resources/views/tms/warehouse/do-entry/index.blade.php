@@ -649,24 +649,24 @@ $(document).ready(function () {
                             });
                         })
                     }else{
-                        showNotif({
-                            'title': 'Access Denied!',
-                            'message': 'DO has been posted!',
-                            'icon': 'error'
+                        Swal.fire({
+                            title: 'Access Denied!',
+                            text: 'DO has been posted!',
+                            icon: 'error'
                         });
                     }
                 }else{
-                    showNotif({
-                        'title': 'Access Denied!',
-                        'message': 'DO has been finished!',
-                        'icon': 'error'
+                    Swal.fire({
+                        title: 'Access Denied!',
+                        text: 'DO has been finished!',
+                        icon: 'error'
                     });
                 }
             }else{
-                showNotif({
-                    'title': 'Access Denied!',
-                    'message': 'DO has been voided!',
-                    'icon': 'error'
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: 'DO has been voided!',
+                    icon: 'error'
                 });
             }
         });
@@ -687,16 +687,137 @@ $(document).ready(function () {
                     confirmButtonText: 'Yes, void it!'
                 }).then(answer => {
                     if (answer.value == true) {
-                        // ajax( (response) => {
-                            
-                        // });
+                        ajax("{{route('tms.warehouse.do_entry.void')}}", "POST", {"do_no": id}, (response) => {
+                            response = response.responseJSON;
+                            if (response.status == true) {
+                                showNotif({
+                                    'title': 'Notification',
+                                    'message': response.message,
+                                    'icon': 'success'
+                                }).then(resolve => {
+                                    get_index.then(resolve => {
+                                        resolve.ajax.reload();
+                                    })
+                                });
+                            }
+                        });
                     }
                 });
             }else{
-                showNotif({
-                    'title': 'Access Denied!',
-                    'message': response.message,
-                    'icon': 'error'
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: response.message,
+                    icon: 'error'
+                });
+            }
+        });
+    });
+    $(document).off('click', '.do-act-unvoided').on('click', '.do-act-unvoided', function () {
+        var id = $(this).data('dono');
+        Swal.fire({
+            title: `Do you want to unvoid DO no. ${id}, now ?`,
+            input: 'text',
+            inputPlaceholder: 'Type your note here...',
+            showCancelButton: true,
+            confirmButtonText: `Yes, unVoid it!`,
+            confirmButtonColor: '#DC3545',
+            icon: 'warning',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        }).then((answer) => {
+            if (answer.value != "" && answer.value != undefined) {
+                var note = answer.value;
+                ajax("{{route('tms.warehouse.do_entry.unvoid')}}", "POST", {"do_no": id, "note": note}, (response) => {
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        showNotif({
+                            'title': 'Notification',
+                            'message': response.message,
+                            'icon': 'success'
+                        }).then(resolve => {
+                            get_index.then(resolve => {
+                                resolve.ajax.reload();
+                            })
+                        });
+                    }
+                });
+            }
+        });
+    });
+    $(document).off('click', '.do-act-posted').on('click', '.do-act-posted', function () {
+        var id = $(this).data('dono');
+        ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "check": true}, (response) => {
+            response = response.responseJSON;
+            if (response.message == null) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Post DO No." + id + " Now?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, post it!'
+                }).then(answer => {
+                    if (answer.value == true) {
+                        ajax("{{route('tms.warehouse.do_entry.post')}}", "POST", {"do_no": id}, (response) => {
+                            response = response.responseJSON;
+                            if (response.status == true) {
+                                showNotif({
+                                    'title': 'Notification',
+                                    'message': response.message,
+                                    'icon': 'success'
+                                }).then(resolve => {
+                                    get_index.then(resolve => {
+                                        resolve.ajax.reload();
+                                    })
+                                });
+                            }
+                        });
+                    }
+                });
+            }else{
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: response.message,
+                    icon: 'error'
+                });
+            }
+        });
+    });
+    $(document).off('click', '.do-act-unposted').on('click', '.do-act-unposted', function () {
+        var id = $(this).data('dono');
+        Swal.fire({
+            title: `Do you want to unpost DO no. ${id}, now ?`,
+            input: 'text',
+            inputPlaceholder: 'Type your note here...',
+            showCancelButton: true,
+            confirmButtonText: `Yes, unpost it!`,
+            confirmButtonColor: '#DC3545',
+            icon: 'warning',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        }).then((answer) => {
+            if (answer.value != "" && answer.value != undefined) {
+                var note = answer.value;
+                ajax("{{route('tms.warehouse.do_entry.unpost')}}", "POST", {"do_no": id, "note": note}, (response) => {
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        showNotif({
+                            'title': 'Notification',
+                            'message': response.message,
+                            'icon': 'success'
+                        }).then(resolve => {
+                            get_index.then(resolve => {
+                                resolve.ajax.reload();
+                            })
+                        });
+                    }
                 });
             }
         });
