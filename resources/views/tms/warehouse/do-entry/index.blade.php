@@ -82,6 +82,7 @@
 @include('tms.warehouse.do-entry.modal.header.doaddr')
 @include('tms.warehouse.do-entry.modal.item.table_item')
 @include('tms.warehouse.do-entry.modal.item.add_item')
+@include('tms.warehouse.do-entry.modal.log.tableLog')
 @endsection
 @section('script')
 <script>
@@ -883,7 +884,7 @@ $(document).ready(function () {
                     var response = resolve;
                     if (response.status == true) {
                         showNotif({
-                            'title': 'Success',
+                            'title': 'Notification',
                             'message': response.message,
                             'icon': 'success'
                         }).then(resolve => {
@@ -902,6 +903,44 @@ $(document).ready(function () {
             });
         }
     });
+
+    var tbl_log = $('#do-datatables-log').DataTable(obj_tbl);
+    $(document).on('click', '.do-act-log', function () {
+        var id = $(this).data('dono');
+        var column = [
+            {data: 'date_log', name: 'date_log'},
+            {data: 'time_log', name: 'time_log'},
+            {data: 'status_log', name: 'status_log'},
+            {data: 'user', name: 'user'},
+            {data: 'note', name: 'note'}
+        ];
+        tbl_log = $('#do-datatables-log').DataTable({
+            processing: true,
+            serverSide: true,
+            destroy: true,
+            ajax: {
+                url: "{{ route('tms.warehouse.do_entry.header_tools') }}",
+                method: 'POST',
+                data: {"type":"log", "do_no":id},
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            },
+            columns: column,
+            lengthChange: false,
+            searching: false,
+            paging: false,
+            ordering: false,
+            scrollY: "200px",
+            scrollCollapse: true,
+            fixedHeader:true,
+        });
+        modalAction('#do-modal-log').then(resolve => {
+            resolve.on('shown.bs.modal', function () {
+                tbl_log.columns.adjust().draw();
+            });
+        });
+    });
     
     var tbl_do_setting = $('#do-setting-datatables').DataTable(obj_tbl);
     $('#do-btn-modal-table-setting').on('click', function () {
@@ -912,9 +951,7 @@ $(document).ready(function () {
                     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
                     {data: 'data', name: 'data'},
                     {data: 'title', name: 'title'},
-                    {data: 'status', name: 'status'},
-                    // {data: 'status_ori', name: 'status_ori'},
-                    // {data: 'idx', name: 'idx'},
+                    {data: 'status', name: 'status'}
                 ];
                 tbl_do_setting = $('#do-setting-datatables').DataTable({
                     processing: false,
@@ -934,7 +971,6 @@ $(document).ready(function () {
                     scrollCollapse: true,
                     fixedHeader: true,
                 });
-                // tbl_do_setting.columns([4,5]).visible(false);
             });
         });
     });
@@ -966,7 +1002,7 @@ $(document).ready(function () {
             (response) => {
                 response = response.responseJSON;
                 Swal.fire({
-                    title: 'Success!',
+                    title: 'Notification',
                     text: response.message,
                     icon: 'success'
                 }).then(() => {

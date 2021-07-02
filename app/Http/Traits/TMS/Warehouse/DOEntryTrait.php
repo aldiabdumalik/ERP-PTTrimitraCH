@@ -281,8 +281,8 @@ trait DoEntryTrait {
     {
         $query = 
             DB::connection('db_tbs')
-            ->table('entry_cl_log')
-            ->where('do_no', $request->cl_no)
+            ->table('entry_do_tbl_log')
+            ->where('do_no', $request->do_no)
             ->get();
         return $query;
     }
