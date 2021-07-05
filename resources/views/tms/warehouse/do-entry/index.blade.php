@@ -824,6 +824,12 @@ $(document).ready(function () {
         });
     });
 
+    $(document).off('click', '.do-act-report').on('click', '.do-act-report', function () {
+        var encrypt = btoa(`${$(this).data('dono')}`);
+        var url = "{{route('tms.warehouse.do_entry.print')}}?print=" + encrypt;
+        window.open(url, '_blank');
+    });
+
     $(document).on('submit', '#do-form-create', () => {
         var form_data = {
             "do_no": $('#do-create-no').val(),

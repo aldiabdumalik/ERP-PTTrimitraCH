@@ -378,6 +378,9 @@ class ClaimEntryController extends Controller
             $log = $this->createLOG($cl_no, 'PRINT', $request->note);
             $pdf = PDF::loadView('tms.warehouse.claim-entry.report.report', compact('data'))->setPaper('a4', 'potrait');
             return $pdf->stream();
+        }else{
+            $request->session()->flash('message', 'Data tidak ditemukan!');
+            return Redirect::back();
         }
     }
 
