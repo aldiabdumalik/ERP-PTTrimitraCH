@@ -1029,7 +1029,10 @@ $(document).ready(function () {
     });
 
     function ajax(route, method, params=null, callback) {
-        $.ajax({
+        $('body').loading({
+            message: "Wait a minute..."
+        });
+        return $.ajax({
             url: route,
             method: method,
             dataType: "JSON",
@@ -1044,14 +1047,19 @@ $(document).ready(function () {
                     text: response.responseJSON.message,
                     icon: 'error'
                 })
+                $('body').loading('stop');
             },
             complete: function (response){
                 callback(response);
+                $('body').loading('stop');
             }
         });
     }
     function ajaxWithPromise(params) {
         return new Promise((resolve, reject) => {
+            $('body').loading({
+                message: "Wait a minute..."
+            });
             $.ajax({
                 url: params.route,
                 method: params.method,
@@ -1067,10 +1075,14 @@ $(document).ready(function () {
                         text: response.responseJSON.message,
                         icon: 'error'
                     });
+                    $('body').loading('stop');
                     reject(response);
+
                 },
                 complete: function (response){
+                    $('body').loading('stop'); 
                     resolve(response);
+
                 }
             });
         });
@@ -1145,7 +1157,8 @@ $(document).ready(function () {
 @push('js')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ asset('/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/jqloading/jquery.loading.min.js') }}"></script>
 <script>
     $('.this-datepicker').datepicker({
         format: 'dd/mm/yyyy',

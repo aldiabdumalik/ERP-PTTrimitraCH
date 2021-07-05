@@ -155,13 +155,13 @@ trait DoEntryTrait {
             ->first();
         if (isset($query)) {
             if ($query->voided_date != null) {
-                $voided = $this->carbonCreateFormFormat($query->voided_date);
+                $voided = $this->carbonCreateFormFormat($query->voided_date, 'Y-m-d H:i:s');
                 $message = "DO has been voided at $voided, by $query->voided_by";
             }elseif ($query->finished_date != null) {
-                $finished = $this->carbonCreateFormFormat($query->finished_date);
+                $finished = $this->carbonCreateFormFormat($query->finished_date, 'Y-m-d H:i:s');
                 $message = "DO has been finished at $finished, by $query->finished_by";
             }elseif ($query->posted_date != null) {
-                $posted = $this->carbonCreateFormFormat($query->posted_date);
+                $posted = $this->carbonCreateFormFormat($query->posted_date, 'Y-m-d H:i:s');
                 $message = "DO has been posted at $posted, by $query->posted_by";
             }
         }else{
