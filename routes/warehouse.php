@@ -117,3 +117,7 @@ Route::post('/warehouse/do_entry/unpost', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryUnpost', 
     'as' => 'tms.warehouse.do_entry.unpost'
 ]);
+Route::get('/warehouse/do_entry/print', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryPrint', 
+    'as' => 'tms.warehouse.do_entry.print'
+]);

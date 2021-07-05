@@ -10,7 +10,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Milon\Barcode\Facades\DNS1DFacade as DNS1D;
 use Yajra\DataTables\Facades\DataTables;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class DoEntryController extends Controller
 {
@@ -280,6 +282,19 @@ class DoEntryController extends Controller
             }
         }
         return $this->_Error('Data or Method Not Found!');
+    }
+
+    public function DoEntryPrint(Request $request)
+    {
+        $data = (object) [];
+        $data->do_no = '21040033';
+        $data = $this->headerToolsViewDo($data);
+        $header = $data['header'];
+        $items = $data['items'];
+        $to_barcode = (($data['header']->ref_no != null) ? $data['header']->ref_no : 0);
+        $barcode = DNS1D::getBarcodePNG($to_barcode, 'C39', 1, 22);
+        $pdf = PDF::loadView('tms.warehouse.do-entry.report.report', compact('barcode', 'header', 'items'))->setPaper('a4', 'potrait');
+        return $pdf->stream();
     }
 
     public function DoEntryHeader(Request $request)
