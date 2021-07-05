@@ -445,6 +445,7 @@ trait DoEntryTrait {
             'db_tbs.entry_do_tbl.invoice',
             'db_tbs.entry_do_tbl.created_by as user',
             'db_tbs.entry_do_tbl.sj_type',
+            'db_tbs.entry_do_tbl.rr_no',
             DB::raw('
                 date(db_tbs.entry_do_tbl.printed_date) as printed,
                 date(db_tbs.entry_do_tbl.posted_date) as posted,

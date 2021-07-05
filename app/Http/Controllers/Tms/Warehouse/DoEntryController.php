@@ -219,7 +219,8 @@ class DoEntryController extends Controller
         if (isset($query)) {
             $posted = DoEntry::where('do_no', $request->do_no)->update([
                 'posted_date' => date('Y-m-d H:i:s'),
-                'posted_by' => Auth::user()->FullName
+                'posted_by' => Auth::user()->FullName,
+                'rr_no' => $request->rr_no
             ]);
             $log = $this->createLOG($request->do_no, 'POST');
             if ($posted) {
@@ -255,7 +256,8 @@ class DoEntryController extends Controller
         if (isset($query)) {
             $posted = DoEntry::where('do_no', $request->do_no)->update([
                 'posted_date' => null,
-                'posted_by' => null
+                'posted_by' => null,
+                'rr_no' => null
             ]);
             $log = $this->createLOG($request->do_no, 'UNPOST', $request->note);
             if ($posted) {

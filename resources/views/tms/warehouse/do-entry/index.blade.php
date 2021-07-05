@@ -557,8 +557,8 @@ $(document).ready(function () {
             $('#do-create-posted').val(posted);
             $('#do-create-finished').val(finished);
             $('#do-create-inv').val(header.invoice);
-            // $('#do-create-rgno').val(header.);
-            // $('#do-create-rrno').val(header.);
+            $('#do-create-rrno').val(header.rr_no);
+            $('#do-create-rgno').val(header.rg_no);
 
             var no = 1;
             $.each(items, function (i, item) {
@@ -625,8 +625,8 @@ $(document).ready(function () {
                         $('#do-create-posted').val(posted);
                         $('#do-create-finished').val(finished);
                         $('#do-create-inv').val(header.invoice);
-                        // $('#do-create-rgno').val(header.);
-                        // $('#do-create-rrno').val(header.);
+                        $('#do-create-rrno').val(header.rr_no);
+                        $('#do-create-rgno').val(header.rg_no);
 
                         var no = 1;
                         $.each(items, function (i, item) {
@@ -754,16 +754,24 @@ $(document).ready(function () {
             response = response.responseJSON;
             if (response.message == null) {
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Post DO No." + id + " Now?",
+                    // title: 'Are you sure?',
+                    title: "Post DO No." + id + " Now?",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, post it!'
+                    confirmButtonText: 'Yes, post it!',
+                    input: 'text',
+                    inputPlaceholder: 'Type your RR No. here...',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to write RR No!'
+                        }
+                    }
                 }).then(answer => {
-                    if (answer.value == true) {
-                        ajax("{{route('tms.warehouse.do_entry.post')}}", "POST", {"do_no": id}, (response) => {
+                    if (answer.value != "" && answer.value != undefined) {
+                        var rr_no = answer.value;
+                        ajax("{{route('tms.warehouse.do_entry.post')}}", "POST", {"do_no": id, "rr_no": rr_no}, (response) => {
                             response = response.responseJSON;
                             if (response.status == true) {
                                 showNotif({
