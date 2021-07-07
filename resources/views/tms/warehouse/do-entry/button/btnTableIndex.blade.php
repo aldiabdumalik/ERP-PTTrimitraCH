@@ -22,6 +22,10 @@
         <a class="dropdown-item text-danger do-act-unfinished" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-times"></i> Unfinished</a>
         @endif
 
+        @if ($data->posted_date != NULL)
+        <a class="dropdown-item text-success do-act-revise" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-reply"></i> Revise</a>
+        @endif
+
         <a class="dropdown-item text-primary do-act-report" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-print"></i> Print</a>
         <a class="dropdown-item text-primary do-act-log" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-share"></i> Log</a>
     </div>

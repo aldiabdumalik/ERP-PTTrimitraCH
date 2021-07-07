@@ -121,3 +121,7 @@ Route::get('/warehouse/do_entry/print', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryPrint', 
     'as' => 'tms.warehouse.do_entry.print'
 ]);
+Route::post('/warehouse/do_entry/revise', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryRevise', 
+    'as' => 'tms.warehouse.do_entry.revise'
+]);

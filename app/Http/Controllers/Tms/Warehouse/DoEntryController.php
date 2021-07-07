@@ -310,6 +310,63 @@ class DoEntryController extends Controller
         }
     }
 
+    public function DoEntryRevise(Request $request)
+    {
+        if (!isset($request->posted)) {
+            return $this->_Error('Can\'t revised. it has not been posted');
+        }
+        $do_no = $request->do_no;
+        $voided = DoEntry::where('do_no', $do_no)->update([
+            'voided_date' => date('Y-m-d H:i:s'),
+            'voided_by' => Auth::user()->FullName,
+            'posted_date' => null,
+            'posted_by' => null
+        ]);
+        $log = $this->createLOG($do_no, 'VOID');
+
+        $do_new = $this->headerToolsDoEntryNo($request);
+
+        $items = $request->items;
+        $data = [];
+        for ($i=0; $i < count($items); $i++) { 
+            $data[] = [
+                'do_no' => $do_new,
+                'row_no' => $items[$i][0],
+                'item_code' => $items[$i][1],
+                'quantity' => $items[$i][4],
+                'unit' => $items[$i][3],
+                'so_no' => $request->sso,
+                'sso_no' => $request->so,
+                'ref_no' => $request->refno,
+                'po_no' => $request->pono,
+                'dn_no' => $request->dnno,
+                'invoice' => $request->inv,
+                'period' => $request->priod,
+                'cust_id' => $request->customercode,
+                'do_address' => $request->customerdoaddr,
+                'cust_name' => $request->customername,
+                'source' => "",
+                'id_driver' => "",
+                'remark' => $request->remark,
+                'branch' => $request->branch,
+                'warehouse' => $request->warehouse,
+                'sj_type' => $request->sj_type,
+                'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
+                'direct_date' => null,
+                'do_trans' => 0,
+                'created_by' => Auth::user()->FullName,
+                'created_date' => date('Y-m-d H:i:s')
+            ];
+        }
+        try {
+            $query = DoEntry::insert($data);
+            $log = $this->createLOG($do_new, "REVISE FROM DO No. $do_no");
+            return $this->_Success("Revise successfully! New DO No. $do_new", 201);
+        } catch (Exception $e) {
+            return $this->_Error('failed to Revise, please check your form again', 401, $e->getMessage());
+        }
+    }
+
     public function DoEntryHeader(Request $request)
     {
         switch ($request->type) {

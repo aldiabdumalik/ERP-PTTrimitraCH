@@ -191,6 +191,7 @@ $(document).ready(function () {
         tbl_additem.clear().draw(false);
         hideShow('#item-button-div', false);
         hideShow('#do-btn-create-submit', false);
+        hideShow('#do-btn-revise', true);
         $('#do-form-create input').not('.readonly-first').removeAttr('readonly');
         $('#do-form-create select').prop('disabled', false);
         $('#do-btn-create-submit').text('Simpan');
@@ -518,6 +519,7 @@ $(document).ready(function () {
         var id = $(this).data('dono');
         hideShow('#item-button-div', true);
         hideShow('#do-btn-create-submit', true);
+        hideShow('#do-btn-revise', true);
         $('#do-form-create input').prop('readonly', true);
         $('#do-form-create select').prop('disabled', true);
         ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "view_do": true}, (response) => {
@@ -838,6 +840,155 @@ $(document).ready(function () {
         window.open(url, '_blank');
     });
 
+    $(document).off('click', '.do-act-revise').on('click', '.do-act-revise', function () {
+        var id = $(this).data('dono');
+        hideShow('#item-button-div', true);
+        hideShow('#do-btn-create-submit', true);
+        $('#do-form-create input').not('#do-create-date').prop('readonly', true);
+        $('#do-form-create select').prop('disabled', true);
+        ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "view_do": true}, (response) => {
+            hideShow('#do-btn-revise', false);
+            response = response.responseJSON;
+            var header = response.content.header;
+            var items = response.content.items;
+
+            var date = date_convert(header.delivery_date);
+            var voided = date_convert(header.voided);
+            var posted = date_convert(header.posted);
+            var finished = date_convert(header.finished);
+            var printed = date_convert(header.printed);
+
+            $('#do-create-no').val(header.do_no);
+            $('#do-create-branch').val(header.branch);
+            $('#do-create-warehouse').val(header.warehouse);
+            $('#do-create-direct').val(((header.sj_type != null) ? header.sj_type : 'Regular'));
+            $('#do-create-priod').val(header.period);
+            $('#do-create-date').val(date);
+            $('#do-create-sso').val(header.sso_no);
+            $('#do-create-so').val(header.so_no);
+            $('#do-create-pono').val(header.po_no);
+            $('#do-create-dnno').val(header.dn_no);
+            $('#do-create-refno').val(header.ref_no);
+            $('#do-create-remark').val(header.remark);
+            $('#do-create-customercode').val(header.cust_id);
+            $('#do-create-customerdoaddr').val(header.id_do);
+            $('#do-create-customername').val(header.cust_name);
+            $('#do-create-customergroup').val(10);
+            $('#do-create-customeraddr1').val(header.address1);
+            $('#do-create-customeraddr2').val(header.address2);
+            $('#do-create-customeraddr3').val(header.address3);
+            $('#do-create-customeraddr4').val(header.address4);
+            $('#do-create-user').val(header.user);
+            $('#do-create-printed').val(printed);
+            $('#do-create-voided').val(voided);
+            $('#do-create-posted').val(posted);
+            $('#do-create-finished').val(finished);
+            $('#do-create-inv').val(header.invoice);
+            $('#do-create-rrno').val(header.rr_no);
+            $('#do-create-rgno').val(header.rg_no);
+
+            window.localStorage.setItem('date-old', date);
+
+            var no = 1;
+            $.each(items, function (i, item) {
+                tbl_additem.row.add([
+                    no,
+                    item['item_code'],
+                    item['part_no'],
+                    item['unit'],
+                    item['quantity'],
+                    0,
+                    0,
+                    item['sso_no'],
+                    item['part_name']
+                ]).draw();
+                no++;
+            });
+
+            modalAction('#do-modal-create').then(resolve => {
+                resolve.on('shown.bs.modal', function () {
+                    tbl_additem.columns.adjust().draw();
+                });
+            })
+        });
+    });
+    $(document).on('click', '#do-btn-revise', function () {
+        if ($('#do-create-date').val() == "") {
+            Swal.fire({
+                title: 'Warning',
+                text: 'Date input cannot be empty!',
+                icon: 'warning'
+            });
+        }else{
+            if ($('#do-create-date').val() == window.localStorage.getItem('date-old')) {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Input date cannot be the same as the previous date!',
+                    icon: 'warning'
+                });
+            }else{
+                var form_data = {
+                    "do_no": $('#do-create-no').val(),
+                    "branch": $('#do-create-branch').val(),
+                    "warehouse": $('#do-create-warehouse').val(),
+                    "sj_type": $('#do-create-direct').val(),
+                    "priod": $('#do-create-priod').val(),
+                    "date": $('#do-create-date').val(),
+                    "sso": $('#do-create-sso').val(),
+                    "so": $('#do-create-so').val(),
+                    "pono": $('#do-create-pono').val(),
+                    "dnno": $('#do-create-dnno').val(),
+                    "refno": $('#do-create-refno').val(),
+                    "delivery": $('#do-create-delivery').val(),
+                    "delivery2": $('#do-create-delivery2').val(),
+                    "remark": $('#do-create-remark').val(),
+                    "customercode": $('#do-create-customercode').val(),
+                    "customerdoaddr": $('#do-create-customerdoaddr').val(),
+                    "customername": $('#do-create-customername').val(),
+                    "customergroup": $('#do-create-customergroup').val(),
+                    "customeraddr1": $('#do-create-customeraddr1').val(),
+                    "customeraddr2": $('#do-create-customeraddr2').val(),
+                    "customeraddr3": $('#do-create-customeraddr3').val(),
+                    "customeraddr4": $('#do-create-customeraddr4').val(),
+                    "user": $('#do-create-user').val(),
+                    "printed": $('#do-create-printed').val(),
+                    "voided": $('#do-create-voided').val(),
+                    "posted": $('#do-create-posted').val(),
+                    "finished": $('#do-create-finished').val(),
+                    "inv": $('#do-create-inv').val(),
+                    "rgno": $('#do-create-rgno').val(),
+                    "rrno": $('#do-create-rrno').val(),
+                    "items": tbl_additem.rows().data().toArray()
+                };
+                var post = {
+                    "route": "{{route('tms.warehouse.do_entry.revise')}}",
+                    "method": "POST",
+                    "data": form_data
+                };
+                $('#do-btn-revise').prop('disabled', true);
+                ajaxWithPromise(post).then(resolve => {
+                    $('#do-btn-revise').prop('disabled', false);
+                    var response = resolve;
+                    modalAction('#do-modal-create', 'hide');
+                    if (response.status == true) {
+                        Swal.fire({
+                            title: 'Notification',
+                            text: response.message,
+                            icon: 'success'
+                        }).then(answer => {
+                            get_index.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    }
+                }, reject => {
+                    var response = reject;
+                    $('#do-btn-revise').prop('disabled', false);
+                });
+            }
+        }
+    });
+
     $(document).on('submit', '#do-form-create', () => {
         var form_data = {
             "do_no": $('#do-create-no').val(),
@@ -902,9 +1053,9 @@ $(document).ready(function () {
                             'message': response.message,
                             'icon': 'success'
                         }).then(resolve => {
-                            modalAction('#do-create-modal', 'hide').then(resolve => {
+                            modalAction('#do-modal-create', 'hide').then(resolve => {
                                 get_index.then(resolve => {
-                                    resolve.ajax().reload();
+                                    resolve.ajax.reload();
                                 });
                             });
                         });
@@ -1030,7 +1181,7 @@ $(document).ready(function () {
 
     function ajax(route, method, params=null, callback) {
         $('body').loading({
-            message: "Wait a minute..."
+            message: "wait for a moment..."
         });
         return $.ajax({
             url: route,
@@ -1058,7 +1209,7 @@ $(document).ready(function () {
     function ajaxWithPromise(params) {
         return new Promise((resolve, reject) => {
             $('body').loading({
-                message: "Wait a minute..."
+                message: "wait for a moment..."
             });
             $.ajax({
                 url: params.route,

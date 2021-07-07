@@ -37,6 +37,7 @@
                 <div class="modal-footer">
                     <button type="button" id="do-btn-create-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                     <button type="submit" id="do-btn-create-submit" class="btn btn-info">Simpan</button>
+                    <button type="button" id="do-btn-revise" class="btn btn-info d-none">Revise</button>
                 </div>
             </div>
         </form>
