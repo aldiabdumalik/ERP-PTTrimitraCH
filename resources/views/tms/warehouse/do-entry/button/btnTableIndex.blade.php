@@ -9,17 +9,19 @@
         @if ($data->posted_date == NULL)
         <a class="dropdown-item text-success do-act-posted" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Posted</a>
         @else
-        <a class="dropdown-item text-danger do-act-unposted" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Unposted</a>
+        <a class="dropdown-item text-danger do-act-unposted" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Unpost</a>
         @endif
 
         @if ($data->voided_date == NULL)
         <a class="dropdown-item text-danger do-act-voided" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-ban"></i> Void</a>
         @else
-        <a class="dropdown-item text-danger do-act-unvoided" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-ban"></i> Unvoided</a>
+        <a class="dropdown-item text-danger do-act-unvoided" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-ban"></i> Unvoid</a>
         @endif
+
+        <a class="dropdown-item text-success do-act-finished" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Finish</a>
         
         @if ($data->finished_date != NULL)
-        <a class="dropdown-item text-danger do-act-unfinished" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-times"></i> Unfinished</a>
+        <a class="dropdown-item text-danger do-act-unfinished" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-times"></i> Unfinish</a>
         @endif
 
         @if ($data->posted_date != NULL)

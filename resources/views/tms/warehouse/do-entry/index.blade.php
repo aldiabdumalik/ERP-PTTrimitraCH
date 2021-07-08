@@ -834,6 +834,70 @@ $(document).ready(function () {
         });
     });
 
+    $(document).off('click', '.do-act-finished').on('click', '.do-act-finished', function () {
+        var id = $(this).data('dono');
+        Swal.fire({
+            title: `Do you want to finish DO no. ${id}, now ?`,
+            showCancelButton: true,
+            confirmButtonText: `Yes, finish it!`,
+            confirmButtonColor: '#DC3545',
+            icon: 'warning',
+        }).then((answer) => {
+            if (answer.value != "" && answer.value != undefined) {
+                var note = answer.value;
+                ajax("{{route('tms.warehouse.do_entry.finish')}}", "POST", {"do_no": id}, (response) => {
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        showNotif({
+                            'title': 'Notification',
+                            'message': response.message,
+                            'icon': 'success'
+                        }).then(resolve => {
+                            get_index.then(resolve => {
+                                resolve.ajax.reload();
+                            })
+                        });
+                    }
+                });
+            }
+        });
+    });
+    $(document).off('click', '.do-act-unfinished').on('click', '.do-act-unfinished', function () {
+        var id = $(this).data('dono');
+        Swal.fire({
+            title: `Do you want to Unfinish DO no. ${id}, now ?`,
+            input: 'text',
+            inputPlaceholder: 'Type your note here...',
+            showCancelButton: true,
+            confirmButtonText: `Yes, unfinish it!`,
+            confirmButtonColor: '#DC3545',
+            icon: 'warning',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        }).then((answer) => {
+            if (answer.value != "" && answer.value != undefined) {
+                var note = answer.value;
+                ajax("{{route('tms.warehouse.do_entry.unfinish')}}", "POST", {"do_no": id, "note": note}, (response) => {
+                    response = response.responseJSON;
+                    if (response.status == true) {
+                        showNotif({
+                            'title': 'Notification',
+                            'message': response.message,
+                            'icon': 'success'
+                        }).then(resolve => {
+                            get_index.then(resolve => {
+                                resolve.ajax.reload();
+                            })
+                        });
+                    }
+                });
+            }
+        });
+    });
+
     $(document).off('click', '.do-act-report').on('click', '.do-act-report', function () {
         var encrypt = btoa(`${$(this).data('dono')}`);
         var url = "{{route('tms.warehouse.do_entry.print')}}?print=" + encrypt;

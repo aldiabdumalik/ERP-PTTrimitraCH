@@ -367,6 +367,37 @@ class DoEntryController extends Controller
         }
     }
 
+    public function DoEntryFinish(Request $request)
+    {
+        $check = DoEntry::where('do_no', $request->do_no)->first();
+        if ($check->posted_date == null) {
+            return $this->_Error('Can\'t finished. it has not been posted');
+        }else{
+            $update = DoEntry::where('do_no', $request->do_no)
+                ->update([
+                    'finished_date' => date('Y-m-d H:i:s'),
+                    'finished_by' => Auth::user()->FullName,
+                ]);
+            $log = $this->createLOG($request->do_no, "FINISH");
+            return $this->_Success('DO entry has been finished');
+        }
+    }
+
+    public function DoEntryUnfinish(Request $request)
+    {
+        $check = DoEntry::where('do_no', $request->do_no)->first();
+        if ($check->finished_date == null) {
+            return $this->_Error('Can\'t unfinished. it has not been finished');
+        }
+        $update = DoEntry::where('do_no', $request->do_no)
+            ->update([
+                'finished_date' => null,
+                'finished_by' => null,
+            ]);
+        $log = $this->createLOG($request->do_no, "UNFINISH", $request->note);
+        return $this->_Success('DO entry has been unfinished');
+    }
+
     public function DoEntryHeader(Request $request)
     {
         switch ($request->type) {
