@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Delivery Order Entry</h4>
+                <h4 class="modal-title">DO Items</h4>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">

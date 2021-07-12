@@ -29,6 +29,7 @@ class AppUser
             if($userRole->count() >= 1){
                 $roleId     = $userRole->role_id;
             } else {
+                session(['url.intended' => url()->current()]);
                 return redirect()->route('login');
             }
                 
@@ -98,6 +99,7 @@ class AppUser
 
             
         }
+        session(['url.intended' => url()->current()]);
         return redirect()->route('login');
     }
 
