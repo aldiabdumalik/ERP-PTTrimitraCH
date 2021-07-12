@@ -273,6 +273,9 @@ class DoEntryController extends Controller
     {
         $query = DoEntry::where('do_no', $request->do_no)->first();
         if (isset($query)) {
+            if ($query->revised_date != null) {
+                return $this->_Error("DO No. $request->do_no failed to unvoid, because it has been revised to DO No. $query->revised_to!");
+            }
             $voided = DoEntry::where('do_no', $request->do_no)->update([
                 'voided_date' => null,
                 'voided_by' => null
@@ -316,15 +319,19 @@ class DoEntryController extends Controller
             return $this->_Error('Can\'t revised. it has not been posted');
         }
         $do_no = $request->do_no;
+        $do_new = $this->headerToolsDoEntryNo($request);
         $voided = DoEntry::where('do_no', $do_no)->update([
             'voided_date' => date('Y-m-d H:i:s'),
             'voided_by' => Auth::user()->FullName,
+            'finished_date' => null,
+            'finished_by' => null,
             'posted_date' => null,
-            'posted_by' => null
+            'posted_by' => null,
+            'revised_date' => date('Y-m-d H:i:s'),
+            'revised_by' => Auth::user()->FullName,
+            'revised_to' => $do_new,
         ]);
-        $log = $this->createLOG($do_no, 'VOID');
-
-        $do_new = $this->headerToolsDoEntryNo($request);
+        $log = $this->createLOG($do_no, 'VOID', 'VOIDED BY SYSTEM');
 
         $items = $request->items;
         $data = [];
@@ -360,7 +367,7 @@ class DoEntryController extends Controller
         }
         try {
             $query = DoEntry::insert($data);
-            $log = $this->createLOG($do_new, "REVISE FROM DO No. $do_no");
+            $log = $this->createLOG($do_new, "ADD", "REVISE FROM DO No. $do_no");
             return $this->_Success("Revise successfully! New DO No. $do_new", 201);
         } catch (Exception $e) {
             return $this->_Error('failed to Revise, please check your form again', 401, $e->getMessage());

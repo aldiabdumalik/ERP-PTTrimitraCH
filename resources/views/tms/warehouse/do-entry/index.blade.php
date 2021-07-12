@@ -1258,7 +1258,7 @@ $(document).ready(function () {
             data: params,
             error: function(response, status, x){
                 Swal.fire({
-                    title: 'Error!',
+                    title: 'Access Denied',
                     text: response.responseJSON.message,
                     icon: 'error'
                 })
@@ -1286,7 +1286,7 @@ $(document).ready(function () {
                 data: params.data,
                 error: function(response, status, x){
                     Swal.fire({
-                        title: 'Error!',
+                        title: 'Access Denied',
                         text: response.responseJSON.message,
                         icon: 'error'
                     });
