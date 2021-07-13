@@ -1310,7 +1310,7 @@ $(document).ready(function(){
         }
     });
 
-    const dataTables = (route, method, params=null, columns) => {
+    function dataTables(route, method, params=null, columns) {
         const dtbl = {
             processing: true,
             serverSide: true,
@@ -1327,7 +1327,7 @@ $(document).ready(function(){
         };
         return dtbl;
     }
-    const ajax = (route, type, params=null, callback) => {
+    function ajax(route, type, params=null, callback) {
         $.ajax({
             url: route,
             type: type,
@@ -1350,11 +1350,12 @@ $(document).ready(function(){
             }
         });
     }
-    const modalAction = (elementId=null, action='show') => {
+
+    function modalAction(elementId=null, action='show') {
         $(elementId).modal(action);
     }
 
-    const hideShow = (elelemt=null, hide=true) => {
+    function hideShow(elelemt=null, hide=true){
         if (hide == true) {
             $(elelemt).addClass('d-none');
         }else{
@@ -1362,7 +1363,7 @@ $(document).ready(function(){
         }
     }
 
-    const toRoman = (num) => {
+    function toRoman(num){
         var roman = {
             M: 1000,
             CM: 900,
