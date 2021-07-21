@@ -169,8 +169,8 @@ class DoEntryController extends Controller
         $items = $request->items;
         $data = [];
         $old_data = DoEntry::where('do_no', $request->do_no)->first();
-        $create_by = $old_data->create_by;
-        $create_date = $old_data->create_date;
+        $create_by = $old_data->created_by;
+        $create_date = $old_data->created_date;
         $old_data = DoEntry::where('do_no', $request->do_no)->delete();
         for ($i=0; $i < count($items); $i++) { 
             $data[] = [
@@ -198,8 +198,8 @@ class DoEntryController extends Controller
                 'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
                 'direct_date' => null,
                 'do_trans' => 0,
-                'create_by' => $create_by,
-                'create_date' => $create_date,
+                'created_by' => $create_by,
+                'created_date' => $create_date,
                 'update_by' => Auth::user()->FullName,
                 'update_date' => date('Y-m-d H:i:s')
             ];

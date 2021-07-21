@@ -1245,7 +1245,8 @@ $(document).ready(function () {
 
     function ajax(route, method, params=null, callback) {
         $('body').loading({
-            message: "wait for a moment..."
+            message: "wait for a moment...",
+            zIndex: 9999
         });
         return $.ajax({
             url: route,
@@ -1273,7 +1274,8 @@ $(document).ready(function () {
     function ajaxWithPromise(params) {
         return new Promise((resolve, reject) => {
             $('body').loading({
-                message: "wait for a moment..."
+                message: "wait for a moment...",
+                zIndex: 9999
             });
             $.ajax({
                 url: params.route,
