@@ -44,6 +44,9 @@
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="do-btn-modal-create">
                     <i class="ti-plus"></i>  Add New Data
                 </button>
+                <button type="button"  class="btn btn-primary btn-flat btn-sm" id="do-btn-modal-print">
+                    <i class="fa fa-print"></i>  Print
+                </button>
                 <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="do-btn-modal-table-setting">
                     <i class="fa fa-cogs"></i>
                 </button>
@@ -83,6 +86,7 @@
 @include('tms.warehouse.do-entry.modal.item.table_item')
 @include('tms.warehouse.do-entry.modal.item.add_item')
 @include('tms.warehouse.do-entry.modal.log.tableLog')
+@include('tms.warehouse.do-entry.modal.print.modalPrint')
 @endsection
 @section('script')
 <script>
@@ -902,6 +906,11 @@ $(document).ready(function () {
         var encrypt = btoa(`${$(this).data('dono')}`);
         var url = "{{route('tms.warehouse.do_entry.print')}}?print=" + encrypt;
         window.open(url, '_blank');
+        // modalAction('#do-modal-print');
+    });
+
+    $('#do-btn-modal-print').on('click', function () {
+        modalAction('#do-modal-print');
     });
 
     $(document).off('click', '.do-act-revise').on('click', '.do-act-revise', function () {

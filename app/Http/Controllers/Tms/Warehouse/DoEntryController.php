@@ -293,6 +293,7 @@ class DoEntryController extends Controller
     public function DoEntryPrint(Request $request)
     {
         if (isset($request->print) && $request->print != "") {
+            $type = 'blank';
             $data = (object) [];
             $data->do_no = base64_decode($request->print);
             $data = $this->headerToolsViewDo($data);
@@ -303,9 +304,17 @@ class DoEntryController extends Controller
                 return Redirect::back();
             }
             $to_barcode = (($data['header']->ref_no != null) ? $data['header']->ref_no : 0);
-            $barcode = DNS1D::getBarcodePNG($to_barcode, 'C39', 1, 22);
-            $log = $this->createLOG($header->do_no, 'PRINT');
-            $pdf = PDF::loadView('tms.warehouse.do-entry.report.report', compact('barcode', 'header', 'items'))->setPaper('a4', 'potrait');
+            $barcode = DNS1D::getBarcodePNG($to_barcode, 'C39', 2, 22);
+
+            $posted = DoEntry::where('do_no', $request->do_no)->update([
+                'posted_date' => date('Y-m-d H:i:s'),
+                'posted_by' => Auth::user()->FullName,
+                // 'rr_no' => $request->rr_no
+            ]);
+
+            // $log = $this->createLOG($header->do_no, 'PRINT');
+            // $log = $this->createLOG($request->do_no, 'POST');
+            $pdf = PDF::loadView('tms.warehouse.do-entry.report.report', compact('barcode', 'header', 'items', 'type'))->setPaper('a4', 'potrait');
             return $pdf->stream();
         }else{
             $request->session()->flash('message', 'Data tidak ditemukan!');
