@@ -306,7 +306,7 @@ class DoEntryController extends Controller
             $to_barcode = (($data['header']->ref_no != null) ? $data['header']->ref_no : 0);
             $barcode = DNS1D::getBarcodePNG($to_barcode, 'C39', 2, 22);
 
-            $posted = DoEntry::where('do_no', $request->do_no)->update([
+            $posted = DoEntry::where('do_no', $header->do_no)->update([
                 'posted_date' => date('Y-m-d H:i:s'),
                 'posted_by' => Auth::user()->FullName,
                 // 'rr_no' => $request->rr_no
