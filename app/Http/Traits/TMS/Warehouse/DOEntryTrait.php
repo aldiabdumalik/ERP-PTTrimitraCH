@@ -147,6 +147,33 @@ trait DoEntryTrait {
         return $data;
     }
 
+    protected function headerToolsDataForPrint($data)
+    {
+        $query = DoEntry::where('db_tbs.entry_do_tbl.do_no', '>=', $data->dari)
+            ->where('db_tbs.entry_do_tbl.do_no', '<=', $data->sampai)
+            ->leftJoin('db_tbs.item','item_code','=','db_tbs.item.itemcode')
+            ->leftJoin('db_tbs.sys_do_address', function($join) {
+                $join->on('db_tbs.entry_do_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
+                $join->on('db_tbs.entry_do_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+            })
+            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
+                $join->on('db_tbs.entry_do_tbl.sso_no','=','db_tbs.entry_sso_tbl.sso_header');
+                $join->on('db_tbs.entry_do_tbl.item_code','=','db_tbs.entry_sso_tbl.item_code');
+            })
+            ->leftJoin('db_tbs.entry_so_tbl',function($join){
+                $join->on('db_tbs.entry_do_tbl.so_no','=','db_tbs.entry_so_tbl.so_header');
+                $join->on('db_tbs.entry_do_tbl.item_code','=','db_tbs.entry_so_tbl.item_code');
+            })
+            ->select($this->columnOfDoView())
+            // ->groupBy('db_tbs.entry_do_tbl.do_no')
+            ->get();
+        // $data = [
+        //     'header' => $query->first(),
+        //     'items' => $query
+        // ];
+        return $query;
+    }
+
     protected function headerToolsCheckDO(Request $request)
     {
         $message = null;
@@ -331,6 +358,14 @@ trait DoEntryTrait {
                 'user' => Auth::user()->FullName,
                 'note' => ($note != null) ? $note : ""
             ]);
+        return $log;
+    }
+
+    protected function createLOGBatch($data)
+    {
+        $log = DB::connection('db_tbs')
+            ->table('entry_do_tbl_log')
+            ->insert($data);
         return $log;
     }
 

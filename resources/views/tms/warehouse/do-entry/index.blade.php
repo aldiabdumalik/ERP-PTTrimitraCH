@@ -903,15 +903,39 @@ $(document).ready(function () {
     });
 
     $(document).off('click', '.do-act-report').on('click', '.do-act-report', function () {
-        var encrypt = btoa(`${$(this).data('dono')}`);
-        var url = "{{route('tms.warehouse.do_entry.print')}}?print=" + encrypt;
-        window.open(url, '_blank');
-        // modalAction('#do-modal-print');
+        var id = $(this).data('dono');
+        modalAction('#do-modal-print').then(resolve => {
+            $('#do-print-dari').val(id);
+            $('#do-print-sampai').val(id);
+
+            $('#do-print-dari').prop('readonly', true);
+            $('#do-print-sampai').prop('readonly', true);
+        });
     });
 
     $('#do-btn-modal-print').on('click', function () {
-        modalAction('#do-modal-print');
+        modalAction('#do-modal-print').then(resolve => {
+            $('#do-btn-print-gas').on('click', function () {
+                if ($('#do-print-dari').val() == "" || $('#do-print-sampai').val() == "") {
+                    var dari = ($('#do-print-dari').val() == "") ? $('#do-print-dari').addClass('alert-danger') : $('#do-print-dari').removeClass('alert-danger')
+                    var sampai = ($('#do-print-sampai').val() == "") ? $('#do-print-sampai').addClass('alert-danger') : $('#do-print-sampai').removeClass('alert-danger')
+                }else{
+                    var dari = $('#do-print-dari').val();
+                    var sampai = $('#do-print-sampai').val();
+                    var type = $('#do-print-type').val();
+
+                    var encrypt = btoa(`${dari}&${sampai}&${type}`);
+
+                    var url = "{{route('tms.warehouse.do_entry.print')}}?params=" + encrypt;
+                    window.open(url, '_blank');
+                }
+            });
+        });
     });
+    $('#do-modal-print').on('hidden.bs.modal', function () {
+        $(this).find('input').val(null);
+        $(this).find('input').prop('readonly', false);
+    })
 
     $(document).off('click', '.do-act-revise').on('click', '.do-act-revise', function () {
         var id = $(this).data('dono');

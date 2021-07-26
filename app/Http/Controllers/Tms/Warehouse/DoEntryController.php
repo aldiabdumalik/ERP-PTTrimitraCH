@@ -292,29 +292,63 @@ class DoEntryController extends Controller
 
     public function DoEntryPrint(Request $request)
     {
-        if (isset($request->print) && $request->print != "") {
-            $type = 'blank';
+        if (isset($request->params) && $request->params != "") {
+            $decode = base64_decode($request->params);
+            $arr = explode('&', $decode);
+
             $data = (object) [];
-            $data->do_no = base64_decode($request->print);
-            $data = $this->headerToolsViewDo($data);
-            $header = $data['header'];
-            $items = $data['items'];
-            if ($items->isEmpty()) {
+            $data->dari = $arr[0];
+            $data->sampai = $arr[1];
+            $data->type = $arr[2];
+
+            $result = $this->headerToolsDataForPrint($data);
+
+            if ($result->isEmpty()) {
                 $request->session()->flash('message', 'Data tidak ditemukan!');
                 return Redirect::back();
             }
-            $to_barcode = (($data['header']->ref_no != null) ? $data['header']->ref_no : 0);
-            $barcode = DNS1D::getBarcodePNG($to_barcode, 'C39', 2, 22);
 
-            $posted = DoEntry::where('do_no', $header->do_no)->update([
-                'posted_date' => date('Y-m-d H:i:s'),
-                'posted_by' => Auth::user()->FullName,
-                // 'rr_no' => $request->rr_no
-            ]);
+            $groupItem = $result->groupBy('do_no');
+            $getKey = [];
+            $getValue = [];
+            foreach ($groupItem as $key => $v) {
+                $getKey[] = $key;
+                $getValue[] = $v;
+            }
 
-            // $log = $this->createLOG($header->do_no, 'PRINT');
-            // $log = $this->createLOG($request->do_no, 'POST');
-            $pdf = PDF::loadView('tms.warehouse.do-entry.report.report', compact('barcode', 'header', 'items', 'type'))->setPaper('a4', 'potrait');
+            $posted = DoEntry::where('do_no', '>=', $data->dari)
+                ->where('do_no', '<=', $data->sampai)
+                ->update([
+                    'posted_date' => date('Y-m-d H:i:s'),
+                    'posted_by' => Auth::user()->FullName,
+                    // 'rr_no' => $request->rr_no
+                ]);
+            $log_print = [];
+            $log_post = [];
+            for ($i=0; $i < count($getKey); $i++) { 
+                $log_print[] = [
+                    'do_no' => $getKey[$i],
+                    'date_log' => date('Y-m-d'),
+                    'time_log' => date('H:i:s'),
+                    'status_log' => 'PRINT',
+                    'user' => Auth::user()->FullName,
+                    'note' => null
+                ];
+
+                $log_post[] = [
+                    'do_no' => $getKey[$i],
+                    'date_log' => date('Y-m-d'),
+                    'time_log' => date('H:i:s'),
+                    'status_log' => 'POST',
+                    'user' => Auth::user()->FullName,
+                    'note' => null
+                ];
+            }
+
+            $insert_log_print = $this->createLOGBatch($log_print);
+            $insert_log_post = $this->createLOGBatch($log_post);
+
+            $pdf = PDF::loadView('tms.warehouse.do-entry.report.report', compact('data', 'groupItem', 'getKey'))->setPaper('a4', 'potrait');
             return $pdf->stream();
         }else{
             $request->session()->flash('message', 'Data tidak ditemukan!');

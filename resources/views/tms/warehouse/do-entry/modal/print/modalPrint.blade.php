@@ -9,6 +9,37 @@
                     <div class="col-12">
                         <div class="form-row align-items-center mb-1">
                             <div class="col-2">
+                                <label for="do-print-do">DO No.</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-row align-items-center mb-1">
+                            <div class="col-6">
+                                <div class="form-row align-items-center mb-1">
+                                    <div class="col-4">
+                                        <label for="do-print-dari">Dari</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" name="do-print-dari" id="do-print-dari" class="form-control form-control-sm" autocomplete="off" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-row align-items-center mb-1">
+                                    <div class="col-4">
+                                        <label for="do-print-sampai">Sampai</label>
+                                    </div>
+                                    <div class="col-8">
+                                        <input type="text" name="do-print-sampai" id="do-print-sampai" class="form-control form-control-sm" autocomplete="off" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-row align-items-center mb-1">
+                            <div class="col-2">
                                 <label for="do-print-type">Template</label>
                             </div>
                             <div class="col-10">
