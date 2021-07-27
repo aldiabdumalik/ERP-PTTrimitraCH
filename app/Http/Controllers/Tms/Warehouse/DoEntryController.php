@@ -323,6 +323,7 @@ class DoEntryController extends Controller
 
             $posted = DoEntry::where('do_no', '>=', $data->dari)
                 ->where('do_no', '<=', $data->sampai)
+                ->where('voided_date', '=', null)
                 ->update([
                     'posted_date' => date('Y-m-d H:i:s'),
                     'posted_by' => Auth::user()->FullName,
