@@ -14,11 +14,11 @@
         -webkit-appearance: none !important; 
         margin: 0 !important; 
     }
-    /* input[readonly] {
-        background-color: #fff !important;
+    input[readonly] {
+        /* background-color: #fff !important; */
         cursor: not-allowed;
         pointer-events: all !important;
-    } */
+    }
     .row.no-gutters {
         margin-right: 0;
         margin-left: 0;
