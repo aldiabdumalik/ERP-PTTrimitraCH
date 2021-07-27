@@ -87,6 +87,7 @@
 @include('tms.warehouse.do-entry.modal.item.add_item')
 @include('tms.warehouse.do-entry.modal.log.tableLog')
 @include('tms.warehouse.do-entry.modal.print.modalPrint')
+@include('tms.warehouse.do-entry.modal.print.modalPrintDo')
 @endsection
 @section('script')
 <script>
@@ -935,7 +936,77 @@ $(document).ready(function () {
     $('#do-modal-print').on('hidden.bs.modal', function () {
         $(this).find('input').val(null);
         $(this).find('input').prop('readonly', false);
-    })
+    });
+    var tbl_do_print;
+    $(document).on('keypress', '#do-print-dari', function (e) {
+        if(e.which == 13) {
+            modalAction('#do-modal-print-dodata').then(resolve => {
+                $('#do-print-dodata-where').val('dari');
+                var params = {"type": "dodataforprint"}
+                tbl_do_print = $('#do-print-dodata-datatables').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ordering: false,
+                    ajax: {
+                        url: "{{ route('tms.warehouse.do_entry.header_tools') }}",
+                        method: 'POST',
+                        data: params,
+                        headers: token_header
+                    },
+                    columns: [
+                        {data: 'do_no', name: 'do_no'},
+                        {data: 'delivery_date', name: 'delivery_date'},
+                        {data: 'po_no', name: 'po_no'},
+                        {data: 'cust_id', name: 'cust_id'},
+                    ],
+                });
+            });
+        }
+    });
+    $(document).on('keypress', '#do-print-sampai', function (e) {
+        if(e.which == 13) {
+            if ($('#do-print-dari').val() !== "") {
+                modalAction('#do-modal-print-dodata').then(resolve => {
+                    $('#do-print-dodata-where').val('sampai');
+                    var params = {"type": "dodataforprint", "dari": $('#do-print-dari').val()}
+                    tbl_do_print = $('#do-print-dodata-datatables').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ordering: false,
+                        ajax: {
+                            url: "{{ route('tms.warehouse.do_entry.header_tools') }}",
+                            method: 'POST',
+                            data: params,
+                            headers: token_header
+                        },
+                        columns: [
+                            {data: 'do_no', name: 'do_no'},
+                            {data: 'delivery_date', name: 'delivery_date'},
+                            {data: 'po_no', name: 'po_no'},
+                            {data: 'cust_id', name: 'cust_id'},
+                        ],
+                    });
+                });
+            }
+        }
+    });
+    $(document).off('click', 'tr', '#do-print-dodata-datatables').on('click', 'tr', '#do-print-dodata-datatables', function () {
+        var data = tbl_do_print.row(this).data();
+        modalAction('#do-modal-print-dodata', 'hide').then((resolve) => {
+            if ($('#do-print-dodata-where').val() == 'dari') {
+                $('#do-print-dari').val(data.do_no);
+                $('#do-print-sampai').val(null);
+            }else{
+                $('#do-print-sampai').val(data.do_no);
+            }
+        });
+    });
+    $('#do-modal-print-dodata').on('hidden.bs.modal', function () {
+        $(this).find('input').val(null);
+        $(this).find('input').prop('readonly', false);
+    });
 
     $(document).off('click', '.do-act-revise').on('click', '.do-act-revise', function () {
         var id = $(this).data('dono');

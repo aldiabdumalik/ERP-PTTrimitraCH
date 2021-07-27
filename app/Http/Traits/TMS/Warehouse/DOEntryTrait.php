@@ -151,6 +151,7 @@ trait DoEntryTrait {
     {
         $query = DoEntry::where('db_tbs.entry_do_tbl.do_no', '>=', $data->dari)
             ->where('db_tbs.entry_do_tbl.do_no', '<=', $data->sampai)
+            ->where('db_tbs.entry_do_tbl.voided_date', '=', null)
             ->leftJoin('db_tbs.item','item_code','=','db_tbs.item.itemcode')
             ->leftJoin('db_tbs.sys_do_address', function($join) {
                 $join->on('db_tbs.entry_do_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
@@ -167,10 +168,28 @@ trait DoEntryTrait {
             ->select($this->columnOfDoView())
             // ->groupBy('db_tbs.entry_do_tbl.do_no')
             ->get();
-        // $data = [
-        //     'header' => $query->first(),
-        //     'items' => $query
-        // ];
+        return $query;
+    }
+
+    protected function headerToolsDataDoForPrint(Request $request)
+    {
+        $where = [];
+        if (isset($request->dari)) {
+            $where = [
+                ['do_no', '>=', $request->dari],
+                ['voided_date', '=', null],
+            ];
+        }else{
+            $where = [
+                ['voided_date', '=', null],
+            ];
+        }
+
+        $query = DoEntry::where($where)
+            ->selectRaw('do_no, delivery_date, po_no, cust_id')
+            ->orderBy('do_no', 'desc')
+            ->groupBy('do_no')
+            ->get();
         return $query;
     }
 

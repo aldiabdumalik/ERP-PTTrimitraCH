@@ -507,6 +507,14 @@ class DoEntryController extends Controller
                     return $this->_Success('OK!', 200, $result);
                 }
                 break;
+            case "dodataforprint":
+                $query = $this->headerToolsDataDoForPrint($request);
+                return DataTables::of($query)
+                    ->editColumn('delivery_date', function($query) {
+                        return date('d/m/Y', strtotime($query->delivery_date));
+                    })
+                    ->make(true);
+                break;
             default:
                 return $this->_Error('Methode Not Found');
         }

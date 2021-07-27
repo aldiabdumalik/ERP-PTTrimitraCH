@@ -8,8 +8,9 @@
                 <div class="row" style="font-size: 13px;">
                     <div class="col-12">
                         <div class="form-row align-items-center mb-1">
-                            <div class="col-2">
-                                <label for="do-print-do">DO No.</label>
+                            <div class="col-12">
+                                <label for="do-print-do">DO No. </label>
+                                <span class="text-danger"><small>(write manually or press enter on the input field)</small></span>
                             </div>
                         </div>
                     </div>
