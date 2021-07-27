@@ -301,6 +301,11 @@ class DoEntryController extends Controller
             $data->sampai = $arr[1];
             $data->type = $arr[2];
 
+            if ($data->sampai <= $data->dari && $data->sampai !== $data->dari) {
+                $request->session()->flash('message', 'Invalid data input!');
+                return Redirect::back();
+            }
+
             $result = $this->headerToolsDataForPrint($data);
 
             if ($result->isEmpty()) {
