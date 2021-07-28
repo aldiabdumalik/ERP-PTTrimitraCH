@@ -458,6 +458,29 @@ class DoEntryController extends Controller
         return $this->_Success('DO entry has been unfinished');
     }
 
+    public function DoEntryNG(Request $request)
+    {
+        $items = $request->items;
+        if (count($items) > 0) {
+            $ng = 0;
+            for ($i=0; $i < count($items); $i++) {
+                $ng = (($items[$i]['qty_ng'] == "") ? 0 : $items[$i]['qty_ng']);
+                if (((int)$items[$i]['qty_sj'] - (int)$ng) === 0) {
+                    DoEntry::where('do_no', $items[$i]['do_no'])
+                        ->where('item_code', $items[$i]['itemcode'])
+                        ->delete();
+                }else{
+                    DoEntry::where('do_no', $items[$i]['do_no'])
+                        ->where('item_code', $items[$i]['itemcode'])
+                        ->update([
+                            'quantity' => (int)$items[$i]['qty_sj'] - (int)$items[$i]['qty_ng']
+                        ]);
+                }
+            }
+        }
+        return $this->_Success('Successfuly create Qty NG');
+    }
+
     public function DoEntryHeader(Request $request)
     {
         switch ($request->type) {

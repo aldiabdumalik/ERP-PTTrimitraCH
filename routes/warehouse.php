@@ -133,3 +133,7 @@ Route::post('/warehouse/do_entry/revise', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryRevise', 
     'as' => 'tms.warehouse.do_entry.revise'
 ]);
+Route::post('/warehouse/do_entry/qtyng', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryNG', 
+    'as' => 'tms.warehouse.do_entry.ng'
+]);

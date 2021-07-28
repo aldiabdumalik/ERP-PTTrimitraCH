@@ -88,6 +88,7 @@
 @include('tms.warehouse.do-entry.modal.log.tableLog')
 @include('tms.warehouse.do-entry.modal.print.modalPrint')
 @include('tms.warehouse.do-entry.modal.print.modalPrintDo')
+@include('tms.warehouse.do-entry.modal.table.tableNG')
 @endsection
 @section('script')
 <script>
@@ -591,6 +592,7 @@ $(document).ready(function () {
         });
     });
 
+    var tbl_ng;
     $(document).off('click', '.do-act-edit').on('click', '.do-act-edit', function () {
         var id = $(this).data('dono');
         ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "view_do": true}, (response) => {
@@ -600,62 +602,96 @@ $(document).ready(function () {
             if (header.voided == null) {
                 if (header.finished == null) {
                     if (header.posted == null) {
-                        var date = date_convert(header.delivery_date);
-                        var voided = date_convert(header.voided);
-                        var posted = date_convert(header.posted);
-                        var finished = date_convert(header.finished);
-                        var printed = date_convert(header.printed);
+                            Swal.fire({
+                            text: 'Do you want to create NG?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes',
+                            cancelButtonText: 'No'
+                        }).then(answer => {
+                            if (answer.value == true) {
+                                modalAction('#do-modal-ng').then(resolve => {
+                                    $('#do-ng-no').val(header.do_no);
+                                    $('#do-ng-refno').val(header.ref_no);
+                                    tbl_ng = $('#do-ng-datatables').DataTable(obj_tbl);
 
-                        $('#do-create-no').val(header.do_no);
-                        $('#do-create-branch').val(header.branch);
-                        $('#do-create-warehouse').val(header.warehouse);
-                        $('#do-create-direct').val(((header.sj_type != null) ? header.sj_type : 'Regular'));
-                        $('#do-create-priod').val(header.period);
-                        $('#do-create-date').val(date);
-                        $('#do-create-sso').val(header.sso_no);
-                        $('#do-create-so').val(header.so_no);
-                        $('#do-create-pono').val(header.po_no);
-                        $('#do-create-dnno').val(header.dn_no);
-                        $('#do-create-refno').val(header.ref_no);
-                        $('#do-create-remark').val(header.remark);
-                        $('#do-create-customercode').val(header.cust_id);
-                        $('#do-create-customerdoaddr').val(header.id_do);
-                        $('#do-create-customername').val(header.cust_name);
-                        $('#do-create-customergroup').val(10);
-                        $('#do-create-customeraddr1').val(header.address1);
-                        $('#do-create-customeraddr2').val(header.address2);
-                        $('#do-create-customeraddr3').val(header.address3);
-                        $('#do-create-customeraddr4').val(header.address4);
-                        $('#do-create-user').val(header.user);
-                        $('#do-create-printed').val(printed);
-                        $('#do-create-voided').val(voided);
-                        $('#do-create-posted').val(posted);
-                        $('#do-create-finished').val(finished);
-                        $('#do-create-inv').val(header.invoice);
-                        $('#do-create-rrno').val(header.rr_no);
-                        $('#do-create-rgno').val(header.rg_no);
+                                    var no = 1;
+                                    $.each(items, function (i, item) {
+                                        tbl_ng.row.add([
+                                            no,
+                                            item['part_no'],
+                                            item['item_code'],
+                                            item['part_name'],
+                                            item['unit'],
+                                            item['sso_no'],
+                                            item['quantity'],
+                                            `<input type="number" class="form-control-sm" autocomplete="off" id="rowngid-${no}">`
+                                        ]).draw();
+                                        no++;
+                                    });
+                                    resolve.on('shown.bs.modal', function () {
+                                        tbl_ng.columns.adjust().draw();
+                                    });
+                                });
+                            }else{
+                                var date = date_convert(header.delivery_date);
+                                var voided = date_convert(header.voided);
+                                var posted = date_convert(header.posted);
+                                var finished = date_convert(header.finished);
+                                var printed = date_convert(header.printed);
 
-                        var no = 1;
-                        $.each(items, function (i, item) {
-                            tbl_additem.row.add([
-                                no,
-                                item['item_code'],
-                                item['part_no'],
-                                item['unit'],
-                                item['quantity'],
-                                0,
-                                0,
-                                item['sso_no'],
-                                item['part_name']
-                            ]).draw();
-                            no++;
+                                $('#do-create-no').val(header.do_no);
+                                $('#do-create-branch').val(header.branch);
+                                $('#do-create-warehouse').val(header.warehouse);
+                                $('#do-create-direct').val(((header.sj_type != null) ? header.sj_type : 'Regular'));
+                                $('#do-create-priod').val(header.period);
+                                $('#do-create-date').val(date);
+                                $('#do-create-sso').val(header.sso_no);
+                                $('#do-create-so').val(header.so_no);
+                                $('#do-create-pono').val(header.po_no);
+                                $('#do-create-dnno').val(header.dn_no);
+                                $('#do-create-refno').val(header.ref_no);
+                                $('#do-create-remark').val(header.remark);
+                                $('#do-create-customercode').val(header.cust_id);
+                                $('#do-create-customerdoaddr').val(header.id_do);
+                                $('#do-create-customername').val(header.cust_name);
+                                $('#do-create-customergroup').val(10);
+                                $('#do-create-customeraddr1').val(header.address1);
+                                $('#do-create-customeraddr2').val(header.address2);
+                                $('#do-create-customeraddr3').val(header.address3);
+                                $('#do-create-customeraddr4').val(header.address4);
+                                $('#do-create-user').val(header.user);
+                                $('#do-create-printed').val(printed);
+                                $('#do-create-voided').val(voided);
+                                $('#do-create-posted').val(posted);
+                                $('#do-create-finished').val(finished);
+                                $('#do-create-inv').val(header.invoice);
+                                $('#do-create-rrno').val(header.rr_no);
+                                $('#do-create-rgno').val(header.rg_no);
+
+                                var no = 1;
+                                $.each(items, function (i, item) {
+                                    tbl_additem.row.add([
+                                        no,
+                                        item['item_code'],
+                                        item['part_no'],
+                                        item['unit'],
+                                        item['quantity'],
+                                        0,
+                                        0,
+                                        item['sso_no'],
+                                        item['part_name']
+                                    ]).draw();
+                                    no++;
+                                });
+
+                                modalAction('#do-modal-create').then(resolve => {
+                                    resolve.on('shown.bs.modal', function () {
+                                        tbl_additem.columns.adjust().draw();
+                                    });
+                                })
+
+                            }
                         });
-
-                        modalAction('#do-modal-create').then(resolve => {
-                            resolve.on('shown.bs.modal', function () {
-                                tbl_additem.columns.adjust().draw();
-                            });
-                        })
                     }else{
                         Swal.fire({
                             title: 'Access Denied!',
@@ -678,6 +714,68 @@ $(document).ready(function () {
                 });
             }
         });
+    });
+
+    $(document).on('submit', '#do-form-ng', function () {
+        var fix_data = [];
+        var item = tbl_ng.rows().data().toArray();
+        var id = 0;
+        var count = 0;
+        var nu = 0;
+        for (i=0;i < item.length; i++){
+            var obj_tbl_ng = {}
+
+            var max_val_sj  =  item[i][6];
+            var qty_sj = tbl_ng.rows().cell(i, 7).nodes().to$().find('input').val();
+
+            obj_tbl_ng.do_no = $('#do-ng-no').val();
+            obj_tbl_ng.itemcode = item[i][2];
+            obj_tbl_ng.sso = item[i][5];
+            obj_tbl_ng.qty_sj = max_val_sj;
+            obj_tbl_ng.qty_ng = qty_sj;
+
+            if(qty_sj > max_val_sj){
+                count++;
+                id++;
+                if(qty_sj > 0){
+                    $(`#rowngid-${id}`).removeClass('alert-success');
+                    $(`#rowngid-${id}`).addClass('alert-danger'); 
+                }    
+            }else if(qty_sj <= max_val_sj){
+                id++;
+                if(qty_sj > 0){
+                    $(`#rowngid-${id}`).removeClass('alert-danger');
+                    $(`#rowngid-${id}`).addClass('alert-success'); 
+                }
+            }
+
+            fix_data.push(obj_tbl_ng);
+        }
+        if (count == 0) {
+            var data = {"items": fix_data};
+            var post = {
+                "route": "{{route('tms.warehouse.do_entry.ng')}}",
+                "method": "POST",
+                "data": data
+            };
+            $('#do-btn-revise').prop('disabled', true);
+            ajaxWithPromise(post).then(resolve => {
+                if (resolve.status == true) {
+                    var response = resolve;
+                    modalAction('#do-modal-ng', 'hide').then(resolve => {
+                        Swal.fire({
+                            title: 'Notification',
+                            text: response.message,
+                            icon: 'success'
+                        }).then(() => {
+                            get_index.then(resolve => {
+                                resolve.ajax.reload();
+                            })
+                        });
+                    });
+                }
+            });
+        }
     });
 
     $(document).off('click', '.do-act-voided').on('click', '.do-act-voided', function () {
