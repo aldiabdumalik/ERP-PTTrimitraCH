@@ -111,6 +111,9 @@ class DoEntryController extends Controller
             }elseif (isset($request->check)) {
                 $message = $this->headerToolsCheckDO($request);
                 return $this->_Success($message);
+            }elseif (isset($request->check_print)) {
+                $message = $this->headerToolsCheckDO($request);
+                return $this->_Success($message);
             }
             if ($query->isEmpty()) {
                 return $this->_Success('false');
@@ -321,14 +324,6 @@ class DoEntryController extends Controller
                 $getValue[] = $v;
             }
 
-            $posted = DoEntry::where('do_no', '>=', $data->dari)
-                ->where('do_no', '<=', $data->sampai)
-                ->where('voided_date', '=', null)
-                ->update([
-                    'posted_date' => date('Y-m-d H:i:s'),
-                    'posted_by' => Auth::user()->FullName,
-                    // 'rr_no' => $request->rr_no
-                ]);
             $log_print = [];
             $log_post = [];
             for ($i=0; $i < count($getKey); $i++) { 
@@ -341,16 +336,25 @@ class DoEntryController extends Controller
                     'note' => null
                 ];
 
-                $log_post[] = [
-                    'do_no' => $getKey[$i],
-                    'date_log' => date('Y-m-d'),
-                    'time_log' => date('H:i:s'),
-                    'status_log' => 'POST',
-                    'user' => Auth::user()->FullName,
-                    'note' => null
-                ];
+                if ($getValue[$i][0]['posted'] === null) {
+                    $log_post[] = [
+                        'do_no' => $getKey[$i],
+                        'date_log' => date('Y-m-d'),
+                        'time_log' => date('H:i:s'),
+                        'status_log' => 'POST',
+                        'user' => Auth::user()->FullName,
+                        'note' => null
+                    ];
+                }
             }
 
+            $posted = DoEntry::where('do_no', '>=', $data->dari)
+                ->where('do_no', '<=', $data->sampai)
+                ->where('voided_date', '=', null)
+                ->update([
+                    'posted_date' => date('Y-m-d H:i:s'),
+                    'posted_by' => Auth::user()->FullName,
+                ]);
             $insert_log_print = $this->createLOGBatch($log_print);
             $insert_log_post = $this->createLOGBatch($log_post);
 

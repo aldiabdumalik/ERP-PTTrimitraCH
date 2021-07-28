@@ -905,34 +905,46 @@ $(document).ready(function () {
 
     $(document).off('click', '.do-act-report').on('click', '.do-act-report', function () {
         var id = $(this).data('dono');
-        modalAction('#do-modal-print').then(resolve => {
-            $('#do-print-dari').val(id);
-            $('#do-print-sampai').val(id);
+        ajax("{{route('tms.warehouse.do_entry.read')}}", "GET", {"do_no": id, "check_print": true}, (response) => {
+            response = response.responseJSON;
+            if (response.message !== null) {
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: response.message,
+                    icon: 'error'
+                });
+            }else{
+                modalAction('#do-modal-print').then(resolve => {
+                    $('#do-print-dari').val(id);
+                    $('#do-print-sampai').val(id);
 
-            $('#do-print-dari').prop('readonly', true);
-            $('#do-print-sampai').prop('readonly', true);
+                    $('#do-print-dari').prop('readonly', true);
+                    $('#do-print-sampai').prop('readonly', true);
+                });
+            }
         });
     });
 
     $('#do-btn-modal-print').on('click', function () {
-        modalAction('#do-modal-print').then(resolve => {
-            $('#do-btn-print-gas').on('click', function () {
-                if ($('#do-print-dari').val() == "" || $('#do-print-sampai').val() == "") {
-                    var dari = ($('#do-print-dari').val() == "") ? $('#do-print-dari').addClass('alert-danger') : $('#do-print-dari').removeClass('alert-danger')
-                    var sampai = ($('#do-print-sampai').val() == "") ? $('#do-print-sampai').addClass('alert-danger') : $('#do-print-sampai').removeClass('alert-danger')
-                }else{
-                    var dari = $('#do-print-dari').val();
-                    var sampai = $('#do-print-sampai').val();
-                    var type = $('#do-print-type').val();
-
-                    var encrypt = btoa(`${dari}&${sampai}&${type}`);
-
-                    var url = "{{route('tms.warehouse.do_entry.print')}}?params=" + encrypt;
-                    window.open(url, '_blank');
-                }
-            });
-        });
+        modalAction('#do-modal-print').then(resolve => {});
     });
+
+    $(document).on('click', '#do-btn-print-gas', function () {
+        if ($('#do-print-dari').val() == "" || $('#do-print-sampai').val() == "") {
+            var dari = ($('#do-print-dari').val() == "") ? $('#do-print-dari').addClass('alert-danger') : $('#do-print-dari').removeClass('alert-danger')
+            var sampai = ($('#do-print-sampai').val() == "") ? $('#do-print-sampai').addClass('alert-danger') : $('#do-print-sampai').removeClass('alert-danger')
+        }else{
+            var dari = $('#do-print-dari').val();
+            var sampai = $('#do-print-sampai').val();
+            var type = $('#do-print-type').val();
+
+            var encrypt = btoa(`${dari}&${sampai}&${type}`);
+
+            var url = "{{route('tms.warehouse.do_entry.print')}}?params=" + encrypt;
+            window.open(url, '_blank');
+        }
+    });
+
     $('#do-modal-print').on('hidden.bs.modal', function () {
         $(this).find('input').val(null);
         $(this).find('input').prop('readonly', false);
@@ -992,7 +1004,7 @@ $(document).ready(function () {
             }
         }
     });
-    $(document).off('click', 'tr', '#do-print-dodata-datatables').on('click', 'tr', '#do-print-dodata-datatables', function () {
+    $('#do-print-dodata-datatables').off('click', 'tr').on('click', 'tr', function () {
         var data = tbl_do_print.row(this).data();
         modalAction('#do-modal-print-dodata', 'hide').then((resolve) => {
             if ($('#do-print-dodata-where').val() == 'dari') {

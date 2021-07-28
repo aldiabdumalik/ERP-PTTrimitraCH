@@ -200,6 +200,10 @@ trait DoEntryTrait {
             ->selectRaw('do_no, voided_date, voided_by, finished_date, finished_by, posted_date, posted_by')
             ->first();
         if (isset($query)) {
+            if ($query->voided_date !== null && isset($request->check_print)) {
+                $voided = $this->carbonCreateFormFormat($query->voided_date, 'Y-m-d H:i:s');
+                return $message = "DO has been voided at $voided, by $query->voided_by";
+            }
             if ($query->voided_date != null) {
                 $voided = $this->carbonCreateFormFormat($query->voided_date, 'Y-m-d H:i:s');
                 $message = "DO has been voided at $voided, by $query->voided_by";
