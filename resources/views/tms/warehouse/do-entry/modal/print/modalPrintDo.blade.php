@@ -5,8 +5,8 @@
                 <input type="hidden" name="do-print-dodata-where" id="do-print-dodata-where">
                 <div class="table-responsive">
                     <div class="datatable datatable-primary">
-                        <table id="do-print-dodata-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
-                            <thead class="text-center" style="font-size: 15px;">
+                        <table id="do-print-dodata-datatables" class="table table-bordered table-hover text-center" style="width:100%;cursor:pointer">
+                            <thead class="" style="font-size: 15px;">
                                 <tr>
                                     <th class="align-middle">DO No.</th>
                                     <th class="align-middle">Date</th>

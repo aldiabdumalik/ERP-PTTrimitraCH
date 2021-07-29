@@ -168,7 +168,15 @@ $(document).ready(function () {
         });
     }
 
-    var tbl_additem = $('#do-datatables-create').DataTable(obj_tbl);
+    var obj_merge_additem = {...obj_tbl, ...{
+        "columnDefs": [{
+            "targets": [0,4,5,6],
+            "createdCell":  function (td, cellData, rowData, row, col) {
+                $(td).addClass('text-right');
+            }
+        }]
+    }};
+    var tbl_additem = $('#do-datatables-create').DataTable(obj_merge_additem);
 
     $('#do-btn-modal-create').on('click', function () {
         modalAction('#do-modal-create').then(function (resolve) {
@@ -373,8 +381,19 @@ $(document).ready(function () {
         }
     });
     
-    var tbl_items = $('#do-datatables-items').DataTable(obj_tbl);
+    var tbl_items;
     $(document).on('click', '#do-btn-add-item', function () {
+        var obj_class_right = {
+            "columnDefs": [{
+                "targets": [7, 8, 9],
+                "createdCell":  function (td, cellData, rowData, row, col) {
+                    $(td).addClass('text-right');
+                }
+            }]
+        };
+        obj_merge = {...obj_tbl, ...obj_class_right};
+        tbl_items = $('#do-datatables-items').DataTable(obj_merge);
+
         tbl_items.clear().draw();
         var sso = $('#do-create-sso').val();
         var so = $('#do-create-so').val();
@@ -612,7 +631,16 @@ $(document).ready(function () {
                                 modalAction('#do-modal-ng').then(resolve => {
                                     $('#do-ng-no').val(header.do_no);
                                     $('#do-ng-refno').val(header.ref_no);
-                                    tbl_ng = $('#do-ng-datatables').DataTable(obj_tbl);
+                                    
+                                    var obj_merge_ng = {...obj_tbl, ...{
+                                        "columnDefs": [{
+                                            "targets": [0,6],
+                                            "createdCell":  function (td, cellData, rowData, row, col) {
+                                                $(td).addClass('text-right');
+                                            }
+                                        }]
+                                    }};
+                                    tbl_ng = $('#do-ng-datatables').DataTable(obj_merge_ng);
 
                                     var no = 1;
                                     $.each(items, function (i, item) {

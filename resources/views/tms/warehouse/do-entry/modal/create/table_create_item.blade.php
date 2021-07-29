@@ -14,7 +14,7 @@
                     <th class="align-middle">Descript</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody class="text-center"></tbody>
         </table>
     </div>
 </div>
