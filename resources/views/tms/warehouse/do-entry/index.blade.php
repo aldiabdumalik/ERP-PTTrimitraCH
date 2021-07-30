@@ -1063,9 +1063,11 @@ $(document).ready(function () {
             var dari = $('#do-print-dari').val();
             var sampai = $('#do-print-sampai').val();
             var type = $('#do-print-type').val();
-
             var encrypt = btoa(`${dari}&${sampai}&${type}`);
-
+            get_index.then(resolve => {
+                resolve.ajax.reload();
+            });
+            modalAction('#do-modal-print', 'hide');
             var url = "{{route('tms.warehouse.do_entry.print')}}?params=" + encrypt;
             window.open(url, '_blank');
         }
