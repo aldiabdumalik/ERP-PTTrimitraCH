@@ -216,6 +216,35 @@ class DoEntryController extends Controller
         }
     }
 
+    public function DoEntryDeleteItem(Request $request)
+    {
+        $do = DoEntry::where('do_no', $request->do_no)->get();
+        if ($do->isEmpty()) {
+            return $this->_Success(NULL);
+        }
+        $update = DoEntry::where('do_no', $request->do_no)
+            ->where('item_code', $request->itemcode)
+            ->update([
+                'delete_by' => Auth::user()->FullName,
+                'delete_date' => date('Y-m-d H:i:s')
+            ]);
+        return $this->_Success('Data Exist');
+    }
+
+    public function DoEntryCancel(Request $request)
+    {
+        $do = DoEntry::where('do_no', $request->do_no)->get();
+        if ($do->isEmpty()) {
+            return $this->_Success(NULL);
+        }
+        $update = DoEntry::where('do_no', $request->do_no)
+            ->update([
+                'delete_by' => null,
+                'delete_date' => null
+            ]);
+        return $this->_Success('Data Exist');
+    }
+
     public function DoEntryPost(Request $request)
     {
         $query = DoEntry::where('do_no', $request->do_no)->first();

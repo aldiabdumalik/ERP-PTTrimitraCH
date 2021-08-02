@@ -180,23 +180,23 @@ $(document).ready(function () {
 
     $('#do-btn-modal-create').on('click', function () {
         modalAction('#do-modal-create').then(function (resolve) {
+            var now = new Date();
+            var currentMonth = ('0'+(now.getMonth()+1)).slice(-2);
+            $('#do-create-priod').val(`${now.getFullYear()}-${currentMonth}`);
+            var params = {"type": "DONo"};
+            ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
+                "POST",
+                params,
+                (response) => {
+                    var resText = response.responseText;
+                    response = response.responseJSON;
+                    $('#do-create-no').val(response);
+                    var refno = `DO/${resText.substr(resText.length - 3)}/${toRoman(currentMonth)}/${now.getFullYear()}`;
+                    $('#do-create-refno').val(refno);
+                    $('#do-create-date').datepicker("setDate",'now');
+                });
             resolve.on('shown.bs.modal', () => {
                 tbl_additem.columns.adjust().draw();
-                var now = new Date();
-                var currentMonth = ('0'+(now.getMonth()+1)).slice(-2);
-                $('#do-create-priod').val(`${now.getFullYear()}-${currentMonth}`);
-                var params = {"type": "DONo"};
-                ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
-                    "POST",
-                    params,
-                    (response) => {
-                        var resText = response.responseText;
-                        response = response.responseJSON;
-                        $('#do-create-no').val(response);
-                        var refno = `DO/${resText.substr(resText.length - 3)}/${toRoman(currentMonth)}/${now.getFullYear()}`;
-                        $('#do-create-refno').val(refno);
-                        $('#do-create-date').datepicker("setDate",'now');
-                    });
             });
         });
     });
@@ -441,7 +441,7 @@ $(document).ready(function () {
                                         data[i].qty_sso,
                                         data[i].qty_sj,
                                         data[i].unit,
-                                        '<input autocomplete="off" type="number" class="insj form-control-sm" id="rowid-'+id+'">'
+                                        '<input autocomplete="off" type="number" class="form-control-sm" id="rowid-'+id+'">'
                                     ]).draw();
                                 }
                             }
@@ -538,6 +538,21 @@ $(document).ready(function () {
                 $('#do-btn-delete-item').removeAttr('disabled');
             }
         }
+    });
+
+    $(document).on('click', '#do-btn-delete-item', function () {
+        var do_no = $('#do-create-no').val();
+        var itemcode = tbl_additem.row('.selected').data()[1];
+        var params = {"do_no": do_no, "itemcode": itemcode};
+        ajax("{{route('tms.warehouse.do_entry.delete_item')}}", "POST", params, (response) => {
+            response = response.responseJSON;
+            tbl_additem.row('.selected').remove().draw( false );
+            for (let i = 0; i < tbl_additem.rows().data().toArray().length; i++) {
+                var drw = tbl_additem.cell( i, 0 ).data(1+i); 
+            }
+            tbl_additem.draw(false);
+            $('#do-btn-delete-item').prop('disabled', true);
+        });
     });
 
     $(document).off('click', '.do-act-view').on('click', '.do-act-view', function () {

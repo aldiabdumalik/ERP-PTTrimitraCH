@@ -137,3 +137,11 @@ Route::post('/warehouse/do_entry/qtyng', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryNG', 
     'as' => 'tms.warehouse.do_entry.ng'
 ]);
+Route::post('/warehouse/do_entry/delete_item', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryDeleteItem', 
+    'as' => 'tms.warehouse.do_entry.delete_item'
+]);
+Route::post('/warehouse/do_entry/cancel_form', [
+    'uses' => 'TMS\Warehouse\DoEntryController@DoEntryCancel', 
+    'as' => 'tms.warehouse.do_entry.cancel_form'
+]);

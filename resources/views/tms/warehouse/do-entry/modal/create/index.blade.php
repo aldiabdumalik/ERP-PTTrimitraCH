@@ -24,10 +24,10 @@
                             </button>
                             {{-- <button type="button" id="do-btn-edit-item" class="btn btn-sm btn-info" disabled>
                                 Edit
-                            </button>
+                            </button> --}}
                             <button type="button" id="do-btn-delete-item" class="btn btn-sm btn-info" disabled>
                                 Delete
-                            </button> --}}
+                            </button>
                         </div>
                         <div class="col-12">
                             @include('tms.warehouse.do-entry.modal.create.table_create_item')
