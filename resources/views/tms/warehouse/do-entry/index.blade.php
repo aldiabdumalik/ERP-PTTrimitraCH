@@ -380,6 +380,16 @@ $(document).ready(function () {
             return false;
         }
     });
+
+    $(document).on('click', '#do-btn-create-close', function () {
+        ajax("{{ route('tms.warehouse.do_entry.cancel_form') }}",
+            "POST",
+            {"do_no": $('#do-create-no').val()},
+            (response) => {
+                response = response.responseJSON;
+                modalAction('#do-modal-create', 'hide')
+        })
+    });
     
     var tbl_items;
     $(document).on('click', '#do-btn-add-item', function () {
@@ -402,12 +412,14 @@ $(document).ready(function () {
             if ($('#do-create-sso').val() == "*") {
                 send = {
                     "type": "sso_detail",
-                    "so_header": $('#do-create-so').val()
+                    "so_header": $('#do-create-so').val(),
+                    "do_no": $('#do-create-no').val()
                 };
             }else{
                 send = {
                     "type": "sso_detail",
-                    "sso_header": $('#do-create-sso').val()
+                    "sso_header": $('#do-create-sso').val(),
+                    "do_no": $('#do-create-no').val()
                 }; 
             }
             ajax("{{ route('tms.warehouse.do_entry.header_tools') }}",
@@ -417,6 +429,7 @@ $(document).ready(function () {
                     response = response.responseJSON;
                     if (response.status == true) {
                         var data = response.content;
+                        console.log(data);
                         var sum_qty_sj = 0;
                         var sum_qty_sso = 0;
                         var id=0;

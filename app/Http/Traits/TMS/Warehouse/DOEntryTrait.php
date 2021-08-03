@@ -105,9 +105,9 @@ trait DoEntryTrait {
                 $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_do_tbl.item_code');
             })
             ->select([
+                'db_tbs.entry_sso_tbl.item_code as itemcode',
                 'db_tbs.entry_sso_tbl.dn_no as dn_no',
                 'db_tbs.item.part_no as part_no',
-                'db_tbs.entry_sso_tbl.item_code as itemcode',
                 'db_tbs.item.unit as unit',
                 'db_tbs.item.descript1 as model',
                 'db_tbs.entry_so_tbl.qty_so as qty_so',
@@ -115,7 +115,11 @@ trait DoEntryTrait {
                 'db_tbs.entry_so_tbl.so_header as so_no',
                 'db_tbs.item.descript as part_name',
                 'db_tbs.entry_sso_tbl.qty_sso as qty_sso',
-                DB::raw('IFNULL(db_tbs.entry_do_tbl.do_no, 0) as do_no, IFNULL(sum(db_tbs.entry_do_tbl.quantity), 0) as qty_sj, date(db_tbs.entry_sso_tbl.closed_date) as closed_date')
+                DB::raw('
+                    IFNULL(db_tbs.entry_do_tbl.do_no, 0) as do_no, 
+                    IFNULL(sum(db_tbs.entry_do_tbl.quantity), 0) as qty_sj, 
+                    date(db_tbs.entry_sso_tbl.closed_date) as closed_date
+                ')
             ])
             ->groupBy('db_tbs.entry_sso_tbl.item_code')
             ->get();

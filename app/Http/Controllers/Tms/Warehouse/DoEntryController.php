@@ -559,7 +559,7 @@ class DoEntryController extends Controller
             case "sso_detail":
                 $result = $this->headerToolsSSODetail($request);
                 if ($result->isEmpty()) {
-                    return $this->_Error('SO data not found!', 404);
+                    return $this->_Error('SSO/SO data not found!', 404);
                 }else{
                     return $this->_Success('OK!', 200, $result);
                 }
