@@ -36,7 +36,7 @@
             float: left;
             padding: 0;
             padding: 0 5px 0 5px;
-            border: 1px solid #000;
+            border: 1px solid transparent;
             font-size: 12px;
             font-weight: bold;
         }
@@ -53,7 +53,7 @@
         .sq-utama {
             width: 20.3cm;
             height: 10cm;
-            border: 1px solid #000;
+            border: 1px solid transparent;
             padding: 0;
             margin: 0;
         }
@@ -64,7 +64,7 @@
             padding: 0;
             float: left;
             border: none;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid transparent;
         }
         .sq-2 {
             width: 9.7cm; 
@@ -72,7 +72,7 @@
             margin: 0;
             padding: 0;
             float: left;
-            border: 1px solid #000;
+            border: 1px solid transparent;
             border-top: none;
         }
         .sq-3 {
@@ -82,8 +82,8 @@
             padding: 0;
             float: left;
             border: none;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
+            border-right: 1px solid transparent;
+            border-bottom: 1px solid transparent;
         }
         .sq-4 {
             width: 4.9cm; 
@@ -92,7 +92,7 @@
             padding: 0;
             float: left;
             border: none;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid transparent;
         }
         .sq-1-header {
             width: 1.2cm;
@@ -101,7 +101,7 @@
             padding: 0;
             text-align: center;
             border: none;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid transparent;
         }
         .sq-2-header {
             width: 9.7cm;
@@ -110,7 +110,7 @@
             padding: 0;
             text-align: center;
             border: none;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid transparent;
         }
         .sq-3-header {
             width: 4.4cm;
@@ -119,7 +119,7 @@
             padding: 0;
             text-align: center;
             border: none;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid transparent;
         }
         .sq-4-header {
             width: 4.9cm;
@@ -128,7 +128,7 @@
             padding: 0;
             text-align: center;
             border: none;
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid transparent;
         }
         .footer {
             width: 20.3cm;
@@ -193,7 +193,7 @@
             padding: 0;
             margin: 0;
             border: none;
-            /* border-right: 0.5px solid #000; */
+            /* border-right: 0.5px solid transparent; */
         }
         .sq-ttd-col:last-child {
             border-right: none;
@@ -233,7 +233,7 @@
 <body>
     <fieldset class="sq-cops">
         <fieldset class="sq-cops1">
-            PT TRIMITRA CHITRAHASTA
+            &nbsp;
         </fieldset>
         <fieldset class="sq-cops1" style="text-align:right">
             <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($getKey[$i], 'C39', 1.5, 18) }}" alt="barcode" />
@@ -245,23 +245,23 @@
     <fieldset class="sq-header">
         <fieldset class="sq-no">
             <div class="sq-no-row">
-                <div class="sq-no-col-1">NOMOR</div>
-                <div class="sq-no-col-2">:</div>
+                <div class="sq-no-col-1">&nbsp;</div>
+                <div class="sq-no-col-2">&nbsp;</div>
                 <div class="sq-no-col-3">{{ $groupItem[$getKey[$i]][0]->do_no }}</div>
             </div>
             <div class="sq-no-row">
-                <div class="sq-no-col-1">P/O NO.</div>
-                <div class="sq-no-col-2">:</div>
+                <div class="sq-no-col-1">&nbsp;</div>
+                <div class="sq-no-col-2">&nbsp;</div>
                 <div class="sq-no-col-3">{{ $groupItem[$getKey[$i]][0]->po_no }}</div>
             </div>
             <div class="sq-no-row">
-                <div class="sq-no-col-1">TANGGAL</div>
-                <div class="sq-no-col-2">:</div>
+                <div class="sq-no-col-1">&nbsp;</div>
+                <div class="sq-no-col-2">&nbsp;</div>
                 <div class="sq-no-col-3">{{\Carbon\Carbon::createFromFormat('Y-m-d', $groupItem[$getKey[$i]][0]->delivery_date)->format('d/m/Y')}}</div>
             </div>
             <div class="sq-no-row">
-                <div class="sq-no-col-1">KEND. NO.</div>
-                <div class="sq-no-col-2">:</div>
+                <div class="sq-no-col-1">&nbsp;</div>
+                <div class="sq-no-col-2">&nbsp;</div>
                 <div class="sq-no-col-3"></div>
             </div>
         </fieldset>
@@ -275,15 +275,12 @@
         </fieldset>
     </fieldset>
     <fieldset class="sq-dgnhor">
-        <div style="clear: both;">
-            Dengan hormat, <br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bersama ini kami mengirimkan barang-barang yang tersebut sbb :
-        </div>
+        <div style="clear: both;"></div>
     </fieldset>
     <fieldset class="sq-utama">
         <fieldset class="sq-1">
             <div class="sq-1-header">
-                <p style="padding:3px;font-weight:bold;">NO.</p>
+                <p style="padding:3px;font-weight:bold;">&nbsp;</p>
             </div>
             <div style="line-height: 20px;font-size: 12px;">
                 @php $no=1; @endphp
@@ -294,7 +291,7 @@
         </fieldset>
         <fieldset class="sq-2">
             <div class="sq-2-header">
-                <p style="padding:3px;font-weight:bold;">NO. PART / NAMA BARANG</p>
+                <p style="padding:3px;font-weight:bold;">&nbsp;</p>
             </div>
             <div style="line-height: 20px;font-size: 12px;">
                 @foreach($groupItem[$getKey[$i]] as $item)
@@ -304,7 +301,7 @@
         </fieldset>
         <fieldset class="sq-3">
             <div class="sq-3-header">
-                <p style="padding:3px;font-weight:bold;">QTY</p>
+                <p style="padding:3px;font-weight:bold;">&nbsp;</p>
             </div>
             <div style="line-height: 20px;font-size: 12px;">
                 @foreach($groupItem[$getKey[$i]] as $item)
@@ -314,7 +311,7 @@
         </fieldset>
         <fieldset class="sq-4">
             <div class="sq-4-header">
-                <p style="padding:3px;font-weight:bold;">KET.</p>
+                <p style="padding:3px;font-weight:bold;">&nbsp;</p>
             </div>
             <div style="line-height: 20px;font-size: 12px;">
                 @foreach($groupItem[$getKey[$i]] as $item)
@@ -324,83 +321,24 @@
         </fieldset>
         <fieldset class="sq-ttd">
             <fieldset class="sq-ttd-col">
-                <div class="sq-ttd-isi">
-                    DITERIMA OLEH, 
-                    <br>
-                    <br>
-                    <br>
-                    (
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;
-                    )
-                </div>
+                <div class="sq-ttd-isi"></div>
             </fieldset>
             <fieldset class="sq-ttd-col">
-                <div class="sq-ttd-isi">
-                    Pengirim, 
-                    <br>
-                    <br>
-                    <br>
-                    (
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;
-                    )
-                </div>
+                <div class="sq-ttd-isi"></div>
             </fieldset>
             <fieldset class="sq-ttd-col">
-                <div class="sq-ttd-isi">
-                    Satpam, 
-                    <br>
-                    <br>
-                    <br>
-                    (
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;
-                    )
-                </div>
+                <div class="sq-ttd-isi"></div>
             </fieldset>
             <fieldset class="sq-ttd-col">
-                <div class="sq-ttd-isi">
-                    Gudang, 
-                    <br>
-                    <br>
-                    <br>
-                    (
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;
-                    )
-                </div>
+                <div class="sq-ttd-isi"></div>
             </fieldset>
             <fieldset class="sq-ttd-col">
-                <div class="sq-ttd-isi">
-                    HORMAT KAMI, 
-                    <br>
-                    <br>
-                    <br>
-                    (
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;
-                    )
-                </div>
+                <div class="sq-ttd-isi"></div>
             </fieldset>
         </fieldset>
     </fieldset>
     <fieldset class="footer">
-        <div class="foot-1">
-            LD - PPC - 013 Rev. 2
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            Putih Asli : Customer (Saat Penagihan), Merah : Finance, Putih, Biru : Customer, Hijau : PPIC,
-        </div>
+        <div class="foot-1"></div>
     </fieldset>
 </body>
 

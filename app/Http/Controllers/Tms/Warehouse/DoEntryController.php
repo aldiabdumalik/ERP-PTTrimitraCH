@@ -386,8 +386,14 @@ class DoEntryController extends Controller
             //     ]);
             // $insert_log_print = $this->createLOGBatch($log_print);
             // $insert_log_post = $this->createLOGBatch($log_post);
-
-            $pdf = PDF::loadView('tms.warehouse.do-entry.report.report', compact('data', 'groupItem', 'getKey'))->setPaper('a4', 'potrait');
+            
+            $template = 'tms.warehouse.do-entry.report.report';
+            if ($data->type == 'blank') {
+                $template = 'tms.warehouse.do-entry.report.report';
+            }else{
+                $template = 'tms.warehouse.do-entry.report.reportTemplate';
+            }
+            $pdf = PDF::loadView($template, compact('data', 'groupItem', 'getKey'))->setPaper('a4', 'potrait');
             return $pdf->stream();
         }else{
             $request->session()->flash('message', 'Data tidak ditemukan!');

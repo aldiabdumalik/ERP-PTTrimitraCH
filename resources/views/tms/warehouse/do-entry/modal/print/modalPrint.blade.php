@@ -46,7 +46,7 @@
                             <div class="col-10">
                                 <select name="do-print-type" id="do-print-type" class="form-control">
                                     <option value="blank">Blank</option>
-                                    <option value="grid">Template</option>
+                                    <option value="template">Template</option>
                                 </select>
                             </div>
                         </div>
