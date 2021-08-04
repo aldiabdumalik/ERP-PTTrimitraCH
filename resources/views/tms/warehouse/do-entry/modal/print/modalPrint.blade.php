@@ -41,12 +41,12 @@
                     <div class="col-12">
                         <div class="form-row align-items-center mb-1">
                             <div class="col-2">
-                                <label for="do-print-type">Kertas</label>
+                                <label for="do-print-type">Paper</label>
                             </div>
                             <div class="col-10">
                                 <select name="do-print-type" id="do-print-type" class="form-control">
                                     <option value="blank">Blank</option>
-                                    <option value="grid">Grid</option>
+                                    <option value="grid">Template</option>
                                 </select>
                             </div>
                         </div>

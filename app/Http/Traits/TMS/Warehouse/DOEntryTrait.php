@@ -207,6 +207,8 @@ trait DoEntryTrait {
             if ($query->voided_date !== null && isset($request->check_print)) {
                 $voided = $this->carbonCreateFormFormat($query->voided_date, 'Y-m-d H:i:s');
                 return $message = "DO has been voided at $voided, by $query->voided_by";
+            }elseif ($query->voided_date == null && isset($request->check_print)) {
+                return $message = null;
             }
             if ($query->voided_date != null) {
                 $voided = $this->carbonCreateFormFormat($query->voided_date, 'Y-m-d H:i:s');
