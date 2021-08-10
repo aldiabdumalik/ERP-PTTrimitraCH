@@ -238,9 +238,7 @@
         <fieldset class="sq-cops1" style="text-align:right">
             <img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($getKey[$i], 'C39', 1.5, 18) }}" alt="barcode" />
         </fieldset>
-        <fieldset class="sq-cops2">
-            SURAT JALAN
-        </fieldset>
+        <fieldset class="sq-cops2"></fieldset>
     </fieldset>
     <fieldset class="sq-header">
         <fieldset class="sq-no">
