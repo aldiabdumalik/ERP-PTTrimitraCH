@@ -19,7 +19,7 @@
                             <div class="col-6">
                                 <div class="form-row align-items-center mb-1">
                                     <div class="col-4">
-                                        <label for="do-print-dari">Dari</label>
+                                        <label for="do-print-dari">Start</label>
                                     </div>
                                     <div class="col-8">
                                         <input type="text" name="do-print-dari" id="do-print-dari" class="form-control form-control-sm" autocomplete="off" required>
@@ -29,7 +29,7 @@
                             <div class="col-6">
                                 <div class="form-row align-items-center mb-1">
                                     <div class="col-4">
-                                        <label for="do-print-sampai">Sampai</label>
+                                        <label for="do-print-sampai">To</label>
                                     </div>
                                     <div class="col-8">
                                         <input type="text" name="do-print-sampai" id="do-print-sampai" class="form-control form-control-sm" autocomplete="off" required>
@@ -54,7 +54,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="do-btn-print-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" id="do-btn-print-close" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <button type="button" id="do-btn-print-gas" class="btn btn-primary">Print</button>
             </div>
         </div>

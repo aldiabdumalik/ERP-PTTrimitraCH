@@ -429,7 +429,7 @@ $(document).ready(function () {
                     response = response.responseJSON;
                     if (response.status == true) {
                         var data = response.content;
-                        console.log(data);
+                        // console.log(data);
                         var sum_qty_sj = 0;
                         var sum_qty_sso = 0;
                         var id=0;

@@ -377,15 +377,15 @@ class DoEntryController extends Controller
                 }
             }
 
-            // $posted = DoEntry::where('do_no', '>=', $data->dari)
-            //     ->where('do_no', '<=', $data->sampai)
-            //     ->where('voided_date', '=', null)
-            //     ->update([
-            //         'posted_date' => date('Y-m-d H:i:s'),
-            //         'posted_by' => Auth::user()->FullName,
-            //     ]);
-            // $insert_log_print = $this->createLOGBatch($log_print);
-            // $insert_log_post = $this->createLOGBatch($log_post);
+            $posted = DoEntry::where('do_no', '>=', $data->dari)
+                ->where('do_no', '<=', $data->sampai)
+                ->where('voided_date', '=', null)
+                ->update([
+                    'posted_date' => date('Y-m-d H:i:s'),
+                    'posted_by' => Auth::user()->FullName,
+                ]);
+            $insert_log_print = $this->createLOGBatch($log_print);
+            $insert_log_post = $this->createLOGBatch($log_post);
             
             $template = 'tms.warehouse.do-entry.report.report';
             if ($data->type == 'blank') {
