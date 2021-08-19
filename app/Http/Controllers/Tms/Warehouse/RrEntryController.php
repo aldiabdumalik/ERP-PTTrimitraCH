@@ -42,7 +42,7 @@ class RrEntryController extends Controller
                         ]);
                 }
             }
-            $note = $this->dateConvertFrom($item[0]['rr_date'], 'd/m/Y', 'Y-m-d') . date('H:i:s') ."-".$this->dateConvertFrom($item[0]['scuritystamp']);
+            $note = date('Y-m-d H:i:s') ."-".$this->dateConvertFrom($item[0]['rr_date']);
             $this->createGlobalLog('db_tbs.entry_do_tbl_log', [
                 'do_no' => $item[0]['do_no'],
                 'date_log' => date('Y-m-d'),
