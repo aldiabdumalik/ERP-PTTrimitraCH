@@ -261,7 +261,6 @@ $(document).ready(function () {
             formReset();
             if (resolve.status == true) {
                 var res = resolve.content[0];
-                console.log(res);
                 $('#rr-create-dono').val(res.do_no);
                 $('#rr-create-refno').val(res.ref_no);
                 $('#rr-create-dodate').val(date_convert(res.delivery_date));
@@ -271,7 +270,7 @@ $(document).ready(function () {
                 $('#rr-create-pono').val(res.po_no);
                 $('#rr-create-sso').val(res.sso_no);
                 $('#rr-create-so').val(res.so_no);
-                $('#rr-create-rrno').val((res.rr_no == null) ? res.dn_no : res.rr_no);
+                $('#rr-create-rrno').val((res.rr_no == null) ? res.po_no : res.rr_no);
                 var no = 1;
                 $.each(resolve.content, function (i, item) {
                     tbl_index.row.add([
@@ -331,7 +330,21 @@ $(document).ready(function () {
         var isvalid = validationBeforeSubmit();
         if (isvalid == true) {
             if(count == 0){
-                console.log(to_submit);
+                var params = {
+                    "route": "{{route('tms.warehouse.rr_entry.save')}}",
+                    "method": "POST",
+                    "data": {"items": to_submit}
+                };
+                ajaxWithPromise(params).then(resolve => {
+                    formReset();
+                    if (resolve.status == true) {
+                        Swal.fire({
+                            title: 'Notification',
+                            text: resolve.message,
+                            icon: 'success'
+                        });
+                    }
+                });
             }
         }
     });
@@ -433,6 +446,15 @@ $(document).ready(function () {
                 }
             });
         });
+    }
+
+    function addZeroes( num ) {
+        var value = Number(num);
+        var res = num.split(".");
+        if(res.length == 1 || (res[1].length < 4)) {
+            value = value.toFixed(2);
+        }
+        return value
     }
 });
 </script>

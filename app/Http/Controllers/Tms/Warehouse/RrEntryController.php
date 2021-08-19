@@ -22,7 +22,37 @@ class RrEntryController extends Controller
 
     public function RrEntrySave(Request $request)
     {
-        # code...
+        $item = $request->items;
+        if (count($item) > 0) {
+            for ($i=0; $i < count($item); $i++) {
+                if ((int)$item[$i]['fix_qty'] === 0) {
+                    DoEntry::where('do_no', $item[$i]['do_no'])
+                        ->where('item_code', $item[$i]['itemcode'])
+                        ->delete();
+                }else{
+                    DoEntry::where('do_no', $item[$i]['do_no'])
+                        ->where('item_code', $item[$i]['itemcode'])
+                        ->update([
+                            'quantity' => (int)$item[$i]['fix_qty'],
+                            'rr_no' => $item[$i]['rr_no'],
+                            'rr_date' => $this->dateConvertFrom($item[$i]['rr_date'], 'd/m/Y', 'Y-m-d'),
+                            'scurity_stamp' => $this->dateConvertFrom($item[$i]['scuritystamp'], 'd/m/Y', 'Y-m-d'),
+                            'posted_date' => date('Y-m-d H:i:s'),
+                            'posted_by' => auth()->user()->FullName
+                        ]);
+                }
+            }
+            $note = $this->dateConvertFrom($item[0]['rr_date'], 'd/m/Y', 'Y-m-d') . date('H:i:s') ."-".$this->dateConvertFrom($item[0]['scuritystamp']);
+            $this->createGlobalLog('db_tbs.entry_do_tbl_log', [
+                'do_no' => $item[0]['do_no'],
+                'date_log' => date('Y-m-d'),
+                'time_log' => date('H:i:s'),
+                'status_log' => 'POST',
+                'user' => Auth::user()->FullName,
+                'note' => $note
+            ]);
+        }
+        $this->_Success('RR No has been input to DO');
     }
 
     public function RrEntryHeader(Request $request)

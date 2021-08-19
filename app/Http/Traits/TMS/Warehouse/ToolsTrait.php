@@ -1,6 +1,10 @@
 <?php
 namespace App\Http\Traits\TMS\Warehouse;
+
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 trait ToolsTrait {
     
     protected function _Error($message=null, $code=401, $content=null)
@@ -19,5 +23,17 @@ trait ToolsTrait {
             'content' => $content,
             'message' => $message
         ], $code);
+    }
+
+    protected function dateConvertFrom($date, $from='Y-m-d', $to='d/m/Y')
+    {
+        return Carbon::createFromFormat($from, $date)->format($to);
+    }
+
+    protected function createGlobalLog($tbl, $data)
+    {
+        $log = DB::table($tbl)
+            ->insert($data);
+        return $log;
     }
 }
