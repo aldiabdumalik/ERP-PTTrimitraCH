@@ -145,3 +145,21 @@ Route::post('/warehouse/do_entry/cancel_form', [
     'uses' => 'TMS\Warehouse\DoEntryController@DoEntryCancel', 
     'as' => 'tms.warehouse.do_entry.cancel_form'
 ]);
+/*
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |   TMS - WAREHOUSE - RR ENTRY
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |
+*/
+Route::get('/warehouse/rr_entry', [
+    'uses' => 'TMS\Warehouse\RrEntryController@index', 
+    'as' => 'tms.warehouse.rr_entry'
+]);
+Route::post('/warehouse/rr_entry/header_tools', [
+    'uses' => 'TMS\Warehouse\RrEntryController@RrEntryHeader', 
+    'as' => 'tms.warehouse.rr_entry.headerTools'
+]);
+Route::post('/warehouse/rr_entry/save', [
+    'uses' => 'TMS\Warehouse\RrEntryController@RrEntrySave', 
+    'as' => 'tms.warehouse.rr_entry.save'
+]);

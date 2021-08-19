@@ -177,6 +177,10 @@ Breadcrumbs::for('tms.warehouse.do_entry.index', function ($trail) {
     $trail->push('Warehouse', '#');
     $trail->push('DO Entry', route('tms.warehouse.do_entry.index'));
 });
+Breadcrumbs::for('tms.warehouse.rr_entry', function ($trail) {
+    $trail->push('Warehouse', '#');
+    $trail->push('RR Entry', route('tms.warehouse.rr_entry'));
+});
 //  2.4.1. Products
 Breadcrumbs::for('tms.warehouse.products', function ($trail) {
     $trail->push('Warehouse', '#');
