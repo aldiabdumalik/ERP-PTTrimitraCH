@@ -38,13 +38,13 @@ class RrEntryController extends Controller
                             'rr_date' => $this->dateConvertFrom($item[$i]['rr_date'], 'd/m/Y', 'Y-m-d'),
                             'scurity_stamp' => $this->dateConvertFrom($item[$i]['scuritystamp'], 'd/m/Y', 'Y-m-d'),
                             'posted_date' => date('Y-m-d H:i:s'),
-                            'posted_by' => auth()->user()->FullName
+                            'posted_by' => Auth::user()->FullName
                         ]);
                 }
             }
-            $note = date('Y-m-d H:i:s') ."-".$this->dateConvertFrom($item[0]['rr_date']);
+            $note = date('d/m/Y H:i:s') ."-". $item[0]['rr_date'];
             $this->createGlobalLog('db_tbs.entry_do_tbl_log', [
-                'do_no' => $item[0]['do_no'],
+                'do_no' => $request->do_no,
                 'date_log' => date('Y-m-d'),
                 'time_log' => date('H:i:s'),
                 'status_log' => 'POST',
@@ -52,7 +52,7 @@ class RrEntryController extends Controller
                 'note' => $note
             ]);
         }
-        $this->_Success('RR No has been input to DO');
+        return $this->_Success('RR No has been input to DO');
     }
 
     public function RrEntryHeader(Request $request)

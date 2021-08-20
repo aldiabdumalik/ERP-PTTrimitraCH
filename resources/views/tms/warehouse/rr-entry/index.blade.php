@@ -333,7 +333,7 @@ $(document).ready(function () {
                 var params = {
                     "route": "{{route('tms.warehouse.rr_entry.save')}}",
                     "method": "POST",
-                    "data": {"items": to_submit}
+                    "data": {"items": to_submit, "do_no": $('#rr-create-dono').val()}
                 };
                 ajaxWithPromise(params).then(resolve => {
                     formReset();
