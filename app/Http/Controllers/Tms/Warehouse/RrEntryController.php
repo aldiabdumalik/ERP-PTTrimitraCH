@@ -35,24 +35,24 @@ class RrEntryController extends Controller
                         ->update([
                             'quantity' => (int)$item[$i]['fix_qty'],
                             'rr_no' => $item[$i]['rr_no'],
-                            'rr_date' => $this->dateConvertFrom($item[$i]['rr_date'], 'd/m/Y', 'Y-m-d'),
-                            'scurity_stamp' => $this->dateConvertFrom($item[$i]['scuritystamp'], 'd/m/Y', 'Y-m-d'),
+                            'rr_date' => convertDate($item[$i]['rr_date'], 'd/m/Y', 'Y-m-d'),
+                            'scurity_stamp' => convertDate($item[$i]['scuritystamp'], 'd/m/Y', 'Y-m-d'),
                             'posted_date' => date('Y-m-d H:i:s'),
-                            'posted_by' => Auth::user()->FullName
+                            'posted_by' => FullName()
                         ]);
                 }
             }
             $note = date('d/m/Y H:i:s') ."-". $item[0]['rr_date'];
-            $this->createGlobalLog('db_tbs.entry_do_tbl_log', [
+            createLog('db_tbs.entry_do_tbl_log', [
                 'do_no' => $request->do_no,
                 'date_log' => date('Y-m-d'),
                 'time_log' => date('H:i:s'),
                 'status_log' => 'POST',
-                'user' => Auth::user()->FullName,
+                'user' => FullName(),
                 'note' => $note
             ]);
         }
-        return $this->_Success('RR No has been input to DO');
+        return _Success('RR No has been input to DO');
     }
 
     public function RrEntryHeader(Request $request)
@@ -75,12 +75,12 @@ class RrEntryController extends Controller
                     $query = DoEntry::where('entry_do_tbl.do_no', $request->dono)
                         ->leftJoin('item', 'item.ITEMCODE', '=', 'entry_do_tbl.item_code')
                         ->get();
-                    return $this->_Success(null, 200, $query);
+                    return _Success(null, 200, $query);
                 }
-                return $this->_Error($req);
+                return _Error($req);
                 break;
             default:
-                return $this->_Error('Methode Not Found');
+                return _Error('Method Not Found');
         }
     }
 
