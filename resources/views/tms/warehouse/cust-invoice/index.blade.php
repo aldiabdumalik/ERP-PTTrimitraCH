@@ -18,15 +18,24 @@
 <script>
     $(document).ready(function () {
         const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
-        const obj_tbl = {
-            destroy: true,
-            lengthChange: false,
-            searching: false,
-            paging: false,
-            ordering: false,
-            scrollY: "200px",
-            scrollCollapse: true,
-            fixedHeader: true,
+        const tbl_attr = (targets=[]) => {
+            const obj = {
+                destroy: true,
+                lengthChange: false,
+                searching: false,
+                paging: false,
+                ordering: false,
+                scrollY: "200px",
+                scrollCollapse: true,
+                fixedHeader: true,
+                columnDefs: [{
+                    targets: targets,
+                    createdCell:  function (td, cellData, rowData, row, col) {
+                        $(td).addClass('text-right');
+                    }
+                }]
+            };
+            return obj;
         };
         modalAction('#custinv-modal-index');
 
@@ -34,6 +43,19 @@
             let tbl_index = $('#custinv-datatables').DataTable();
             resolve(tbl_index);
         });
+
+        var tbl_item = $('#custinv-datatables-index').DataTable(tbl_attr([0,7,8,9]));
+        $('#custinv-modal-index').on('shown.bs.modal', function () {
+            tbl_item.columns.adjust().draw();
+        });
+        $('#carouselExampleSlidesOnly').on('slid.bs.carousel', function () {
+            var idx = $(this).find('.active').index();
+            if (idx == 0) {
+                $('#custinv-text-view-by').text("VIEW BY DO NO.");
+            }else{
+                $('#custinv-text-view-by').text("VIEW BY PART NO.");
+            }
+        })
 
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
