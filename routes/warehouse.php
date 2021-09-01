@@ -163,3 +163,14 @@ Route::post('/warehouse/rr_entry/save', [
     'uses' => 'TMS\Warehouse\RrEntryController@RrEntrySave', 
     'as' => 'tms.warehouse.rr_entry.save'
 ]);
+
+/*
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |   TMS - WAREHOUSE - Customer Invoice
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |
+*/
+Route::get('/warehouse/customer_invoice', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@index', 
+    'as' => 'tms.warehouse.customer_invoice'
+]);

@@ -9,7 +9,7 @@
 @include('tms.warehouse.cust-invoice.style.custom-style')
 
 <div class="main-content-inner">
-    
+    @include('tms.warehouse.cust-invoice.table.tableindex')
 </div>
 
 @endsection
