@@ -34,7 +34,7 @@
                                             @include('tms.warehouse.cust-invoice.modal.create.itemTable')
                                         </div>
                                         <div class="carousel-item">
-                                            <h1>Test</h1>
+                                            @include('tms.warehouse.cust-invoice.modal.create.itemTablePart')
                                         </div>
                                     </div>
                                 </div>

@@ -45,10 +45,15 @@
         });
 
         var tbl_item = $('#custinv-datatables-index').DataTable(tbl_attr([0,7,8,9]));
+        var tbl_item_part = $('#custinv-datatables-index-part').DataTable(tbl_attr([6,7,8]));
+
         $('#custinv-modal-index').on('shown.bs.modal', function () {
             tbl_item.columns.adjust().draw();
+            tbl_item_part.columns.adjust().draw();
         });
+        
         $('#carouselExampleSlidesOnly').on('slid.bs.carousel', function () {
+            tbl_item_part.columns.adjust().draw();
             var idx = $(this).find('.active').index();
             if (idx == 0) {
                 $('#custinv-text-view-by').text("VIEW BY DO NO.");
