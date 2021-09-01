@@ -7,9 +7,9 @@
             <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custinv-btn-modal-print">
                 <i class="fa fa-print"></i>  Print
             </button>
-            <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="custinv-btn-modal-table-setting">
+            {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="custinv-btn-modal-table-setting">
                 <i class="fa fa-cogs"></i>
-            </button>
+            </button> --}}
         </div>
     </div>
 </div>
@@ -27,6 +27,17 @@
                         <div class="">
                             <div class="table-responsive">
                                 <table id="custinv-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
+                                    <thead>
+                                        <tr>
+                                            <th class="align-middle">Inv No.</th>
+                                            <th class="align-middle">Date</th>
+                                            <th class="align-middle">Posted</th>
+                                            <th class="align-middle">Voided</th>
+                                            <th class="align-middle">Ref No.</th>
+                                            <th class="align-middle">PPN No.</th>
+                                            <th class="align-middle">Customer</th>
+                                        </tr>
+                                    </thead>
                                 </table>
                             </div>
                         </div>

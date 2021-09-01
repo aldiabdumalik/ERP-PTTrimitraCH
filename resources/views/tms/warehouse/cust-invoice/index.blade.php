@@ -11,11 +11,13 @@
 <div class="main-content-inner">
     @include('tms.warehouse.cust-invoice.table.tableindex')
 </div>
+@include('tms.warehouse.cust-invoice.modal.create.index')
 
 @endsection
 @section('script')
 <script>
     $(document).ready(function () {
+        const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
         const obj_tbl = {
             destroy: true,
             lengthChange: false,
@@ -26,7 +28,49 @@
             scrollCollapse: true,
             fixedHeader: true,
         };
-        const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
+        modalAction('#custinv-modal-index');
+
+        const index_data = new Promise(function(resolve, reject) {
+            let tbl_index = $('#custinv-datatables').DataTable();
+            resolve(tbl_index);
+        });
+
+        function modalAction(elementId=null, action='show'){
+            return new Promise(resolve => {
+                $(elementId).modal(action);
+                resolve($(elementId));
+            });
+        }
+
+        function ajaxCall(params) {
+            return new Promise((resolve, reject) => {
+                $('body').loading({
+                    message: "wait for a moment...",
+                    zIndex: 9999
+                });
+                $.ajax({
+                    url: params.route,
+                    method: params.method,
+                    dataType: "JSON",
+                    cache: false,
+                    headers: token_header,
+                    data: params.data,
+                    error: function(response, status, x){
+                        Swal.fire({
+                            title: 'Access Denied',
+                            text: response.responseJSON.message,
+                            icon: 'error'
+                        });
+                        $('body').loading('stop');
+                        reject(response);
+                    },
+                    complete: function (response){
+                        $('body').loading('stop'); 
+                        resolve(response);
+                    }
+                });
+            });
+        }
     });
 </script>
 @endsection
