@@ -28,4 +28,8 @@
     .selected {
         background-color: #dddddd;
     }
+    .auto-middle {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
 </style>

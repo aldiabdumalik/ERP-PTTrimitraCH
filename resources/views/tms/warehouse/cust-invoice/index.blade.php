@@ -51,13 +51,13 @@
             tbl_item.columns.adjust().draw();
             tbl_item_part.columns.adjust().draw();
         });
-        
+
         $('#carouselExampleSlidesOnly').on('slid.bs.carousel', function () {
-            tbl_item_part.columns.adjust().draw();
             var idx = $(this).find('.active').index();
             if (idx == 0) {
                 $('#custinv-text-view-by').text("VIEW BY DO NO.");
             }else{
+                tbl_item_part.columns.adjust().draw();
                 $('#custinv-text-view-by').text("VIEW BY PART NO.");
             }
         })

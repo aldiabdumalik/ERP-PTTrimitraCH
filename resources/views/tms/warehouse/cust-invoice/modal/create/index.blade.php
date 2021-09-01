@@ -6,6 +6,17 @@
                     <h4 class="modal-title">Customer Invoice</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="form-row" style="font-size: 11px;">
+                        <div class="col-xl-4 border-left">
+                            @include('tms.warehouse.cust-invoice.modal.create.header1')
+                        </div>
+                        <div class="col-xl-4 border-left">
+                            @include('tms.warehouse.cust-invoice.modal.create.header2')
+                        </div>
+                        <div class="col-xl-4 border-left border-right">
+                            @include('tms.warehouse.cust-invoice.modal.create.header3')
+                        </div>
+                    </div>
                     <div class="mt-4">
                         <div class="row">
                             <div class="col-4">
