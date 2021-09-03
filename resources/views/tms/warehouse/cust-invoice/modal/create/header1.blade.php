@@ -52,14 +52,14 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-2">
-                <input type="text" name="custinv-create-vat1" id="custinv-create-vat1" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
+                <input type="number" name="custinv-create-vat1" id="custinv-create-vat1" class="form-control form-control-sm" autocomplete="off" required maxlength="1" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
             </div>
             <div class="col-5">
-                <input type="text" name="custinv-create-vat2" id="custinv-create-vat2" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
+                <input type="number" name="custinv-create-vat2" id="custinv-create-vat2" class="form-control form-control-sm" autocomplete="off" required>
             </div>
             <div class="col-5">
                 <div class="input-group input-group-sm">
-                    <input type="text" name="custinv-create-vat3" id="custinv-create-vat3" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
+                    <input type="number" name="custinv-create-vat3" id="custinv-create-vat3" class="form-control form-control-sm text-right" autocomplete="off" required min="0" step="0.01" value="0.00">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
@@ -90,7 +90,7 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm" autocomplete="off" required value="IDR">
             </div>
             <div class="col-6">
                 <input type="text" name="custinv-create-currenvy-value" id="custinv-create-currenvy-value" class="form-control form-control-sm" autocomplete="off" required>
@@ -106,7 +106,7 @@
         <div class="row no-gutters">
             <div class="col-12">
                 <div class="input-group input-group-sm">
-                    <input type="text" name="custinv-create-terms" id="custinv-create-terms" class="form-control form-control-sm" autocomplete="off" required>
+                    <input type="number" name="custinv-create-terms" id="custinv-create-terms" class="form-control form-control-sm" autocomplete="off" required min="0" value="0">
                     <div class="input-group-append">
                         <span class="input-group-text">Days</span>
                     </div>
@@ -122,7 +122,7 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-12">
-                <input type="text" name="custinv-create-duedate" id="custinv-create-duedate" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-duedate" id="custinv-create-duedate" class="form-control form-control-sm this-datepicker" autocomplete="off" required>
             </div>
         </div>
     </div>
