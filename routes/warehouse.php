@@ -172,5 +172,10 @@ Route::post('/warehouse/rr_entry/save', [
 */
 Route::get('/warehouse/customer_invoice', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@index', 
-    'as' => 'tms.warehouse.customer_invoice'
+    'as' => 'tms.warehouse.cust_invoice'
+]);
+
+Route::get('/warehouse/customer_price', [
+    'uses' => 'TMS\Warehouse\CustPriceController@index', 
+    'as' => 'tms.warehouse.cust_price'
 ]);

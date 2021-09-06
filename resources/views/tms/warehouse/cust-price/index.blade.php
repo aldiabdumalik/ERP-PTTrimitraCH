@@ -9,7 +9,7 @@
 @include('tms.warehouse.cust-price.style.custom-style')
 
 <div class="main-content-inner">
-    {{-- @include('tms.warehouse.cust-invoice.table.tableindex') --}}
+    @include('tms.warehouse.cust-price.table.index')
 </div>
 {{-- @include('tms.warehouse.cust-invoice.modal.create.index') --}}
 
@@ -37,17 +37,17 @@
             };
             return obj;
         };
-        modalAction('#custinv-modal-index');
+        // modalAction('#custprice-modal-index');
 
         const index_data = new Promise(function(resolve, reject) {
-            let tbl_index = $('#custinv-datatables').DataTable();
+            let tbl_index = $('#custprice-datatables').DataTable();
             resolve(tbl_index);
         });
 
-        var tbl_item = $('#custinv-datatables-index').DataTable(tbl_attr([0,7,8,9]));
-        var tbl_item_part = $('#custinv-datatables-index-part').DataTable(tbl_attr([6,7,8]));
+        var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,7,8,9]));
+        var tbl_item_part = $('#custprice-datatables-index-part').DataTable(tbl_attr([6,7,8]));
 
-        $('#custinv-modal-index').on('shown.bs.modal', function () {
+        $('#custprice-modal-index').on('shown.bs.modal', function () {
             tbl_item.columns.adjust().draw();
             tbl_item_part.columns.adjust().draw();
         });
@@ -55,10 +55,10 @@
         $('#carouselExampleSlidesOnly').on('slid.bs.carousel', function () {
             var idx = $(this).find('.active').index();
             if (idx == 0) {
-                $('#custinv-text-view-by').text("VIEW BY DO NO.");
+                $('#custprice-text-view-by').text("VIEW BY DO NO.");
             }else{
                 tbl_item_part.columns.adjust().draw();
-                $('#custinv-text-view-by').text("VIEW BY PART NO.");
+                $('#custprice-text-view-by').text("VIEW BY PART NO.");
             }
         })
 
