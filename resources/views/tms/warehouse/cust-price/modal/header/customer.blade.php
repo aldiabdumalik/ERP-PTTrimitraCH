@@ -13,7 +13,6 @@
                                         <th class="align-middle">Name</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
