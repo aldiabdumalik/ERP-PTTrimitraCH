@@ -1,11 +1,11 @@
-<div class="form-row align-items-center mb-1">
+{{-- <div class="form-row align-items-center mb-1">
     <div class="col-2">
         <label for="custprice-create-no" class="auto-middle">Customer Price No.</label>
     </div>
     <div class="col-10">
         <input type="text" name="custprice-create-no" id="custprice-create-no" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
     </div>
-</div>
+</div> --}}
 <div class="form-row align-items-center mb-1">
     <div class="col-2">
         <label for="custprice-create-customercode">Customer</label>
