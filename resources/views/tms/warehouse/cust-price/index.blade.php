@@ -11,7 +11,7 @@
 <div class="main-content-inner">
     @include('tms.warehouse.cust-price.table.index')
 </div>
-{{-- @include('tms.warehouse.cust-invoice.modal.create.index') --}}
+@include('tms.warehouse.cust-price.modal.create.index')
 
 @endsection
 @section('script')
@@ -37,30 +37,18 @@
             };
             return obj;
         };
-        // modalAction('#custprice-modal-index');
+        modalAction('#custprice-modal-index');
 
         const index_data = new Promise(function(resolve, reject) {
             let tbl_index = $('#custprice-datatables').DataTable();
             resolve(tbl_index);
         });
 
-        var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,7,8,9]));
-        var tbl_item_part = $('#custprice-datatables-index-part').DataTable(tbl_attr([6,7,8]));
+        var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,4,5]));
 
         $('#custprice-modal-index').on('shown.bs.modal', function () {
             tbl_item.columns.adjust().draw();
-            tbl_item_part.columns.adjust().draw();
         });
-
-        $('#carouselExampleSlidesOnly').on('slid.bs.carousel', function () {
-            var idx = $(this).find('.active').index();
-            if (idx == 0) {
-                $('#custprice-text-view-by').text("VIEW BY DO NO.");
-            }else{
-                tbl_item_part.columns.adjust().draw();
-                $('#custprice-text-view-by').text("VIEW BY PART NO.");
-            }
-        })
 
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
