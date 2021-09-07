@@ -36,4 +36,15 @@ trait ToolsTrait {
             ->insert($data);
         return $log;
     }
+
+    protected function customer()
+    {
+        $query = 
+            DB::connection('ekanban')
+            ->table('ekanban_customermaster')
+            ->selectRaw('CustomerCode_eKanban as code, CustomerName as name')
+            ->where('status_data', 'ACTIVE')
+            ->get();
+        return $query;
+    }
 }

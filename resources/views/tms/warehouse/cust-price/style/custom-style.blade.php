@@ -32,4 +32,7 @@
         margin-top: auto;
         margin-bottom: auto;
     }
+    .bg-abu {
+        background-color: #d3d3d3;
+    }
 </style>

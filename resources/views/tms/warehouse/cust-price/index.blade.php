@@ -51,21 +51,36 @@
         var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,4,5]));
 
         $('#custprice-modal-index').on('shown.bs.modal', function () {
-            tbl_item.columns.adjust().draw();
+            adjustDraw(tbl_item);
         });
 
-        var tbl_customer = $('#custprice-datatables-customer').DataTable(tbl_attr([]));
+        var tbl_customer = $('#custprice-datatables-customer').DataTable({
+            destroy: true,
+            lengthChange: false,
+            ordering: false,
+            fixedHeader: true,
+        });
 
         $('#custprice-create-customercode').on('keypress', function (e) {
             e.preventDefault();
             if (e.keyCode == 13) {
-                modalAction('#custprice-modal-customer');
+                modalAction('#custprice-modal-customer').then(resolve => {
+                    ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "GET", data: {type: "customer"}}).then(resolve => {
+                        let customer = resolve.content;
+                        $.each(customer, function (i, cust) {
+                            tbl_customer.row.add([
+                                cust.code,
+                                cust.name
+                            ]);
+                        });
+                    });
+                });
             }
             return false;
         });
 
         $('#custprice-modal-customer').on('shown.bs.modal', function () {
-            tbl_customer.columns.adjust().draw();
+            adjustDraw(tbl_customer);
         });
 
 
@@ -105,6 +120,10 @@
                     }
                 });
             });
+        }
+
+        function adjustDraw(tbl) {
+            return tbl.columns.adjust().draw();
         }
     });
 </script>
