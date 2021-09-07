@@ -7,7 +7,7 @@
                     <div class="table-responsive">
                         <div class="">
                             <table id="custprice-datatables-customer" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
-                                <thead class="text-center" style="font-size: 15px;background-color: #D3D3D3">
+                                <thead class="text-center bg-abu" style="font-size: 15px;">
                                     <tr style="font-size: 14px;">
                                         <th class="align-middle">Code</th>
                                         <th class="align-middle">Name</th>

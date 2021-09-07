@@ -41,8 +41,8 @@
         <div class="row no-gutters">
             <div class="col-4">
                 <select name="custprice-create-posted" id="custprice-create-posted" class="form-control form-control-sm" required style="pointer-events: none">
-                    <option value="date">Date</option>
-                    <option value="so" selected>SO</option>
+                    <option value="DATE">DATE</option>
+                    <option value="SO" selected>SO</option>
                 </select>
             </div>
             <div class="col-8">

@@ -83,6 +83,18 @@
             adjustDraw(tbl_customer);
         });
 
+        $('#custprice-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_customer.row(this).data();
+            modalAction('#custprice-modal-customer', 'hide').then(resolve => {
+                $('#custprice-create-customercode').val(data[0]);
+                $('#custprice-create-customername').val(data[1]);
+                if (data[0] === "A01") {
+                    $('#custprice-create-posted').val('DATE');
+                }else{
+                    $('#custprice-create-posted').val('SO');
+                }
+            });
+        });
 
         // Function lib
         function modalAction(elementId=null, action='show'){
