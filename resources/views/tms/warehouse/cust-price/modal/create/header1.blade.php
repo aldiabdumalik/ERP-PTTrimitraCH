@@ -58,15 +58,3 @@
         </div>
     </div>
 </div>
-<div class="form-row align-items-center mb-1">
-    <div class="col-2">
-        <label for="custprice-create-remark" class="auto-middle">Remark</label>
-    </div>
-    <div class="col-10">
-        <div class="row no-gutters">
-            <div class="col-12">
-                <input type="text" name="custprice-create-remark" id="custprice-create-remark" class="form-control form-control-sm" autocomplete="off">
-            </div>
-        </div>
-    </div>
-</div>

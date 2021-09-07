@@ -4,6 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Customer Price</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-row" style="font-size: 11px;">
@@ -34,7 +35,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="custprice-btn-index-close" class="btn btn-secondary">Batal</button>
+                    <button type="button" id="custprice-btn-index-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                     <button type="submit" id="custprice-btn-index-submit" class="btn btn-info">Simpan</button>
                 </div>
             </div>

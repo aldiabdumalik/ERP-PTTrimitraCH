@@ -12,6 +12,7 @@
     @include('tms.warehouse.cust-price.table.index')
 </div>
 @include('tms.warehouse.cust-price.modal.create.index')
+@include('tms.warehouse.cust-price.modal.header.customer')
 
 @endsection
 @section('script')
@@ -37,11 +38,14 @@
             };
             return obj;
         };
-        modalAction('#custprice-modal-index');
 
         const index_data = new Promise(function(resolve, reject) {
             let tbl_index = $('#custprice-datatables').DataTable();
             resolve(tbl_index);
+        });
+
+        $('#custprice-btn-modal-create').on('click', function () {
+            modalAction('#custprice-modal-index');
         });
 
         var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,4,5]));
@@ -50,6 +54,22 @@
             tbl_item.columns.adjust().draw();
         });
 
+        var tbl_customer = $('#custprice-datatables-customer').DataTable(tbl_attr([]));
+
+        $('#custprice-create-customercode').on('keypress', function (e) {
+            e.preventDefault();
+            if (e.keyCode == 13) {
+                modalAction('#custprice-modal-customer');
+            }
+            return false;
+        });
+
+        $('#custprice-modal-customer').on('shown.bs.modal', function () {
+            tbl_customer.columns.adjust().draw();
+        });
+
+
+        // Function lib
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
                 $(elementId).modal(action);
