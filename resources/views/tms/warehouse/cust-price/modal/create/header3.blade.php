@@ -3,7 +3,7 @@
         <label for="custprice-create-user" class="auto-middle">User</label>
     </div>
     <div class="col-10">
-        <input type="text" name="custprice-create-user" id="custprice-create-user" class="form-control form-control-sm readonly-first" readonly required value="{{Auth()->user()->FullName}}">
+        <input type="text" name="custprice-create-user" id="custprice-create-user" class="form-control form-control-sm readonly-first" data-val="{{auth()->user()->FullName}}" readonly required value="{{auth()->user()->FullName}}">
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
@@ -35,7 +35,7 @@
                 <label for="custprice-create-entrydate" class="auto-middle">Entry Date</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custprice-create-entrydate" id="custprice-create-entrydate" class="form-control form-control-sm readonly-first" value="{{date('d/m/Y')}}" readonly required>
+                <input type="text" name="custprice-create-entrydate" id="custprice-create-entrydate" class="form-control form-control-sm readonly-first" data-val="{{date('d/m/Y')}}" value="{{date('d/m/Y')}}" readonly required>
             </div>
         </div>
     </div>

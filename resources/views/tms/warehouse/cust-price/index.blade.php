@@ -50,13 +50,13 @@
                     headers: token_header
                 },
                 columns: [
-                    {data:'cust_id', name: 'cust_id', className: "text-center"},
-                    {data:'CustomerName', name: 'CustomerName', className: "text-left"},
-                    {data:'created_date', name: 'created_date', className: "text-center"},
-                    {data:'active_date', name: 'active_date', className: "text-center"},
-                    {data:'posted_date', name: 'posted_date', className: "text-center"},
-                    {data:'voided_date', name: 'voided_date', className: "text-center"},
-                    {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center"},
+                    {data:'cust_id', name: 'cust_id', className: "text-center align-middle"},
+                    {data:'CustomerName', name: 'CustomerName', className: "text-left align-middle"},
+                    {data:'created_date', name: 'created_date', className: "text-center align-middle"},
+                    {data:'active_date', name: 'active_date', className: "text-center align-middle"},
+                    {data:'posted_date', name: 'posted_date', className: "text-center align-middle"},
+                    {data:'voided_date', name: 'voided_date', className: "text-center align-middle"},
+                    {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center align-middle"},
                 ],
                 ordering: false,
             });
@@ -103,6 +103,10 @@
             adjustDraw(tbl_customer);
         });
 
+        $('#custprice-modal-index').on('hidden.bs.modal', function () {
+            resetForm();
+        });
+
         $('#custprice-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_customer.row(this).data();
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
@@ -117,6 +121,20 @@
         });
 
         // Function lib
+        function resetForm() {
+            $('#custprice-create-customercode').val(null);
+            $('#custprice-create-customername').val(null);
+            $('#custprice-create-posted').val(null);
+            $('#custprice-create-voided').val(null);
+            $('#custprice-create-printed').val(null);
+            $('#custprice-create-user').val($('#custprice-create-user').data('val'));
+            $('#custprice-create-valas').val($('#custprice-create-valas').data('val'));
+            $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+            $('#custprice-create-activedate').val("{{date('d/m/Y')}}");
+            index_data.then(resolve => {
+                resolve.clear().draw(false);
+            });
+        }
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
                 $(elementId).modal(action);
