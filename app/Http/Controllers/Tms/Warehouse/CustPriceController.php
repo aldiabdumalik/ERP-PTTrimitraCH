@@ -4,7 +4,9 @@ namespace App\Http\Controllers\TMS\Warehouse;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
+use App\Models\Dbtbs\CustPrice;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class CustPriceController extends Controller
 {
@@ -13,6 +15,37 @@ class CustPriceController extends Controller
     public function index()
     {
         return view('tms.warehouse.cust-price.index');
+    }
+
+    public function custPriceTable(Request $request)
+    {
+        $query = CustPrice::select(['entry_custprice_tbl.*', 'ekanban_customermaster.CustomerCode_eKanban', 'ekanban_customermaster.CustomerName'])
+            ->join('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+            ->groupBy(['cust_id', 'active_date'])->orderBy('created_date', 'DESC')->get();
+            
+        return DataTables::of($query)
+            ->editColumn('created_date', function($query) {
+                    return date('d/m/Y', strtotime($query->created_date));
+                }
+            )
+            ->editColumn('active_date', function($query) {
+                    return date('d/m/Y', strtotime($query->active_date));
+                }
+            )
+            ->editColumn('posted_date', function($query) {
+                    return ($query->posted_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->posted_date));
+                }
+            )
+            ->editColumn('voided_date', function($query) {
+                    return ($query->voided_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->voided_date));
+                }
+            )
+            ->addColumn('action', function($query){
+                    return view('tms.warehouse.cust-price.button.btnTableIndex', ['data' => $query]);
+                }
+            )
+            ->rawColumns(['action'])
+            ->make(true);
     }
     
     public function headerTools(Request $request)

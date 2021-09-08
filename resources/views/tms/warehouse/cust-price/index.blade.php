@@ -40,7 +40,26 @@
         };
 
         const index_data = new Promise(function(resolve, reject) {
-            let tbl_index = $('#custprice-datatables').DataTable();
+            let tbl_index = $('#custprice-datatables').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.warehouse.cust_price.index')}}",
+                    method: 'POST',
+                    headers: token_header
+                },
+                columns: [
+                    {data:'cust_id', name: 'cust_id', className: "text-center"},
+                    {data:'CustomerName', name: 'CustomerName', className: "text-left"},
+                    {data:'created_date', name: 'created_date', className: "text-center"},
+                    {data:'active_date', name: 'active_date', className: "text-center"},
+                    {data:'posted_date', name: 'posted_date', className: "text-center"},
+                    {data:'voided_date', name: 'voided_date', className: "text-center"},
+                    {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center"},
+                ],
+                ordering: false,
+            });
             resolve(tbl_index);
         });
 
@@ -73,6 +92,7 @@
                                 cust.name
                             ]);
                         });
+                        tbl_customer.draw();
                     });
                 });
             }

@@ -12,6 +12,7 @@ class CustPrice extends Model
 
     protected $connection = 'db_tbs';
     protected $table = 'entry_custprice_tbl';
+    
     protected $fillable = [
         'id_price',
         'status',

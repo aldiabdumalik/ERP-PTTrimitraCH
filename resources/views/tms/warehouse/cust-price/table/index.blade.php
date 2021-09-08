@@ -32,6 +32,7 @@
                                             <th class="align-middle">Cust ID</th>
                                             <th class="align-middle">Customer Name</th>
                                             <th class="align-middle">Written</th>
+                                            <th class="align-middle">Active Date</th>
                                             <th class="align-middle">Posted</th>
                                             <th class="align-middle">Voided</th>
                                             <th class="align-middle">Action</th>
