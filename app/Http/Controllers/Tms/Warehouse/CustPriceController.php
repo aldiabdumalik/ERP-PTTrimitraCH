@@ -19,9 +19,15 @@ class CustPriceController extends Controller
 
     public function custPriceTable(Request $request)
     {
-        $query = CustPrice::select(['entry_custprice_tbl.*', 'ekanban_customermaster.CustomerCode_eKanban', 'ekanban_customermaster.CustomerName'])
+        $query = CustPrice::select([
+                'entry_custprice_tbl.*', 
+                'ekanban_customermaster.CustomerCode_eKanban', 
+                'ekanban_customermaster.CustomerName'
+            ])
             ->join('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
-            ->groupBy(['cust_id', 'active_date'])->orderBy('created_date', 'DESC')->get();
+            ->groupBy(['cust_id', 'active_date'])
+            ->orderBy('created_date', 'DESC')
+            ->get();
             
         return DataTables::of($query)
             ->editColumn('created_date', function($query) {
@@ -46,6 +52,23 @@ class CustPriceController extends Controller
             )
             ->rawColumns(['action'])
             ->make(true);
+    }
+
+    public function custPriceDetail($cust, $date)
+    {
+        $query = CustPrice::select([
+                'entry_custprice_tbl.*', 
+                'ekanban_customermaster.CustomerCode_eKanban', 
+                'ekanban_customermaster.CustomerName',
+                'item.PART_NO',
+                'item.DESCRIPT'
+            ])
+            ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
+            ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+            ->where('cust_id', $cust)
+            ->where('active_date', $date)
+            ->get();
+        return _Success(null, 200, $query);
     }
     
     public function headerTools(Request $request)

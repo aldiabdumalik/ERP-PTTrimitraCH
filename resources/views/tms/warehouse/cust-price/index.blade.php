@@ -113,14 +113,59 @@
                 $('#custprice-create-customercode').val(data[0]);
                 $('#custprice-create-customername').val(data[1]);
                 if (data[0] === "A01") {
-                    $('#custprice-create-posted').val('DATE');
+                    $('#custprice-create-priceby').val('DATE');
                 }else{
-                    $('#custprice-create-posted').val('SO');
+                    $('#custprice-create-priceby').val('SO');
                 }
             });
         });
 
+        $(document).on('click', '.custprice-act-view', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            route  = route.replace(':cust', cust);
+            route  = route.replace(':date', date);
+            modalAction('#custprice-modal-index').then(resolve => {
+                ajaxCall({route: route, method: "GET"}).then(resolve => {
+                    if (resolve.status == true) {
+                        var no = 1;
+                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
+                        $.each(resolve.content, function (i, data) {
+                            tbl_item.row.add([
+                                no,
+                                data.item_code,
+                                data.PART_NO,
+                                data.DESCRIPT,
+                                (data.price_new == null ? "0.00" : addZeroes(String(data.price_new))),
+                                "0.00",
+                            ]);
+                            no++;
+                            cust_id = data.cust_id;
+                            cust_name = data.CustomerName;
+                            valas = data.currency;
+                            active_date = data.active_date;
+                            created = data.created_date;
+                            user = data.created_by;
+                            posted = data.posted_date;
+                            voided = data.voided_date;
+                            printed = data.printed_date;
+                        });
+                        tbl_item.draw();
+                    }
+                });
+            });
+        });
+
         // Function lib
+        function addZeroes( num ) {
+            var value = Number(num);
+            var res = num.split(".");
+            if(res.length == 1 || (res[1].length < 4)) {
+                value = value.toFixed(2);
+            }
+            return value;
+        }
         function resetForm() {
             $('#custprice-create-customercode').val(null);
             $('#custprice-create-customername').val(null);
@@ -131,9 +176,7 @@
             $('#custprice-create-valas').val($('#custprice-create-valas').data('val'));
             $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
             $('#custprice-create-activedate').val("{{date('d/m/Y')}}");
-            index_data.then(resolve => {
-                resolve.clear().draw(false);
-            });
+            tbl_item.clear().draw(false);
         }
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
