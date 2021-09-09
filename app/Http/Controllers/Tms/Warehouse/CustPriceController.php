@@ -70,6 +70,11 @@ class CustPriceController extends Controller
             ->get();
         return _Success(null, 200, $query);
     }
+
+    public function items(Request $request)
+    {
+        
+    }
     
     public function headerTools(Request $request)
     {

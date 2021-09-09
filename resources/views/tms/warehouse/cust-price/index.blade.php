@@ -13,6 +13,7 @@
 </div>
 @include('tms.warehouse.cust-price.modal.create.index')
 @include('tms.warehouse.cust-price.modal.header.customer')
+@include('tms.warehouse.cust-price.modal.create.itemTableAdd')
 
 @endsection
 @section('script')
