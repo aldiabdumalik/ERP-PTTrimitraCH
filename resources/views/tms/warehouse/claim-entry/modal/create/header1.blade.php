@@ -8,7 +8,7 @@
                 <input type="text" name="claim-create-no" id="claim-create-no" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
             <div class="col-3">
-                <input type="text" name="claim-create-branch" id="claim-create-branch" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="claim-create-branch" id="claim-create-branch" class="form-control form-control-sm readonly-first" readonly value="{{ auth()->user()->Branch }}" autocomplete="off" required>
             </div>
             <div class="col-3">
                 <input type="text" name="claim-create-warehouse" id="claim-create-warehouse" class="form-control form-control-sm" autocomplete="off" required>
