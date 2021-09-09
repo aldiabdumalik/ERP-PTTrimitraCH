@@ -144,7 +144,7 @@
                                 data.item_code,
                                 data.PART_NO,
                                 data.DESCRIPT,
-                                (data.price_new == null ? "0.00" : addZeroes(String(data.price_new))),
+                                (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
                                 "0.00",
                             ]);
                             no++;
@@ -299,6 +299,19 @@
             return tbl.columns.adjust().draw();
         }
         
+        function currency(bilangan) {
+            var	number_string = bilangan.toString(),
+            split	= number_string.split('.'),
+            sisa 	= split[0].length % 3,
+            rupiah 	= split[0].substr(0, sisa),
+            ribuan 	= split[0].substr(sisa).match(/\d{1,3}/gi);
+
+            if (ribuan) {
+                separator = sisa ? ',' : '';
+                rupiah += separator + ribuan.join(',');
+            }
+            return rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+        }
     });
 </script>
 @endsection
