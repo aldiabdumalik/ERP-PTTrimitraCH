@@ -20,7 +20,7 @@
                     </div>
                     <div class="mt-4">
                         <div class="row">
-                            <div class="col-12 text-right">
+                            <div id="custprice-btn-table-item" class="col-12 text-right">
                                 <button type="button" id="custprice-btn-add-item" class="btn btn-sm btn-info">
                                     Add Item
                                 </button>
@@ -35,8 +35,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="custprice-btn-index-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" id="custprice-btn-index-submit" class="btn btn-info">Simpan</button>
+                    <button type="button" id="custprice-btn-index-close" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" id="custprice-btn-index-submit" class="btn btn-info">Save</button>
                 </div>
             </div>
         </form>

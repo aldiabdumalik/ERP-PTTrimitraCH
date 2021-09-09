@@ -4,9 +4,9 @@
             <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-create">
                 <i class="ti-plus"></i>  Add New Data
             </button>
-            <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-print">
+            {{-- <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-print">
                 <i class="fa fa-print"></i>  Print
-            </button>
+            </button> --}}
             {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="custprice-btn-modal-table-setting">
                 <i class="fa fa-cogs"></i>
             </button> --}}
@@ -26,7 +26,7 @@
                     <div class="col">
                         <div class="">
                             <div class="table-responsive">
-                                <table id="custprice-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
+                                <table id="custprice-datatables" class="table table-bordered table-striped table-hover" style="width:100%;cursor:pointer">
                                     <thead>
                                         <tr>
                                             <th class="align-middle">Cust ID</th>
