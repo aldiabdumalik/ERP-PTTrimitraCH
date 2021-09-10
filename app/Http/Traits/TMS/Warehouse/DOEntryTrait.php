@@ -20,6 +20,10 @@ trait DoEntryTrait {
             ->where('db_tbs.entry_sso_tbl.sso_header', $request->sso_header)
             ->where('db_tbs.entry_sso_tbl.active_cls','1')
             ->leftJoin('db_tbs.entry_so_tbl', 'db_tbs.entry_so_tbl.so_header', '=', 'db_tbs.entry_sso_tbl.so_header')
+            ->leftJoin('db_tbs.sys_warehouse', function ($join){
+                $join->on('db_tbs.sys_warehouse.branch', '=', 'db_tbs.entry_so_tbl.branch');
+                $join->on('db_tbs.sys_warehouse.warehouse_id', '=', 'db_tbs.entry_so_tbl.warehouse');
+            })
             ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'db_tbs.entry_so_tbl.cust_id')
             ->leftJoin('db_tbs.sys_do_address', function ($join) {
                 $join->on('db_tbs.entry_so_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
