@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Milon\Barcode\Facades\DNS1DFacade as DNS1D;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 
 class DoEntryController extends Controller
@@ -551,6 +552,9 @@ class DoEntryController extends Controller
                 if (!isset($sso)) {
                     return $this->_Error('SSO data not found!', 404);
                 }else{
+                    if ($sso->branch !== Auth::user()->Branch) {
+                        return $this->_Error('SSO/SO data not match with your branch!', 404);
+                    }
                     return $this->_Success('OK!', 200, $sso);
                 }
                 break;
