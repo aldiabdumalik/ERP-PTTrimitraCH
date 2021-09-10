@@ -563,6 +563,9 @@ class DoEntryController extends Controller
                 if (!isset($so)) {
                     return $this->_Error('SO data not found!', 404);
                 }else{
+                    if ($so->branch !== Auth::user()->Branch) {
+                        return $this->_Error('SSO/SO data not match with your branch!', 404);
+                    }
                     return $this->_Success('OK!', 200, $so);
                 }
                 break;
