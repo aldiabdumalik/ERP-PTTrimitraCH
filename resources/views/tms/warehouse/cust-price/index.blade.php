@@ -108,6 +108,7 @@
             resetForm();
         });
 
+        var tbl_item_add;
         $('#custprice-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_customer.row(this).data();
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
@@ -118,6 +119,9 @@
                 }else{
                     $('#custprice-create-priceby').val('SO');
                 }
+                modalAction('#custprice-modal-item').then(function () {
+                    tbl_item_add = $('#custprice-datatables-customer-item').DataTable();
+                });
             });
         });
 

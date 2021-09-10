@@ -3,12 +3,12 @@
         <form id="custprice-form-item" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Customer Item Cust id <span class="cust-id-txt"></span></h4>
+                    {{-- <h4 class="modal-title">Customer Item Cust id <span class="cust-id-txt"></span></h4> --}}
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <h6 class="text-center">Click row to select Item</h6>
-                    <div class="">
+                    <div class="datatables datatable-dark">
                         <div class="table-responsive">
                             <table id="custprice-datatables-customer-item" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
                                 <thead>
