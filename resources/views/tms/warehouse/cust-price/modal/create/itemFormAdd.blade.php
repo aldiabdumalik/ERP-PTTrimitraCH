@@ -14,7 +14,7 @@
                                 <label for="custprice-additem-itemcode">Item Code</label>
                             </div>
                             <div class="col-10">
-                                <input type="text" name="custprice-additem-itemcode" id="custprice-additem-itemcode" class="form-control form-control-sm" autocomplete="off" required>
+                                <input type="text" name="custprice-additem-itemcode" id="custprice-additem-itemcode" class="form-control form-control-sm" readonly autocomplete="off" required>
                             </div>
                         </div>
                         <div class="form-row align-items-center mb-1">
@@ -46,7 +46,7 @@
                                 <label for="custprice-additem-newprice">New Price</label>
                             </div>
                             <div class="col-10">
-                                <input type="number" name="custprice-additem-newprice" id="custprice-additem-newprice" class="form-control form-control-sm" required value="0">
+                                <input type="text" name="custprice-additem-newprice" id="custprice-additem-newprice" class="form-control form-control-sm" required value="0">
                             </div>
                         </div>
                     </div>

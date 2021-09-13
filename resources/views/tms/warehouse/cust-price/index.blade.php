@@ -75,6 +75,22 @@
             adjustDraw(tbl_item);
         });
 
+        $('#custprice-datatables-index tbody').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_item.row(this).data();
+            if (data != undefined) {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    $('#custprice-btn-edit-item').prop('disabled', true);
+                    $('#custprice-btn-delete-item').prop('disabled', true);
+                }else {
+                    tbl_item.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    $('#custprice-btn-edit-item').removeAttr('disabled');
+                    $('#custprice-btn-delete-item').removeAttr('disabled');
+                }
+            }
+        });
+
         var tbl_customer = $('#custprice-datatables-customer').DataTable({
             destroy: true,
             lengthChange: false,
@@ -86,6 +102,7 @@
             e.preventDefault();
             if (e.keyCode == 13) {
                 modalAction('#custprice-modal-customer').then(resolve => {
+                    tbl_item.clear().draw(false);
                     ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
                         let customer = resolve.content;
                         $.each(customer, function (i, cust) {
@@ -141,17 +158,129 @@
                             {data:'unit', name: 'unit', className: "text-center align-middle"},
                         ],
                         ordering: false,
-                        lengthChange: false
+                        lengthChange: false,
+                        createdRow: function( row, data, dataIndex ) {
+                            $(row).attr('data-id', data.itemcode);
+                            $(row).attr('id', `row-${data.itemcode}`);
+                        }
                     });
                 });
             });
         });
 
+        $('#custprice-btn-add-item').on('click', function () {
+            var cust_id = $('#custprice-create-customercode').val();
+            var cust_name = $('#custprice-create-customername').val();
+            if (cust_name === "") {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: "Please add customer first!",
+                    icon: 'warning'
+                });
+            }else{
+                modalAction('#custprice-modal-item').then(function () {
+                    tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ajax: {
+                            url: "{{route('tms.warehouse.cust_price.header')}}",
+                            method: "POST",
+                            data: {
+                                type: "items",
+                                cust_id: cust_id
+                            },
+                            headers: token_header
+                        },
+                        columns: [
+                            {data:'itemcode', name: 'itemcode', className: "text-center align-middle"},
+                            {data:'part_no', name: 'part_no', className: "text-left align-middle"},
+                            {data:'descript', name: 'descript', className: "text-left align-middle"},
+                            {data:'unit', name: 'unit', className: "text-center align-middle"},
+                        ],
+                        ordering: false,
+                        lengthChange: false,
+                        createdRow: function( row, data, dataIndex ) {
+                            $(row).attr('data-id', data.itemcode);
+                            $(row).attr('id', `row-${data.itemcode}`);
+                        }
+                    });
+                });
+            }
+        });
+
         $('#custprice-datatables-customer-item').off('click', 'tr').on('click', 'tr', function () {
+            var row_id = $(this).data('id');
             var data = tbl_item_add.row(this).data();
-            modalAction('#custprice-modal-itemadd').then(function () {
-                console.log(data);
-            });
+            var cek = tbl_item.rows().data().toArray();
+            var isExist = false;
+            if (cek.length > 0) {
+                for (let i = 0; i < cek.length; i++) {
+                    if (data.itemcode == cek[i][1]) {
+                        isExist = true;
+                        break;
+                    }
+                }
+            }
+            if (isExist == true) {
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: "Itemcode ini tersedia, silahkan klik edit pada tabel untuk melakukan perubahan!",
+                        icon: 'warning'
+                    });
+            }else{
+                modalAction('#custprice-modal-item', 'hide').then(() => {
+                    modalAction('#custprice-modal-itemadd').then(() => {
+                        $('#custprice-additem-itemcode').val(data.itemcode);
+                        $('#custprice-additem-partno').val(data.part_no);
+                        $('#custprice-additem-description').val(data.descript);
+                        $('#custprice-additem-unit').val(data.unit);
+                        $('#custprice-additem-newprice').val(currency(addZeroes(String(0))));
+                    });
+                });
+            }
+        });
+
+        $(document).on('click', '#custprice-btn-delete-item', function () {
+            tbl_item.row('.selected').remove().draw( false );
+            for (let i = 0; i < tbl_item.rows().data().toArray().length; i++) {
+                var drw = tbl_item.cell( i, 0 ).data(1+i); 
+            }
+            tbl_item.draw(false);
+            $('#custprice-btn-edit-item').prop('disabled', true);
+            $('#custprice-btn-delete-item').prop('disabled', true);
+        });
+
+        $(document).on('submit', '#custprice-form-itemadd', function () {
+            var index = tbl_item.data().length;
+            if ($('#custprice-additem-index').val() == 0) {
+                var add = tbl_item.row.add([
+                    index+1,
+                    $('#custprice-additem-itemcode').val(),
+                    $('#custprice-additem-partno').val(),
+                    $('#custprice-additem-description').val(),
+                    currency(addZeroes(String($('#custprice-additem-newprice').val()))),
+                    "0.00",
+                ]).node();
+                $(add).attr('data-id', index+1);
+                tbl_item.draw(false);
+            }else{
+                var idx = parseInt($('#custprice-additem-index').val()) - 1;
+                tbl_item.row( idx ).data([
+                    $('#custprice-additem-index').val(),
+                    $('#custprice-additem-itemcode').val(),
+                    $('#custprice-additem-partno').val(),
+                    $('#custprice-additem-description').val(),
+                    currency(addZeroes(String($('#custprice-additem-newprice').val()))),
+                    "0.00",
+                ]).draw(false);
+            }
+            modalAction('#custprice-modal-itemadd', 'hide');
+        });
+
+        $(document).on('hidden.bs.modal', '#custprice-modal-itemadd', function () {
+            $(this).find('#custprice-form-itemadd').trigger('reset');
+            $('#custprice-additem-index').val(0);
         });
 
         $(document).on('click', '.custprice-act-view', function () {
