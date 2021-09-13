@@ -70,17 +70,19 @@ class CustPriceController extends Controller
             ->get();
         return _Success(null, 200, $query);
     }
-
-    public function items(Request $request)
-    {
-        
-    }
     
     public function headerTools(Request $request)
     {
         switch ($request->type) {
             case 'customer':
                 return _Success(null, 200, $this->customer());
+                break;
+            
+            case "items":
+                if (isset($request->cust_id)) {
+                    return DataTables::of($this->items($request->cust_id))->make(true);
+                }
+                return _Error('Params not exist!', 404);
                 break;
             
             default:

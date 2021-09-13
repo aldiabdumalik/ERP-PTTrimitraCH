@@ -14,6 +14,7 @@
 @include('tms.warehouse.cust-price.modal.create.index')
 @include('tms.warehouse.cust-price.modal.header.customer')
 @include('tms.warehouse.cust-price.modal.create.itemTableAdd')
+@include('tms.warehouse.cust-price.modal.create.itemFormAdd')
 
 @endsection
 @section('script')
@@ -85,7 +86,7 @@
             e.preventDefault();
             if (e.keyCode == 13) {
                 modalAction('#custprice-modal-customer').then(resolve => {
-                    ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "GET", data: {type: "customer"}}).then(resolve => {
+                    ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
                         let customer = resolve.content;
                         $.each(customer, function (i, cust) {
                             tbl_customer.row.add([
@@ -120,8 +121,36 @@
                     $('#custprice-create-priceby').val('SO');
                 }
                 modalAction('#custprice-modal-item').then(function () {
-                    tbl_item_add = $('#custprice-datatables-customer-item').DataTable();
+                    tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ajax: {
+                            url: "{{route('tms.warehouse.cust_price.header')}}",
+                            method: "POST",
+                            data: {
+                                type: "items",
+                                cust_id: data[0]
+                            },
+                            headers: token_header
+                        },
+                        columns: [
+                            {data:'itemcode', name: 'itemcode', className: "text-center align-middle"},
+                            {data:'part_no', name: 'part_no', className: "text-left align-middle"},
+                            {data:'descript', name: 'descript', className: "text-left align-middle"},
+                            {data:'unit', name: 'unit', className: "text-center align-middle"},
+                        ],
+                        ordering: false,
+                        lengthChange: false
+                    });
                 });
+            });
+        });
+
+        $('#custprice-datatables-customer-item').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_item_add.row(this).data();
+            modalAction('#custprice-modal-itemadd').then(function () {
+                console.log(data);
             });
         });
 

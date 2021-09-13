@@ -47,4 +47,16 @@ trait ToolsTrait {
             ->get();
         return $query;
     }
+
+    protected function items($id)
+    {
+        $query = 
+            DB::connection('db_tbs')
+                ->table('item')
+                ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit')
+                ->where('CUSTCODE', $id)
+                ->get();
+        return $query;
+    }
+
 }
