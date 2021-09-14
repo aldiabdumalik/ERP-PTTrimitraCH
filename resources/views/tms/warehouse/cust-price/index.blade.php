@@ -385,6 +385,33 @@
             });
         });
 
+        $(document).on('submit', '#custprice-form-index', function () {
+            var data = {
+                cust_id: $('#custprice-create-customercode').val(),
+                valas: $('#custprice-create-valas').val(),
+                active_date: $('#custprice-create-activedate').val(),
+                items: tbl_item.rows().data().toArray()
+            };
+            // Cek
+            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            route  = route.replace(':cust', $('#custprice-create-customercode').val());
+            route  = route.replace(':date', $('#custprice-create-activedate').val().split("/").reverse().join("-"));
+            var rou;
+            ajaxCall({route: route, method: "GET"}).then(resolve => {
+                if (resolve.content.length <= 0) {
+                    rou = "{{route('tms.warehouse.cust_price.save')}}";
+                }else{
+                    rou = "{{route('tms.warehouse.cust_price.save')}}";
+                }
+            });
+        });
+
+        function submit(route, data) {
+            return ajaxCall({route: route, method: "POST", data: data}).then(resolve => {
+                console.log(resolve);
+            });
+        }
+
         // Function lib
         function resetForm() {
             $('#custprice-create-customercode').val(null);
