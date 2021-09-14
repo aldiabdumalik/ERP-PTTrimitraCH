@@ -355,7 +355,7 @@
                                 data.item_code,
                                 data.PART_NO,
                                 data.DESCRIPT,
-                                (data.price_new == null ? "0.00" : addZeroes(String(data.price_new))),
+                                (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
                                 "0.00",
                             ]);
                             no++;

@@ -20,6 +20,7 @@ class CustPrice extends Model
         'item_code',
         'currency',
         'price',
+        'price_new',
         'active_date',
     ];
     protected $hidden = [];

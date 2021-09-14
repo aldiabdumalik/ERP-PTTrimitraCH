@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustPrice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class CustPriceController extends Controller
@@ -70,6 +71,25 @@ class CustPriceController extends Controller
             ->get();
         return _Success(null, 200, $query);
     }
+
+    public function save(Request $request)
+    {
+        $data = [];
+        $items = $request->items;
+        if (!empty($items)) {
+            for ($i=0; $i < count($items); $i++) { 
+                $data[] = [
+                    'cust_id' => $request->cust_id,
+                    'item_code' => $items[$i][1],
+                    'currency' => $request->valas,
+                    'price' => $items[$i][4],
+                    'active_date' => $request->active_date,
+                ];
+            }
+            return _Success(null, 200, $data);
+        }
+        return _Error('failed to save');
+    }
     
     public function headerTools(Request $request)
     {
@@ -80,7 +100,8 @@ class CustPriceController extends Controller
             
             case "items":
                 if (isset($request->cust_id)) {
-                    return DataTables::of($this->items($request->cust_id))->make(true);
+                    // return DataTables::of($this->items($request->cust_id))->make(true);
+                    return DataTables::of($this->items_with_old_price($request->cust_id))->make(true);
                 }
                 return _Error('Params not exist!', 404);
                 break;
@@ -89,5 +110,64 @@ class CustPriceController extends Controller
                 return _Error('Params not exist!', 404);
                 break;
         }
+    }
+
+    public function getitems()
+    {
+        $cust = 'N02';
+        $items = $this->items($cust);
+        $items_arr = [];
+        foreach ($items as $i) {
+            $price = CustPrice::where('item_code', $i->itemcode)
+                ->orderBy('active_date', 'DESC')
+                ->first();
+            if (isset($price)) {
+                $items_arr[] = [
+                    'itemcode' => $i->itemcode,
+                    'part_no' => $i->part_no,
+                    'descript' => $i->descript,
+                    'unit' => $i->unit,
+                    'price' => $price->price_new
+                ];
+            }else{
+                $items_arr[] = [
+                    'itemcode' => $i->itemcode,
+                    'part_no' => $i->part_no,
+                    'descript' => $i->descript,
+                    'unit' => $i->unit,
+                    'price' => 0
+                ];
+            }
+        }
+        print_r($items_arr);
+    }
+
+    private function items_with_old_price($cust)
+    {
+        $items = $this->items($cust);
+        $items_arr = [];
+        foreach ($items as $i) {
+            $price = CustPrice::where('item_code', $i->itemcode)
+                ->orderBy('active_date', 'DESC')
+                ->first();
+            if (isset($price)) {
+                $items_arr[] = [
+                    'itemcode' => $i->itemcode,
+                    'part_no' => $i->part_no,
+                    'descript' => $i->descript,
+                    'unit' => $i->unit,
+                    'price' => $price->price_new
+                ];
+            }else{
+                $items_arr[] = [
+                    'itemcode' => $i->itemcode,
+                    'part_no' => $i->part_no,
+                    'descript' => $i->descript,
+                    'unit' => $i->unit,
+                    'price' => 0
+                ];
+            }
+        }
+        return $items_arr;
     }
 }

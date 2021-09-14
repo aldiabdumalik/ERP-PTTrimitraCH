@@ -191,3 +191,7 @@ Route::get('/warehouse/customer_price/detail/{cust}/{date}', [
     'uses' => 'TMS\Warehouse\CustPriceController@custPriceDetail', 
     'as' => 'tms.warehouse.cust_price.detail'
 ]);
+Route::get('/warehouse/customer_price/items', [
+    'uses' => 'TMS\Warehouse\CustPriceController@getitems', 
+    'as' => 'tms.warehouse.cust_price.getitems'
+]);
