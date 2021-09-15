@@ -135,6 +135,29 @@ class CustPriceController extends Controller
         return _Success('Customer Price has been Voided');
     }
 
+    public function unvoided(Request $request)
+    {
+        $cek = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])
+            ->whereNotNull('posted_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Customer Price has been posted');
+        }
+
+        $void = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])->update([
+                'voided_date' => null,
+                'voided_by' => null
+            ]);
+        return _Success('Customer Price has been Unvoided');
+    }
+
     public function posted(Request $request)
     {
         $cek = CustPrice::where([
@@ -156,6 +179,29 @@ class CustPriceController extends Controller
                 'posted_by' => Auth::user()->FullName
             ]);
         return _Success('Customer Price has been Posted');
+    }
+
+    public function unposted(Request $request)
+    {
+        $cek = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])
+            ->whereNotNull('voided_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Customer Price has been voided');
+        }
+
+        $void = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])->update([
+                'posted_date' => null,
+                'posted_by' => null
+            ]);
+        return _Success('Customer Price has been Unposted');
     }
     
     public function headerTools(Request $request)
