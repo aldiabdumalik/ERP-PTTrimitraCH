@@ -243,7 +243,7 @@ class ClaimEntryController extends Controller
                         'cl_no' => $request->cl_no,
                         'doc_no' => $request->doc_no,
                         'creation_at' => $date,
-                        'creation_by' => Auth::user()->fullName,
+                        'creation_by' => Auth::user()->FullName,
                         'itemcode' => $items[$i][1],
                         'descript' => $items[$i][2],
                         'unit' => $items[$i][3],

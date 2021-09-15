@@ -195,3 +195,7 @@ Route::get('/warehouse/customer_price/items', [
     'uses' => 'TMS\Warehouse\CustPriceController@getitems', 
     'as' => 'tms.warehouse.cust_price.getitems'
 ]);
+Route::post('/warehouse/customer_price/save', [
+    'uses' => 'TMS\Warehouse\CustPriceController@save', 
+    'as' => 'tms.warehouse.cust_price.save'
+]);

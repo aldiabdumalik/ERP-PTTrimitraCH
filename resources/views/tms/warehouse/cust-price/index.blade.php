@@ -389,20 +389,21 @@
             var data = {
                 cust_id: $('#custprice-create-customercode').val(),
                 valas: $('#custprice-create-valas').val(),
-                active_date: $('#custprice-create-activedate').val(),
+                active_date: $('#custprice-create-activedate').val().split("/").reverse().join("-"),
                 items: tbl_item.rows().data().toArray()
             };
             // Cek
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', $('#custprice-create-customercode').val());
             route  = route.replace(':date', $('#custprice-create-activedate').val().split("/").reverse().join("-"));
-            var rou;
             ajaxCall({route: route, method: "GET"}).then(resolve => {
+                var rou;
                 if (resolve.content.length <= 0) {
                     rou = "{{route('tms.warehouse.cust_price.save')}}";
                 }else{
                     rou = "{{route('tms.warehouse.cust_price.save')}}";
                 }
+                submit(rou, data);
             });
         });
 

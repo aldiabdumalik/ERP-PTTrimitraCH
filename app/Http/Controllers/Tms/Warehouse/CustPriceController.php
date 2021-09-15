@@ -5,7 +5,9 @@ namespace App\Http\Controllers\TMS\Warehouse;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustPrice;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -82,13 +84,78 @@ class CustPriceController extends Controller
                     'cust_id' => $request->cust_id,
                     'item_code' => $items[$i][1],
                     'currency' => $request->valas,
-                    'price' => $items[$i][4],
+                    'price' =>  str_replace(',', '', $items[$i][4]), // $items[$i][4],
                     'active_date' => $request->active_date,
+                    'created_by' => Auth::user()->FullName,
+                    'created_date' => Carbon::now(),
                 ];
             }
             return _Success(null, 200, $data);
         }
         return _Error('failed to save');
+    }
+
+    public function update(Request $request, $cust, $active)
+    {
+        $cek = CustPrice::select([
+                'entry_custprice_tbl.*', 
+                'ekanban_customermaster.CustomerCode_eKanban', 
+                'ekanban_customermaster.CustomerName',
+                'item.PART_NO',
+                'item.DESCRIPT'
+            ])
+            ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
+            ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+            ->where('cust_id', $cust)
+            ->where('active_date', $active)
+            ->get();
+        $items = $request->items;
+    }
+
+    public function voided(Request $request)
+    {
+        $cek = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])
+            ->whereNotNull('posted_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Customer Price has been posted');
+        }
+
+        $void = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])->update([
+                'voided_date' => Carbon::now(),
+                'voided_by' => Auth::user()->FullName
+            ]);
+        return _Success('Customer Price has been Voided');
+    }
+
+    public function posted(Request $request)
+    {
+        $cek = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])
+            ->whereNotNull('voided_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Customer Price has been voided');
+        }
+
+        $void = CustPrice::where([
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->date
+            ])->update([
+                'posted_date' => Carbon::now(),
+                'posted_by' => Auth::user()->FullName
+            ]);
+        return _Success('Customer Price has been Posted');
     }
     
     public function headerTools(Request $request)
