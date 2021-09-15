@@ -218,7 +218,32 @@ class CustPriceController extends Controller
                 }
                 return _Error('Params not exist!', 404);
                 break;
-            
+
+            case "validation":
+                if (isset($request->cust_id) && isset($request->active)) {
+                    $query = CustPrice::select([
+                            'entry_custprice_tbl.*', 
+                            'ekanban_customermaster.CustomerCode_eKanban', 
+                            'ekanban_customermaster.CustomerName',
+                            'item.PART_NO',
+                            'item.DESCRIPT'
+                        ])
+                        ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
+                        ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+                        ->where('cust_id', $request->cust_id)
+                        ->where('active_date', $request->active)
+                        ->first();
+                    if ($query->posted_date !== null) {
+                        return _Error('Customer Price has been posted');
+                    }elseif ($query->voided_date !== null) {
+                        return _Error('Customer Price has been voided');
+                    }else{
+                        return _Success('Already to action');
+                    }
+                }
+                return _Error('Params not exist!', 404);
+                break;
+
             default:
                 return _Error('Params not exist!', 404);
                 break;
