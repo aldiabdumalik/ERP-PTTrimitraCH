@@ -199,3 +199,7 @@ Route::post('/warehouse/customer_price/save', [
     'uses' => 'TMS\Warehouse\CustPriceController@save', 
     'as' => 'tms.warehouse.cust_price.save'
 ]);
+Route::put('/warehouse/customer_price/update/{cust}/{active}', [
+    'uses' => 'TMS\Warehouse\CustPriceController@update', 
+    'as' => 'tms.warehouse.cust_price.update'
+]);

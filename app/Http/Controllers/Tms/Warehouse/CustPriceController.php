@@ -110,6 +110,7 @@ class CustPriceController extends Controller
             ->where('active_date', $active)
             ->get();
         $items = $request->items;
+        return _Success(null, 200, $cek);
     }
 
     public function voided(Request $request)

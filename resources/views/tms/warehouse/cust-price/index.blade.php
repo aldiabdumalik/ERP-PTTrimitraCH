@@ -383,6 +383,7 @@
                                 $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
                                 $('#custprice-create-activedate').val(date_convert(active_date));
                                 $('#custprice-create-entrydate').val(date_convert(created));
+                                $('#custprice-create-activedate').prop('readonly', true);
                             }
                         });
                     });
@@ -406,14 +407,18 @@
                 if (resolve.content.length <= 0) {
                     rou = "{{route('tms.warehouse.cust_price.save')}}";
                 }else{
-                    rou = "{{route('tms.warehouse.cust_price.save')}}";
+                    rou = "{{route('tms.warehouse.cust_price.update', [':cust', ':active'])}}";
+                    rou  = rou.replace(':cust', $('#custprice-create-customercode').val());
+                    rou  = rou.replace(':active', $('#custprice-create-activedate').val().split("/").reverse().join("-"));
                 }
                 submit(rou, data);
             });
         });
 
         function submit(route, data) {
-            return ajaxCall({route: route, method: "POST", data: data}).then(resolve => {
+            var method = (route == "{{route('tms.warehouse.cust_price.save')}}" ? "POST" : "PUT");
+            console.log(route);
+            return ajaxCall({route: route, method: method, data: data}).then(resolve => {
                 var msg = resolve.message;
                 if (resolve.status == true) {
                     Swal.fire({
@@ -531,6 +536,7 @@
     $('.this-datepicker').datepicker({
         format: 'dd/mm/yyyy',
         autoclose: true,
+        enableOnReadonly: false,
     }).datepicker("setDate",'now');
     $("input[type=number]").on("input", function() {
         var nonNumReg = /[^0-9.]/g
