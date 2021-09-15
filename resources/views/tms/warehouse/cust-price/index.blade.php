@@ -343,45 +343,50 @@
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
-            modalAction('#custprice-modal-index').then(resolve => {
 
-                ajaxCall({route: route, method: "GET"}).then(resolve => {
-                    if (resolve.status == true) {
-                        var no = 1;
-                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
-                        $.each(resolve.content, function (i, data) {
-                            tbl_item.row.add([
-                                no,
-                                data.item_code,
-                                data.PART_NO,
-                                data.DESCRIPT,
-                                (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
-                                "0.00",
-                            ]);
-                            no++;
-                            cust_id = data.cust_id;
-                            cust_name = data.CustomerName;
-                            valas = data.currency;
-                            active_date = data.active_date;
-                            created = data.created_date;
-                            user = data.created_by;
-                            posted = data.posted_date;
-                            voided = data.voided_date;
-                            printed = data.printed_date;
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "validation", cust_id: cust, active: date} }).then(resolve => {
+                var status = resolve.status;
+                if (status == true) {
+                    modalAction('#custprice-modal-index').then(resolve => {
+                        ajaxCall({route: route, method: "GET"}).then(resolve => {
+                            if (resolve.status == true) {
+                                var no = 1;
+                                var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
+                                $.each(resolve.content, function (i, data) {
+                                    tbl_item.row.add([
+                                        no,
+                                        data.item_code,
+                                        data.PART_NO,
+                                        data.DESCRIPT,
+                                        (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
+                                        "0.00",
+                                    ]);
+                                    no++;
+                                    cust_id = data.cust_id;
+                                    cust_name = data.CustomerName;
+                                    valas = data.currency;
+                                    active_date = data.active_date;
+                                    created = data.created_date;
+                                    user = data.created_by;
+                                    posted = data.posted_date;
+                                    voided = data.voided_date;
+                                    printed = data.printed_date;
+                                });
+                                tbl_item.draw();
+                                $('#custprice-create-customercode').val(cust_id);
+                                $('#custprice-create-customername').val(cust_name);
+                                $('#custprice-create-posted').val(date_convert(posted));
+                                $('#custprice-create-voided').val(date_convert(voided));
+                                $('#custprice-create-printed').val(date_convert(printed));
+                                $('#custprice-create-user').val(user);
+                                $('#custprice-create-valas').val(valas);
+                                $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+                                $('#custprice-create-activedate').val(date_convert(active_date));
+                                $('#custprice-create-entrydate').val(date_convert(created));
+                            }
                         });
-                        tbl_item.draw();
-                        $('#custprice-create-customercode').val(cust_id);
-                        $('#custprice-create-customername').val(cust_name);
-                        $('#custprice-create-posted').val(date_convert(posted));
-                        $('#custprice-create-voided').val(date_convert(voided));
-                        $('#custprice-create-printed').val(date_convert(printed));
-                        $('#custprice-create-user').val(user);
-                        $('#custprice-create-valas').val(valas);
-                        $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
-                        $('#custprice-create-activedate').val(date_convert(active_date));
-                        $('#custprice-create-entrydate').val(date_convert(created));
-                    }
-                });
+                    });
+                }
             });
         });
 
@@ -409,7 +414,18 @@
 
         function submit(route, data) {
             return ajaxCall({route: route, method: "POST", data: data}).then(resolve => {
-                console.log(resolve);
+                var msg = resolve.message;
+                if (resolve.status == true) {
+                    Swal.fire({
+                        title: 'Notification',
+                        text: msg,
+                        icon: 'success'
+                    }).then(answer => {
+                        index_data.then(resolve => {
+                            resolve.ajax.reload();
+                        });
+                    });
+                }
             });
         }
 
