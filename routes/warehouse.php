@@ -203,3 +203,19 @@ Route::put('/warehouse/customer_price/update/{cust}/{active}', [
     'uses' => 'TMS\Warehouse\CustPriceController@update', 
     'as' => 'tms.warehouse.cust_price.update'
 ]);
+Route::post('/warehouse/customer_price/voided', [
+    'uses' => 'TMS\Warehouse\CustPriceController@voided', 
+    'as' => 'tms.warehouse.cust_price.voided'
+]);
+Route::post('/warehouse/customer_price/unvoided', [
+    'uses' => 'TMS\Warehouse\CustPriceController@unvoided', 
+    'as' => 'tms.warehouse.cust_price.unvoided'
+]);
+Route::post('/warehouse/customer_price/posted', [
+    'uses' => 'TMS\Warehouse\CustPriceController@posted', 
+    'as' => 'tms.warehouse.cust_price.posted'
+]);
+Route::post('/warehouse/customer_price/unposted', [
+    'uses' => 'TMS\Warehouse\CustPriceController@unposted', 
+    'as' => 'tms.warehouse.cust_price.unposted'
+]);

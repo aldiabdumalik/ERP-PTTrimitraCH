@@ -18,7 +18,7 @@
         <a class="dropdown-item text-danger custprice-act-unvoided" href="javascript:void(0)" data-activedate="{{ $data->active_date }}" data-custid="{{ $data->cust_id }}"><i class="fa fa-ban"></i> Unvoid</a>
         @endif
 
-        <a class="dropdown-item text-primary custprice-act-report" href="javascript:void(0)" data-activedate="{{ $data->active_date }}" data-custid="{{ $data->cust_id }}"><i class="fa fa-print"></i> Print</a>
+        {{-- <a class="dropdown-item text-primary custprice-act-report" href="javascript:void(0)" data-activedate="{{ $data->active_date }}" data-custid="{{ $data->cust_id }}"><i class="fa fa-print"></i> Print</a> --}}
         <a class="dropdown-item text-primary custprice-act-log" href="javascript:void(0)" data-activedate="{{ $data->active_date }}" data-custid="{{ $data->cust_id }}"><i class="fa fa-share"></i> Log</a>
     </div>
 </div>

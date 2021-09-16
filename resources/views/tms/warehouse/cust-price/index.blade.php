@@ -435,6 +435,74 @@
             });
         }
 
+        $(document).on('click', '.custprice-act-voided', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.voided')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+                var msg = resolve.message;
+                Swal.fire({
+                    title: 'Notification',
+                    text: msg,
+                    icon: 'success'
+                }).then(answer => {
+                    index_data.then(resolve => {
+                        resolve.ajax.reload();
+                    });
+                });
+            });
+        });
+
+        $(document).on('click', '.custprice-act-unvoided', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.unvoided')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+                var msg = resolve.message;
+                Swal.fire({
+                    title: 'Notification',
+                    text: msg,
+                    icon: 'success'
+                }).then(answer => {
+                    index_data.then(resolve => {
+                        resolve.ajax.reload();
+                    });
+                });
+            });
+        });
+
+        $(document).on('click', '.custprice-act-posted', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+                var msg = resolve.message;
+                Swal.fire({
+                    title: 'Notification',
+                    text: msg,
+                    icon: 'success'
+                }).then(answer => {
+                    index_data.then(resolve => {
+                        resolve.ajax.reload();
+                    });
+                });
+            });
+        });
+
+        $(document).on('click', '.custprice-act-unposted', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+                var msg = resolve.message;
+                Swal.fire({
+                    title: 'Notification',
+                    text: msg,
+                    icon: 'success'
+                }).then(answer => {
+                    index_data.then(resolve => {
+                        resolve.ajax.reload();
+                    });
+                });
+            });
+        });
+
         // Function lib
         function resetForm() {
             $('#custprice-create-customercode').val(null);
