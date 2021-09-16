@@ -384,6 +384,7 @@
                                 $('#custprice-create-activedate').val(date_convert(active_date));
                                 $('#custprice-create-entrydate').val(date_convert(created));
                                 $('#custprice-create-activedate').prop('readonly', true);
+                                $('#custprice-create-customercode').prop('readonly', true);
                             }
                         });
                     });

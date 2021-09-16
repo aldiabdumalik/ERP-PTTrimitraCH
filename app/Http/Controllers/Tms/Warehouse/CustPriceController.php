@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustPrice;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -90,27 +91,52 @@ class CustPriceController extends Controller
                     'created_date' => Carbon::now(),
                 ];
             }
-            return _Success(null, 200, $data);
+            try {
+                $query = CustPrice::insert($data);
+                // $log = $this->createLOG($request->do_no, 'EDIT');
+                return $this->_Success('Saved successfully!', 201);
+            } catch (Exception $e) {
+                return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+            }
         }
         return _Error('failed to save');
     }
 
     public function update(Request $request, $cust, $active)
     {
-        $cek = CustPrice::select([
-                'entry_custprice_tbl.*', 
-                'ekanban_customermaster.CustomerCode_eKanban', 
-                'ekanban_customermaster.CustomerName',
-                'item.PART_NO',
-                'item.DESCRIPT'
-            ])
-            ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
-            ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
-            ->where('cust_id', $cust)
+        $cek = CustPrice::where('cust_id', $cust)
             ->where('active_date', $active)
-            ->get();
+            ->first();
+        $create_by = $cek->created_by;
+        $create_date = $cek->created_date;
+        $data = [];
         $items = $request->items;
-        return _Success(null, 200, $cek);
+        $old_data = CustPrice::where('cust_id', $cust)
+            ->where('active_date', $active)
+            ->delete();
+        if (!empty($items)) {
+            for ($i=0; $i < count($items); $i++) { 
+                $data[] = [
+                    'cust_id' => $request->cust_id,
+                    'item_code' => $items[$i][1],
+                    'currency' => $request->valas,
+                    'price' =>  str_replace(',', '', $items[$i][4]), // $items[$i][4],
+                    'active_date' => $request->active_date,
+                    'updated_by' => Auth::user()->FullName,
+                    'updated_date' => Carbon::now(),
+                    'created_by' => $create_by,
+                    'created_date' => $create_date,
+                ];
+            }
+            try {
+                $query = CustPrice::insert($data);
+                // $log = $this->createLOG($request->do_no, 'EDIT');
+                return $this->_Success('Saved successfully!', 201);
+            } catch (Exception $e) {
+                return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+            }
+        }
+        return _Error('failed to save');
     }
 
     public function voided(Request $request)
