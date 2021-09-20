@@ -93,7 +93,14 @@ class CustPriceController extends Controller
             }
             try {
                 $query = CustPrice::insert($data);
-                // $log = $this->createLOG($request->do_no, 'EDIT');
+                $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                    'cust_id' => $request->cust_id,
+                    'active_date' => $request->active_date,
+                    'written_date' => Carbon::now(),
+                    'status' => 'ADD',
+                    'user' => Auth::user()->FullName,
+                    'note' => null
+                ]);
                 return $this->_Success('Saved successfully!', 201);
             } catch (Exception $e) {
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
@@ -130,7 +137,14 @@ class CustPriceController extends Controller
             }
             try {
                 $query = CustPrice::insert($data);
-                // $log = $this->createLOG($request->do_no, 'EDIT');
+                $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                    'cust_id' => $request->cust_id,
+                    'active_date' => $request->active_date,
+                    'written_date' => Carbon::now(),
+                    'status' => 'EDIT',
+                    'user' => Auth::user()->FullName,
+                    'note' => null
+                ]);
                 return $this->_Success('Saved successfully!', 201);
             } catch (Exception $e) {
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
@@ -159,6 +173,16 @@ class CustPriceController extends Controller
                 'voided_date' => Carbon::now(),
                 'voided_by' => Auth::user()->FullName
             ]);
+        if ($void) {
+            $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->active_date,
+                'written_date' => Carbon::now(),
+                'status' => 'VOIDED',
+                'user' => Auth::user()->FullName,
+                'note' => null
+            ]);
+        }
         return _Success('Customer Price has been Voided');
     }
 
@@ -182,6 +206,16 @@ class CustPriceController extends Controller
                 'voided_date' => null,
                 'voided_by' => null
             ]);
+        if ($void) {
+            $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->active_date,
+                'written_date' => Carbon::now(),
+                'status' => 'UNVOIDED',
+                'user' => Auth::user()->FullName,
+                'note' => null
+            ]);
+        }
         return _Success('Customer Price has been Unvoided');
     }
 
@@ -198,13 +232,23 @@ class CustPriceController extends Controller
             return _Error('Customer Price has been voided');
         }
 
-        $void = CustPrice::where([
+        $posted = CustPrice::where([
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])->update([
                 'posted_date' => Carbon::now(),
                 'posted_by' => Auth::user()->FullName
             ]);
+        if ($posted) {
+            $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->active_date,
+                'written_date' => Carbon::now(),
+                'status' => 'POSTED',
+                'user' => Auth::user()->FullName,
+                'note' => null
+            ]);
+        }
         return _Success('Customer Price has been Posted');
     }
 
@@ -221,13 +265,23 @@ class CustPriceController extends Controller
             return _Error('Customer Price has been voided');
         }
 
-        $void = CustPrice::where([
+        $unposted = CustPrice::where([
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])->update([
                 'posted_date' => null,
                 'posted_by' => null
             ]);
+        if ($unposted) {
+            $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                'cust_id' => $request->cust_id,
+                'active_date' => $request->active_date,
+                'written_date' => Carbon::now(),
+                'status' => 'UNPOSTED',
+                'user' => Auth::user()->FullName,
+                'note' => null
+            ]);
+        }
         return _Success('Customer Price has been Unposted');
     }
     
