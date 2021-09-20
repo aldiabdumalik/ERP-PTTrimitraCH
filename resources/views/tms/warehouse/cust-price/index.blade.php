@@ -15,6 +15,7 @@
 @include('tms.warehouse.cust-price.modal.header.customer')
 @include('tms.warehouse.cust-price.modal.create.itemTableAdd')
 @include('tms.warehouse.cust-price.modal.create.itemFormAdd')
+@include('tms.warehouse.cust-price.modal.log.tableLog')
 
 @endsection
 @section('script')
@@ -501,6 +502,13 @@
                     });
                 });
             });
+        });
+        
+        var tbl_log;
+        $(document).on('click', '.custprice-act-log', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            modalAction('#custprice-modal-log');
         });
 
         // Function lib
