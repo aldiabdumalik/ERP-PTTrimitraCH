@@ -508,7 +508,32 @@
         $(document).on('click', '.custprice-act-log', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
-            modalAction('#custprice-modal-log');
+            modalAction('#custprice-modal-log').then(resolve => {
+                tbl_log = $('#custprice-datatables-log').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ajax: {
+                        url: "{{route('tms.warehouse.cust_price.header')}}",
+                        method: "POST",
+                        data: {
+                            type: "log",
+                            cust_id: cust,
+                            date: date,
+                        },
+                        headers: token_header
+                    },
+                    columns: [
+                        {data:'date', name: 'date', className: "text-center align-middle"},
+                        {data:'time', name: 'time', className: "text-left align-middle"},
+                        {data:'status', name: 'status', className: "text-left align-middle"},
+                        {data:'user', name: 'user', className: "text-center align-middle"},
+                        {data:'note', name: 'note', className: "text-center align-middle"},
+                    ],
+                    ordering: false,
+                    lengthChange: false
+                });
+            });
         });
 
         // Function lib
