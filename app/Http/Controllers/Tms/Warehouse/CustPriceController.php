@@ -246,6 +246,26 @@ class CustPriceController extends Controller
                 return _Error('Params not exist!', 404);
                 break;
 
+            case "log":
+                if (isset($request->cust_id) && isset($request->date)) {
+                    $query = DB::table('db_tbs.entry_custprice_tbl_log')
+                        ->where('cust_id', $request->cust_id)
+                        ->where('active_date', $request->date)
+                        ->get();
+                    return DataTables::of($query)
+                        ->addColumn('date', function($query){
+                                return convertDate($query->written_date, 'Y-m-d H:i:s', 'd/m/Y');
+                            }
+                        )
+                        ->addColumn('time', function($query){
+                                return convertDate($query->written_date, 'Y-m-d H:i:s', 'H:i');
+                            }
+                        )
+                        ->make(true);
+                }
+                return _Error('Params not exist!', 404);
+                break;
+
             case "validation":
                 if (isset($request->cust_id) && isset($request->active)) {
                     $query = CustPrice::select([
