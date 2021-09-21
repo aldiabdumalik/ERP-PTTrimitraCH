@@ -14,10 +14,7 @@
                 </select>
             </div>
             <div class="col-3">
-                <select name="custinv-create-branch" id="custinv-create-branch" class="form-control form-control-sm" required>
-                    <option value="CP">CP - CIREBON PLAN</option>
-                    <option value="HO" selected>HO - HEAD OFFICE</option>
-                </select>
+                <input type="text" name="custinv-create-branch" id="custinv-create-branch" class="form-control form-control-sm readonly-first" readonly required value="{{auth()->user()->Branch}}">
             </div>
         </div>
     </div>
