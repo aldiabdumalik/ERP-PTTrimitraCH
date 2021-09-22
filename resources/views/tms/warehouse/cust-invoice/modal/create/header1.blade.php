@@ -29,7 +29,7 @@
                 <input type="text" name="custinv-create-priod" id="custinv-create-priod" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
             <div class="col-6">
-                <input type="text" name="custinv-create-date" id="custinv-create-date" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-date" id="custinv-create-date" class="form-control form-control-sm this-datepicker" autocomplete="off" required>
             </div>
         </div>
     </div>

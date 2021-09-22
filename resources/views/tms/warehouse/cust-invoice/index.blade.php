@@ -110,6 +110,7 @@
     $('.this-datepicker').datepicker({
         format: 'dd/mm/yyyy',
         autoclose: true,
+        enableOnReadonly: false,
     }).datepicker("setDate",'now');
     $("input[type=number]").on("input", function() {
         var nonNumReg = /[^0-9.]/g

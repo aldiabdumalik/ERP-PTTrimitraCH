@@ -11,4 +11,21 @@ class CustInvoiceController extends Controller
     {
         return view('tms.warehouse.cust-invoice.index');
     }
+
+    public function header(Request $request)
+    {
+        switch ($request->type) {
+            case 'invno':
+                return 123;
+                break;
+            
+            case 'value':
+                # code...
+                break;
+                
+            default:
+                return _Error('Params not exist!', 404);
+                break;
+        }
+    }
 }

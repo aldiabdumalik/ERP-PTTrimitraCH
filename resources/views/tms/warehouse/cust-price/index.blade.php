@@ -547,6 +547,7 @@
             $('#custprice-create-valas').val($('#custprice-create-valas').data('val'));
             $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
             $('#custprice-create-activedate').val("{{date('d/m/Y')}}");
+            $('#custprice-create-entrydate').val("{{date('d/m/Y')}}");
             $(tbl_item.table().header())
                 .removeClass('bg-abu')
                 .addClass('btn-info');
