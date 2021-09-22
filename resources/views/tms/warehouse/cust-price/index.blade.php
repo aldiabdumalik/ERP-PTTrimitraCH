@@ -550,6 +550,7 @@
                     processing: true,
                     serverSide: true,
                     destroy: true,
+                    searching: false,
                     ajax: {
                         url: "{{route('tms.warehouse.cust_price.header')}}",
                         method: "POST",
