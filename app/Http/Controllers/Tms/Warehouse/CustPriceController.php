@@ -161,11 +161,11 @@ class CustPriceController extends Controller
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])
-            ->whereNotNull('posted_date')
+            ->whereNull('posted_date')
             ->get();
 
         if ($cek->isEmpty()) {
-            return _Error('Customer Price has been posted');
+            return _Error('Customer Price has been posted', 404, $cek);
         }
 
         $void = CustPrice::where([
@@ -194,7 +194,7 @@ class CustPriceController extends Controller
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])
-            ->whereNotNull('posted_date')
+            ->whereNull('posted_date')
             ->get();
 
         if ($cek->isEmpty()) {
@@ -227,7 +227,7 @@ class CustPriceController extends Controller
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])
-            ->whereNotNull('voided_date')
+            ->whereNull('voided_date')
             ->get();
 
         if ($cek->isEmpty()) {
@@ -260,7 +260,7 @@ class CustPriceController extends Controller
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])
-            ->whereNotNull('voided_date')
+            ->whereNull('voided_date')
             ->get();
 
         if ($cek->isEmpty()) {
