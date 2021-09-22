@@ -419,7 +419,6 @@
 
         function submit(route, data) {
             var method = (route == "{{route('tms.warehouse.cust_price.save')}}" ? "POST" : "PUT");
-            console.log(route);
             return ajaxCall({route: route, method: method, data: data}).then(resolve => {
                 var msg = resolve.message;
                 if (resolve.status == true) {
