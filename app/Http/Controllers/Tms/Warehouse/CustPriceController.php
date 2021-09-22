@@ -178,7 +178,7 @@ class CustPriceController extends Controller
         if ($void) {
             $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                 'cust_id' => $request->cust_id,
-                'active_date' => $request->active_date,
+                'active_date' => $request->date,
                 'written_date' => Carbon::now(),
                 'status' => 'VOIDED',
                 'user' => Auth::user()->FullName,
@@ -211,11 +211,11 @@ class CustPriceController extends Controller
         if ($void) {
             $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                 'cust_id' => $request->cust_id,
-                'active_date' => $request->active_date,
+                'active_date' => $request->date,
                 'written_date' => Carbon::now(),
                 'status' => 'UNVOIDED',
                 'user' => Auth::user()->FullName,
-                'note' => null
+                'note' => $request->note
             ]);
         }
         return _Success('Customer Price has been Unvoided');
@@ -244,7 +244,7 @@ class CustPriceController extends Controller
         if ($posted) {
             $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                 'cust_id' => $request->cust_id,
-                'active_date' => $request->active_date,
+                'active_date' => $request->date,
                 'written_date' => Carbon::now(),
                 'status' => 'POSTED',
                 'user' => Auth::user()->FullName,
@@ -277,11 +277,11 @@ class CustPriceController extends Controller
         if ($unposted) {
             $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                 'cust_id' => $request->cust_id,
-                'active_date' => $request->active_date,
+                'active_date' => $request->date,
                 'written_date' => Carbon::now(),
                 'status' => 'UNPOSTED',
                 'user' => Auth::user()->FullName,
-                'note' => null
+                'note' => $request->note
             ]);
         }
         return _Success('Customer Price has been Unposted');

@@ -457,17 +457,35 @@
         $(document).on('click', '.custprice-act-unvoided', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.unvoided')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
-                var msg = resolve.message;
-                Swal.fire({
-                    title: 'Notification',
-                    text: msg,
-                    icon: 'success'
-                }).then(answer => {
-                    index_data.then(resolve => {
-                        resolve.ajax.reload();
+            Swal.fire({
+                title: `Do you want to unvoid Cust Price, now ?`,
+                input: 'text',
+                inputPlaceholder: 'Type your note here...',
+                showCancelButton: true,
+                confirmButtonText: `Yes, unVoid it!`,
+                confirmButtonColor: '#DC3545',
+                icon: 'warning',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to write something!'
+                    }
+                }
+            }).then((answer) => {
+                if (answer.value != "" && answer.value != undefined) {
+                    var note = answer.value;
+                    ajaxCall({route: "{{route('tms.warehouse.cust_price.unvoided')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
+                        var msg = resolve.message;
+                        Swal.fire({
+                            title: 'Notification',
+                            text: msg,
+                            icon: 'success'
+                        }).then(answer => {
+                            index_data.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
                     });
-                });
+                }
             });
         });
 
@@ -491,17 +509,35 @@
         $(document).on('click', '.custprice-act-unposted', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
-                var msg = resolve.message;
-                Swal.fire({
-                    title: 'Notification',
-                    text: msg,
-                    icon: 'success'
-                }).then(answer => {
-                    index_data.then(resolve => {
-                        resolve.ajax.reload();
+            Swal.fire({
+                title: `Do you want to unposted now ?`,
+                input: 'text',
+                inputPlaceholder: 'Type your note here...',
+                showCancelButton: true,
+                confirmButtonText: `Yes, unposted it!`,
+                confirmButtonColor: '#DC3545',
+                icon: 'warning',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to write something!'
+                    }
+                }
+            }).then((answer) => {
+                if (answer.value != "" && answer.value != undefined) {
+                    var note = answer.value;
+                    ajaxCall({route: "{{route('tms.warehouse.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
+                        var msg = resolve.message;
+                        Swal.fire({
+                            title: 'Notification',
+                            text: msg,
+                            icon: 'success'
+                        }).then(answer => {
+                            index_data.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
                     });
-                });
+                }
             });
         });
         
