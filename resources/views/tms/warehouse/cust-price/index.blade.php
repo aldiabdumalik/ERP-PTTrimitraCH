@@ -423,6 +423,7 @@
             return ajaxCall({route: route, method: method, data: data}).then(resolve => {
                 var msg = resolve.message;
                 if (resolve.status == true) {
+                    modalAction('#custprice-modal-index', 'hide');
                     Swal.fire({
                         title: 'Notification',
                         text: msg,
