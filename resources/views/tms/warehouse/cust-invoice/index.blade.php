@@ -12,6 +12,7 @@
     @include('tms.warehouse.cust-invoice.table.tableindex')
 </div>
 @include('tms.warehouse.cust-invoice.modal.create.index')
+@include('tms.warehouse.cust-invoice.modal.table.customer')
 
 @endsection
 @section('script')
@@ -37,11 +38,22 @@
             };
             return obj;
         };
-        modalAction('#custinv-modal-index');
 
         const index_data = new Promise(function(resolve, reject) {
             let tbl_index = $('#custinv-datatables').DataTable();
             resolve(tbl_index);
+        });
+
+        $('#custinv-btn-modal-create').on('click', function () {
+            modalAction('#custinv-modal-index').then(resolve => {
+                ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'invno'}}).then(resolve => {
+                    $('#custinv-create-no').val(resolve);
+                    $('#custinv-create-date').datepicker("setDate",'now');
+                    var now = new Date();
+                    var currentMonth = ('0'+(now.getMonth()+1)).slice(-2);
+                    $('#custinv-create-priod').val(`${now.getFullYear()}-${currentMonth}`);
+                });
+            });
         });
 
         var tbl_item = $('#custinv-datatables-index').DataTable(tbl_attr([0,7,8,9]));
@@ -60,7 +72,33 @@
                 tbl_item_part.columns.adjust().draw();
                 $('#custinv-text-view-by').text("VIEW BY PART NO.");
             }
-        })
+        });
+
+        var tbl_customer;
+        $(document).on('keypress', '#custinv-create-customercode', function (e) {
+            if(e.which == 13) {
+                modalAction('#custinv-modal-customer').then((resolve) => {
+                    var params = {"type": "customer"}
+                    var column = [
+                        {data: 'code', name: 'code'},
+                        {data: 'name', name: 'name'},
+                    ];
+                    tbl_customer = $('#custinv-datatables-customer').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ajax: {
+                            url: "{{ route('tms.warehouse.cust_invoice.header') }}",
+                            method: 'POST',
+                            data: params,
+                            headers: token_header
+                        },
+                        columns: column,
+                    });
+                });
+            }
+            return false;
+        });
 
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {

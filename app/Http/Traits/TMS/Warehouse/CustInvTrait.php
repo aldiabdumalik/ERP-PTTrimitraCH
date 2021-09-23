@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Redirect;
 
 trait CustInvTrait {
     
-    protected function CustInvNo(Request $request)
+    protected function custInvNo(Request $request)
     {
         $ref = DB::table('db_tbs.sys_number')
             ->selectRaw('concat(right(year(NOW()),2),DATE_FORMAT(NOW(),"%m")) as ref')

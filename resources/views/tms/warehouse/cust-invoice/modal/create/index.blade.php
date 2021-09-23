@@ -54,8 +54,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="custinv-btn-index-close" class="btn btn-secondary">Batal</button>
-                    <button type="submit" id="custinv-btn-index-submit" class="btn btn-info">Simpan</button>
+                    <button type="button" id="custinv-btn-create-close" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" id="custinv-btn-index-submit" class="btn btn-info">Save</button>
                 </div>
             </div>
         </form>

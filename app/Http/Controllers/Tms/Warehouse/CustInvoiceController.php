@@ -3,10 +3,19 @@
 namespace App\Http\Controllers\TMS\Warehouse;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\TMS\Warehouse\CustInvTrait;
+use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class CustInvoiceController extends Controller
 {
+    use ToolsTrait, CustInvTrait;
+
+    public function __construct() {
+        date_default_timezone_set('Asia/Jakarta');
+    }
+
     public function index()
     {
         return view('tms.warehouse.cust-invoice.index');
@@ -16,11 +25,11 @@ class CustInvoiceController extends Controller
     {
         switch ($request->type) {
             case 'invno':
-                return 123;
+                return $this->custInvNo($request);
                 break;
             
-            case 'value':
-                # code...
+            case 'customer':
+                return DataTables::of($this->customer($request))->make(true);
                 break;
                 
             default:

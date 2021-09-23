@@ -174,7 +174,16 @@ Route::get('/warehouse/customer_invoice', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@index', 
     'as' => 'tms.warehouse.cust_invoice'
 ]);
-
+Route::post('/warehouse/customer_invoice/header', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@header', 
+    'as' => 'tms.warehouse.cust_invoice.header'
+]);
+/*
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |   TMS - WAREHOUSE - Customer Price
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |
+*/
 Route::get('/warehouse/customer_price', [
     'uses' => 'TMS\Warehouse\CustPriceController@index', 
     'as' => 'tms.warehouse.cust_price'
