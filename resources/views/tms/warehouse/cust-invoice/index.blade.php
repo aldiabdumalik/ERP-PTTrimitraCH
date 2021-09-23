@@ -13,6 +13,7 @@
 </div>
 @include('tms.warehouse.cust-invoice.modal.create.index')
 @include('tms.warehouse.cust-invoice.modal.table.customer')
+@include('tms.warehouse.cust-invoice.modal.table.doaddr')
 
 @endsection
 @section('script')
