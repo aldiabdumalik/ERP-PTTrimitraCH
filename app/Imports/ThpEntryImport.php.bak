@@ -39,20 +39,16 @@ class ThpEntryImport implements ToCollection, WithStartRow
                         ->first();
                     if (!isset($check)) {
 
-                        $row_qty = (int)(($row[15] != null) ? $row[15] : 0) + (int)(($row[16] != null) ? $row[16] : 0);
-                        $shift = (int)(($row[15] != null) ? $row[15] : 0) + (int)(($row[16] != null) ? $row[16] : 0);
-                        $machine = (isset($row[11])) ? '' : $row[11];
-
-                        $remark = $shift . "_" . $machine;
+                        $row_qty = (int)(($row[14] != null) ? $row[14] : 0) + (int)(($row[15] != null) ? $row[15] : 0);
 
                         $thp = ThpEntry::where('production_code', $productioncode->production_code)
                                 ->where('closed', NULL)
                                 ->orderBy('thp_date', 'desc')
                                 ->first();
                         if (isset($thp)) {
-                            $persentase = round(($thp->lhp_qty / $thp->plan)*100);
+                            $persentase = round(($thp->lhp_qty / $thp->thp_qty)*100);
                             $min_persen = $this->min_persen;
-                            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
+                            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->thp_qty);
                             if ($persentase <= $min_persen) {
                                 $thp_qty = $row_qty + abs($outstanding_qty);
                             }else{
@@ -71,7 +67,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                         $data_insert = [
                             'customer_code' => $productioncode->customer_id,
                             'production_code' => $productioncode->production_code,
-                            'item_code' => ($productioncode->item_code !== null) ? $productioncode->item_code : $row[3],
+                            'item_code' => $productioncode->item_code,
                             'part_number' => $productioncode->part_number,
                             'part_name' => $productioncode->part_name,
                             'part_type' => $productioncode->part_type,
@@ -80,13 +76,13 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             'process_sequence_1' => $productioncode->process_sequence_1,
                             'process_sequence_2' => $productioncode->process_sequence_2,
                             'ct' => $productioncode->ct_sph,
-                            'plan' => $row[7],
-                            'ton' => $machine,
-                            'time' => (isset($row[13])) ? 0.00 : round($row[13], 2),
-                            'plan_hour' => (isset($row[14])) ? 0.00 : round($row[14], 2),
+                            'plan' => $row[6],
+                            'ton' => $row[10],
+                            'time' => round($row[12], 2),
+                            'plan_hour' => round($row[13], 2),
                             'thp_qty' => $thp_qty,
                             'thp_remark' => '  _ ',
-                            'note' => (isset($row[21])) ? $row[21] : null,
+                            'note' => (isset($row[20])) ? $row[20]:null,
                             // 'apnormality' => $row[20],
                             // 'action_plan' => $row[25],
                             'thp_date' => $this->date,

@@ -29,7 +29,7 @@ class ThpEntryController extends Controller
         $customer = Customer::orderBy('customer_id', 'asc')->get();
         $getDate = Carbon::now()->format('d/m/Y');
         $getDate1 =  Carbon::now()->format('Y/m');
-        return view('tms.manufacturing.thp_entry/index', compact('getDate','getDate1','customer'));
+        return view('tms.manufacturing.thp_entry.index', compact('getDate','getDate1','customer'));
     }
 
     public function getThpTable(Request $request)
