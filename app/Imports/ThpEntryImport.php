@@ -54,9 +54,9 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             $min_persen = $this->min_persen;
                             $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
                             if ($persentase <= $min_persen) {
-                                $thp_qty = $row_qty + abs($outstanding_qty);
+                                $thp_qty = (int) $row[7] + abs($outstanding_qty);
                             }else{
-                                $thp_qty = $row_qty;
+                                $thp_qty = (int) $row[7];
                             }
                             $update = ThpEntry::where('production_code', $thp->production_code)
                                 ->where('thp_date', $thp->thp_date)
@@ -65,7 +65,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                     'status' => 'CLOSED'
                                 ]);
                         }else{
-                            $thp_qty = $row_qty;
+                            $thp_qty = (int) $row[7];
                         }
 
                         $data_insert = [
@@ -80,12 +80,13 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             'process_sequence_1' => $productioncode->process_sequence_1,
                             'process_sequence_2' => $productioncode->process_sequence_2,
                             'ct' => $productioncode->ct_sph,
-                            'plan' => $row[7],
+                            // 'plan' => $row[7],
+                            'plan' => $thp_qty,
                             'ton' => $machine,
                             'time' => (isset($row[13])) ? 0.00 : round($row[13], 2),
                             'plan_hour' => (isset($row[14])) ? 0.00 : round($row[14], 2),
-                            'thp_qty' => $thp_qty,
-                            'thp_remark' => '  _ ',
+                            'thp_qty' => $row_qty,
+                            'thp_remark' => $remark,
                             'note' => (isset($row[21])) ? $row[21] : null,
                             // 'apnormality' => $row[20],
                             // 'action_plan' => $row[25],

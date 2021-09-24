@@ -84,12 +84,12 @@
 <div class="row">
     <div class="col-2">
         <div class="">
-            <label style="font-size:12px;" for="thp-thp-action-plan" class="col-form-label text-bold">Action plan</label>
+            <label style="font-size:12px;" for="thp-action-plan" class="col-form-label text-bold">Action plan</label>
         </div>
     </div>
     <div class="col-10">
         <div class="">
-            <input type="text" name="thp-thp-action-plan" id="thp-thp-action-plan" class="form-control" autocomplete="off">
+            <input type="text" name="thp-action-plan" id="thp-action-plan" class="form-control" autocomplete="off">
         </div>
     </div> 
 </div>

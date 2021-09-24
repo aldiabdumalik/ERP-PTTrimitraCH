@@ -163,7 +163,7 @@ class ThpEntryController extends Controller
             ->first();
         $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
         if (isset($lhp)) {
-            $outstanding_qty =  $lhp_qty - $query->thp_qty;
+            $outstanding_qty =  $lhp_qty - $query->plan;
             $update = ThpEntry::where('id_thp', $query->id_thp)
                 ->update([
                     'lhp_qty' => $lhp_qty,
@@ -207,7 +207,7 @@ class ThpEntryController extends Controller
             ->where($lhp_where)
             ->first();
         $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
-        $outstanding_qty =  $lhp_qty - $data->thp_qty;
+        $outstanding_qty =  $lhp_qty - $data->plan;
         $update = DB::connection('oee')
             ->table('entry_thp_tbl')
             ->where('id_thp', $data->id_thp)
@@ -219,14 +219,14 @@ class ThpEntryController extends Controller
         $thp = ThpEntry::where('id_thp', $request->id)
             ->first();
         if (isset($thp)) {
-            $persentase = round(($thp->lhp_qty / $thp->thp_qty)*100);
+            $persentase = round(($thp->lhp_qty / $thp->plan)*100);
             $getsetting = DB::connection('oee')
                 ->table('entry_thp_tbl_setting')
                 ->select('value_setting')
                 ->where('id', 1)
                 ->first();
             $min_persen = $getsetting->value_setting;
-            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->thp_qty);
+            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
             if ($persentase >= $min_persen) {
                 $update = ThpEntry::where('production_code', $thp->production_code)
                     ->where('thp_date', $thp->thp_date)
@@ -406,18 +406,18 @@ class ThpEntryController extends Controller
         }
 
         $thp = ThpEntry::where('production_code', $request->production_code)
-            ->where('closed', NULL)
+            ->whereNull('closed')
             ->orderBy('thp_date', 'desc')
             ->first();
         if (isset($thp)) {
-            $persentase = round(($thp->lhp_qty / $thp->thp_qty)*100);
+            $persentase = round(($thp->lhp_qty / $thp->plan)*100);
             $getsetting = DB::connection('oee')
                 ->table('entry_thp_tbl_setting')
                 ->select('value_setting')
                 ->where('id', 1)
                 ->first();
             $min_persen = $getsetting->value_setting;
-            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->thp_qty);
+            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
             if ($persentase <= $min_persen) {
                 $thp_qty = $request->thp_qty + abs($outstanding_qty);
             }else{
@@ -447,7 +447,8 @@ class ThpEntryController extends Controller
                 'process_sequence_1' => $request->process_1,
                 'process_sequence_2' => $request->process_2,
                 'ct' => $request->ct,
-                'plan' => $request->plan,
+                // 'plan' => $request->plan,
+                'plan' => $thp_qty,
                 'ton' => $request->ton,
                 'time' => $request->time,
                 'plan_hour' => $request->plan_hour,
@@ -507,7 +508,7 @@ class ThpEntryController extends Controller
                 'process_sequence_1' => $request->process_1,
                 'process_sequence_2' => $request->process_2,
                 'ct' => $request->ct,
-                'plan' => $request->plan,
+                'plan' => $request->thp_qty,
                 'ton' => $request->ton,
                 'time' => $request->time,
                 'plan_hour' => $request->plan_hour,
