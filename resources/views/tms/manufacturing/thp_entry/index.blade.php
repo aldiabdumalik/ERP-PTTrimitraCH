@@ -24,6 +24,34 @@
     #thp-select-datepicker .datepicker {
         width: 100% !important;
     }
+    input[readonly] {
+        cursor: not-allowed;
+        pointer-events: all !important;
+    }
+    .row.no-gutters {
+        margin-right: 0;
+        margin-left: 0;
+
+        & > [class^="col-"],
+        & > [class*=" col-"] {
+            padding-right: 0;
+            padding-left: 0;
+        }
+    }
+    button:disabled {
+        cursor: not-allowed;
+        pointer-events: all !important;
+    }
+    .selected {
+        background-color: #dddddd;
+    }
+    .auto-middle {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+    .bg-abu {
+        background-color: #d3d3d3;
+    }
 </style>
 <div class="main-content-inner">
     <div class="row">
@@ -109,6 +137,7 @@
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
 @include('tms.manufacturing.thp_entry._modal.setting.setPersentase')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal.shortThpByDate')
+@include('tms.manufacturing.thp_entry._modal.form.index')
 
 
 @endsection
@@ -292,7 +321,8 @@ $(document).ready(function(){
     });
     $(document).on('click', '#addModal', function(e) {
         e.preventDefault();
-        $('#createModal').modal('show');
+        // $('#createModal').modal('show');
+        $('#thp-modal-index').modal('show');
     });
     $(document).on('click', '#printModal', function(e) {
         e.preventDefault();
@@ -514,6 +544,10 @@ $(document).ready(function(){
                 {data: 'process_detailname', name: 'process_detailname'},
                 {data: 'ct_sph', name: 'ct_sph'}
             ],
+            ordering: false,
+            scrollY: "200px",
+            scrollCollapse: true,
+            fixedHeader: true,
         });
         $('#thp-poduction-code-datatables tbody').off('click').on('click', 'tr', function () {
             var data = tbl_production_code.row(this).data();
