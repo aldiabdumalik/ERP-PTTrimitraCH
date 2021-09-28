@@ -3,7 +3,7 @@
         <label class="auto-middle" for="thp-create-date">Date</label>
     </div>
     <div class="col-10">
-        <input type="text" name="thp-create-date" id="thp-create-date" class="form-control form-control-sm" autocomplete="off" required>
+        <input type="text" name="thp-create-date" id="thp-create-date" class="form-control form-control-sm this-datepicker" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center">

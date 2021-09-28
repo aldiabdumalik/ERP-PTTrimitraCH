@@ -104,10 +104,27 @@ class ThpEntryController extends Controller
             })
             ->make(true);
     }
+
+    public function check($prodcode, $date)
+    {
+        $checking = ThpEntry::where('production_code', $prodcode)->where('thp_date', $date)->first();
+        if (isset($checking)) {
+            if ($checking->closed === null) {
+                return _Success('is_exist');
+            }
+
+            return _Error('THP has been closed');
+        }
+        return _Success('isnt_exist');
+    }
     
     public function createTHP(Request $request)
     {
         if($request->ajax()){
+            // $checking = ThpEntry::where('production_code', $request->production_code)->where('thp_date', $request->thp_date)->first();
+            // if (isset($checking)) {
+            //     # update
+            // }
             if ($request->id_thp == 0) {
                 $query = $this->_createTHP($request);
                 $message = 'ditambahkan';

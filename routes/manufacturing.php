@@ -50,3 +50,16 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@settingThpEntry', 
         'as' => 'tms.manufacturing.thp_entry.settingThpEntry'
     ]);
+
+    Route::get('/manufacturing/thp_entry/checking/{prodcode}/{date}', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@check', 
+        'as' => 'tms.manufacturing.thp_entry.check'
+    ]);
+    Route::post('/manufacturing/thp_entry/save', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@save', 
+        'as' => 'tms.manufacturing.thp_entry.save'
+    ]);
+    Route::put('/manufacturing/thp_entry/{prodcode}/update', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@update', 
+        'as' => 'tms.manufacturing.thp_entry.update'
+    ]);

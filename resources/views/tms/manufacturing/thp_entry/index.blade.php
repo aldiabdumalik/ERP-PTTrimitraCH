@@ -324,6 +324,14 @@ $(document).ready(function(){
         // $('#createModal').modal('show');
         $('#thp-modal-index').modal('show');
     });
+    $(document).on('keypress', '#thp-create-prodcode', function(e){
+        e.preventDefault();
+        if(e.which == 13) {
+            $('#poduction-code-modal').modal('show');
+            productioncode_tbl();
+        }
+        return false;
+    });
     $(document).on('click', '#printModal', function(e) {
         e.preventDefault();
         $('#thp-print-modal').modal('show');
@@ -353,6 +361,32 @@ $(document).ready(function(){
     $(document).on('change', '#pc-search-customer', function (e) {
         e.preventDefault();
         productioncode_tbl($('#pc-search-process').val(), $(this).val());
+    });
+    $(document).on('submit', '#thp-form-index', function () {
+        var data = {
+            "thp_date": $('#thp-create-date').val(),
+            "customer_code": $('#thp-create-cust').val(),
+            "production_code": $('#thp-create-prodcode').val(),
+            "part_number": $('#thp-create-partno').val(),
+            "part_name": $('#thp-create-partname').val(),
+            "part_type": $('#thp-create-type').val(),
+            "route": $('#thp-create-route').val(),
+            "process_1": $('#thp-create-subprocess1').val(),
+            "process_2": $('#thp-create-subprocess2').val(),
+            "ct": $('#thp-create-ct').val(),
+            "plan": $('#thp-create-plan').val(),
+            "ton": $('#thp-create-machine').val(),
+            "time": $('#thp-create-time').val(),
+            "plan_hour": $('#thp-create-ph').val(),
+            "thp_qty": $('#thp-create-qty').val(),
+            "shift": $('#thp-create-shift').val(),
+            "note": $('#thp-create-note').val(),
+            "apnormal": $('#thp-create-apnormality').val(),
+            "action_plan": $('#thp-create-actionplan').val(),
+        }
+        ajaxCall({route: "{{ route('tms.manufacturing.thp_entry.thpentry_create') }}", method: "POST", data: data}).then(resolve => {
+            console.log(resolve);
+        });
     });
     $(document).on('submit', '#thp-form-create', function () {
         var data = {
@@ -552,18 +586,28 @@ $(document).ready(function(){
         $('#thp-poduction-code-datatables tbody').off('click').on('click', 'tr', function () {
             var data = tbl_production_code.row(this).data();
             var process;
+            processs = data.process.split('/');
             $('#thp-part-number').val(data.part_number);
             $('#thp-part-name').val(data.part_name);
             $('#thp-part-type').val(data.part_type);
             $('#thp-production-code').val(data.production_code);
             $('#thp-customer-code').val(data.customer_id);
             $('#thp-route').val(data.process_detailname);
-            processs = data.process.split('/');
             $('#thp-process-1').val(processs[0]);
             $('#thp-process-2').val(processs[1]);
             $('#thp-ct').val(data.ct_sph);
             $('#thp-itemcode').val(data.item_code);
             $('#thp-production-process').val(data.production_process);
+
+            $('#thp-create-partno').val(data.part_number);
+            $('#thp-create-partname').val(data.part_name);
+            $('#thp-create-type').val(data.part_type);
+            $('#thp-create-prodcode').val(data.production_code);
+            $('#thp-create-cust').val(data.customer_id);
+            $('#thp-create-route').val(data.process_detailname);
+            $('#thp-create-subprocess1').val(processs[0]);
+            $('#thp-create-subprocess2').val(processs[1]);
+            $('#thp-create-ct').val(data.ct_sph);
 
             $('#poduction-code-modal').modal('hide');
         });
@@ -754,6 +798,37 @@ $(document).ready(function(){
             }
         });
     }
+    function ajaxCall(params) {
+        return new Promise((resolve, reject) => {
+            $('body').loading({
+                message: "wait for a moment...",
+                zIndex: 9999
+            });
+            $.ajax({
+                url: params.route,
+                method: params.method,
+                dataType: "JSON",
+                cache: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: params.data,
+                error: function(response, status, x){
+                    Swal.fire({
+                        title: 'Access Denied',
+                        text: response.responseJSON.message,
+                        icon: 'error'
+                    });
+                    $('body').loading('stop');
+                    reject(response);
+                },
+                complete: function (response){
+                    $('body').loading('stop'); 
+                    resolve(response);
+                }
+            });
+        });
+    }
 });
 </script>
 @endsection
@@ -762,7 +837,8 @@ $(document).ready(function(){
 @push('js')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ asset('/vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('vendor/jqloading/jquery.loading.min.js') }}"></script>
 <script>
     $('.print-datepicker').datepicker({
         format: 'yyyy-mm-dd',
