@@ -110,21 +110,110 @@ class ThpEntryController extends Controller
         $checking = ThpEntry::where('production_code', $prodcode)->where('thp_date', $date)->first();
         if (isset($checking)) {
             if ($checking->closed === null) {
-                return _Success('is_exist');
+                return _Success('is_exist', 200, $checking);
             }
 
             return _Error('THP has been closed');
         }
         return _Success('isnt_exist');
     }
+
+    public function save(Request $request)
+    {
+        try {
+            $prod = DB::table('oee.db_productioncode_tbl')
+                ->where(['code_status' => 1, 'production_code' => $request->production_code])
+                ->first();
+            $query = DB::connection('oee')
+                ->table('entry_thp_tbl')
+                ->insertGetId([
+                    'customer_code' => $request->customer_code,
+                    'production_code' => $request->production_code,
+                    'part_number' => $request->part_number,
+                    'part_name' => $request->part_name,
+                    'part_type' => $request->part_type,
+                    'item_code' => $prod->item_code,
+                    'route' => $request->route,
+                    'process_sequence_1' => $request->process_1,
+                    'process_sequence_2' => $request->process_2,
+                    'ct' => $request->ct,
+                    'ton' => $request->ton,
+                    'time' => $request->time,
+                    'plan_hour' => $request->plan_hour,
+                    'thp_qty' => $request->thp_qty,
+                    'plan' => $request->thp_qty,
+                    'thp_remark' => $request->shift.'_'.$request->ton,
+                    'note' => $request->note,
+                    'apnormality' => $request->apnormal,
+                    'action_plan' => $request->action_plan,
+                    'thp_date' => $request->thp_date,
+                    'user' => Auth::user()->FullName,
+                    'thp_written' => date('Y-m-d H:i:s')
+                ]);
+            $query2 = DB::table('oee.entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $query,
+                    'production_code' => $request->production_code,
+                    'item_code' => $prod->item_code,
+                    'remark' => $request->shift.'_'.$request->ton,
+                    'thp_date' => $request->thp_date,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'ADD',
+                    'user' => Auth::user()->FullName,
+                    'note' => date('YmdHis').'-DEV'
+                ]);
+            return _Success('THP successfuly saved', 201);
+        } catch (\Throwable $th) {
+            return _Error('THP failed to saved', 401);
+        }
+    }
+
+    public function update(Request $request, $prodcode)
+    {
+        $thp = ThpEntry::where('production_code', $prodcode)->where('thp_date', $request->thp_date)->first();
+        try {
+            $query = DB::connection('oee')
+                ->table('entry_thp_tbl')
+                ->where('id_thp', $thp->id_thp)
+                ->update([
+                    'process_sequence_1' => $request->process_1,
+                    'process_sequence_2' => $request->process_2,
+                    'ct' => $request->ct,
+                    'ton' => $request->ton,
+                    'time' => $request->time,
+                    'plan_hour' => $request->plan_hour,
+                    'thp_qty' => $request->thp_qty,
+                    'plan' => $request->thp_qty,
+                    'thp_remark' => $request->shift.'_'.$request->ton,
+                    'note' => $request->note,
+                    'apnormality' => $request->apnormal,
+                    'action_plan' => $request->action_plan,
+                    'thp_date' => $request->thp_date,
+                    'user' => Auth::user()->FullName
+                ]);
+            $query2 = DB::table('oee.entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $thp->id_thp,
+                    'production_code' => $request->production_code,
+                    'remark' => $request->shift.'_'.$request->ton,
+                    'thp_date' => $request->thp_date,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'EDIT',
+                    'user' => Auth::user()->FullName,
+                    'note' => date('YmdHis').'-DEV'
+                ]);
+            return _Success('THP has been updated');
+        } catch (\Throwable $th) {
+            return _Error('THP failed to update', 401);
+        }
+        return _Success('THP has been updated', 201);
+    }
     
     public function createTHP(Request $request)
     {
         if($request->ajax()){
-            // $checking = ThpEntry::where('production_code', $request->production_code)->where('thp_date', $request->thp_date)->first();
-            // if (isset($checking)) {
-            //     # update
-            // }
             if ($request->id_thp == 0) {
                 $query = $this->_createTHP($request);
                 $message = 'ditambahkan';

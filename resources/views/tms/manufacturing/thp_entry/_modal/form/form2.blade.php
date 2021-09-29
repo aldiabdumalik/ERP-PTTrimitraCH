@@ -3,8 +3,8 @@
         <label class="auto-middle" for="thp-create-shift">Shift</label>
     </div>
     <div class="col-10">
-        <select name="thp-create-shift" id="thp-create-shift" class="form-control form-control-sm">
-            <option value="" disabled selected>Select shift</option>
+        <select name="thp-create-shift" id="thp-create-shift" class="form-control form-control-sm" required>
+            <option value="" disabled>Select shift</option>
             <option value="1">Shift 1</option>
             <option value="2">Shift 2</option>
         </select>

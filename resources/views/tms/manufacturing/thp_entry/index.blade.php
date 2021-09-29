@@ -255,49 +255,86 @@ $(document).ready(function(){
         });
     });
     $(document).on('click', '.thp-act-edit', function () {
-        getThp($(this).data('thp'), function (response) {
-            response = response.responseJSON;
-            $('#createModal').modal('show');
-            if (response.status == true) {
-                var data = response.data;
-                var action_plan, date, apnormality, note, sgm, shift, grup, machine;
-                date = data.thp_date.split('-');
-                date = date[2] + '/' + date[1] + '/' + date[0];
-                $('#thp-id').val(data.id_thp);
-                $('#thp-date').val(date);
-                $('#thp-production-code').val(data.production_code);
-                $('#thp-part-number').val(data.part_number);
-                $('#thp-part-name').val(data.part_name);
-                $('#thp-part-type').val(data.part_type);
-                $('#thp-customer-code').val(data.customer_code);
-                $('#thp-route').val(data.route);
-                $('#thp-plan').val(data.plan);
-                $('#thp-ct').val(data.ct);
-                $('#thp-ton').val(data.ton);
-                $('#thp-time').val(data.time);
-                $('#thp-plan-hour').val(data.plan_hour);
-                $('#thp-process-1').val(data.process_sequence_1);
-                $('#thp-process-2').val(data.process_sequence_2);
-                $('#thp-qty').val(data.thp_qty);
-                $('#thp-itemcode').val(data.item_code);
-                $('#thp-production-process').val(data.production_process);
-                sgm = data.thp_remark.split('_');
-                shift = sgm[0].split('');
+        var id = $(this).data('thp'),
+            prod = $(this).data('prod'),
+            date = $(this).data('date'),
+            route = "{{ route('tms.manufacturing.thp_entry.check', [':prodcode', ':date']) }}";
+            route  = route.replace(':prodcode', prod);
+            route  = route.replace(':date', date);
+        ajaxCall({route: route, method: "GET"}).then(resolve => {
+            var data = resolve.content;
+            if (resolve.message === 'is_exist') {
+                $('#thp-modal-index').modal('show');
+                $('#thp-create-prodcode').prop('readonly', true);
 
-                $('#thp-note').val(data.note);
-                $('#thp-apnormal').val(data.apnormality);
-                $('#thp-action-plan').val(data.action_plan);
+                var action_plan, date, apnormality, note, sgm, shift, grup, machine;
+                date = data.thp_date.split("-").reverse().join("/");
+                $('#thp-create-date').val(date);
+                $('#thp-create-prodcode').val(data.production_code);
+                $('#thp-create-partno').val(data.part_number);
+                $('#thp-create-partname').val(data.part_name);
+                $('#thp-create-type').val(data.part_type);
+                $('#thp-create-cust').val(data.customer_code);
+                $('#thp-create-route').val(data.route);
+                $('#thp-create-ct').val(addZeroes(String(data.ct)));
+                $('#thp-create-machine').val(data.ton);
+                $('#thp-create-time').val(addZeroes(String(data.time)));
+                $('#thp-create-ph').val(addZeroes(String(data.plan_hour)));
+                $('#thp-create-subprocess1').val(data.process_sequence_1);
+                $('#thp-create-subprocess2').val(data.process_sequence_2);
+                $('#thp-create-qty').val(data.thp_qty);
+                sgm = data.thp_remark.split('_');
+                shift = sgm[0];
+
+                $('#thp-create-shift').val(shift);
+                $('#thp-create-note').val(data.note);
+                $('#thp-create-apnormality').val(data.apnormality);
+                $('#thp-create-actionplan').val(data.action_plan);
             }
         });
+        // getThp($(this).data('thp'), function (response) {
+        //     response = response.responseJSON;
+        //     $('#createModal').modal('show');
+        //     if (response.status == true) {
+        //         var data = response.data;
+        //         var action_plan, date, apnormality, note, sgm, shift, grup, machine;
+        //         date = data.thp_date.split('-');
+        //         date = date[2] + '/' + date[1] + '/' + date[0];
+        //         $('#thp-id').val(data.id_thp);
+        //         $('#thp-date').val(date);
+        //         $('#thp-production-code').val(data.production_code);
+        //         $('#thp-part-number').val(data.part_number);
+        //         $('#thp-part-name').val(data.part_name);
+        //         $('#thp-part-type').val(data.part_type);
+        //         $('#thp-customer-code').val(data.customer_code);
+        //         $('#thp-route').val(data.route);
+        //         $('#thp-plan').val(data.plan);
+        //         $('#thp-ct').val(data.ct);
+        //         $('#thp-ton').val(data.ton);
+        //         $('#thp-time').val(data.time);
+        //         $('#thp-plan-hour').val(data.plan_hour);
+        //         $('#thp-process-1').val(data.process_sequence_1);
+        //         $('#thp-process-2').val(data.process_sequence_2);
+        //         $('#thp-qty').val(data.thp_qty);
+        //         $('#thp-itemcode').val(data.item_code);
+        //         $('#thp-production-process').val(data.production_process);
+        //         sgm = data.thp_remark.split('_');
+        //         shift = sgm[0].split('');
+
+        //         $('#thp-note').val(data.note);
+        //         $('#thp-apnormal').val(data.apnormality);
+        //         $('#thp-action-plan').val(data.action_plan);
+        //     }
+        // });
     }).on('mouseup',function(){
-        setTimeout(function(){ 
-            // $('#thp-form-create input,textarea').removeAttr('readonly');
-            // $('#thp-form-create select').removeAttr('disabled');
-            // $('#thp-edit-btn').prop('hidden', 'hidden');
-            // $('#thp-btn-production-code').removeAttr('disabled');
-            $('.thp-create-btn').text('Update');
-            $('.thp-create-btn').css({'display': 'block'});
-        }, 1000);
+        // setTimeout(function(){ 
+        //     // $('#thp-form-create input,textarea').removeAttr('readonly');
+        //     // $('#thp-form-create select').removeAttr('disabled');
+        //     // $('#thp-edit-btn').prop('hidden', 'hidden');
+        //     // $('#thp-btn-production-code').removeAttr('disabled');
+        //     $('.thp-create-btn').text('Update');
+        //     $('.thp-create-btn').css({'display': 'block'});
+        // }, 1000);
     });
     $(document).on('click', '.thp-act-log', function () {
         $('#thp-log-modal').modal('show');
@@ -323,6 +360,10 @@ $(document).ready(function(){
         e.preventDefault();
         // $('#createModal').modal('show');
         $('#thp-modal-index').modal('show');
+    });
+    $('#thp-modal-index').on('hidden.bs.modal', function () {
+        $('#thp-form-index').trigger('reset');
+        $('input').not('.readonly-first').prop('readonly', false);
     });
     $(document).on('keypress', '#thp-create-prodcode', function(e){
         e.preventDefault();
@@ -364,7 +405,7 @@ $(document).ready(function(){
     });
     $(document).on('submit', '#thp-form-index', function () {
         var data = {
-            "thp_date": $('#thp-create-date').val(),
+            "thp_date": $('#thp-create-date').val().split("/").reverse().join("-"),
             "customer_code": $('#thp-create-cust').val(),
             "production_code": $('#thp-create-prodcode').val(),
             "part_number": $('#thp-create-partno').val(),
@@ -374,7 +415,6 @@ $(document).ready(function(){
             "process_1": $('#thp-create-subprocess1').val(),
             "process_2": $('#thp-create-subprocess2').val(),
             "ct": $('#thp-create-ct').val(),
-            "plan": $('#thp-create-plan').val(),
             "ton": $('#thp-create-machine').val(),
             "time": $('#thp-create-time').val(),
             "plan_hour": $('#thp-create-ph').val(),
@@ -384,8 +424,26 @@ $(document).ready(function(){
             "apnormal": $('#thp-create-apnormality').val(),
             "action_plan": $('#thp-create-actionplan').val(),
         }
-        ajaxCall({route: "{{ route('tms.manufacturing.thp_entry.thpentry_create') }}", method: "POST", data: data}).then(resolve => {
-            console.log(resolve);
+        var route = "{{ route('tms.manufacturing.thp_entry.check', [':prodcode', ':date']) }}";
+        route  = route.replace(':prodcode', $('#thp-create-prodcode').val());
+        route  = route.replace(':date', $('#thp-create-date').val().split("/").reverse().join("-"));
+        ajaxCall({route: route, method: "GET"}).then(resolve => {
+            var msg = resolve.message;
+            if (msg === 'isnt_exist') {
+                ajaxCall({route: "{{ route('tms.manufacturing.thp_entry.save') }}", method: "POST", data: data}).then(resolve => { 
+                    Swal.fire({
+                        title: 'Success!',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(function(){
+                        window.location.reload();
+                    });
+                });
+            }else{
+                var update = "{{ route('tms.manufacturing.thp_entry.update', [':prodcode']) }}";
+                update  = update.replace(':prodcode', $('#thp-create-prodcode').val());
+                ajaxCall({route: update, method: "PUT", data: data}).then(resolve => { console.log(resolve); });
+            }
         });
     });
     $(document).on('submit', '#thp-form-create', function () {
@@ -797,6 +855,14 @@ $(document).ready(function(){
                 callback(response);
             }
         });
+    }
+    function addZeroes( num ) {
+        var value = Number(num);
+        var res = num.split(".");
+        if(res.length == 1 || (res[1].length < 4)) {
+            value = value.toFixed(2);
+        }
+        return value;
     }
     function ajaxCall(params) {
         return new Promise((resolve, reject) => {
