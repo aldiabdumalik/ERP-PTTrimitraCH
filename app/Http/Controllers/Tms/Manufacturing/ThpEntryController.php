@@ -134,6 +134,7 @@ class ThpEntryController extends Controller
                     'part_type' => $request->part_type,
                     'item_code' => $prod->item_code,
                     'route' => $request->route,
+                    'production_process' => $prod->production_process,
                     'process_sequence_1' => $request->process_1,
                     'process_sequence_2' => $request->process_2,
                     'ct' => $request->ct,
@@ -362,7 +363,7 @@ class ThpEntryController extends Controller
             }else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Maaf THP Entry tidak dapat diclose karena kurang dari '.$min_persen.'%, silahkan coba kembali!',
+                    'message' => 'Maaf THP Entry tidak dapat diclose karena kurang dari '.$min_persen.'% dari LHP!',
                 ], 401);
             }
         }
@@ -768,8 +769,7 @@ class ThpEntryController extends Controller
         $fixDate = $cd[2].'-'.$cd[1].'-'.$cd[0];
         $production_process = $arr_params[1];
 
-        $check = DB::connection('oee')
-            ->table('entry_thp_tbl')
+        $check = DB::table('oee.entry_thp_tbl')
             ->where('thp_date', $fixDate)
             ->where('production_process', $production_process)
             ->get();
@@ -792,8 +792,7 @@ class ThpEntryController extends Controller
                         'date2' => $v->thp_date
                     ];
                 }
-                $lhp = DB::connection('oee')
-                    ->table('entry_lhp_tbl')
+                $lhp = DB::table('oee.entry_lhp_tbl')
                     ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
                     ->where($lhp_where)
                     ->first();

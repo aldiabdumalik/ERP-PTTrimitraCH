@@ -85,7 +85,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             'ton' => $machine,
                             'time' => (isset($row[13])) ? 0.00 : round($row[13], 2),
                             'plan_hour' => (isset($row[14])) ? 0.00 : round($row[14], 2),
-                            'thp_qty' => $row_qty,
+                            'thp_qty' => $thp_qty,
                             'thp_remark' => $remark,
                             'note' => (isset($row[21])) ? $row[21] : null,
                             // 'apnormality' => $row[20],
