@@ -312,22 +312,23 @@ class ThpEntryController extends Controller
             ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
             ->where($lhp_where)
             ->first();
-        $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
-        $outstanding_qty =  $lhp_qty - $data->plan;
-        $update = DB::connection('oee')
-            ->table('entry_thp_tbl')
-            ->where('id_thp', $data->id_thp)
-            ->update([
-                'lhp_qty' => $lhp_qty,
-                'outstanding_qty' => $outstanding_qty
-            ]);
+        if (isset($lhp)) {
+            $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+            $outstanding_qty =  $lhp_qty - $data->plan;
+            $update = DB::connection('oee')
+                ->table('entry_thp_tbl')
+                ->where('id_thp', $data->id_thp)
+                ->update([
+                    'lhp_qty' => $lhp_qty,
+                    'outstanding_qty' => $outstanding_qty
+                ]);
+        }
 
         $thp = ThpEntry::where('id_thp', $request->id)
             ->first();
         if (isset($thp)) {
             $persentase = round(($thp->lhp_qty / $thp->plan)*100);
-            $getsetting = DB::connection('oee')
-                ->table('entry_thp_tbl_setting')
+            $getsetting = DB::table('oee.entry_thp_tbl_setting')
                 ->select('value_setting')
                 ->where('id', 1)
                 ->first();
