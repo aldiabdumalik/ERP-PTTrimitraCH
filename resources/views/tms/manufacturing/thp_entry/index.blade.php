@@ -292,40 +292,6 @@ $(document).ready(function(){
                 $('#thp-create-actionplan').val(data.action_plan);
             }
         });
-        // getThp($(this).data('thp'), function (response) {
-        //     response = response.responseJSON;
-        //     $('#createModal').modal('show');
-        //     if (response.status == true) {
-        //         var data = response.data;
-        //         var action_plan, date, apnormality, note, sgm, shift, grup, machine;
-        //         date = data.thp_date.split('-');
-        //         date = date[2] + '/' + date[1] + '/' + date[0];
-        //         $('#thp-id').val(data.id_thp);
-        //         $('#thp-date').val(date);
-        //         $('#thp-production-code').val(data.production_code);
-        //         $('#thp-part-number').val(data.part_number);
-        //         $('#thp-part-name').val(data.part_name);
-        //         $('#thp-part-type').val(data.part_type);
-        //         $('#thp-customer-code').val(data.customer_code);
-        //         $('#thp-route').val(data.route);
-        //         $('#thp-plan').val(data.plan);
-        //         $('#thp-ct').val(data.ct);
-        //         $('#thp-ton').val(data.ton);
-        //         $('#thp-time').val(data.time);
-        //         $('#thp-plan-hour').val(data.plan_hour);
-        //         $('#thp-process-1').val(data.process_sequence_1);
-        //         $('#thp-process-2').val(data.process_sequence_2);
-        //         $('#thp-qty').val(data.thp_qty);
-        //         $('#thp-itemcode').val(data.item_code);
-        //         $('#thp-production-process').val(data.production_process);
-        //         sgm = data.thp_remark.split('_');
-        //         shift = sgm[0].split('');
-
-        //         $('#thp-note').val(data.note);
-        //         $('#thp-apnormal').val(data.apnormality);
-        //         $('#thp-action-plan').val(data.action_plan);
-        //     }
-        // });
     }).on('mouseup',function(){
         // setTimeout(function(){ 
         //     // $('#thp-form-create input,textarea').removeAttr('readonly');

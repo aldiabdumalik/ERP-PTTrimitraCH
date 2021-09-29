@@ -285,7 +285,7 @@ class ThpEntryController extends Controller
         }else{
             return response()->json([
                 'status' => false,
-                'message' => 'Data gagal ditemukan!'
+                'message' => 'Data tidak ditemukan!'
             ], 404);
         }
     }
