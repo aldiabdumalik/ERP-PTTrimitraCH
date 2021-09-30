@@ -19,7 +19,6 @@
                                         <th class="align-middle">Address 4</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
