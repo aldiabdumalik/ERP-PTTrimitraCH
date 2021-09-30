@@ -87,7 +87,9 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm" autocomplete="off" required value="IDR">
+                <select name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm">
+                    <option value="IDR">IDR</option>
+                </select>
             </div>
             <div class="col-6">
                 <input type="text" name="custinv-create-currenvy-value" id="custinv-create-currenvy-value" class="form-control form-control-sm" autocomplete="off" required>

@@ -12,7 +12,7 @@
                                 <thead class="text-center" style="font-size: 15px;">
                                     <tr style="font-size: 14px;">
                                         <th class="align-middle">Code</th>
-                                        <th class="align-middle">Nama</th>
+                                        <th class="align-middle">Name</th>
                                         <th class="align-middle">Address 1</th>
                                         <th class="align-middle">Address 2</th>
                                         <th class="align-middle">Address 3</th>

@@ -399,8 +399,7 @@ class ThpEntryController extends Controller
 
     public function importToDB(Request $request)
     {
-        $getsetting = DB::connection('oee')
-                ->table('entry_thp_tbl_setting')
+        $getsetting = DB::table('oee.entry_thp_tbl_setting')
                 ->select('value_setting')
                 ->where('id', 1)
                 ->first();
