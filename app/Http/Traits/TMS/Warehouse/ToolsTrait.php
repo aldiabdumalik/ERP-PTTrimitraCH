@@ -48,6 +48,23 @@ trait ToolsTrait {
         return $query;
     }
 
+    protected function sys_account(Request $request)
+    {
+        if (isset($request->number)) {
+            $query = 
+                DB::table('db_tbs.sys_account')
+                    ->where('status', 'ACTIVE')
+                    ->where('number', $request->number)
+                    ->first();
+        }else{
+            $query = 
+                DB::table('db_tbs.sys_account')
+                    ->where('status', 'ACTIVE')
+                    ->get();
+        }
+        return $query;
+    }
+
     protected function items($id)
     {
         $query = 

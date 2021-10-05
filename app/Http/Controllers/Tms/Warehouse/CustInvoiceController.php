@@ -33,6 +33,13 @@ class CustInvoiceController extends Controller
                 return DataTables::of($this->customer($request))->make(true);
                 break;
 
+            case 'sys_account':
+                if (isset($request->number)) {
+                    return _Success(null, 200, $this->sys_account($request));
+                }
+                return DataTables::of($this->sys_account($request))->make(true);
+                break;
+
             case 'currency':
                 if (isset($request->currency)) {
                     $res = DB::table('db_tbs.valas')
