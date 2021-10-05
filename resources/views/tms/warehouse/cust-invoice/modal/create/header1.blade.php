@@ -87,12 +87,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <select name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm">
-                    <option value="IDR">IDR</option>
-                </select>
+                <select name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm"></select>
             </div>
             <div class="col-6">
-                <input type="text" name="custinv-create-currenvy-value" id="custinv-create-currenvy-value" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-currenvy-value" id="custinv-create-currenvy-value" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
         </div>
     </div>

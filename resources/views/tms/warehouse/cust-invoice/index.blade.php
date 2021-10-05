@@ -19,6 +19,8 @@
 @section('script')
 <script>
     $(document).ready(function () {
+        moment().format();
+        moment.locale('id');
         const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
         const tbl_attr = (targets=[]) => {
             const obj = {
@@ -53,8 +55,37 @@
                     var now = new Date();
                     var currentMonth = ('0'+(now.getMonth()+1)).slice(-2);
                     $('#custinv-create-priod').val(`${now.getFullYear()}-${currentMonth}`);
+
+                    ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+                        var data = resolve.content;
+                        $.each(data, function (i, valas) {
+                            $('#custinv-create-currency-type').append($('<option>', { 
+                                value: valas.valas,
+                                text : valas.valas 
+                            }));
+                        });
+                        
+                        ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'currency', currency: 'IDR'}}).then(resolve => {
+                            $('#custinv-create-currency-type').val('IDR');
+                            $('#custinv-create-currenvy-value').val(currency(addZeroes(String(resolve.content.rate)))); 
+                        });
+                    });
                 });
             });
+        });
+
+        $(document).on('change', '#custinv-create-currency-type', function () {
+            var id = $(this).val();
+            ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'currency', currency: id}}).then(resolve => {
+                $('#custinv-create-currenvy-value').val(currency(addZeroes(String(resolve.content.rate))));
+            });
+        });
+
+        $(document).on('keyup', '#custinv-create-terms', function (e) {
+            var val = $(this).val();
+            if (val>0) {
+                $('#custinv-create-duedate').val(moment($('#custinv-create-date').val(), "DD/MM/YYYY").add(val, 'days').format('L'));
+            }
         });
 
         var tbl_item = $('#custinv-datatables-index').DataTable(tbl_attr([0,7,8,9]));
@@ -100,6 +131,19 @@
             }
             return false;
         });
+        $('#custinv-datatables-customer tbody').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_customer.row(this).data();
+            modalAction('#custinv-modal-customer', 'hide').then(resolve => {
+                $('#custinv-create-customercode').val(data.code);
+                $('#custinv-create-customername').val(data.name);
+                $('#custinv-create-an').val(data.cont);
+                $('#custinv-create-customeraddr1').val(data.ad1);
+                $('#custinv-create-customeraddr2').val(data.ad2);
+                $('#custinv-create-customeraddr3').val(data.ad3);
+                $('#custinv-create-customeraddr4').val(data.ad4);
+                $('#custinv-create-glcode').val(data.glcode);
+            });
+        });
 
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
@@ -137,6 +181,36 @@
                 });
             });
         }
+        function addZeroes( num ) {
+            var value = Number(num);
+            var res = num.split(".");
+            if(res.length == 1 || (res[1].length < 4)) {
+                value = value.toFixed(2);
+            }
+            return value;
+        }
+        function currency(bilangan) {
+            var	number_string = bilangan.toString(),
+            split	= number_string.split('.'),
+            sisa 	= split[0].length % 3,
+            rupiah 	= split[0].substr(0, sisa),
+            ribuan 	= split[0].substr(sisa).match(/\d{1,3}/gi);
+
+            if (ribuan) {
+                separator = sisa ? ',' : '';
+                rupiah += separator + ribuan.join(',');
+            }
+            return rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+        }
+
+        $('#custinv-create-date').on('changeDate', function () {
+            $('#custinv-create-terms').val(0);
+            $('#custinv-create-duedate').val($(this).val());
+        });
+        $('#custinv-create-duedate').on('changeDate', function () {
+            var days = moment($('#custinv-create-duedate').val(), "DD/MM/YYYY").diff(moment($('#custinv-create-date').val(), "DD/MM/YYYY"), 'days');
+            $('#custinv-create-terms').val(days);
+        });
     });
 </script>
 @endsection
@@ -145,6 +219,7 @@
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('vendor/jqloading/jquery.loading.min.js') }}"></script>
+<script src="{{ asset('vendor/moment/moment-with-locales.js') }}"></script>
 <script>
     $('.this-datepicker').datepicker({
         format: 'dd/mm/yyyy',

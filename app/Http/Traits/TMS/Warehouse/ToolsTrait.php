@@ -42,7 +42,7 @@ trait ToolsTrait {
         $query = 
             DB::connection('ekanban')
             ->table('ekanban_customermaster')
-            ->selectRaw('CustomerCode_eKanban as code, CustomerName as name')
+            ->selectRaw('CustomerCode_eKanban as code, CustomerName as name, Contact as cont, Address1 as ad1, Address2 as ad2, Address3 as ad3, Address4 as ad4, GLAR as glcode')
             ->where('status_data', 'ACTIVE')
             ->get();
         return $query;

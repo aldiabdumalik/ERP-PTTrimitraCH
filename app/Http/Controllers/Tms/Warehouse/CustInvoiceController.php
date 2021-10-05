@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\CustInvTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class CustInvoiceController extends Controller
@@ -30,6 +31,17 @@ class CustInvoiceController extends Controller
             
             case 'customer':
                 return DataTables::of($this->customer($request))->make(true);
+                break;
+
+            case 'currency':
+                if (isset($request->currency)) {
+                    $res = DB::table('db_tbs.valas')
+                        ->where('valas', $request->currency)
+                        ->first();
+                }else{
+                    $res = DB::table('db_tbs.valas')->get();
+                }
+                return _Success(null, 200, $res);
                 break;
                 
             default:

@@ -20,7 +20,7 @@
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-12">
-        <input type="text" name="custinv-create-an" id="custinv-create-an" class="form-control form-control-sm readonly-first" readonly>
+        <input type="text" name="custinv-create-an" id="custinv-create-an" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
@@ -53,7 +53,7 @@
                 <input type="text" name="custinv-create-glcode" id="custinv-create-glcode" class="form-control form-control-sm" autocomplete="off" required>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-glket" id="custinv-create-glket" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-glket" id="custinv-create-glket" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
         </div>
     </div>
