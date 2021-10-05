@@ -144,7 +144,7 @@
                 $('#custinv-create-customeraddr4').val(data.ad4);
                 $('#custinv-create-glcode').val(data.glcode);
                 ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'sys_account', number: data.glcode}}).then(resolve => {
-                    $('#custinv-create-glket').val(resolve.content.name);
+                    $('#custinv-create-glketgi').val(resolve.content.name);
                 });
             });
         });
