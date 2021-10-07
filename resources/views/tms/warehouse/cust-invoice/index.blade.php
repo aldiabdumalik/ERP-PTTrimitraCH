@@ -15,6 +15,7 @@
 @include('tms.warehouse.cust-invoice.modal.table.customer')
 @include('tms.warehouse.cust-invoice.modal.table.doaddr')
 @include('tms.warehouse.cust-invoice.modal.table.sysaccount')
+@include('tms.warehouse.cust-invoice.modal.table.do')
 
 @endsection
 @section('script')
@@ -144,9 +145,90 @@
                 $('#custinv-create-customeraddr4').val(data.ad4);
                 $('#custinv-create-glcode').val(data.glcode);
                 ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'sys_account', number: data.glcode}}).then(resolve => {
-                    $('#custinv-create-glketgi').val(resolve.content.name);
+                    $('#custinv-create-glket').val(resolve.content.name);
                 });
             });
+        });
+
+        var tbl_account;
+        $(document).on('keypress', '#custinv-create-glcode', function (e) {
+            if(e.which == 13) {
+                modalAction('#custinv-modal-sysacc').then((resolve) => {
+                    var params = {"type": "sys_account"}
+                    var column = [
+                        {data: 'number', name: 'number', className: 'text-center'},
+                        {data: 'name', name: 'name', className: 'text-left'},
+                        {data: 'ldept', name: 'ldept', className: 'text-center'},
+                        {data: 'ldiv', name: 'ldiv', className: 'text-center'},
+                    ];
+                    tbl_account = $('#custinv-datatables-sysacc').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ajax: {
+                            url: "{{ route('tms.warehouse.cust_invoice.header') }}",
+                            method: 'POST',
+                            data: params,
+                            headers: token_header
+                        },
+                        columns: column,
+                        ordering: false,
+                        scrollY: "300px",
+                        scrollCollapse: true,
+                        fixedHeader: true,
+                    });
+                });
+            }
+            return false;
+        });
+
+        $('#custinv-datatables-sysacc tbody').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_account.row(this).data();
+            modalAction('#custinv-modal-sysacc', 'hide').then(resolve => {
+                $('#custinv-create-glcode').val(data.number);
+                $('#custinv-create-glket').val(data.name);
+            });
+        });
+
+        var tbl_do;
+        $(document).on('click', '#custinv-btn-add-item', function () {
+            var cust_id = $('#custinv-create-customercode').val();
+            if (cust_id == "") {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Input customer first!',
+                    icon: 'warning'
+                });
+            }else{
+                modalAction('#custinv-modal-do').then(resolve => {
+                    tbl_do = $('#custinv-datatables-do').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ajax: {
+                            url: "{{ route('tms.warehouse.cust_invoice.do') }}",
+                            method: 'POST',
+                            data: {cust_id: cust_id},
+                            headers: token_header
+                        },
+                        columns: [
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'do_no', name: 'do_no', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                        ],
+                        ordering: false,
+                        scrollY: "300px",
+                        scrollCollapse: true,
+                        fixedHeader: true,
+                    });
+                });
+            }
         });
 
         function modalAction(elementId=null, action='show'){

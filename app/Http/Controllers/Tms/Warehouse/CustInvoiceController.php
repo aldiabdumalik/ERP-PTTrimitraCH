@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\CustInvTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -22,6 +23,19 @@ class CustInvoiceController extends Controller
         return view('tms.warehouse.cust-invoice.index');
     }
 
+    public function delivery_order(Request $request)
+    {
+        $customer = $request->cust_id;
+        $branch = Auth::user()->Branch;
+
+        $req = $this->custInvDoGB([
+            'cust_id' => $customer,
+            'branch' => $branch
+        ]);
+
+        return DataTables::of($req)->make(true);
+    }
+
     public function header(Request $request)
     {
         switch ($request->type) {
@@ -34,10 +48,24 @@ class CustInvoiceController extends Controller
                 break;
 
             case 'sys_account':
+                $req = $this->sys_account($request);
                 if (isset($request->number)) {
-                    return _Success(null, 200, $this->sys_account($request));
+                    return _Success(null, 200, $req);
                 }
-                return DataTables::of($this->sys_account($request))->make(true);
+                return DataTables::of($req)
+                    ->editColumn('ldept', function($req) {
+                            return view('tms.warehouse.cust-invoice.button.ldept', [
+                                'req' => $req,
+                            ]);
+                        }
+                    )
+                    ->editColumn('ldiv', function($req) {
+                            return view('tms.warehouse.cust-invoice.button.ldiv', [
+                                'req' => $req,
+                            ]);
+                        }
+                    )
+                    ->make(true);
                 break;
 
             case 'currency':
