@@ -70,6 +70,7 @@ trait CustInvTrait {
                 entry_do_tbl.rr_no,
                 entry_do_tbl.period as do_priod,
                 entry_do_tbl.cust_id as cust_id,
+                entry_do_tbl.delivery_date as do_date,
                 SUM(entry_do_tbl.quantity) as tot_qty,
                 db_tbs.item.PART_NO as part_no,
                 db_tbs.item.descript1 as model,
