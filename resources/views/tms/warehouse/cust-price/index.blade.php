@@ -236,7 +236,7 @@
                             item.items.itemcode,
                             item.items.part_no,
                             item.items.descript,
-                            `<input type="number" id="new_price" class="form-control form-control-sm text-right" value="0.00">`,
+                            `<input type="number" class="form-control form-control-sm text-right" value="0.00">`,
                             old_price,
                         ]).node();
                         $(add).attr('id', item.items.itemcode);
@@ -252,11 +252,20 @@
         });
 
         $(document).on('click', '#custprice-btn-delete-item', function () {
+            var tbl = tbl_item.row('.selected').data();
+            
+            var id = tbl[1];
+            var index = $.inArray(id, item_select);
+
+            item_select.splice( index, 1 );
+
             tbl_item.row('.selected').remove().draw( false );
             for (let i = 0; i < tbl_item.rows().data().toArray().length; i++) {
                 var drw = tbl_item.cell( i, 0 ).data(1+i);
             }
             tbl_item.draw(false);
+            
+
             $('#custprice-btn-edit-item').prop('disabled', true);
             $('#custprice-btn-delete-item').prop('disabled', true);
         });
@@ -369,7 +378,7 @@
                                         data.item_code,
                                         data.PART_NO,
                                         data.DESCRIPT,
-                                        `<input type="text" id="new_price" class="form-control form-control-sm text-right" value="${price_new}">`,
+                                        `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
                                         // (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
                                         currency(addZeroes(String(data.price_old))),
                                     ]);
