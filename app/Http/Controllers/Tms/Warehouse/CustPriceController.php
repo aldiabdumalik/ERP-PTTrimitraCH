@@ -83,10 +83,11 @@ class CustPriceController extends Controller
             for ($i=0; $i < count($items); $i++) { 
                 $data[] = [
                     'cust_id' => $request->cust_id,
-                    'item_code' => $items[$i][1],
+                    'item_code' => $items[$i]['itemcode'],
                     'currency' => $request->valas,
-                    'price' =>  str_replace(',', '', $items[$i][4]), // $items[$i][4],
-                    'price_new' =>  str_replace(',', '', $items[$i][4]), // $items[$i][4],
+                    'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['new_price'],
+                    'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i][4],
+                    'price_old' =>  str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
                     'active_date' => $request->active_date,
                     'created_by' => Auth::user()->FullName,
                     'created_date' => Carbon::now(),
@@ -126,10 +127,11 @@ class CustPriceController extends Controller
             for ($i=0; $i < count($items); $i++) { 
                 $data[] = [
                     'cust_id' => $request->cust_id,
-                    'item_code' => $items[$i][1],
+                    'item_code' => $items[$i]['itemcode'],
                     'currency' => $request->valas,
-                    'price' =>  str_replace(',', '', $items[$i][4]), // $items[$i][4],
-                    'price_new' =>  str_replace(',', '', $items[$i][4]), // $items[$i][4],
+                    'price' =>  str_replace(',', '', $items[$i]['price_new']), // $items[$i]['price_new'],
+                    'price_new' =>  str_replace(',', '', $items[$i]['price_new']), // $items[$i]['price_new'],
+                    'price_old' =>  str_replace(',', '', $items[$i]['price_old']), // $items[$i][4],
                     'active_date' => $request->active_date,
                     'updated_by' => Auth::user()->FullName,
                     'updated_date' => Carbon::now(),
@@ -296,10 +298,40 @@ class CustPriceController extends Controller
             
             case "items":
                 if (isset($request->cust_id)) {
-                    return DataTables::of($this->items($request->cust_id))->make(true);
+                    return DataTables::of($this->items($request->cust_id))
+                        ->addIndexColumn()
+                        ->make(true);
                     // return DataTables::of($this->items_with_old_price($request->cust_id))->make(true);
                 }
                 return _Error('Params not exist!', 404);
+                break;
+
+            case 'items_selected':
+                $result = [];
+                $itemcode = $request->items;
+                if (!empty($itemcode)) {
+                    for ($i=0; $i < count($itemcode); $i++) { 
+                        $item = $this->item($itemcode[$i]);
+                        $old = $this->_oldPrice($itemcode[$i]);
+                        $result[] = [
+                            'items' => $item,
+                            'old_price' => $old
+                        ];
+                    }
+                    return _Success(null, 200, $result);
+                }
+                return _Error('Please select a item');
+                break;
+
+            case 'currency':
+                if (isset($request->currency)) {
+                    $res = DB::table('db_tbs.valas')
+                        ->where('valas', $request->currency)
+                        ->first();
+                }else{
+                    $res = DB::table('db_tbs.valas')->get();
+                }
+                return _Success(null, 200, $res);
                 break;
 
             case "log":
@@ -351,6 +383,15 @@ class CustPriceController extends Controller
                 return _Error('Params not exist!', 404);
                 break;
         }
+    }
+
+    private function _oldPrice($itemcode)
+    {
+        $query = CustPrice::where('item_code', $itemcode)
+            ->selectRaw('item_code, price_new')
+            ->orderBy('active_date', 'DESC')
+            ->first();
+        return $query;
     }
 
     public function getitems()

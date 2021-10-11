@@ -21,6 +21,7 @@
 @section('script')
 <script>
     $(document).ready(function () {
+        var item_select = [];
         const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
         const tbl_attr = (targets=[]) => {
             const obj = {
@@ -67,7 +68,18 @@
         });
 
         $('#custprice-btn-modal-create').on('click', function () {
-            modalAction('#custprice-modal-index');
+            modalAction('#custprice-modal-index').then(() => {
+                ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+                    var data = resolve.content;
+                    $.each(data, function (i, valas) {
+                        $('#custprice-create-valas').append($('<option>', { 
+                            value: valas.valas,
+                            text : valas.valas 
+                        }));
+                    });
+                    $('#custprice-create-valas').val('IDR');
+                });
+            });
         });
 
         var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,4,5]));
@@ -113,6 +125,8 @@
                             ]);
                         });
                         tbl_customer.draw();
+                        $('#custprice-datatables-customer-item').DataTable().destroy();
+                        item_select = [];
                     });
                 });
             }
@@ -127,16 +141,11 @@
             resetForm();
         });
 
-        var tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
-            destroy: true,
-            ordering: false,
-            lengthChange: false,
-        });
+        var tbl_item_add;
         function getTblItem(cust_id) {
             tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
                 processing: true,
                 serverSide: true,
-                destroy: true,
                 ajax: {
                     url: "{{route('tms.warehouse.cust_price.header')}}",
                     method: "POST",
@@ -156,7 +165,12 @@
                 lengthChange: false,
                 createdRow: function( row, data, dataIndex ) {
                     $(row).attr('data-id', data.itemcode);
-                    $(row).attr('id', `row-${data.itemcode}`);
+                    $(row).attr('id', data.itemcode);
+                },
+                rowCallback: function( row, data ) {
+                    if ( $.inArray(data.itemcode, item_select) !== -1 ) {
+                        $(row).addClass('selected');
+                    }
                 }
             });
         }
@@ -188,47 +202,59 @@
                 });
             }else{
                 modalAction('#custprice-modal-item').then(function () {
+                    tbl_item_add.destroy();
                     getTblItem(cust_id);
                 });
             }
         });
 
         $('#custprice-datatables-customer-item').off('click', 'tr').on('click', 'tr', function () {
-            var row_id = $(this).data('id');
-            var data = tbl_item_add.row(this).data();
-            var cek = tbl_item.rows().data().toArray();
-            var isExist = false;
-            if (cek.length > 0) {
-                for (let i = 0; i < cek.length; i++) {
-                    if (data.itemcode == cek[i][1]) {
-                        isExist = true;
-                        break;
-                    }
-                }
+            var id = this.id;
+            var index = $.inArray(id, item_select);
+
+            if ( index === -1 ) {
+                item_select.push( id );
+            } else {
+                item_select.splice( index, 1 );
             }
-            if (isExist == true) {
-                Swal.fire({
-                    title: 'Warning!',
-                    text: "Itemcode ini tersedia, silahkan klik edit pada tabel untuk melakukan perubahan!",
-                    icon: 'warning'
-                });
-            }else{
-                modalAction('#custprice-modal-item', 'hide').then(() => {
-                    modalAction('#custprice-modal-itemadd').then(() => {
-                        $('#custprice-additem-itemcode').val(data.itemcode);
-                        $('#custprice-additem-partno').val(data.part_no);
-                        $('#custprice-additem-description').val(data.descript);
-                        $('#custprice-additem-unit').val(data.unit);
-                        $('#custprice-additem-newprice').val(currency(addZeroes(String(0))));
+
+            $(this).toggleClass('selected');
+        });
+
+        $(document).on('click', '#custprice-btn-item-submit', function () {
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "items_selected", items: item_select}}).then(resolve => {
+                var data = resolve.content;
+                modalAction('#custprice-modal-item', 'hide').then(resolve => {
+
+                    tbl_item.clear().draw(false);
+                    var no = 1;
+                    
+                    $.each(data, function (i, item) {
+                        var old_price = (item.old_price == null) ? '0.00' : currency(addZeroes(String(item.old_price.price_new)));
+                        var add = tbl_item.row.add([
+                            no,
+                            item.items.itemcode,
+                            item.items.part_no,
+                            item.items.descript,
+                            `<input type="number" id="new_price" class="form-control form-control-sm text-right" value="0.00">`,
+                            old_price,
+                        ]).node();
+                        $(add).attr('id', item.items.itemcode);
+                        $(add).addClass(item.items.itemcode);
+                        tbl_item.draw(false);
+                        
+                        
+                        no++;
                     });
+
                 });
-            }
+            });
         });
 
         $(document).on('click', '#custprice-btn-delete-item', function () {
             tbl_item.row('.selected').remove().draw( false );
             for (let i = 0; i < tbl_item.rows().data().toArray().length; i++) {
-                var drw = tbl_item.cell( i, 0 ).data(1+i); 
+                var drw = tbl_item.cell( i, 0 ).data(1+i);
             }
             tbl_item.draw(false);
             $('#custprice-btn-edit-item').prop('disabled', true);
@@ -292,7 +318,7 @@
                                 data.PART_NO,
                                 data.DESCRIPT,
                                 (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
-                                "0.00",
+                                currency(addZeroes(String(data.price_old))),
                             ]);
                             no++;
                             cust_id = data.cust_id;
@@ -337,13 +363,15 @@
                                 var no = 1;
                                 var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
                                 $.each(resolve.content, function (i, data) {
+                                    var price_new = (data.price_new == null ? "0.00" : addZeroes(String(data.price_new)));
                                     tbl_item.row.add([
                                         no,
                                         data.item_code,
                                         data.PART_NO,
                                         data.DESCRIPT,
-                                        (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
-                                        "0.00",
+                                        `<input type="text" id="new_price" class="form-control form-control-sm text-right" value="${price_new}">`,
+                                        // (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
+                                        currency(addZeroes(String(data.price_old))),
                                     ]);
                                     no++;
                                     cust_id = data.cust_id;
@@ -377,11 +405,27 @@
         });
 
         $(document).on('submit', '#custprice-form-index', function () {
+            var items = tbl_item.rows().data().toArray();
+            var items_fix = [];
+            for (let i = 0; i < items.length; i++) {
+                var obj_tbl_index = {}
+                var new_price = tbl_item.rows().cell(i, 4).nodes().to$().find('input').val();
+                
+                if (new_price !== "0.00") {
+                    obj_tbl_index.itemcode = items[i][1];
+                    obj_tbl_index.part_no = items[i][2];
+                    obj_tbl_index.descript = items[i][3];
+                    obj_tbl_index.new_price = new_price;
+                    obj_tbl_index.old_price = items[i][5];
+
+                    items_fix.push(obj_tbl_index);
+                }
+            }
             var data = {
                 cust_id: $('#custprice-create-customercode').val(),
                 valas: $('#custprice-create-valas').val(),
                 active_date: $('#custprice-create-activedate').val().split("/").reverse().join("-"),
-                items: tbl_item.rows().data().toArray()
+                items: items_fix
             };
             // Cek
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";

@@ -28,7 +28,7 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-4">
-                <input type="text" name="custprice-create-valas" id="custprice-create-valas" class="form-control form-control-sm" data-val="IDR" autocomplete="off" required value="IDR">
+                <select name="custprice-create-valas" id="custprice-create-valas" class="form-control form-control-sm" required></select>
             </div>
         </div>
     </div>
