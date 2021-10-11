@@ -296,8 +296,8 @@ class CustPriceController extends Controller
             
             case "items":
                 if (isset($request->cust_id)) {
-                    // return DataTables::of($this->items($request->cust_id))->make(true);
-                    return DataTables::of($this->items_with_old_price($request->cust_id))->make(true);
+                    return DataTables::of($this->items($request->cust_id))->make(true);
+                    // return DataTables::of($this->items_with_old_price($request->cust_id))->make(true);
                 }
                 return _Error('Params not exist!', 404);
                 break;

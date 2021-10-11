@@ -127,9 +127,42 @@
             resetForm();
         });
 
-        var tbl_item_add;
+        var tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
+            destroy: true,
+            ordering: false,
+            lengthChange: false,
+        });
+        function getTblItem(cust_id) {
+            tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.warehouse.cust_price.header')}}",
+                    method: "POST",
+                    data: {
+                        type: "items",
+                        cust_id: cust_id
+                    },
+                    headers: token_header
+                },
+                columns: [
+                    {data:'itemcode', name: 'itemcode', className: "text-center align-middle"},
+                    {data:'part_no', name: 'part_no', className: "text-left align-middle"},
+                    {data:'descript', name: 'descript', className: "text-left align-middle"},
+                    {data:'unit', name: 'unit', className: "text-center align-middle"},
+                ],
+                ordering: false,
+                lengthChange: false,
+                createdRow: function( row, data, dataIndex ) {
+                    $(row).attr('data-id', data.itemcode);
+                    $(row).attr('id', `row-${data.itemcode}`);
+                }
+            });
+        }
         $('#custprice-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_customer.row(this).data();
+            var cust_id = data[0];
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
                 $('#custprice-create-customercode').val(data[0]);
                 $('#custprice-create-customername').val(data[1]);
@@ -139,32 +172,7 @@
                     $('#custprice-create-priceby').val('SO');
                 }
                 modalAction('#custprice-modal-item').then(function () {
-                    tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
-                        processing: true,
-                        serverSide: true,
-                        destroy: true,
-                        ajax: {
-                            url: "{{route('tms.warehouse.cust_price.header')}}",
-                            method: "POST",
-                            data: {
-                                type: "items",
-                                cust_id: data[0]
-                            },
-                            headers: token_header
-                        },
-                        columns: [
-                            {data:'itemcode', name: 'itemcode', className: "text-center align-middle"},
-                            {data:'part_no', name: 'part_no', className: "text-left align-middle"},
-                            {data:'descript', name: 'descript', className: "text-left align-middle"},
-                            {data:'unit', name: 'unit', className: "text-center align-middle"},
-                        ],
-                        ordering: false,
-                        lengthChange: false,
-                        createdRow: function( row, data, dataIndex ) {
-                            $(row).attr('data-id', data.itemcode);
-                            $(row).attr('id', `row-${data.itemcode}`);
-                        }
-                    });
+                    getTblItem(cust_id);
                 });
             });
         });
@@ -180,32 +188,7 @@
                 });
             }else{
                 modalAction('#custprice-modal-item').then(function () {
-                    tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
-                        processing: true,
-                        serverSide: true,
-                        destroy: true,
-                        ajax: {
-                            url: "{{route('tms.warehouse.cust_price.header')}}",
-                            method: "POST",
-                            data: {
-                                type: "items",
-                                cust_id: cust_id
-                            },
-                            headers: token_header
-                        },
-                        columns: [
-                            {data:'itemcode', name: 'itemcode', className: "text-center align-middle"},
-                            {data:'part_no', name: 'part_no', className: "text-left align-middle"},
-                            {data:'descript', name: 'descript', className: "text-left align-middle"},
-                            {data:'unit', name: 'unit', className: "text-center align-middle"},
-                        ],
-                        ordering: false,
-                        lengthChange: false,
-                        createdRow: function( row, data, dataIndex ) {
-                            $(row).attr('data-id', data.itemcode);
-                            $(row).attr('id', `row-${data.itemcode}`);
-                        }
-                    });
+                    getTblItem(cust_id);
                 });
             }
         });
@@ -224,11 +207,11 @@
                 }
             }
             if (isExist == true) {
-                    Swal.fire({
-                        title: 'Warning!',
-                        text: "Itemcode ini tersedia, silahkan klik edit pada tabel untuk melakukan perubahan!",
-                        icon: 'warning'
-                    });
+                Swal.fire({
+                    title: 'Warning!',
+                    text: "Itemcode ini tersedia, silahkan klik edit pada tabel untuk melakukan perubahan!",
+                    icon: 'warning'
+                });
             }else{
                 modalAction('#custprice-modal-item', 'hide').then(() => {
                     modalAction('#custprice-modal-itemadd').then(() => {
