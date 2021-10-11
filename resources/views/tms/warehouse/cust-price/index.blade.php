@@ -446,21 +446,33 @@
 
         function submit(route, data) {
             var method = (route == "{{route('tms.warehouse.cust_price.save')}}" ? "POST" : "PUT");
-            return ajaxCall({route: route, method: method, data: data}).then(resolve => {
-                var msg = resolve.message;
-                if (resolve.status == true) {
-                    modalAction('#custprice-modal-index', 'hide');
-                    Swal.fire({
-                        title: 'Notification',
-                        text: msg,
-                        icon: 'success'
-                    }).then(answer => {
-                        index_data.then(resolve => {
-                            resolve.ajax.reload();
-                        });
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will save and post!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, save and post it!'
+            }).then((result) => {
+                if (result.value == true) {
+                    ajaxCall({route: route, method: method, data: data}).then(resolve => {
+                        var msg = resolve.message;
+                        if (resolve.status == true) {
+                            modalAction('#custprice-modal-index', 'hide');
+                            Swal.fire({
+                                title: 'Notification',
+                                text: msg,
+                                icon: 'success'
+                            }).then(answer => {
+                                index_data.then(resolve => {
+                                    resolve.ajax.reload();
+                                });
+                            });
+                        }
                     });
                 }
-            });
+            })
         }
 
         $(document).on('click', '.custprice-act-voided', function () {

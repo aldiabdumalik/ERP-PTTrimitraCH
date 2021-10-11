@@ -103,6 +103,25 @@ class CustPriceController extends Controller
                     'user' => Auth::user()->FullName,
                     'note' => null
                 ]);
+
+                // Post
+                $posted = CustPrice::where([
+                        'cust_id' => $request->cust_id,
+                        'active_date' => $request->active_date
+                    ])->update([
+                        'posted_date' => Carbon::now(),
+                        'posted_by' => Auth::user()->FullName
+                    ]);
+                if ($posted) {
+                    $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                        'cust_id' => $request->cust_id,
+                        'active_date' => $request->active_date,
+                        'written_date' => Carbon::now(),
+                        'status' => 'POSTED',
+                        'user' => Auth::user()->FullName,
+                        'note' => null
+                    ]);
+                }
                 return $this->_Success('Saved successfully!', 201);
             } catch (Exception $e) {
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
@@ -149,7 +168,26 @@ class CustPriceController extends Controller
                     'user' => Auth::user()->FullName,
                     'note' => null
                 ]);
-                return $this->_Success('Saved successfully!', 201);
+
+                // Post
+                $posted = CustPrice::where([
+                        'cust_id' => $request->cust_id,
+                        'active_date' => $request->active_date
+                    ])->update([
+                        'posted_date' => Carbon::now(),
+                        'posted_by' => Auth::user()->FullName
+                    ]);
+                if ($posted) {
+                    $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                        'cust_id' => $request->cust_id,
+                        'active_date' => $request->active_date,
+                        'written_date' => Carbon::now(),
+                        'status' => 'POSTED',
+                        'user' => Auth::user()->FullName,
+                        'note' => null
+                    ]);
+                }
+                return $this->_Success('Cust Price has been update & posted!', 201);
             } catch (Exception $e) {
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
