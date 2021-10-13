@@ -27,20 +27,29 @@ class CustInvoiceController extends Controller
     {
         $customer = $request->cust_id;
         $branch = Auth::user()->Branch;
-
-        $req = $this->callDoEntry([
+        $req_dt = $this->callDoEntry([
             'cust_id' => $customer,
             'branch' => $branch
         ]);
 
-        // print_r($req);die;
+        if (!isset($request->call_do_id)) {
 
-        return DataTables::of($req)
-            ->editColumn('do_date', function($req) {
-                    return convertDate($req->do_date, 'Y-m-d', 'd/m/Y');
-                }
-            )
-            ->make(true);
+            return DataTables::of($req_dt)
+                ->editColumn('do_date', function($req) {
+                        return convertDate($req->do_date, 'Y-m-d', 'd/m/Y');
+                    }
+                )
+                ->make(true);
+        }
+
+        $req = $this->callDoJoin($request->arr_do);
+
+        $response = [
+            'do' => $req_dt,
+            'itemcode' => $req
+        ];
+
+        return _Success(null, 200, $response);
     }
 
     public function header(Request $request)

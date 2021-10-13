@@ -15,7 +15,7 @@
                     <th class="align-middle">Sub Amount</th>
                 </tr>
             </thead>
-            <tbody class="text-center"></tbody>
+            {{-- <tbody class="text-center"></tbody> --}}
         </table>
     </div>
 </div>

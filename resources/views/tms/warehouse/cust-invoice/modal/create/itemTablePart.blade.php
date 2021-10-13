@@ -14,7 +14,7 @@
                     <th class="align-middle">Sub Total</th>
                 </tr>
             </thead>
-            <tbody class="text-center"></tbody>
+            {{-- <tbody class="text-center"></tbody> --}}
         </table>
     </div>
 </div>

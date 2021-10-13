@@ -234,10 +234,76 @@
                 });
             }else{
                 modalAction('#custinv-modal-do', 'hide').then(() => {
-                    console.log(do_selected);
+                    ajaxCall({
+                        route: "{{ route('tms.warehouse.cust_invoice.do') }}", 
+                        method: "POST", 
+                        data: {
+                            call_do_id: true,
+                            arr_do: do_selected,
+                            cust_id: $('#custinv-create-customercode').val()
+                        }
+                    }).then(resolve => {
+                        var by_item = resolve.content.itemcode;
+                        console.log(resolve.content);
+                        eachByDO(resolve.content.do).then(resolve => {
+                            eachByItemcode(by_item);
+                        });
+                    });
                 });
             }
         });
+
+        function eachByDO(response) {
+            return new Promise((resolve, reject) => {
+                tbl_item.clear().draw(false);
+                var no = 1;
+                $.each(response, function (i, data) {
+                    var add = tbl_item.row.add([
+                        no,
+                        data.do_no,
+                        data.ref_no,
+                        data.cust_id,
+                        data.dn_no,
+                        data.po_no,
+                        data.do_date,
+                        addZeroes(String(data.qty_sj)),
+                        '0.00',
+                        currency(addZeroes(String(data.sub_ammount)))
+                    ]).node();
+                    $(add).attr('id', data.do_no);
+                    $(add).addClass(data.do_no);
+                    no++;
+                });
+                tbl_item.draw(false);
+                resolve(tbl_item);
+            });
+        }
+
+        function eachByItemcode(response) {
+            return new Promise((resolve, reject) => {
+                tbl_item_part.clear().draw(false);
+                var no = 1;
+                $.each(response, function (i, data) {
+                    var price = (data.item_price_new === null ? currency(addZeroes(String(data.item_price))) : currency(addZeroes(String(data.item_price_new))));
+                    var add = tbl_item_part.row.add([
+                        data.do_no,
+                        data.sso_no,
+                        data.part_no,
+                        data.item_code,
+                        data.descript,
+                        data.unit,
+                        addZeroes(String(data.qty_sj)),
+                        price,
+                        currency(addZeroes(String(data.item_price_hasil))),
+                    ]).node();
+                    $(add).attr('data-id', data.do_no);
+                    $(add).addClass(data.do_no);
+                    no++;
+                });
+                tbl_item_part.draw(false);
+                resolve(tbl_item_part);
+            });
+        }
 
         var tbl_account;
         $(document).on('keypress', '#custinv-create-glcode', function (e) {

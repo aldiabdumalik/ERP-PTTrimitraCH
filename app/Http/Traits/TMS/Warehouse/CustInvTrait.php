@@ -15,49 +15,10 @@ use Illuminate\Support\Facades\Redirect;
 
 trait CustInvTrait {
 
-    protected function custInvDo($params)
+    protected function callDOJoin($arr_do)
     {
-        $query = DoEntry::selectRaw('
-                entry_do_tbl.do_no,
-                entry_do_tbl.item_code,
-                entry_do_tbl.quantity as qty_sj,
-                entry_do_tbl.unit,
-                entry_do_tbl.so_no,
-                entry_do_tbl.sso_no,
-                entry_do_tbl.ref_no,
-                entry_do_tbl.po_no,
-                entry_do_tbl.dn_no,
-                entry_do_tbl.rr_no,
-                entry_do_tbl.period as do_priod,
-                entry_do_tbl.cust_id as cust_id,
-                SUM(entry_do_tbl.quantity) as tot_qty,
-                db_tbs.item.PART_NO as part_no,
-                db_tbs.item.descript1 as model,
-                db_tbs.item.descript as part_name
-            ')
-            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
-                    $join->on('db_tbs.entry_sso_tbl.sso_header','=','db_tbs.entry_do_tbl.sso_no');
-                    $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_do_tbl.item_code');
-                }
-            )
-            ->leftJoin('db_tbs.entry_so_tbl', function($join){
-                    $join->on('db_tbs.entry_sso_tbl.so_header','=','db_tbs.entry_so_tbl.so_header');
-                    $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_so_tbl.item_code');
-                }
-            )
-            ->leftJoin('db_tbs.item','db_tbs.entry_sso_tbl.item_code','=','db_tbs.item.itemcode')
-            ->where([
-                'entry_do_tbl.branch' => $params['branch'],
-                'entry_do_tbl.cust_id' => $params['cust_id'],
-            ])
-            ->whereNotNull('rr_date')
-            ->get();
-        return $query;
-    }
-
-    protected function custInvDoGB($params)
-    {
-        $query = DoEntry::selectRaw('
+        $query = DB::table("db_tbs.entry_do_tbl")
+            ->selectRaw('
                 db_tbs.entry_do_tbl.do_no,
                 db_tbs.entry_do_tbl.item_code,
                 db_tbs.entry_do_tbl.quantity as qty_sj,
@@ -72,7 +33,11 @@ trait CustInvTrait {
                 db_tbs.entry_do_tbl.period as do_priod,
                 db_tbs.entry_do_tbl.cust_id as cust_id,
                 db_tbs.entry_do_tbl.delivery_date as do_date,
-                SUM(db_tbs.entry_do_tbl.quantity) as tot_qty
+                db_tbs.item.part_no as part_no,
+                db_tbs.item.DESCRIPT as descript,
+                db_tbs.item.PRICE as item_price,
+                custprice.price_new as item_price_new,
+                (IFNULL(custprice.price_new, db_tbs.item.PRICE) * db_tbs.entry_do_tbl.quantity) as item_price_hasil
             ')
             ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
                     $join->on('db_tbs.entry_sso_tbl.sso_header','=','db_tbs.entry_do_tbl.sso_no');
@@ -85,13 +50,10 @@ trait CustInvTrait {
                 }
             )
             ->leftJoin('db_tbs.item','db_tbs.entry_sso_tbl.item_code','=','db_tbs.item.itemcode')
-            ->where([
-                'db_tbs.entry_do_tbl.branch' => $params['branch'],
-                'db_tbs.entry_do_tbl.cust_id' => $params['cust_id'],
-            ])
-            ->whereNotNull('db_tbs.entry_do_tbl.rr_date')
-            // ->groupBy('db_tbs.entry_do_tbl.item_code')
-            // ->groupBy('db_tbs.entry_do_tbl.do_no')
+            ->leftJoin(DB::raw('(SELECT price_new, item_code FROM db_tbs.entry_custprice_tbl ORDER BY active_date DESC LIMIT 1) as custprice'), function($join){
+                $join->on("custprice.item_code", "=", "entry_do_tbl.item_code");
+            })
+            ->whereIn('db_tbs.entry_do_tbl.do_no', $arr_do)
             ->get();
         return $query;
     }
@@ -114,8 +76,13 @@ trait CustInvTrait {
                 "db_tbs.entry_do_tbl.rr_date",
                 "db_tbs.entry_do_tbl.period as do_priod",
                 "db_tbs.entry_do_tbl.cust_id as cust_id",
-                "db_tbs.entry_do_tbl.delivery_date as do_date"
+                "db_tbs.entry_do_tbl.delivery_date as do_date",
+                DB::raw("SUM((IFNULL(custprice.price_new, db_tbs.item.PRICE) * db_tbs.entry_do_tbl.quantity)) AS sub_ammount"),
             )
+            ->leftJoin('db_tbs.item','db_tbs.entry_do_tbl.item_code','=','db_tbs.item.itemcode')
+            ->leftJoin(DB::raw('(SELECT price_new, item_code FROM db_tbs.entry_custprice_tbl ORDER BY active_date DESC LIMIT 1) as custprice'), function($join){
+                $join->on("custprice.item_code", "=", "entry_do_tbl.item_code");
+            })
             ->where("db_tbs.entry_do_tbl.branch", "=", $params['branch'])
             ->where("db_tbs.entry_do_tbl.cust_id", "=", $params['cust_id'])
             ->whereNotNull("db_tbs.entry_do_tbl.rr_date")
