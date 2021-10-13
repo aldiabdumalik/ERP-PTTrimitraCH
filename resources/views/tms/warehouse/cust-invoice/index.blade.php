@@ -23,6 +23,7 @@
     $(document).ready(function () {
         moment().format();
         moment.locale('id');
+        var do_selected = [];
         const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
         const tbl_attr = (targets=[]) => {
             const obj = {
@@ -108,6 +109,45 @@
             }
         });
 
+        var tbl_do;
+        function tblDoEntry(cust_id) {
+            tbl_do = $('#custinv-datatables-do').DataTable({
+                processing: true,
+                serverSide: true,
+                // destroy: true,
+                ajax: {
+                    url: "{{ route('tms.warehouse.cust_invoice.do') }}",
+                    method: 'POST',
+                    data: {cust_id: cust_id},
+                    headers: token_header
+                },
+                columns: [
+                    {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                    {data: 'do_no', name: 'do_no', className: 'text-center'},
+                    {data: 'dn_no', name: 'dn_no', className: 'text-center'},
+                    {data: 'po_no', name: 'po_no', className: 'text-center'},
+                    {data: 'ref_no', name: 'ref_no', className: 'text-center'},
+                    {data: 'sso_no', name: 'sso_no', className: 'text-center'},
+                    {data: 'do_date', name: 'do_date', className: 'text-center'},
+                    {data: 'tot_qty', name: 'tot_qty', className: 'text-center'},
+                    // {data: 'cust_id', name: 'cust_id', className: 'text-center'},
+                ],
+                ordering: false,
+                scrollY: "300px",
+                scrollCollapse: true,
+                fixedHeader: true,
+                createdRow: function( row, data, dataIndex ) {
+                    $(row).attr('data-id', data.do_no);
+                    $(row).attr('id', data.do_no);
+                },
+                rowCallback: function( row, data ) {
+                    if ( $.inArray(String(data.do_no), do_selected) !== -1 ) {
+                        $(row).addClass('selected');
+                    }
+                }
+            });
+        }
+
         var tbl_customer;
         $(document).on('keypress', '#custinv-create-customercode', function (e) {
             if(e.which == 13) {
@@ -136,6 +176,7 @@
         $('#custinv-datatables-customer tbody').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_customer.row(this).data();
             modalAction('#custinv-modal-customer', 'hide').then(resolve => {
+                var cust_id = data.code;
                 $('#custinv-create-customercode').val(data.code);
                 $('#custinv-create-customername').val(data.name);
                 $('#custinv-create-an').val(data.cont);
@@ -144,10 +185,58 @@
                 $('#custinv-create-customeraddr3').val(data.ad3);
                 $('#custinv-create-customeraddr4').val(data.ad4);
                 $('#custinv-create-glcode').val(data.glcode);
+                do_selected = [];
+                $('#custinv-datatables-do').DataTable().destroy();
                 ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'sys_account', number: data.glcode}}).then(resolve => {
                     $('#custinv-create-glket').val(resolve.content.name);
+                    modalAction('#custinv-modal-do').then(resolve => {
+                        tblDoEntry(cust_id);
+                    });
                 });
             });
+        });
+
+        $(document).on('click', '#custinv-btn-add-item', function () {
+            var cust_id = $('#custinv-create-customercode').val();
+            if (cust_id == "") {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Input customer first!',
+                    icon: 'warning'
+                });
+            }else{
+                modalAction('#custinv-modal-do').then(resolve => {
+                    tbl_do.destroy();
+                    tblDoEntry(cust_id);
+                });
+            }
+        });
+
+        $('#custinv-datatables-do').off('click', 'tr').on('click', 'tr', function () {
+            var id = this.id;
+            var index = $.inArray(id, do_selected);
+
+            if ( index === -1 ) {
+                do_selected.push( id );
+            } else {
+                do_selected.splice( index, 1 );
+            }
+
+            $(this).toggleClass('selected');
+        });
+
+        $(document).on('click', '#custinv-btn-do-ok', function () {
+            if (do_selected.length <= 0) {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Please select DO Entry first!',
+                    icon: 'warning'
+                });
+            }else{
+                modalAction('#custinv-modal-do', 'hide').then(() => {
+                    console.log(do_selected);
+                });
+            }
         });
 
         var tbl_account;
@@ -182,53 +271,12 @@
             return false;
         });
 
-        $('#custinv-datatables-sysacc tbody').off('click', 'tr').on('click', 'tr', function () {
+        $('#custinv-datatables-sysacc').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_account.row(this).data();
             modalAction('#custinv-modal-sysacc', 'hide').then(resolve => {
                 $('#custinv-create-glcode').val(data.number);
                 $('#custinv-create-glket').val(data.name);
             });
-        });
-
-        var tbl_do;
-        $(document).on('click', '#custinv-btn-add-item', function () {
-            var cust_id = $('#custinv-create-customercode').val();
-            if (cust_id == "") {
-                Swal.fire({
-                    title: 'Warning',
-                    text: 'Input customer first!',
-                    icon: 'warning'
-                });
-            }else{
-                modalAction('#custinv-modal-do').then(resolve => {
-                    tbl_do = $('#custinv-datatables-do').DataTable({
-                        processing: true,
-                        serverSide: true,
-                        destroy: true,
-                        ajax: {
-                            url: "{{ route('tms.warehouse.cust_invoice.do') }}",
-                            method: 'POST',
-                            data: {cust_id: cust_id},
-                            headers: token_header
-                        },
-                        columns: [
-                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
-                            {data: 'do_no', name: 'do_no', className: 'text-center'},
-                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
-                            {data: 'dn_no', name: 'dn_no', className: 'text-center'},
-                            {data: 'po_no', name: 'po_no', className: 'text-center'},
-                            {data: 'sso_no', name: 'sso_no', className: 'text-center'},
-                            {data: 'do_date', name: 'do_date', className: 'text-center'},
-                            {data: 'tot_qty', name: 'tot_qty', className: 'text-center'},
-                            {data: 'cust_id', name: 'cust_id', className: 'text-center'},
-                        ],
-                        ordering: false,
-                        scrollY: "300px",
-                        scrollCollapse: true,
-                        fixedHeader: true,
-                    });
-                });
-            }
         });
 
         function modalAction(elementId=null, action='show'){

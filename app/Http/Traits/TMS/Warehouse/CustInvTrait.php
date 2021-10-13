@@ -58,23 +58,21 @@ trait CustInvTrait {
     protected function custInvDoGB($params)
     {
         $query = DoEntry::selectRaw('
-                entry_do_tbl.do_no,
-                entry_do_tbl.item_code,
-                entry_do_tbl.quantity as qty_sj,
-                entry_do_tbl.unit,
-                entry_do_tbl.so_no,
-                entry_do_tbl.sso_no,
-                entry_do_tbl.ref_no,
-                entry_do_tbl.po_no,
-                entry_do_tbl.dn_no,
-                entry_do_tbl.rr_no,
-                entry_do_tbl.period as do_priod,
-                entry_do_tbl.cust_id as cust_id,
-                entry_do_tbl.delivery_date as do_date,
-                SUM(entry_do_tbl.quantity) as tot_qty,
-                db_tbs.item.PART_NO as part_no,
-                db_tbs.item.descript1 as model,
-                db_tbs.item.descript as part_name
+                db_tbs.entry_do_tbl.do_no,
+                db_tbs.entry_do_tbl.item_code,
+                db_tbs.entry_do_tbl.quantity as qty_sj,
+                db_tbs.entry_do_tbl.unit,
+                db_tbs.entry_do_tbl.so_no,
+                db_tbs.entry_do_tbl.sso_no,
+                db_tbs.entry_do_tbl.ref_no,
+                db_tbs.entry_do_tbl.po_no,
+                db_tbs.entry_do_tbl.dn_no,
+                db_tbs.entry_do_tbl.rr_no,
+                db_tbs.entry_do_tbl.rr_date,
+                db_tbs.entry_do_tbl.period as do_priod,
+                db_tbs.entry_do_tbl.cust_id as cust_id,
+                db_tbs.entry_do_tbl.delivery_date as do_date,
+                SUM(db_tbs.entry_do_tbl.quantity) as tot_qty
             ')
             ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
                     $join->on('db_tbs.entry_sso_tbl.sso_header','=','db_tbs.entry_do_tbl.sso_no');
@@ -88,11 +86,40 @@ trait CustInvTrait {
             )
             ->leftJoin('db_tbs.item','db_tbs.entry_sso_tbl.item_code','=','db_tbs.item.itemcode')
             ->where([
-                'entry_do_tbl.branch' => $params['branch'],
-                'entry_do_tbl.cust_id' => $params['cust_id'],
+                'db_tbs.entry_do_tbl.branch' => $params['branch'],
+                'db_tbs.entry_do_tbl.cust_id' => $params['cust_id'],
             ])
-            ->whereNotNull('rr_date')
-            ->groupBy('db_tbs.entry_do_tbl.do_no')
+            ->whereNotNull('db_tbs.entry_do_tbl.rr_date')
+            // ->groupBy('db_tbs.entry_do_tbl.item_code')
+            // ->groupBy('db_tbs.entry_do_tbl.do_no')
+            ->get();
+        return $query;
+    }
+
+    protected function callDoEntry($params)
+    {
+        $query = DB::table("db_tbs.entry_do_tbl")
+            ->select(
+                "db_tbs.entry_do_tbl.do_no",
+                "db_tbs.entry_do_tbl.item_code",
+                "db_tbs.entry_do_tbl.quantity as qty_sj",
+                DB::raw("sum(db_tbs.entry_do_tbl.quantity) as tot_qty"),
+                "db_tbs.entry_do_tbl.unit",
+                "db_tbs.entry_do_tbl.so_no",
+                "db_tbs.entry_do_tbl.sso_no",
+                "db_tbs.entry_do_tbl.ref_no",
+                "db_tbs.entry_do_tbl.po_no",
+                "db_tbs.entry_do_tbl.dn_no",
+                "db_tbs.entry_do_tbl.rr_no",
+                "db_tbs.entry_do_tbl.rr_date",
+                "db_tbs.entry_do_tbl.period as do_priod",
+                "db_tbs.entry_do_tbl.cust_id as cust_id",
+                "db_tbs.entry_do_tbl.delivery_date as do_date"
+            )
+            ->where("db_tbs.entry_do_tbl.branch", "=", $params['branch'])
+            ->where("db_tbs.entry_do_tbl.cust_id", "=", $params['cust_id'])
+            ->whereNotNull("db_tbs.entry_do_tbl.rr_date")
+            ->groupBy("db_tbs.entry_do_tbl.do_no")
             ->get();
         return $query;
     }

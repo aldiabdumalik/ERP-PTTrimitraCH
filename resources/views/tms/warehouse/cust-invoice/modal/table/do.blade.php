@@ -19,7 +19,7 @@
                                         <th class="align-middle">SSO No.</th>
                                         <th class="align-middle">Date</th>
                                         <th class="align-middle">Amount</th>
-                                        <th class="align-middle">Tag</th>
+                                        {{-- <th class="align-middle">Tag</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -29,6 +29,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="custinv-btn-do-close" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="custinv-btn-do-ok" class="btn btn-info">Add DO Entry</button>
                 </div>
             </div>
         </form>

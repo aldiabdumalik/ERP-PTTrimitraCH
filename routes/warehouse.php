@@ -178,6 +178,10 @@ Route::post('/warehouse/customer_invoice/header', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@header', 
     'as' => 'tms.warehouse.cust_invoice.header'
 ]);
+// Route::post('/warehouse/customer_invoice/do', [
+//     'uses' => 'TMS\Warehouse\CustInvoiceController@delivery_order', 
+//     'as' => 'tms.warehouse.cust_invoice.do'
+// ]);
 Route::post('/warehouse/customer_invoice/do', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@delivery_order', 
     'as' => 'tms.warehouse.cust_invoice.do'

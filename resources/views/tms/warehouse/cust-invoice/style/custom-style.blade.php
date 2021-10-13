@@ -28,6 +28,9 @@
     .selected {
         background-color: #dddddd;
     }
+    .yselected {
+        background-color: #ffff00;
+    }
     .auto-middle {
         margin-top: auto;
         margin-bottom: auto;
