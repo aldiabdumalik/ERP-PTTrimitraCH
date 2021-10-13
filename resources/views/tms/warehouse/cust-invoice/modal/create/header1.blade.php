@@ -72,10 +72,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-6">
-                <input type="text" name="custinv-create-sales" id="custinv-create-sales" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-sales" id="custinv-create-sales" class="form-control form-control-sm readonly-first" readonly value="{{ auth()->user()->Branch }}" autocomplete="off" required>
             </div>
             <div class="col-6">
-                <input type="text" name="custinv-create-pic" id="custinv-create-pic" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-pic" id="custinv-create-pic" class="form-control form-control-sm readonly-first" readonly value="{{ auth()->user()->FullName }}" autocomplete="off" required>
             </div>
         </div>
     </div>

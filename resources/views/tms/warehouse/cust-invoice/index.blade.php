@@ -214,7 +214,7 @@
 
         $('#custinv-datatables-do').off('click', 'tr').on('click', 'tr', function () {
             var id = this.id;
-            var index = $.inArray(id, do_selected);
+            var index = $.inArray(String(id), do_selected);
 
             if ( index === -1 ) {
                 do_selected.push( id );
@@ -271,8 +271,8 @@
                         '0.00',
                         currency(addZeroes(String(data.sub_ammount)))
                     ]).node();
-                    $(add).attr('id', data.do_no);
                     $(add).addClass(data.do_no);
+                    $(add).attr('id', data.do_no);
                     no++;
                     subtotal += data.sub_ammount;
                 });
@@ -318,6 +318,36 @@
                 resolve(tbl_item_part);
             });
         }
+
+        $('#custinv-datatables-index').off('click', 'tr').on('click', 'tr', function () {
+            var data = tbl_item.row(this).data();
+            if (data != undefined) {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    $('#custinv-btn-delete-item').prop('disabled', true);
+
+                    tbl_item_part.$('tr[data-id='+data[1]+']').removeClass('selected');
+                }else {
+                    tbl_item.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    $('#custinv-btn-delete-item').removeAttr('disabled');
+
+                    tbl_item_part.$('tr.selected').removeClass('selected');
+                    tbl_item_part.$('tr[data-id='+data[1]+']').addClass('selected');
+                }
+            }
+        });
+
+        $(document).on('click', '#custinv-btn-delete-item', function () {
+            tbl_item.row('.selected').remove().draw( false );
+            for (let i = 0; i < tbl_item.rows().data().toArray().length; i++) {
+                var drw = tbl_item.cell( i, 0 ).data(1+i); 
+            }
+            tbl_item.draw(false);
+
+            tbl_item_part.rows('.selected').remove().draw();
+            $('#custinv-btn-delete-item').prop('disabled', true);
+        });
 
         var tbl_account;
         $(document).on('keypress', '#custinv-create-glcode', function (e) {
