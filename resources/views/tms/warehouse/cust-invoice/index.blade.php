@@ -243,6 +243,8 @@
                             cust_id: $('#custinv-create-customercode').val()
                         }
                     }).then(resolve => {
+                        tbl_item.clear().draw();
+                        tbl_item_part.clear().draw();
                         var by_item = resolve.content.itemcode;
                         console.log(resolve.content);
                         eachByDO(resolve.content.do).then(resolve => {
@@ -255,7 +257,7 @@
 
         function eachByDO(response) {
             return new Promise((resolve, reject) => {
-                tbl_item.clear().draw(false);
+                // tbl_item.clear().draw(false);
                 var no = 1;
                 var subtotal = 0;
                 $.each(response, function (i, data) {
@@ -295,7 +297,7 @@
 
         function eachByItemcode(response) {
             return new Promise((resolve, reject) => {
-                tbl_item_part.clear().draw(false);
+                // tbl_item_part.clear().draw(false);
                 var no = 1;
                 $.each(response, function (i, data) {
                     var price = (data.item_price_new === null ? currency(addZeroes(String(data.item_price))) : currency(addZeroes(String(data.item_price_new))));

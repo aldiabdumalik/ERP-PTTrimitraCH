@@ -58,6 +58,40 @@ trait CustInvTrait {
         return $query;
     }
 
+    protected function callDoEntryGB($params)
+    {
+        $query = DB::table("db_tbs.entry_do_tbl")
+            ->select(
+                "db_tbs.entry_do_tbl.do_no",
+                "db_tbs.entry_do_tbl.item_code",
+                "db_tbs.entry_do_tbl.quantity as qty_sj",
+                DB::raw("sum(db_tbs.entry_do_tbl.quantity) as tot_qty"),
+                "db_tbs.entry_do_tbl.unit",
+                "db_tbs.entry_do_tbl.so_no",
+                "db_tbs.entry_do_tbl.sso_no",
+                "db_tbs.entry_do_tbl.ref_no",
+                "db_tbs.entry_do_tbl.po_no",
+                "db_tbs.entry_do_tbl.dn_no",
+                "db_tbs.entry_do_tbl.rr_no",
+                "db_tbs.entry_do_tbl.rr_date",
+                "db_tbs.entry_do_tbl.period as do_priod",
+                "db_tbs.entry_do_tbl.cust_id as cust_id",
+                "db_tbs.entry_do_tbl.delivery_date as do_date",
+                DB::raw("SUM((IFNULL(custprice.price_new, db_tbs.item.PRICE) * db_tbs.entry_do_tbl.quantity)) AS sub_ammount"),
+            )
+            ->leftJoin('db_tbs.item','db_tbs.entry_do_tbl.item_code','=','db_tbs.item.itemcode')
+            ->leftJoin(DB::raw('(SELECT price_new, item_code FROM db_tbs.entry_custprice_tbl ORDER BY active_date DESC LIMIT 1) as custprice'), function($join){
+                $join->on("custprice.item_code", "=", "entry_do_tbl.item_code");
+            })
+            ->where("db_tbs.entry_do_tbl.branch", "=", $params['branch'])
+            ->where("db_tbs.entry_do_tbl.cust_id", "=", $params['cust_id'])
+            ->whereIn('db_tbs.entry_do_tbl.do_no', $params['arr_do'])
+            ->whereNotNull("db_tbs.entry_do_tbl.rr_date")
+            ->groupBy("db_tbs.entry_do_tbl.do_no")
+            ->get();
+        return $query;
+    }
+
     protected function callDoEntry($params)
     {
         $query = DB::table("db_tbs.entry_do_tbl")
