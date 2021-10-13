@@ -257,6 +257,7 @@
             return new Promise((resolve, reject) => {
                 tbl_item.clear().draw(false);
                 var no = 1;
+                var subtotal = 0;
                 $.each(response, function (i, data) {
                     var add = tbl_item.row.add([
                         no,
@@ -273,8 +274,21 @@
                     $(add).attr('id', data.do_no);
                     $(add).addClass(data.do_no);
                     no++;
+                    subtotal += data.sub_ammount;
                 });
                 tbl_item.draw(false);
+                $('#custinv-create-subtotal').val(currency(addZeroes(String(subtotal))));
+                var vat = $('#custinv-create-vat3').val();
+                if (vat !== null) {
+                    vat = subtotal * vat / 100;
+                    var balance = subtotal + vat;
+                    $('#custinv-create-vat').val(currency(addZeroes(String(vat))));
+                    $('#custinv-create-balance').val(currency(addZeroes(String(balance))));
+                    $('#custinv-create-total').val(currency(addZeroes(String(balance))));
+                }else{
+                    $('#custinv-create-balance').val(currency(addZeroes(String(subtotal))));
+                    $('#custinv-create-total').val(currency(addZeroes(String(subtotal))));
+                }
                 resolve(tbl_item);
             });
         }
