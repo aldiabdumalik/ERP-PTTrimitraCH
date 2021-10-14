@@ -90,7 +90,7 @@
                 <select name="custinv-create-currency-type" id="custinv-create-currency-type" class="form-control form-control-sm"></select>
             </div>
             <div class="col-6">
-                <input type="text" name="custinv-create-currenvy-value" id="custinv-create-currenvy-value" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
+                <input type="text" name="custinv-create-currency-value" id="custinv-create-currency-value" class="form-control text-right form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
         </div>
     </div>
@@ -103,7 +103,7 @@
         <div class="row no-gutters">
             <div class="col-12">
                 <div class="input-group input-group-sm">
-                    <input type="number" name="custinv-create-terms" id="custinv-create-terms" class="form-control form-control-sm" autocomplete="off" required min="0" value="0">
+                    <input type="number" name="custinv-create-terms" id="custinv-create-terms" class="form-control form-control-sm text-right" autocomplete="off" required min="0" value="0">
                     <div class="input-group-append">
                         <span class="input-group-text">Days</span>
                     </div>

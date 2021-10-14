@@ -70,7 +70,7 @@
                         
                         ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'currency', currency: 'IDR'}}).then(resolve => {
                             $('#custinv-create-currency-type').val('IDR');
-                            $('#custinv-create-currenvy-value').val(currency(addZeroes(String(resolve.content.rate)))); 
+                            $('#custinv-create-currency-value').val(currency(addZeroes(String(resolve.content.rate)))); 
                         });
                     });
                 });
@@ -80,7 +80,7 @@
         $(document).on('change', '#custinv-create-currency-type', function () {
             var id = $(this).val();
             ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'currency', currency: id}}).then(resolve => {
-                $('#custinv-create-currenvy-value').val(currency(addZeroes(String(resolve.content.rate))));
+                $('#custinv-create-currency-value').val(currency(addZeroes(String(resolve.content.rate))));
             });
         });
 
@@ -250,6 +250,8 @@
                         eachByDO(resolve.content.do).then(resolve => {
                             eachByItemcode(by_item);
                         });
+
+                        $('#custinv-create-totline').val(by_item.length);
                     });
                 });
             }
@@ -367,6 +369,8 @@
                     $('#custinv-create-total').val(currency(addZeroes(String(balance))));
                 }
             }
+
+            $('#custinv-create-totline').val(tbl_item_part.rows().data().toArray().length);
         });
 
         $(document).on('change', '#custinv-create-vat3', function () {
@@ -428,6 +432,62 @@
                 $('#custinv-create-glket').val(data.name);
             });
         });
+
+        $(document).on('submit', '#custinv-form-index', function () {
+            var data = {
+                inv_no: $('#custinv-create-no').val(),
+                inv_type: $('#custinv-create-type').val(),
+                inv_branch: $('#custinv-create-branch').val(),
+                inv_priod: $('#custinv-create-priod').val(),
+                inv_date: $('#custinv-create-date').val().split("/").reverse().join("-"),
+                inv_refno: $('#custinv-create-refno').val(),
+                inv_va1: $('#custinv-create-va1').val(),
+                inv_va2: $('#custinv-create-va2').val(),
+                inv_va3: $('#custinv-create-va3').val(),
+                inv_sales: $('#custinv-create-sales').val(),
+                inv_pic: $('#custinv-create-pic').val(),
+                inv_currencytype: $('#custinv-create-currency-type').val(),
+                inv_currencyvalue: $('#custinv-create-currency-value').val(),
+                inv_term: $('#custinv-create-term').val(),
+                inv_duedate: $('#custinv-create-duedate').val(),
+                inv_remark: $('#custinv-create-remark').val(),
+                inv_customercode: $('#custinv-create-customercode').val(),
+                inv_customerdoaddr: $('#custinv-create-customerdoaddr').val(),
+                inv_totline: $('#custinv-create-totline').val(),
+                inv_an: $('#custinv-create-an').val(),
+                inv_glcode: $('#custinv-create-glcode').val(),
+                inv_glket: $('#custinv-create-glket').val(),
+                inv_subtotal: $('#custinv-create-subtotal').val(),
+                inv_cndisc: $('#custinv-create-cndisc').val(),
+                inv_vat: $('#custinv-create-vat').val(),
+                inv_total: $('#custinv-create-total').val(),
+                inv_payment: $('#custinv-create-payment').val(),
+                inv_balance: $('#custinv-create-balance').val(),
+                inv_item: tbl_item.rows().data().toArray()
+            };
+
+            // cek cust inv
+            ajaxCall({route: "", method: "POST", data: {type: "cek_invno", inv_no: data.inv_no}}).then(resolve => {
+                var route, method;
+                if (resolve.message == 'is_exist') {
+                    // route = "{{route('tms.warehouse.cust_invoice.save')}}";
+                    // method = "POST";
+                }else{
+                    // route = "{{route('tms.warehouse.cust_invoice.update', [':inv_no'])}}";
+                    // route  = route.replace(':inv_no', data.inv_no);
+                    // method = "PUT";
+                }
+                submitForm(route, method, data);
+            });
+        });
+
+        function submitForm(route, method, data) {
+            return new Promise(resolve, reject => {
+                ajaxCall({route: route, method: method, data: data}).then(resolve => {
+                    var message = resolve.message;
+                });
+            });
+        }
 
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {

@@ -74,6 +74,10 @@ class CustInvoiceController extends Controller
                 return DataTables::of($this->customer($request))->make(true);
                 break;
 
+            case 'cek_invno':
+                // $query = 
+                break;
+
             case 'sys_account':
                 $req = $this->sys_account($request);
                 if (isset($request->number)) {

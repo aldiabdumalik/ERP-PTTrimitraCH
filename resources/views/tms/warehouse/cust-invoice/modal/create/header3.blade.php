@@ -43,7 +43,7 @@
                 <label for="custinv-create-subtotal" class="auto-middle">Subtotal</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-subtotal" id="custinv-create-subtotal" class="form-control form-control-sm readonly-first" value="0.00" readonly>
+                <input type="text" name="custinv-create-subtotal" id="custinv-create-subtotal" class="form-control form-control-sm readonly-first text-right" value="0.00" readonly>
             </div>
         </div>
     </div>
@@ -53,7 +53,7 @@
                 <label for="custinv-create-cndisc" class="auto-middle">CN/Disc</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-cndisc" id="custinv-create-cndisc" class="form-control form-control-sm readonly-first" value="0.00" readonly>
+                <input type="text" name="custinv-create-cndisc" id="custinv-create-cndisc" class="form-control form-control-sm readonly-first text-right" value="0.00" readonly>
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
                 <label for="custinv-create-vat" class="auto-middle">VAT</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-vat" id="custinv-create-vat" class="form-control form-control-sm readonly-first" value="0.00" readonly>
+                <input type="text" name="custinv-create-vat" id="custinv-create-vat" class="form-control form-control-sm readonly-first text-right" value="0.00" readonly>
             </div>
         </div>
     </div>
@@ -75,7 +75,7 @@
                 <label for="custinv-create-total" class="auto-middle">Total</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-total" id="custinv-create-total" class="form-control form-control-sm readonly-first" value="0.00" readonly>
+                <input type="text" name="custinv-create-total" id="custinv-create-total" class="form-control form-control-sm readonly-first text-right" value="0.00" readonly>
             </div>
         </div>
     </div>
@@ -87,7 +87,7 @@
                 <label for="custinv-create-payment" class="auto-middle">Payment</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-payment" id="custinv-create-payment" class="form-control form-control-sm readonly-first" value="0.00" readonly>
+                <input type="text" name="custinv-create-payment" id="custinv-create-payment" class="form-control form-control-sm readonly-first text-right" value="0.00" readonly>
             </div>
         </div>
     </div>
@@ -97,7 +97,7 @@
                 <label for="custinv-create-balance" class="auto-middle">Balance</label>
             </div>
             <div class="col-8">
-                <input type="text" name="custinv-create-balance" id="custinv-create-balance" class="form-control form-control-sm readonly-first" value="0.00" readonly>
+                <input type="text" name="custinv-create-balance" id="custinv-create-balance" class="form-control form-control-sm readonly-first text-right" value="0.00" readonly>
             </div>
         </div>
     </div>
