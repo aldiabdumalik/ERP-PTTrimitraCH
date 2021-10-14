@@ -58,6 +58,11 @@ class CustInvoiceController extends Controller
         return _Success(null, 200, $response);
     }
 
+    public function save(Request $request)
+    {
+        return _Success(null, 200, $request);
+    }
+
     public function header(Request $request)
     {
         switch ($request->type) {

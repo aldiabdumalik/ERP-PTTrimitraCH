@@ -341,14 +341,52 @@
         });
 
         $(document).on('click', '#custinv-btn-delete-item', function () {
-            tbl_item.row('.selected').remove().draw( false );
+            tbl_item.row('.selected').remove().draw();
             for (let i = 0; i < tbl_item.rows().data().toArray().length; i++) {
                 var drw = tbl_item.cell( i, 0 ).data(1+i); 
             }
-            tbl_item.draw(false);
+            tbl_item.draw();
 
             tbl_item_part.rows('.selected').remove().draw();
             $('#custinv-btn-delete-item').prop('disabled', true);
+
+            var vat = $('#custinv-create-vat3').val(),
+                arr_item = tbl_item.rows().data().toArray(),
+                subtotal = 0;
+
+            if (arr_item.length > 0) {
+                for (let i = 0; i < arr_item.length; i++) {
+                    subtotal += parseFloat(arr_item[i][9].replace(/,/g, ''));
+                }
+                $('#custinv-create-subtotal').val(currency(addZeroes(String(subtotal))));
+                if(!isNaN(parseFloat(vat))) {
+                    vat = subtotal * vat / 100;
+                    var balance = subtotal + vat;
+                    $('#custinv-create-vat').val(currency(addZeroes(String(vat))));
+                    $('#custinv-create-balance').val(currency(addZeroes(String(balance))));
+                    $('#custinv-create-total').val(currency(addZeroes(String(balance))));
+                }
+            }
+        });
+
+        $(document).on('change', '#custinv-create-vat3', function () {
+            var vat = $(this).val(),
+                arr_item = tbl_item.rows().data().toArray(),
+                subtotal = 0;
+
+            if (arr_item.length > 0) {
+                for (let i = 0; i < arr_item.length; i++) {
+                    subtotal += parseFloat(arr_item[i][9].replace(/,/g, ''));
+                }
+                $('#custinv-create-subtotal').val(currency(addZeroes(String(subtotal))));
+                if(!isNaN(parseFloat(vat))) {
+                    vat = subtotal * vat / 100;
+                    var balance = subtotal + vat;
+                    $('#custinv-create-vat').val(currency(addZeroes(String(vat))));
+                    $('#custinv-create-balance').val(currency(addZeroes(String(balance))));
+                    $('#custinv-create-total').val(currency(addZeroes(String(balance))));
+                }
+            }
         });
 
         var tbl_account;
@@ -447,6 +485,14 @@
                 rupiah += separator + ribuan.join(',');
             }
             return rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+        }
+
+        function isInt(n){
+            return Number(n) === n && n % 1 === 0;
+        }
+
+        function isFloat(n){
+            return Number(n) === n && n % 1 !== 0;
         }
 
         $('#custinv-create-date').on('changeDate', function () {
