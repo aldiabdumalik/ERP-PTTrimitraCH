@@ -85,7 +85,7 @@ class CustInvoiceController extends Controller
                 if (isset($query)) {
                     return _Success('is_exist');
                 }
-                return _Error('isnt_exist');
+                return _Success('isnt_exist');
                 break;
 
             case 'sys_account':
