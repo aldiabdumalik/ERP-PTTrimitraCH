@@ -8,7 +8,7 @@
                 <input type="text" name="custinv-create-customercode" id="custinv-create-customercode" class="form-control form-control-sm" autocomplete="off" required>
             </div>
             <div class="col-3">
-                <input type="text" name="custinv-create-customerdoaddr" id="custinv-create-customerdoaddr" class="form-control form-control-sm" autocomplete="off" required>
+                <input type="text" name="custinv-create-customerdoaddr" id="custinv-create-customerdoaddr" class="form-control form-control-sm" autocomplete="off">
             </div>
             <div class="col-3">
                 <input type="text" name="custinv-create-totline" id="custinv-create-totline" class="form-control form-control-sm text-right readonly-first" readonly autocomplete="off" value="0">
