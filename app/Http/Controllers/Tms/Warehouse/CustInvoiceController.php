@@ -5,6 +5,7 @@ namespace App\Http\Controllers\TMS\Warehouse;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\CustInvTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
+use App\Models\Dbtbs\CustInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +64,11 @@ class CustInvoiceController extends Controller
         return _Success(null, 200, $request);
     }
 
+    public function update($inv_no, Request $request)
+    {
+        return _Success(null, 200, $request);
+    }
+
     public function header(Request $request)
     {
         switch ($request->type) {
@@ -75,7 +81,11 @@ class CustInvoiceController extends Controller
                 break;
 
             case 'cek_invno':
-                // $query = 
+                $query = CustInvoice::where('inv_no', $request->inv_no)->first();
+                if (isset($query)) {
+                    return _Success('is_exist');
+                }
+                return _Error('isnt_exist');
                 break;
 
             case 'sys_account':

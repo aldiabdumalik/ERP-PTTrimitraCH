@@ -467,17 +467,18 @@
             };
 
             // cek cust inv
-            ajaxCall({route: "", method: "POST", data: {type: "cek_invno", inv_no: data.inv_no}}).then(resolve => {
+            ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.header') }}", method: "POST", data: {type: "cek_invno", inv_no: data.inv_no}}).then(resolve => {
                 var route, method;
                 if (resolve.message == 'is_exist') {
-                    // route = "{{route('tms.warehouse.cust_invoice.save')}}";
-                    // method = "POST";
+                    route = "{{route('tms.warehouse.cust_invoice.save')}}";
+                    method = "POST";
                 }else{
-                    // route = "{{route('tms.warehouse.cust_invoice.update', [':inv_no'])}}";
-                    // route  = route.replace(':inv_no', data.inv_no);
-                    // method = "PUT";
+                    route = "{{route('tms.warehouse.cust_invoice.update', [':inv_no'])}}";
+                    route  = route.replace(':inv_no', data.inv_no);
+                    method = "PUT";
                 }
-                submitForm(route, method, data);
+                console.log(route);
+                // submitForm(route, method, data);
             });
         });
 

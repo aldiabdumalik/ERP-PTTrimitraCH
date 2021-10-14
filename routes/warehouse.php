@@ -182,10 +182,14 @@ Route::post('/warehouse/customer_invoice/do', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@delivery_order', 
     'as' => 'tms.warehouse.cust_invoice.do'
 ]);
-// Route::get('/warehouse/customer_invoice/do/get', [
-//     'uses' => 'TMS\Warehouse\CustInvoiceController@delivery_order', 
-//     'as' => 'tms.warehouse.cust_invoice.do'
-// ]);
+Route::post('/warehouse/customer_invoice/save', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@save', 
+    'as' => 'tms.warehouse.cust_invoice.save'
+]);
+Route::post('/warehouse/customer_invoice/update/{inv_no}', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@update', 
+    'as' => 'tms.warehouse.cust_invoice.update'
+]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |   TMS - WAREHOUSE - Customer Price
