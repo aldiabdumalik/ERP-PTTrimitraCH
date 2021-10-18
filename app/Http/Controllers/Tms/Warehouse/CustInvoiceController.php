@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\CustInvTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustInvoice;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +62,49 @@ class CustInvoiceController extends Controller
 
     public function save(Request $request)
     {
-        return _Success(null, 200, $request);
+        $data_insert = [];
+        if ($request->ajax()) {
+            $item = $request->inv_item;
+            for ($i=0; $i < count($item); $i++) { 
+                $data_insert[] = [
+                    'inv_no' => $request->inv_no,
+                    'inv_type' => $request->inv_type,
+                    'do_no' => $item[$i][1],
+                    'cust_id' => $request->inv_customercode,
+                    'combine_id' => $request->inv_customerdoaddr,
+                    'cust_type' => null,
+                    'do_addr' => null,
+                    'cust_contact' => $request->inv_an,
+                    'ref_no' => $request->inv_refno,
+                    'pref_tax' => $request->inv_va1,
+                    'tax_no' => $request->inv_va2,
+                    'tax_rate' => $request->inv_va3,
+                    'periode' => $request->inv_priod,
+                    'due_date' => $request->inv_duedate,
+                    'branch' => $request->inv_branch,
+                    // 'warehouse' => $request->inv_no,
+                    'valas' => $request->inv_currencytype,
+                    'rate' => str_replace(',', '', $request->inv_currencyvalue),
+                    'amount_sub' => str_replace(',', '', $request->inv_subtotal),
+                    'amount_dis' => str_replace(',', '', $request->inv_cndisc),
+                    'amount_tax' => str_replace(',', '', $request->inv_vat),
+                    'amount_cn' => 0.00,
+                    'amount_dn' => 0.00,
+                    'amount_pay' => str_replace(',', '', $request->inv_payment),
+                    'amount_bal' => str_replace(',', '', $request->inv_balance),
+                    'amount_exp' => 0.00,
+                    'amount_cos' => 0.00,
+                    'commission' => 0.00,
+                    'term' => $request->inv_term,
+                    'totline' => $request->totline,
+                    'glar' => $request->inv_glcode,
+                    'remark' => $request->remark,
+                    'written_date' => Carbon::now(),
+                    'written_by' => Auth::user()->FullName
+                ];
+            }
+        }
+        return _Success(null, 200, $data_insert);
     }
 
     public function update($inv_no, Request $request)

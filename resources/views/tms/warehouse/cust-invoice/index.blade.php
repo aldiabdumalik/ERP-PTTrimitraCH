@@ -129,7 +129,7 @@
                     {data: 'ref_no', name: 'ref_no', className: 'text-center'},
                     {data: 'sso_no', name: 'sso_no', className: 'text-center'},
                     {data: 'do_date', name: 'do_date', className: 'text-center'},
-                    {data: 'tot_qty', name: 'tot_qty', className: 'text-center'},
+                    {data: 'sub_ammount', name: 'sub_ammount', className: 'text-right'},
                     // {data: 'cust_id', name: 'cust_id', className: 'text-center'},
                 ],
                 ordering: false,
@@ -270,7 +270,7 @@
                         data.cust_id,
                         data.dn_no,
                         data.po_no,
-                        data.do_date,
+                        data.do_date.split("-").reverse().join('/'),
                         addZeroes(String(data.qty_sj)),
                         '0.00',
                         currency(addZeroes(String(data.sub_ammount)))
@@ -536,10 +536,10 @@
         }
         function currency(bilangan) {
             var	number_string = bilangan.toString(),
-            split	= number_string.split('.'),
-            sisa 	= split[0].length % 3,
-            rupiah 	= split[0].substr(0, sisa),
-            ribuan 	= split[0].substr(sisa).match(/\d{1,3}/gi);
+                split	= number_string.split('.'),
+                sisa 	= split[0].length % 3,
+                rupiah 	= split[0].substr(0, sisa),
+                ribuan 	= split[0].substr(sisa).match(/\d{1,3}/gi);
 
             if (ribuan) {
                 separator = sisa ? ',' : '';
