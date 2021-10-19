@@ -7,6 +7,7 @@ use App\Http\Traits\TMS\Warehouse\CustInvTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustInvoice;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -76,9 +77,9 @@ class CustInvoiceController extends Controller
                     'do_addr' => null,
                     'cust_contact' => $request->inv_an,
                     'ref_no' => $request->inv_refno,
-                    'pref_tax' => $request->inv_va1,
-                    'tax_no' => $request->inv_va2,
-                    'tax_rate' => $request->inv_va3,
+                    'pref_tax' => $request->inv_vat1,
+                    'tax_no' => $request->inv_vat2,
+                    'tax_rate' => $request->inv_vat3,
                     'periode' => $request->inv_priod,
                     'due_date' => $request->inv_duedate,
                     'branch' => $request->inv_branch,
@@ -96,12 +97,27 @@ class CustInvoiceController extends Controller
                     'amount_cos' => 0.00,
                     'commission' => 0.00,
                     'term' => $request->inv_term,
-                    'totline' => $request->totline,
+                    'totline' => $request->inv_totline,
                     'glar' => $request->inv_glcode,
-                    'remark' => $request->remark,
+                    'remark' => $request->inv_remark,
                     'written_date' => Carbon::now(),
                     'written_by' => Auth::user()->FullName
                 ];
+            }
+            try {
+                $query = CustInvoice::insert($data_insert);
+                if ($query) {
+                    $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                        'inv_no' => $request->inv_no,
+                        'status' => 'ADD',
+                        'note' => null,
+                        'written_at' => Carbon::now(),
+                        'written_by' => Auth::user()->FullName
+                    ]);
+                }
+                return $this->_Success('Saved successfully!', 201);
+            } catch (Exception $e) {
+                return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
         return _Success(null, 200, $data_insert);
@@ -110,6 +126,126 @@ class CustInvoiceController extends Controller
     public function update($inv_no, Request $request)
     {
         return _Success(null, 200, $request);
+    }
+
+    public function posted(Request $request)
+    {
+        $cek = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])
+            ->whereNull('voided_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Invoice has been voided');
+        }
+
+        $posted = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])->update([
+                'posted_date' => Carbon::now(),
+                'posted_by' => Auth::user()->FullName
+            ]);
+        if ($posted) {
+            $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                'inv_no' => $request->inv_no,
+                'status' => 'POSTED',
+                'note' => null,
+                'written_at' => Carbon::now(),
+                'written_by' => Auth::user()->FullName
+            ]);
+        }
+        return _Success('Invoice has been Posted');
+    }
+
+    public function unposted(Request $request)
+    {
+        $cek = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])
+            ->whereNull('voided_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Invoice has been voided');
+        }
+
+        $unposted = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])->update([
+                'posted_date' => null,
+                'posted_by' => null
+            ]);
+        if ($unposted) {
+            $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                'inv_no' => $request->inv_no,
+                'status' => 'UNPOSTED',
+                'note' => $request->note,
+                'written_at' => Carbon::now(),
+                'written_by' => Auth::user()->FullName
+            ]);
+        }
+        return _Success('Invoice has been Posted');
+    }
+
+    public function voided(Request $request)
+    {
+        $cek = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])
+            ->whereNull('posted_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Invoice has been posted');
+        }
+
+        $voided = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])->update([
+                'voided_date' => Carbon::now(),
+                'voided_by' => Auth::user()->FullName
+            ]);
+        if ($voided) {
+            $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                'inv_no' => $request->inv_no,
+                'status' => 'VOIDED',
+                'note' => $request->note,
+                'written_at' => Carbon::now(),
+                'written_by' => Auth::user()->FullName
+            ]);
+        }
+        return _Success('Invoice has been voided');
+    }
+
+    public function unvoided(Request $request)
+    {
+        $cek = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])
+            ->whereNull('posted_date')
+            ->get();
+
+        if ($cek->isEmpty()) {
+            return _Error('Invoice has been posted');
+        }
+
+        $unvoided = CustInvoice::where([
+                'inv_no' => $request->inv_no
+            ])->update([
+                'voided_date' => null,
+                'voided_by' => null
+            ]);
+        if ($unvoided) {
+            $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                'inv_no' => $request->inv_no,
+                'status' => 'UNVOIDED',
+                'note' => $request->note,
+                'written_at' => Carbon::now(),
+                'written_by' => Auth::user()->FullName
+            ]);
+        }
+        return _Success('Invoice has been voided');
     }
 
     public function header(Request $request)

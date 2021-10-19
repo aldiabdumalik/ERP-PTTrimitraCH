@@ -441,14 +441,14 @@
                 inv_priod: $('#custinv-create-priod').val(),
                 inv_date: $('#custinv-create-date').val().split("/").reverse().join("-"),
                 inv_refno: $('#custinv-create-refno').val(),
-                inv_va1: $('#custinv-create-va1').val(),
-                inv_va2: $('#custinv-create-va2').val(),
-                inv_va3: $('#custinv-create-va3').val(),
+                inv_vat1: $('#custinv-create-vat1').val(),
+                inv_vat2: $('#custinv-create-vat2').val(),
+                inv_vat3: $('#custinv-create-vat3').val(),
                 inv_sales: $('#custinv-create-sales').val(),
                 inv_pic: $('#custinv-create-pic').val(),
                 inv_currencytype: $('#custinv-create-currency-type').val(),
                 inv_currencyvalue: $('#custinv-create-currency-value').val(),
-                inv_term: $('#custinv-create-term').val(),
+                inv_term: $('#custinv-create-terms').val(),
                 inv_duedate: $('#custinv-create-duedate').val(),
                 inv_remark: $('#custinv-create-remark').val(),
                 inv_customercode: $('#custinv-create-customercode').val(),
@@ -467,28 +467,34 @@
             };
 
             // cek cust inv
-            ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.header') }}", method: "POST", data: {type: "cek_invno", inv_no: data.inv_no}}).then(resolve => {
-                var route, method;
-                if (resolve.message == 'is_exist') {
-                    route = "{{route('tms.warehouse.cust_invoice.save')}}";
-                    method = "POST";
-                }else{
-                    route = "{{route('tms.warehouse.cust_invoice.update', [':inv_no'])}}";
-                    route  = route.replace(':inv_no', data.inv_no);
-                    method = "PUT";
-                }
-                console.log(route);
-                // submitForm(route, method, data);
-            });
-        });
-
-        function submitForm(route, method, data) {
-            return new Promise(resolve, reject => {
-                ajaxCall({route: route, method: method, data: data}).then(resolve => {
-                    var message = resolve.message;
+            if (data.inv_item.length > 0) {
+                ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.header') }}", method: "POST", data: {type: "cek_invno", inv_no: data.inv_no}}).then(resolve => {
+                    var route, method;
+                    if (resolve.message == 'isnt_exist') {
+                        route = "{{route('tms.warehouse.cust_invoice.save')}}";
+                        method = "POST";
+                    }else{
+                        route = "{{route('tms.warehouse.cust_invoice.update', [':inv_no'])}}";
+                        route  = route.replace(':inv_no', data.inv_no);
+                        method = "PUT";
+                    }
+                    ajaxCall({route: route, method: method, data: data}).then(resolve => {
+                        var message = resolve.message;
+                        Swal.fire({
+                            title: 'Success',
+                            text: message,
+                            icon: 'success'
+                        }).then(() => {
+                            modalAction('#custinv-modal-index', 'hide').then(() => {
+                                index_data.then(resolve => {
+                                    resolve.ajax.reload();
+                                });
+                            });
+                        });
+                    });
                 });
-            });
-        }
+            }
+        });
 
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {

@@ -186,7 +186,7 @@ Route::post('/warehouse/customer_invoice/save', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@save', 
     'as' => 'tms.warehouse.cust_invoice.save'
 ]);
-Route::post('/warehouse/customer_invoice/update/{inv_no}', [
+Route::put('/warehouse/customer_invoice/update/{inv_no}', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@update', 
     'as' => 'tms.warehouse.cust_invoice.update'
 ]);
