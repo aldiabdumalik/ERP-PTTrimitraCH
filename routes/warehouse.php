@@ -198,6 +198,22 @@ Route::put('/warehouse/customer_invoice/update/{inv_no}', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@update', 
     'as' => 'tms.warehouse.cust_invoice.update'
 ]);
+Route::post('/warehouse/customer_invoice/posted', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@posted', 
+    'as' => 'tms.warehouse.cust_invoice.posted'
+]);
+Route::post('/warehouse/customer_invoice/unposted', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@unposted', 
+    'as' => 'tms.warehouse.cust_invoice.unposted'
+]);
+Route::post('/warehouse/customer_invoice/voided', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@voided', 
+    'as' => 'tms.warehouse.cust_invoice.voided'
+]);
+Route::post('/warehouse/customer_invoice/unvoided', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@unvoided', 
+    'as' => 'tms.warehouse.cust_invoice.unvoided'
+]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |   TMS - WAREHOUSE - Customer Price

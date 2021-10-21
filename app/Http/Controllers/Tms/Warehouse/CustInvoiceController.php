@@ -260,8 +260,7 @@ class CustInvoiceController extends Controller
         $posted = CustInvoice::where([
                 'inv_no' => $request->inv_no
             ])->update([
-                'posted_date' => Carbon::now(),
-                'posted_by' => Auth::user()->FullName
+                'posted_date' => Carbon::now()
             ]);
         if ($posted) {
             $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
@@ -290,8 +289,7 @@ class CustInvoiceController extends Controller
         $unposted = CustInvoice::where([
                 'inv_no' => $request->inv_no
             ])->update([
-                'posted_date' => null,
-                'posted_by' => null
+                'posted_date' => null
             ]);
         if ($unposted) {
             $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
@@ -302,7 +300,7 @@ class CustInvoiceController extends Controller
                 'written_by' => Auth::user()->FullName
             ]);
         }
-        return _Success('Invoice has been Posted');
+        return _Success('Invoice has been unposted');
     }
 
     public function voided(Request $request)
@@ -320,8 +318,7 @@ class CustInvoiceController extends Controller
         $voided = CustInvoice::where([
                 'inv_no' => $request->inv_no
             ])->update([
-                'voided_date' => Carbon::now(),
-                'voided_by' => Auth::user()->FullName
+                'voided_date' => Carbon::now()
             ]);
         if ($voided) {
             $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
@@ -350,8 +347,7 @@ class CustInvoiceController extends Controller
         $unvoided = CustInvoice::where([
                 'inv_no' => $request->inv_no
             ])->update([
-                'voided_date' => null,
-                'voided_by' => null
+                'voided_date' => null
             ]);
         if ($unvoided) {
             $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
@@ -362,7 +358,7 @@ class CustInvoiceController extends Controller
                 'written_by' => Auth::user()->FullName
             ]);
         }
-        return _Success('Invoice has been voided');
+        return _Success('Invoice has been unvoided');
     }
 
     public function header(Request $request)
@@ -425,6 +421,25 @@ class CustInvoiceController extends Controller
                     $res = DB::table('db_tbs.valas')->get();
                 }
                 return _Success(null, 200, $res);
+                break;
+            
+            case "log":
+                if (isset($request->inv_no)) {
+                    $query = DB::table('db_tbs.entry_custinvoice_tbl_log')
+                        ->where('inv_no', $request->inv_no)
+                        ->get();
+                    return DataTables::of($query)
+                        ->addColumn('date', function($query){
+                                return convertDate($query->written_at, 'Y-m-d H:i:s', 'd/m/Y');
+                            }
+                        )
+                        ->addColumn('time', function($query){
+                                return convertDate($query->written_at, 'Y-m-d H:i:s', 'H:i');
+                            }
+                        )
+                        ->make(true);
+                }
+                return _Error('Params not exist!', 404);
                 break;
                 
             default:

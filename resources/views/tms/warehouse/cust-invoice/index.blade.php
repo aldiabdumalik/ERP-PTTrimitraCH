@@ -16,6 +16,7 @@
 @include('tms.warehouse.cust-invoice.modal.table.doaddr')
 @include('tms.warehouse.cust-invoice.modal.table.sysaccount')
 @include('tms.warehouse.cust-invoice.modal.table.do')
+@include('tms.warehouse.cust-invoice.modal.table.tableLog')
 
 @endsection
 @section('script')
@@ -670,6 +671,171 @@
                         });
                     });
                 }
+            });
+        });
+
+        $(document).on('click', '.custinv-act-posted', function () {
+            var inv_no = $(this).data('invno');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Post Invoice No." + inv_no + " Now?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, post it!'
+            }).then(answer => {
+                if (answer.value == true) {
+                    ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.posted') }}", method: "POST", data: {inv_no: inv_no}}).then(resolve => {
+                        var message = resolve.message;
+                        Swal.fire({
+                            title: 'Success',
+                            text: message,
+                            icon: 'success'
+                        }).then(() => {
+                            index_data.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                }
+            });
+        });
+        $(document).on('click', '.custinv-act-unposted', function () {
+            var inv_no = $(this).data('invno');
+            Swal.fire({
+                // title: 'Are you sure?',
+                title: "Unpost Inv No." + inv_no + " Now?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, unpost it!',
+                input: 'text',
+                inputPlaceholder: 'Type your Note here...',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to write Note!'
+                    }
+                }
+            }).then(answer => {
+                if (answer.value != "" && answer.value != undefined) {
+                    var note = answer.value;
+                    ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.unposted') }}", method: "POST", data: {inv_no: inv_no, note: note}}).then(resolve => {
+                        var message = resolve.message;
+                        Swal.fire({
+                            title: 'Success',
+                            text: message,
+                            icon: 'success'
+                        }).then(() => {
+                            index_data.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                }
+            });
+        });
+
+        $(document).on('click', '.custinv-act-voided', function () {
+            var inv_no = $(this).data('invno');
+            Swal.fire({
+                // title: 'Are you sure?',
+                title: "Void Inv No." + inv_no + " Now?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, void it!',
+                input: 'text',
+                inputPlaceholder: 'Type your Note here...',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to write Note!'
+                    }
+                }
+            }).then(answer => {
+                if (answer.value != "" && answer.value != undefined) {
+                    var note = answer.value;
+                    ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.voided') }}", method: "POST", data: {inv_no: inv_no, note: note}}).then(resolve => {
+                        var message = resolve.message;
+                        Swal.fire({
+                            title: 'Success',
+                            text: message,
+                            icon: 'success'
+                        }).then(() => {
+                            index_data.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                }
+            });
+        });
+        $(document).on('click', '.custinv-act-unvoided', function () {
+            var inv_no = $(this).data('invno');
+            Swal.fire({
+                // title: 'Are you sure?',
+                title: "Unvoid Inv No." + inv_no + " Now?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, unvoid it!',
+                input: 'text',
+                inputPlaceholder: 'Type your Note here...',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'You need to write Note!'
+                    }
+                }
+            }).then(answer => {
+                if (answer.value != "" && answer.value != undefined) {
+                    var note = answer.value;
+                    ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.unvoided') }}", method: "POST", data: {inv_no: inv_no, note: note}}).then(resolve => {
+                        var message = resolve.message;
+                        Swal.fire({
+                            title: 'Success',
+                            text: message,
+                            icon: 'success'
+                        }).then(() => {
+                            index_data.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                }
+            });
+        });
+
+        var tbl_log;
+        $(document).on('click', '.custinv-act-log', function () {
+            var inv_no = $(this).data('invno');
+            modalAction('#custinv-modal-log').then(resolve => {
+                tbl_log = $('#custinv-datatables-log').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    searching: false,
+                    ajax: {
+                        url: "{{route('tms.warehouse.cust_invoice.header')}}",
+                        method: "POST",
+                        data: {
+                            type: "log",
+                            inv_no: inv_no
+                        },
+                        headers: token_header
+                    },
+                    columns: [
+                        {data:'date', name: 'date', className: "text-center align-middle"},
+                        {data:'time', name: 'time', className: "text-left align-middle"},
+                        {data:'status', name: 'status', className: "text-left align-middle"},
+                        {data:'written_by', name: 'written_by', className: "text-center align-middle"},
+                        {data:'note', name: 'note', className: "text-center align-middle"},
+                    ],
+                    ordering: false,
+                    lengthChange: false
+                });
             });
         });
 
