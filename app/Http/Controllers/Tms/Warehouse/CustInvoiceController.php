@@ -26,6 +26,62 @@ class CustInvoiceController extends Controller
         return view('tms.warehouse.cust-invoice.index');
     }
 
+    public function inv_table(Request $request)
+    {
+        $query = $this->inv_tbl($request);
+        return DataTables::of($query)
+            ->editColumn('written_date', function($query) {
+                return date('d/m/Y', strtotime($query->written_date));
+            })
+            ->editColumn('posted_date', function($query) {
+                return ($query->posted_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->posted_date));
+            })
+            ->editColumn('voided_date', function($query) {
+                return ($query->voided_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->voided_date));
+            })
+            ->addColumn('action', function($query){
+                return view('tms.warehouse.cust-invoice.button.btnTableIndex', [
+                    'data' => $query,
+                ]);
+            })->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function inv_detail($inv_no)
+    {
+        $custinv = CustInvoice::select([
+            'db_tbs.entry_custinvoice_tbl.*',
+            'ekanban.ekanban_customermaster.CustomerName as cust_name',
+            'ekanban.ekanban_customermaster.CustomerCode_eKanban as code',
+            'ekanban.ekanban_customermaster.Address1 as ad1', 
+            'ekanban.ekanban_customermaster.Address2 as ad2', 
+            'ekanban.ekanban_customermaster.Address3 as ad3', 
+            'ekanban.ekanban_customermaster.Address4 as ad4', 
+            'ekanban.ekanban_customermaster.GLAR as glcode',
+            'db_tbs.sys_account.name as glname'
+        ])
+        ->leftJoin('db_tbs.sys_account', 'db_tbs.sys_account.number', '=', 'db_tbs.entry_custinvoice_tbl.glar')
+        ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'db_tbs.entry_custinvoice_tbl.cust_id')
+        ->where('db_tbs.entry_custinvoice_tbl.inv_no', $inv_no)->get();
+        if ($custinv->isNotEmpty()) {
+            $arr_do = [];
+            foreach ($custinv as $inv) {
+                $arr_do[] = $inv->do_no;
+            }
+            $result = [
+                'custinv' => $custinv,
+                'by_item' => $this->callDoJoin($arr_do),
+                'by_do' => $this->callDoEntryGB([
+                    'cust_id' => $custinv[0]->cust_id,
+                    'branch' => $custinv[0]->branch,
+                    'arr_do' => $arr_do
+                ])
+            ];
+            return _Success(null, 200, $result);
+        }
+        return _Error('Invoice not found!', 404);
+    }
+
     public function delivery_order(Request $request)
     {
         $customer = $request->cust_id;

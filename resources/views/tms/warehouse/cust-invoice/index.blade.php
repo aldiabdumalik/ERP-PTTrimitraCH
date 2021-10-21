@@ -46,7 +46,27 @@
         };
 
         const index_data = new Promise(function(resolve, reject) {
-            let tbl_index = $('#custinv-datatables').DataTable();
+            let tbl_index = $('#custinv-datatables').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.warehouse.cust_invoice.tbl')}}",
+                    method: 'POST',
+                    headers: token_header
+                },
+                columns: [
+                    {data:'inv_no', name: 'inv_no', className: "text-center align-middle"},
+                    {data:'written_date', name: 'written_date', className: "text-center align-middle"},
+                    {data:'posted_date', name: 'posted_date', className: "text-center align-middle"},
+                    {data:'voided_date', name: 'voided_date', className: "text-center align-middle"},
+                    {data:'ref_no', name: 'ref_no', className: "text-center align-middle"},
+                    {data:'tax_no', name: 'tax_no', className: "text-center align-middle"},
+                    {data:'cust_id', name: 'cust_id', className: "text-center align-middle"},
+                    {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center align-middle"},
+                ],
+                ordering: false,
+            });
             resolve(tbl_index);
         });
 
@@ -97,6 +117,25 @@
         $('#custinv-modal-index').on('shown.bs.modal', function () {
             tbl_item.columns.adjust().draw();
             tbl_item_part.columns.adjust().draw();
+        });
+
+        $('#custinv-modal-index').on('hidden.bs.modal', function () {
+            $(tbl_item.table().header())
+                .removeClass('bg-abu')
+                .addClass('btn-info');
+            $(tbl_item_part.table().header())
+                .removeClass('bg-abu')
+                .addClass('btn-info');
+            isHidden('#custinv-btn-add-item', false);
+            isHidden('#custinv-btn-delete-item', false);
+            isHidden('#custinv-btn-index-submit', false);
+            $('input').not('.readonly-first').prop('readonly', false);
+            $('select').prop('disabled', false);
+            $('#custinv-create-currency-type option').remove();
+
+            $('#custinv-form-index').trigger('reset');
+            tbl_item.clear().draw(false);
+            tbl_item_part.clear().draw(false);
         });
 
         $('#carouselExampleSlidesOnly').on('slid.bs.carousel', function () {
@@ -271,7 +310,7 @@
                         data.dn_no,
                         data.po_no,
                         data.do_date.split("-").reverse().join('/'),
-                        addZeroes(String(data.qty_sj)),
+                        addZeroes(String(data.tot_qty)),
                         '0.00',
                         currency(addZeroes(String(data.sub_ammount)))
                     ]).node();
@@ -449,7 +488,7 @@
                 inv_currencytype: $('#custinv-create-currency-type').val(),
                 inv_currencyvalue: $('#custinv-create-currency-value').val(),
                 inv_term: $('#custinv-create-terms').val(),
-                inv_duedate: $('#custinv-create-duedate').val(),
+                inv_duedate: $('#custinv-create-duedate').val().split("/").reverse().join("-"),
                 inv_remark: $('#custinv-create-remark').val(),
                 inv_customercode: $('#custinv-create-customercode').val(),
                 inv_customerdoaddr: $('#custinv-create-customerdoaddr').val(),
@@ -494,6 +533,76 @@
                     });
                 });
             }
+        });
+
+        $(document).on('click', '.custinv-act-view', function () {
+            var inv_no = $(this).data('invno');
+            modalAction('#custinv-modal-index').then(() => {
+                $(tbl_item.table().header())
+                    .removeClass('btn-info')
+                    .addClass('bg-abu');
+                $(tbl_item_part.table().header())
+                    .removeClass('btn-info')
+                    .addClass('bg-abu');
+                isHidden('#custinv-btn-add-item', true);
+                isHidden('#custinv-btn-delete-item', true);
+                isHidden('#custinv-btn-index-submit', true);
+                $('input').prop('readonly', true);
+                $('select').prop('disabled', true);
+
+                var route = "{{route('tms.warehouse.cust_invoice.detail', [':inv_no'])}}";
+                route  = route.replace(':inv_no', inv_no);
+                ajaxCall({route: route, method: 'GET'}).then(resolve => {
+                    var data = resolve.content;
+                    eachByDO(data.by_do).then(resolve => {
+                        eachByItemcode(data.by_item).then(() => {
+                            $.each(data.custinv, function (i, inv) {
+                                $('#custinv-create-no').val(inv.inv_no);
+                                $('#custinv-create-type').val(inv.inv_type);
+                                $('#custinv-create-branch').val(inv.branch);
+                                $('#custinv-create-priod').val(inv.periode);
+                                $('#custinv-create-date').val(convertDateTime(inv.written_date));
+                                $('#custinv-create-refno').val(inv.ref_no);
+                                $('#custinv-create-vat1').val(inv.pref_tax);
+                                $('#custinv-create-vat2').val(inv.tax_no);
+                                $('#custinv-create-vat3').val(inv.tax_rate);
+                                $('#custinv-create-sales').val(inv.written_by);
+                                $('#custinv-create-pic').val(inv.branch);
+                                $('#custinv-create-currency-type').append($('<option>', { 
+                                    value: inv.valas,
+                                    text : inv.valas 
+                                }));
+                                $('#custinv-create-currency-value').val(currency(addZeroes(String(inv.rate))));
+                                $('#custinv-create-terms').val(inv.term);
+                                $('#custinv-create-duedate').val(convertDateTime(inv.due_date));
+                                $('#custinv-create-remark').val(inv.remark);
+                                $('#custinv-create-customercode').val(inv.cust_id);
+                                $('#custinv-create-customername').val(inv.cust_name);
+                                $('#custinv-create-customeraddr1').val(inv.ad1);
+                                $('#custinv-create-customeraddr2').val(inv.ad2);
+                                $('#custinv-create-customeraddr3').val(inv.ad3);
+                                $('#custinv-create-customeraddr4').val(inv.ad4);
+                                $('#custinv-create-customerdoaddr').val(inv.combine_id);
+                                $('#custinv-create-totline').val(inv.totline);
+                                $('#custinv-create-an').val(inv.cust_contact);
+                                $('#custinv-create-glcode').val(inv.glar);
+                                $('#custinv-create-glket').val(inv.glname);
+
+                                $('#custinv-create-subtotal').val(currency(addZeroes(String(inv.amount_sub))));
+                                $('#custinv-create-cndisc').val(currency(addZeroes(String(inv.amount_cn))));
+                                $('#custinv-create-vat').val(currency(addZeroes(String(inv.amount_tax))));
+                                $('#custinv-create-total').val(currency(addZeroes(String(inv.amount_bal))));
+                                $('#custinv-create-payment').val(currency(addZeroes(String(inv.amount_pay))));
+                                $('#custinv-create-balance').val(currency(addZeroes(String(inv.amount_bal))));
+
+                                $('#custinv-create-posted').val((inv.posted_date != null ? convertDateTime(inv.posted_date) : null));
+                                $('#custinv-create-voided').val((inv.voided_date != null ? convertDateTime(inv.voided_date) : null));
+                                $('#custinv-create-printed').val((inv.printed_date != null ? convertDateTime(inv.printed_date) : null));
+                            });
+                        });
+                    });
+                });
+            });
         });
 
         function modalAction(elementId=null, action='show'){
@@ -560,6 +669,16 @@
 
         function isFloat(n){
             return Number(n) === n && n % 1 !== 0;
+        }
+
+        function isHidden(element=null, hide=true){
+            return ((hide == true) ? $(element).addClass('d-none') : $(element).removeClass('d-none'));
+        }
+
+        function convertDateTime(date) {
+            date = date.split(' ');
+            date = date[0].split('-').reverse().join('/');
+            return date;
         }
 
         $('#custinv-create-date').on('changeDate', function () {

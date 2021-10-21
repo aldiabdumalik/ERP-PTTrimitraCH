@@ -174,6 +174,14 @@ Route::get('/warehouse/customer_invoice', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@index', 
     'as' => 'tms.warehouse.cust_invoice'
 ]);
+Route::get('/warehouse/customer_invoice/{inv_no}/detail', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@inv_detail', 
+    'as' => 'tms.warehouse.cust_invoice.detail'
+]);
+Route::post('/warehouse/customer_invoice/tbl_index', [
+    'uses' => 'TMS\Warehouse\CustInvoiceController@inv_table', 
+    'as' => 'tms.warehouse.cust_invoice.tbl'
+]);
 Route::post('/warehouse/customer_invoice/header', [
     'uses' => 'TMS\Warehouse\CustInvoiceController@header', 
     'as' => 'tms.warehouse.cust_invoice.header'

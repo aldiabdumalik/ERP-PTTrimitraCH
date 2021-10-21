@@ -36,6 +36,7 @@
                                             <th class="align-middle">Ref No.</th>
                                             <th class="align-middle">PPN No.</th>
                                             <th class="align-middle">Customer</th>
+                                            <th class="align-middle">Action</th>
                                         </tr>
                                     </thead>
                                 </table>
