@@ -383,6 +383,17 @@ class CustInvoiceController extends Controller
                 }
                 return _Success('isnt_exist');
                 break;
+            
+            case 'validation':
+                $custinv = CustInvoice::where('inv_no', $request->inv_no)->first();
+
+                if (!is_null($custinv->posted_date)) {
+                    return _Error('Invoice has been posted');
+                }elseif (!is_null($custinv->voided_date)) {
+                    return _Error('Invoice has been voided');
+                }
+                return _Success(null);
+                break;
 
             case 'sys_account':
                 $req = $this->sys_account($request);

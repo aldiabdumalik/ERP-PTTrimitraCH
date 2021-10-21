@@ -605,6 +605,74 @@
             });
         });
 
+        $(document).on('click', '.custinv-act-edit', function () {
+            var inv_no = $(this).data('invno');
+            ajaxCall({route: "{{ route('tms.warehouse.cust_invoice.header') }}", method: "POST", data: {type: "validation", inv_no: inv_no} }).then(resolve => {
+                if (resolve.status == true) {
+                    modalAction('#custinv-modal-index').then(() => {
+                        ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+                            var select = resolve.content;
+                            $.each(select, function (i, valas) {
+                                $('#custinv-create-currency-type').append($('<option>', { 
+                                    value: valas.valas,
+                                    text : valas.valas 
+                                }));
+                            });
+                        });
+                        var route = "{{route('tms.warehouse.cust_invoice.detail', [':inv_no'])}}";
+                        route  = route.replace(':inv_no', inv_no);
+                        ajaxCall({route: route, method: 'GET'}).then(resolve => {
+                            var data = resolve.content;
+                            eachByDO(data.by_do).then(resolve => {
+                                eachByItemcode(data.by_item).then(() => {
+                                    $.each(data.custinv, function (i, inv) {
+                                        $('#custinv-create-no').val(inv.inv_no);
+                                        $('#custinv-create-type').val(inv.inv_type);
+                                        $('#custinv-create-branch').val(inv.branch);
+                                        $('#custinv-create-priod').val(inv.periode);
+                                        $('#custinv-create-date').val(convertDateTime(inv.written_date));
+                                        $('#custinv-create-refno').val(inv.ref_no);
+                                        $('#custinv-create-vat1').val(inv.pref_tax);
+                                        $('#custinv-create-vat2').val(inv.tax_no);
+                                        $('#custinv-create-vat3').val(inv.tax_rate);
+                                        $('#custinv-create-sales').val(inv.written_by);
+                                        $('#custinv-create-pic').val(inv.branch);
+                                        $('#custinv-create-currency-type').val(inv.valas);
+                                        $('#custinv-create-currency-value').val(currency(addZeroes(String(inv.rate))));
+                                        $('#custinv-create-terms').val(inv.term);
+                                        $('#custinv-create-duedate').val(convertDateTime(inv.due_date));
+                                        $('#custinv-create-remark').val(inv.remark);
+                                        $('#custinv-create-customercode').val(inv.cust_id);
+                                        $('#custinv-create-customername').val(inv.cust_name);
+                                        $('#custinv-create-customeraddr1').val(inv.ad1);
+                                        $('#custinv-create-customeraddr2').val(inv.ad2);
+                                        $('#custinv-create-customeraddr3').val(inv.ad3);
+                                        $('#custinv-create-customeraddr4').val(inv.ad4);
+                                        $('#custinv-create-customerdoaddr').val(inv.combine_id);
+                                        $('#custinv-create-totline').val(inv.totline);
+                                        $('#custinv-create-an').val(inv.cust_contact);
+                                        $('#custinv-create-glcode').val(inv.glar);
+                                        $('#custinv-create-glket').val(inv.glname);
+
+                                        $('#custinv-create-subtotal').val(currency(addZeroes(String(inv.amount_sub))));
+                                        $('#custinv-create-cndisc').val(currency(addZeroes(String(inv.amount_cn))));
+                                        $('#custinv-create-vat').val(currency(addZeroes(String(inv.amount_tax))));
+                                        $('#custinv-create-total').val(currency(addZeroes(String(inv.amount_bal))));
+                                        $('#custinv-create-payment').val(currency(addZeroes(String(inv.amount_pay))));
+                                        $('#custinv-create-balance').val(currency(addZeroes(String(inv.amount_bal))));
+
+                                        $('#custinv-create-posted').val((inv.posted_date != null ? convertDateTime(inv.posted_date) : null));
+                                        $('#custinv-create-voided').val((inv.voided_date != null ? convertDateTime(inv.voided_date) : null));
+                                        $('#custinv-create-printed').val((inv.printed_date != null ? convertDateTime(inv.printed_date) : null));
+                                    });
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+        });
+
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
                 $(elementId).modal(action);
