@@ -49,10 +49,10 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-2">
-                <input type="number" name="custinv-create-vat1" id="custinv-create-vat1" class="form-control form-control-sm" autocomplete="off" required maxlength="1" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+                <input type="number" name="custinv-create-vat1" id="custinv-create-vat1" class="form-control form-control-sm" autocomplete="off" maxlength="1" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
             </div>
             <div class="col-5">
-                <input type="number" name="custinv-create-vat2" id="custinv-create-vat2" class="form-control form-control-sm" autocomplete="off" required maxlength="9" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+                <input type="number" name="custinv-create-vat2" id="custinv-create-vat2" class="form-control form-control-sm" autocomplete="off" maxlength="9" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
             </div>
             <div class="col-5">
                 <div class="input-group input-group-sm">

@@ -17,6 +17,8 @@
 @include('tms.warehouse.cust-invoice.modal.table.sysaccount')
 @include('tms.warehouse.cust-invoice.modal.table.do')
 @include('tms.warehouse.cust-invoice.modal.table.tableLog')
+@include('tms.warehouse.cust-invoice.modal.report.mreport')
+@include('tms.warehouse.cust-invoice.modal.table.note')
 
 @endsection
 @section('script')
@@ -827,16 +829,64 @@
                         headers: token_header
                     },
                     columns: [
-                        {data:'date', name: 'date', className: "text-center align-middle"},
+                        {data:'date', name: 'date', className: "text-left align-middle"},
                         {data:'time', name: 'time', className: "text-left align-middle"},
                         {data:'status', name: 'status', className: "text-left align-middle"},
-                        {data:'written_by', name: 'written_by', className: "text-center align-middle"},
-                        {data:'note', name: 'note', className: "text-center align-middle"},
+                        {data:'written_by', name: 'written_by', className: "text-left align-middle"},
+                        {data:'note', name: 'note', className: "text-left align-middle"},
                     ],
                     ordering: false,
                     lengthChange: false
                 });
             });
+        });
+
+        $(document).on('click', '.custinv-act-report', function () {
+            var inv_no = $(this).data('invno');
+            modalAction('#custinv-modal-report').then(() => {
+                
+            });
+        });
+
+        $(document).on('click', '.custinv-act-note', function () {
+            var inv_no = $(this).data('invno');
+            modalAction('#custinv-modal-note').then(() => {
+                ajaxCall({route: "{{route('tms.warehouse.cust_invoice.header')}}", method: "POST", data: {type: "note", inv_no: inv_no}}).then(resolve => {
+                    var data = resolve.content;
+                    $('#custinv-note-invno').val(inv_no);
+                    $('#custinv-note-po').val(data.note_po);
+                    $('#custinv-note-sj').val(data.note_sj);
+                });
+            });
+        });
+
+        $(document).on('click', '#custinv-btn-note-ok', function () {
+            var data = {
+                inv_no: $('#custinv-note-invno').val(),
+                note_po: $('#custinv-note-po').val(),
+                note_sj: $('#custinv-note-sj').val()
+            };
+            var route = "{{route('tms.warehouse.cust_invoice.update.note', [':inv_no'])}}";
+            route  = route.replace(':inv_no', data.inv_no);
+            ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                var message = resolve.message;
+                modalAction('#custinv-modal-note', 'hide').then(() => {
+                    Swal.fire({
+                        title: 'Success',
+                        text: message,
+                        icon: 'success'
+                    }).then(() => {
+                        index_data.then(resolve => {
+                            resolve.ajax.reload();
+                        });
+                    });
+                });
+            });;
+        });
+
+        $('#custinv-modal-note').on('hidden.bs.modal', function () {
+            $('#custinv-note-po').val();
+            $('#custinv-note-sj').val();
         });
 
         function modalAction(elementId=null, action='show'){

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class CustInvoiceController extends Controller
 {
@@ -122,6 +123,17 @@ class CustInvoiceController extends Controller
         $data_insert = [];
         if ($request->ajax()) {
             $item = $request->inv_item;
+            $tmp_po = [];
+            $tmp_sj = [];
+            for ($x=0; $x < count($item); $x++) {
+                if(!in_array($item[$x][5], $tmp_po, true)){
+                    array_push($tmp_po, $item[$x][5]);
+                }
+                if(!in_array($item[$x][2], $tmp_sj, true) && ($item[$x][2] !== null)){
+                    array_push($tmp_sj, $item[$x][2]);
+                }
+            }
+
             for ($i=0; $i < count($item); $i++) { 
                 $data_insert[] = [
                     'inv_no' => $request->inv_no,
@@ -156,6 +168,8 @@ class CustInvoiceController extends Controller
                     'totline' => $request->inv_totline,
                     'glar' => $request->inv_glcode,
                     'remark' => $request->inv_remark,
+                    'note_po' => implode(', ', $tmp_po),
+                    'note_sj' => implode(', ', $tmp_sj),
                     'written_date' => Carbon::now(),
                     'written_by' => Auth::user()->FullName
                 ];
@@ -171,9 +185,9 @@ class CustInvoiceController extends Controller
                         'written_by' => Auth::user()->FullName
                     ]);
                 }
-                return $this->_Success('Saved successfully!', 201);
+                return _Success('Saved successfully!', 201);
             } catch (Exception $e) {
-                return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+                return _Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
         return _Success(null, 200, $data_insert);
@@ -187,6 +201,17 @@ class CustInvoiceController extends Controller
             $create_date = $old->written_date;
             $data_insert = [];
             $item = $request->inv_item;
+            $tmp_po = [];
+            $tmp_sj = [];
+            for ($x=0; $x < count($item); $x++) {
+                if(!in_array($item[$x][5], $tmp_po, true)){
+                    array_push($tmp_po, $item[$x][5]);
+                }
+                if(!in_array($item[$x][2], $tmp_sj, true) && ($item[$x][2] !== null)){
+                    array_push($tmp_sj, $item[$x][2]);
+                }
+            }
+
             for ($i=0; $i < count($item); $i++) { 
                 $data_insert[] = [
                     'inv_no' => $request->inv_no,
@@ -221,6 +246,8 @@ class CustInvoiceController extends Controller
                     'totline' => $request->inv_totline,
                     'glar' => $request->inv_glcode,
                     'remark' => $request->inv_remark,
+                    'note_po' => implode(', ', $tmp_po),
+                    'note_sj' => implode(', ', $tmp_sj),
                     'written_date' => $create_date,
                     'written_by' => $create_by,
                     'updated_date' => Carbon::now(),
@@ -238,9 +265,9 @@ class CustInvoiceController extends Controller
                         'written_by' => Auth::user()->FullName
                     ]);
                 }
-                return $this->_Success('Saved successfully!', 201);
+                return _Success('Saved successfully!', 201);
             } catch (Exception $e) {
-                return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+                return _Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
     }
@@ -361,6 +388,51 @@ class CustInvoiceController extends Controller
         return _Success('Invoice has been unvoided');
     }
 
+    public function report(Request $request)
+    {
+        switch ($request->type) {
+            case 'INV':
+                $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.inv')->setPaper('a4', 'potrait');
+                return $pdf->stream();
+                break;
+            
+            case 'OR':
+                break;
+
+            case 'VAT':
+                break;
+
+            case 'CN':
+                break;
+
+            case 'RR':
+                break;
+
+            default:
+                return _Error('Data Not Found');
+                break;
+        }
+    }
+
+    public function updateNote(Request $request, $inv_no)
+    {
+        $update = CustInvoice::where('inv_no', $inv_no)->update([
+            'note_po' => $request->note_po,
+            'note_sj' => $request->note_sj
+        ]);
+
+        if ($update) {
+            $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                'inv_no' => $request->inv_no,
+                'status' => 'EDIT',
+                'note' => "PO No. : $request->note_po / SJ No. : $request->note_sj",
+                'written_at' => Carbon::now(),
+                'written_by' => Auth::user()->FullName
+            ]);
+        }
+        return _Success('Invoice has been updated');
+    }
+
     public function header(Request $request)
     {
         switch ($request->type) {
@@ -440,6 +512,11 @@ class CustInvoiceController extends Controller
                         ->make(true);
                 }
                 return _Error('Params not exist!', 404);
+                break;
+
+            case 'note':
+                $custinv = CustInvoice::where('inv_no', $request->inv_no)->first();
+                return _Success(null, 200, $custinv);
                 break;
                 
             default:

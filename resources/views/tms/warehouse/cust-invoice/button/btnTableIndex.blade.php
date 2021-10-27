@@ -24,6 +24,7 @@
         @endif
 
         <a class="dropdown-item text-primary custinv-act-report" href="javascript:void(0)" data-invno="{{ $data->inv_no }}"><i class="fa fa-print"></i> Print</a>
+        <a class="dropdown-item text-primary custinv-act-note" href="javascript:void(0)" data-invno="{{ $data->inv_no }}"><i class="fa fa-list"></i> Note</a>
         <a class="dropdown-item text-primary custinv-act-log" href="javascript:void(0)" data-invno="{{ $data->inv_no }}"><i class="fa fa-share"></i> Log</a>
     </div>
 </div>

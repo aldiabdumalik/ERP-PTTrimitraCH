@@ -45,6 +45,8 @@ class CustInvoice extends Model
         'totline',
         'glar',
         'remark',
+        'note_po',
+        'note_sj',
         'posted_date',
         'voided_date',
         'printed_date',
