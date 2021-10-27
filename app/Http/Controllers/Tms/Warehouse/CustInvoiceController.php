@@ -177,10 +177,11 @@ class CustInvoiceController extends Controller
             try {
                 $query = CustInvoice::insert($data_insert);
                 if ($query) {
+                    $note = "Qty:".array_sum(array_column($item, 7))."/Total:".str_replace(',', '', $request->inv_subtotal);
                     $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
                         'inv_no' => $request->inv_no,
                         'status' => 'ADD',
-                        'note' => null,
+                        'note' => $note,
                         'written_at' => Carbon::now(),
                         'written_by' => Auth::user()->FullName
                     ]);
@@ -257,10 +258,11 @@ class CustInvoiceController extends Controller
             try {
                 $query = CustInvoice::insert($data_insert);
                 if ($query) {
+                    $note = "Qty:".array_sum(array_column($item, 7))."/Total:".str_replace(',', '', $request->inv_subtotal);
                     $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
                         'inv_no' => $request->inv_no,
-                        'status' => 'UPDATED',
-                        'note' => null,
+                        'status' => 'EDIT',
+                        'note' => $note,
                         'written_at' => Carbon::now(),
                         'written_by' => Auth::user()->FullName
                     ]);
