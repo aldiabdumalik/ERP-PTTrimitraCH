@@ -50,6 +50,15 @@ class CustInvoiceController extends Controller
 
     public function inv_detail($inv_no)
     {
+        $result = $this->_getdetail($inv_no);
+        if (!empty($result)) {
+            return _Success(null, 200, $result);
+        }
+        return _Error('Invoice not found!', 404);
+    }
+
+    private function _getdetail($inv_no)
+    {
         $custinv = CustInvoice::select([
             'db_tbs.entry_custinvoice_tbl.*',
             'ekanban.ekanban_customermaster.CustomerName as cust_name',
@@ -78,9 +87,9 @@ class CustInvoiceController extends Controller
                     'arr_do' => $arr_do
                 ])
             ];
-            return _Success(null, 200, $result);
+            return $result;
         }
-        return _Error('Invoice not found!', 404);
+        return null;
     }
 
     public function delivery_order(Request $request)
@@ -256,6 +265,9 @@ class CustInvoiceController extends Controller
                 ];
             }
             try {
+                // delete dulu
+                $delete = CustInvoice::where('inv_no', $inv_no)->delete();
+
                 $query = CustInvoice::insert($data_insert);
                 if ($query) {
                     $note = "Qty:".array_sum(array_column($item, 7))."/Total:".str_replace(',', '', $request->inv_subtotal);
@@ -267,7 +279,7 @@ class CustInvoiceController extends Controller
                         'written_by' => Auth::user()->FullName
                     ]);
                 }
-                return _Success('Saved successfully!', 201);
+                return _Success('Update successfully!', 201);
             } catch (Exception $e) {
                 return _Error('failed to save, please check your form again', 401, $e->getMessage());
             }
@@ -392,28 +404,42 @@ class CustInvoiceController extends Controller
 
     public function report(Request $request)
     {
-        switch ($request->type) {
-            case 'INV':
-                $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.inv')->setPaper('a4', 'potrait');
-                return $pdf->stream();
-                break;
-            
-            case 'OR':
-                break;
+        $inv_no = '21100001';
+        $result = $this->_getdetail($inv_no);
 
-            case 'VAT':
-                break;
+        if (!empty($result)) {
+            $subtotal = $this->currency($this->addZeroes($result['custinv'][0]->amount_sub));
+            $tax = $this->currency($this->addZeroes($result['custinv'][0]->amount_tax));
+            $balance = $this->currency($this->addZeroes($result['custinv'][0]->amount_bal));
+            $terbilang = $this->terbilang($result['custinv'][0]->amount_bal);
+            switch ($request->type) {
+                case 'INV':
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.inv', compact('result', 'subtotal', 'tax', 'balance', 'terbilang'))->setPaper('a4', 'potrait');
+                    return $pdf->stream();
+                    break;
+                
+                case 'OR':
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.or', compact('result', 'balance', 'terbilang'))->setPaper('a4', 'potrait');
+                    return $pdf->stream();
+                    break;
 
-            case 'CN':
-                break;
+                case 'VAT':
+                    break;
 
-            case 'RR':
-                break;
+                case 'CN':
+                    break;
 
-            default:
-                return _Error('Data Not Found');
-                break;
+                case 'RR':
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.rr', compact('result'));
+                    return $pdf->stream();
+                    break;
+
+                default:
+                    return _Error('Data Not Found');
+                    break;
+            }
         }
+        return _Error('Data Not Found');
     }
 
     public function updateNote(Request $request, $inv_no)
