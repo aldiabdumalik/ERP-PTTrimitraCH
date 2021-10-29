@@ -4,9 +4,9 @@
             <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custinv-btn-modal-create">
                 <i class="ti-plus"></i>  Add New Data
             </button>
-            <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custinv-btn-modal-print">
+            {{-- <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custinv-btn-modal-print">
                 <i class="fa fa-print"></i>  Print
-            </button>
+            </button> --}}
             {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="custinv-btn-modal-table-setting">
                 <i class="fa fa-cogs"></i>
             </button> --}}
