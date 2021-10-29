@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\Redirect;
 
 class CustInvoiceController extends Controller
 {
@@ -424,6 +425,8 @@ class CustInvoiceController extends Controller
                     break;
 
                 case 'VAT':
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.vat');
+                    return $pdf->stream();
                     break;
 
                 case 'CN':
@@ -435,11 +438,13 @@ class CustInvoiceController extends Controller
                     break;
 
                 default:
-                    return _Error('Data Not Found');
+                    $request->session()->flash('message', 'Data Not Found!');
+                    return Redirect::back();
                     break;
             }
         }
-        return _Error('Data Not Found');
+        $request->session()->flash('message', 'Data Not Found!');
+        return Redirect::back();
     }
 
     public function updateNote(Request $request, $inv_no)
