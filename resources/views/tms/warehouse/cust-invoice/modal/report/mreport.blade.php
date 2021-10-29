@@ -54,7 +54,7 @@
                                 <label for="custinv-report-noitem" class="auto-middle">No. of item</label>
                             </div>
                             <div class="col-10">
-                                <input type="text" name="custinv-report-noitem" id="custinv-report-noitem" class="form-control form-control-sm text-right readonly-first" readonly autocomplete="off" required value="0">
+                                <input type="text" name="custinv-report-noitem" id="custinv-report-noitem" class="form-control form-control-sm text-right readonly-first" readonly autocomplete="off" required value="22">
                             </div>
                         </div>
                     </div>
@@ -66,7 +66,7 @@
                                 <label for="custinv-report-cut" class="auto-middle">Cut off line</label>
                             </div>
                             <div class="col-10">
-                                <input type="text" name="custinv-report-cut" id="custinv-report-cut" class="form-control form-control-sm text-right readonly-first" readonly autocomplete="off" required value="0">
+                                <input type="text" name="custinv-report-cut" id="custinv-report-cut" class="form-control form-control-sm text-right" autocomplete="off" required value="22">
                             </div>
                         </div>
                     </div>

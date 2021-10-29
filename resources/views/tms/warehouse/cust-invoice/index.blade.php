@@ -844,8 +844,37 @@
         $(document).on('click', '.custinv-act-report', function () {
             var inv_no = $(this).data('invno');
             modalAction('#custinv-modal-report').then(() => {
-                
+                $('#custinv-btn-report-ok').on('click', function () {
+                    var type = $('#custinv-report-type').val(),
+                        pic = $('#custinv-report-pic').val(),
+                        vat = $('#custinv-report-vat').val(),
+                        noitem = $('#custinv-report-noitem').val(),
+                        cut = $('#custinv-report-cut').val(),
+                        encrypt = btoa(`${inv_no}&${type}&${pic}&${vat}&${noitem}&${cut}`);
+                    index_data.then(resolve => {
+                        resolve.ajax.reload();
+                    });
+                    modalAction('#custinv-modal-report', 'hide');
+                    var url = "{{route('tms.warehouse.cust_invoice.report')}}?params=" + encrypt;
+                    window.open(url, '_blank');
+
+                });
             });
+        });
+
+        $(document).on('change', '#custinv-report-type', function () {
+            var val = $(this).val();
+            if (val == 'INV') {
+                $('#custinv-report-cut').val(22);
+            }else if (val == 'OR') {
+                $('#custinv-report-cut').val(0);
+            }else if (val == 'VAT') {
+                $('#custinv-report-cut').val(18);
+            }else if (val == 'CN') {
+                $('#custinv-report-cut').val(0);
+            }else{
+                $('#custinv-report-cut').val(0);
+            }
         });
 
         $(document).on('click', '.custinv-act-note', function () {

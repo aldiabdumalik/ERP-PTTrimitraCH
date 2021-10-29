@@ -405,7 +405,15 @@ class CustInvoiceController extends Controller
 
     public function report(Request $request)
     {
-        $inv_no = '21100001';
+        $decode = base64_decode($request->params);
+        $arr = explode('&', $decode);
+        $inv_no = $arr[0];
+        $type = $arr[1];
+        $vat = $arr[3];
+        $pic = $arr[2];
+        $noitem = $arr[4];
+        $cut = $arr[5];
+        
         $result = $this->_getdetail($inv_no);
 
         if (!empty($result)) {
@@ -413,7 +421,7 @@ class CustInvoiceController extends Controller
             $tax = $this->currency($this->addZeroes($result['custinv'][0]->amount_tax));
             $balance = $this->currency($this->addZeroes($result['custinv'][0]->amount_bal));
             $terbilang = $this->terbilang($result['custinv'][0]->amount_bal);
-            switch ($request->type) {
+            switch ($type) {
                 case 'INV':
                     $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.inv', compact('result', 'subtotal', 'tax', 'balance', 'terbilang'))->setPaper('a4', 'potrait');
                     return $pdf->stream();
