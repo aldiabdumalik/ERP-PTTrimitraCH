@@ -413,7 +413,7 @@ class CustInvoiceController extends Controller
         $pic = $arr[2];
         $noitem = $arr[4];
         $cut = $arr[5];
-        
+
         $result = $this->_getdetail($inv_no);
 
         if (!empty($result)) {
@@ -433,15 +433,17 @@ class CustInvoiceController extends Controller
                     break;
 
                 case 'VAT':
-                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.vat');
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.vat')->setPaper('a4', 'potrait');
                     return $pdf->stream();
                     break;
 
                 case 'CN':
+                    $pdf = PDF::loadView()->setPaper('a4', 'potrait');
+                    return $pdf->stream();
                     break;
 
                 case 'RR':
-                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.rr', compact('result'));
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.rr', compact('result'))->setPaper('a4', 'potrait');
                     return $pdf->stream();
                     break;
 
