@@ -433,7 +433,7 @@ class CustInvoiceController extends Controller
                     break;
 
                 case 'VAT':
-                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.vat')->setPaper('a4', 'potrait');
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.vat', compact('result', 'subtotal', 'tax', 'balance', 'terbilang'))->setPaper('a4', 'potrait');
                     return $pdf->stream();
                     break;
 

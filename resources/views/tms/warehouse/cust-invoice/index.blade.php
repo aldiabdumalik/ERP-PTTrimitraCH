@@ -918,6 +918,10 @@
             $('#custinv-note-sj').val();
         });
 
+        
+
+        // Function
+
         function modalAction(elementId=null, action='show'){
             return new Promise(resolve => {
                 $(elementId).modal(action);

@@ -178,11 +178,26 @@ trait CustInvTrait {
                 "db_tbs.entry_do_tbl.period as do_priod",
                 "db_tbs.entry_do_tbl.cust_id as cust_id",
                 "db_tbs.entry_do_tbl.delivery_date as do_date",
-                DB::raw("SUM((IFNULL(custprice.price_new, db_tbs.item.PRICE) * db_tbs.entry_do_tbl.quantity)) AS sub_ammount"),
+                DB::raw("SUM((IFNULL(custprice.price_new, db_tbs.entry_so_tbl.price) * db_tbs.entry_do_tbl.quantity)) AS sub_ammount"),
+            )
+            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
+                    $join->on('db_tbs.entry_sso_tbl.sso_header','=','db_tbs.entry_do_tbl.sso_no');
+                    $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_do_tbl.item_code');
+                }
+            )
+            ->leftJoin('db_tbs.entry_so_tbl', function($join){
+                    $join->on('db_tbs.entry_sso_tbl.so_header','=','db_tbs.entry_so_tbl.so_header');
+                    $join->on('db_tbs.entry_sso_tbl.item_code','=','db_tbs.entry_so_tbl.item_code');
+                }
             )
             ->leftJoin('db_tbs.item','db_tbs.entry_do_tbl.item_code','=','db_tbs.item.itemcode')
             ->leftJoin(DB::raw('(SELECT price_new, item_code FROM db_tbs.entry_custprice_tbl ORDER BY active_date DESC LIMIT 1) as custprice'), function($join){
                 $join->on("custprice.item_code", "=", "entry_do_tbl.item_code");
+            })
+            ->whereNotExists(function($query) {
+                $query->from("db_tbs.entry_custinvoice_tbl as t2")
+                    ->select("t2.do_no")
+                    ->whereRaw("t2.do_no = db_tbs.entry_do_tbl.do_no");
             })
             ->where("db_tbs.entry_do_tbl.branch", "=", $params['branch'])
             ->where("db_tbs.entry_do_tbl.cust_id", "=", $params['cust_id'])
