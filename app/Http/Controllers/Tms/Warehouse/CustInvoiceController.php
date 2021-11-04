@@ -446,6 +446,11 @@ class CustInvoiceController extends Controller
                     $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.rr', compact('result'))->setPaper('a4', 'potrait');
                     return $pdf->stream();
                     break;
+                
+                case 'SJ':
+                    $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.sj', compact('result', 'subtotal', 'tax', 'balance'))->setPaper('a4', 'potrait');
+                    return $pdf->stream();
+                    break;
 
                 default:
                     $request->session()->flash('message', 'Data Not Found!');

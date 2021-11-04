@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Surat Jalan</title>
+    <style>
+        * {
+            font-size: 12px;
+        }
+        .header {
+            width: 100%;
+        }
+        .header td {
+            vertical-align: bottom;
+        }
+        .item {
+            width: 100%;
+            margin-top: 10px;
+            font-size: 12px!important;
+        }
+        .item th {
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+        .item td {
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <table class="header" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="width:30%;">{{ date('F d, Y H:i A') }}, {{ auth()->user()->FullName }}</td>
+            <td style="width:40%;text-align:center;font-weight:bold;">
+                <div>PT TRIMITRA CHITRAHASTA</div>
+                <div>List of Surat Jalan for Invoice No.{{$result['custinv'][0]->inv_no}}</div>
+            </td>
+            <td style="width:30%;"></td>
+        </tr>
+    </table>
+    <table class="item" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>No. SJ</th>
+            <th>RR No.</th>
+            <th>DN No.</th>
+            <th>PO No.</th>
+            <th>Qty</th>
+            <th>Sub Ammount</th>
+            <th>VAT</th>
+            <th>Total</th>
+        </tr>
+        @php
+            $qty_tot = 0;
+            $vat = $result['custinv'][0]->tax_rate;
+        @endphp
+        @foreach ($result['by_do'] as $item)
+        @php
+            $qty_tot += $item->tot_qty;
+            $vat_tot = ($item->sub_ammount * $vat) / 100;
+        @endphp
+        <tr>
+            <td class="text-center">{{ $item->do_no }}</td>
+            <td class="text-center">{{ $item->rr_no }}</td>
+            <td class="text-center">{{ $item->dn_no }}</td>
+            <td class="text-center">{{ $item->po_no }}</td>
+            <td class="text-right">{{ addZero($item->tot_qty)}}</td>
+            <td class="text-right">{{rupiah(addZero($item->sub_ammount))}}</td>
+            <td class="text-right">{{rupiah(addZero( $vat_tot ))}}</td>
+            <td class="text-right">{{rupiah(addZero($item->sub_ammount + $vat_tot))}}</td>
+        </tr>
+        @endforeach
+        <tr>
+            <th class="text-right" colspan="4">GRAND TOTAL :</th>
+            <th class="text-right">{{addZero($qty_tot)}}</th>
+            <th class="text-right">{{$subtotal}}</th>
+            <th class="text-right">{{$tax}}</th>
+            <th class="text-right">{{$balance}}</th>
+        </tr>
+    </table>
+</body>
+</html>

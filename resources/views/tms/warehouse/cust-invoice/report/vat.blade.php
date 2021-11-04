@@ -26,20 +26,17 @@
         .h-1{
             display: table-cell;
             width: 50%;
-            /* border: 1px solid black; */
             padding-left: 30px;
         }
         .h-2{
             display: table-cell;
             width: 50%;
-            /* border: 1px solid black; */
         }
         .customer {
             width: 100%;
             font-size: 12px;
             padding-left: 150px;
             padding-top: 50px;
-            /* border: 1px solid black; */
         }
         .glar{
             width: 100%;

@@ -18,6 +18,7 @@
                                     <option value="VAT">VAT - Geverment VAT Form</option>
                                     <option value="CN">CN - CREADIT NOTE</option>
                                     <option value="RR">RR Attachment</option>
+                                    <option value="SJ">SJ - List of SJ</option>
                                 </select>
                             </div>
                         </div>
