@@ -35,6 +35,20 @@
     </style>
 </head>
 <body>
+    <script type="text/php">
+        if (isset($pdf)) {
+            $x = 525;
+            $y = 45;
+            $text = "Page: {PAGE_NUM}";
+            $font = null;
+            $size = 10;
+            $color = array(0,0,0);
+            $word_space = 0.0;
+            $char_space = 0.0;
+            $angle = 0.0;
+            $pdf->page_text($x, $y, $text, $font, $size, $color, $word_space, $char_space, $angle);
+        }
+    </script>
     <table class="header" cellpadding="0" cellspacing="0">
         <tr>
             <td style="width:30%;">{{ date('F d, Y H:i A') }}, {{ auth()->user()->FullName }}</td>

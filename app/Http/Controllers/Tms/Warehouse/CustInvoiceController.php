@@ -449,6 +449,7 @@ class CustInvoiceController extends Controller
                 
                 case 'SJ':
                     $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.sj', compact('result', 'subtotal', 'tax', 'balance'))->setPaper('a4', 'potrait');
+                    $pdf->getDomPDF()->set_option("enable_php", true);
                     return $pdf->stream();
                     break;
 
