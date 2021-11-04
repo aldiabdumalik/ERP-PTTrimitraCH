@@ -6,6 +6,13 @@
     <style>
         * {
             font-size: 12px;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .cop {
+            position: fixed;
+            padding: 25px;
         }
         .header {
             width: 100%;
@@ -21,10 +28,7 @@
         .item th {
             border-top: 1px solid black;
             border-bottom: 1px solid black;
-        }
-        .item td {
-            border-top: 1px solid black;
-            border-bottom: 1px solid black;
+            padding: 5px;
         }
         .text-center {
             text-align: center;
@@ -32,13 +36,26 @@
         .text-right {
             text-align: right;
         }
+        .sub-item {
+            width: 100%;
+            margin-top: 35px;
+            padding: 25px;
+        }
+        .sub-item td {
+            padding: 5px;
+        }
+        .sub-item th {
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
     <script type="text/php">
         if (isset($pdf)) {
-            $x = 525;
-            $y = 45;
+            $x = 545;
+            $y = 30;
             $text = "Page: {PAGE_NUM}";
             $font = null;
             $size = 10;
@@ -49,27 +66,31 @@
             $pdf->page_text($x, $y, $text, $font, $size, $color, $word_space, $char_space, $angle);
         }
     </script>
-    <table class="header" cellpadding="0" cellspacing="0">
-        <tr>
-            <td style="width:30%;">{{ date('F d, Y H:i A') }}, {{ auth()->user()->FullName }}</td>
-            <td style="width:40%;text-align:center;font-weight:bold;">
-                <div>PT TRIMITRA CHITRAHASTA</div>
-                <div>List of Surat Jalan for Invoice No.{{$result['custinv'][0]->inv_no}}</div>
-            </td>
-            <td style="width:30%;"></td>
-        </tr>
-    </table>
-    <table class="item" cellpadding="5" cellspacing="0">
-        <tr>
-            <th>No. SJ</th>
-            <th>RR No.</th>
-            <th>DN No.</th>
-            <th>PO No.</th>
-            <th>Qty</th>
-            <th>Sub Ammount</th>
-            <th>VAT</th>
-            <th>Total</th>
-        </tr>
+    <div class="cop">
+        <table class="header" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="width:30%;">{{ date('F d, Y H:i A') }}, {{ auth()->user()->FullName }}</td>
+                <td style="width:40%;text-align:center;font-weight:bold;">
+                    <div>PT TRIMITRA CHITRAHASTA</div>
+                    <div>List of Surat Jalan for Invoice No.{{$result['custinv'][0]->inv_no}}</div>
+                </td>
+                <td style="width:30%;"></td>
+            </tr>
+        </table>
+    </div>
+    <table class="sub-item" cellspacing="0" page-break-inside: auto;>
+        <thead>
+            <tr>
+                <th>No. SJ</th>
+                <th>RR No.</th>
+                <th>DN No.</th>
+                <th>PO No.</th>
+                <th>Qty</th>
+                <th>Sub Ammount</th>
+                <th>VAT</th>
+                <th>Total</th>
+            </tr>
+        </thead>
         @php
             $qty_tot = 0;
             $vat = $result['custinv'][0]->tax_rate;
