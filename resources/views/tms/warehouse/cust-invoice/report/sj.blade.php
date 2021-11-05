@@ -38,8 +38,9 @@
         }
         .sub-item {
             width: 100%;
-            margin-top: 35px;
-            padding: 25px;
+            padding-left: 25px;
+            padding-right: 25px;
+
         }
         .sub-item td {
             padding: 5px;
@@ -81,6 +82,11 @@
     <table class="sub-item" cellspacing="0" page-break-inside: auto;>
         <thead>
             <tr>
+                <td colspan="8" style="height: 48px!important;"></td>
+            </tr>
+        </thead>
+        <thead>
+            <tr>
                 <th>No. SJ</th>
                 <th>RR No.</th>
                 <th>DN No.</th>
@@ -105,18 +111,18 @@
             <td class="text-center">{{ $item->rr_no }}</td>
             <td class="text-center">{{ $item->dn_no }}</td>
             <td class="text-center">{{ $item->po_no }}</td>
-            <td class="text-right">{{ addZero($item->tot_qty)}}</td>
-            <td class="text-right">{{rupiah(addZero($item->sub_ammount))}}</td>
-            <td class="text-right">{{rupiah(addZero( $vat_tot ))}}</td>
-            <td class="text-right">{{rupiah(addZero($item->sub_ammount + $vat_tot))}}</td>
+            <td class="text-right">{{ rupiah(addZero($item->tot_qty)) }}</td>
+            <td class="text-right">{{ rupiah(addZero($item->sub_ammount)) }}</td>
+            <td class="text-right">{{ rupiah(addZero( $vat_tot )) }}</td>
+            <td class="text-right">{{ rupiah(addZero($item->sub_ammount + $vat_tot)) }}</td>
         </tr>
         @endforeach
         <tr>
             <th class="text-right" colspan="4">GRAND TOTAL :</th>
-            <th class="text-right">{{addZero($qty_tot)}}</th>
-            <th class="text-right">{{$subtotal}}</th>
-            <th class="text-right">{{$tax}}</th>
-            <th class="text-right">{{$balance}}</th>
+            <th class="text-right">{{ rupiah(addZero($qty_tot)) }}</th>
+            <th class="text-right">{{ $subtotal }}</th>
+            <th class="text-right">{{ $tax }}</th>
+            <th class="text-right">{{ $balance }}</th>
         </tr>
     </table>
 </body>

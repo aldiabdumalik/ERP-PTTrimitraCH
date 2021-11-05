@@ -421,6 +421,13 @@ class CustInvoiceController extends Controller
             $tax = $this->currency($this->addZeroes($result['custinv'][0]->amount_tax));
             $balance = $this->currency($this->addZeroes($result['custinv'][0]->amount_bal));
             $terbilang = $this->terbilang($result['custinv'][0]->amount_bal);
+            $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                'inv_no' => $inv_no,
+                'status' => 'PRINT',
+                'note' => "Print type $type",
+                'written_at' => Carbon::now(),
+                'written_by' => Auth::user()->FullName
+            ]);
             switch ($type) {
                 case 'INV':
                     $pdf = PDF::loadView('tms.warehouse.cust-invoice.report.inv', compact('result', 'subtotal', 'tax', 'balance', 'terbilang'))->setPaper('a4', 'potrait');
