@@ -62,6 +62,9 @@ class ThpEntryController extends Controller
             ->editColumn('process', function($query){
                 return $query->process_sequence_1.'/'.$query->process_sequence_2;
             })
+            ->editColumn('apnormality', function($query){
+                return (($query->apnormality == null) ? '//' : $query->apnormality);
+            })
             ->editColumn('shift', function($query){
                 return substr($query->thp_remark, 0, 1);
             })
@@ -88,6 +91,75 @@ class ThpEntryController extends Controller
             }else{
                 return $this->_getProductionTable($request);
             }
+        }
+    }
+
+    public function refresh_lhp($date)
+    {
+        $query = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where(['thp_date' => $date])
+            ->get();
+        if (!empty($query)) {
+            foreach ($query as $val) {
+                if ($val->item_code != null) {
+                    $lhp_where = [
+                        'production_code' => $val->production_code,
+                        'item_code' => $val->item_code,
+                        'date2' => $val->thp_date
+                    ];
+                }else{
+                    $lhp_where = [
+                        'production_code' => $val->production_code,
+                        'date2' => $val->thp_date
+                    ];
+                }
+                $lhp = DB::connection('oee')
+                    ->table('entry_lhp_tbl')
+                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+                    ->where($lhp_where)
+                    ->first();
+                $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
+                if (isset($lhp)) {
+                    $update = ThpEntry::where('id_thp', $val->id_thp)
+                        ->update([
+                            'lhp_qty' => $lhp_qty
+                        ]);
+                }
+                
+            }
+        }
+        return _Success(null);
+    }
+
+    public function note_apnormal($number, Request $request)
+    {
+        $query = DB::connection('oee')
+            ->table('entry_thp_tbl')
+            ->where('id_thp', $number)
+            ->first();
+        if (is_null($query->closed)) {
+            $update = ThpEntry::where('id_thp', $number)
+                ->update([
+                    'note' => $request->note,
+                    'apnormality' => $request->apnormality
+                ]);
+            $log = DB::table('oee.entry_thp_tbl_log')
+                ->insert([
+                    'id_thp' => $query->id_thp,
+                    'production_code' => $query->production_code,
+                    'item_code' => $query->item_code,
+                    'remark' => $query->thp_remark,
+                    'thp_date' => $query->thp_date,
+                    'date_written' => date('Y-m-d'),
+                    'time_written' => date('H:i:s'),
+                    'status_change' => 'EDIT',
+                    'user' => Auth::user()->FullName,
+                    'note' => "apnormal: $request->apnormality/note: $request->note"
+                ]);
+            return _Success('THP Entry has been updated');
+        }else{
+            return _Error('THP Entry has been closed');
         }
     }
 

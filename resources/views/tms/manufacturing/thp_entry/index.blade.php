@@ -83,6 +83,9 @@
                         <a id="settingPersentaseModal" class="dropdown-item" href="javascript:void(0)">Min Persentase</a>
                     </div>
                 </div>
+                <button type="button"  class="btn btn-success btn-flat btn-sm" id="refreshlhp">
+                    <i class="fa fa-refresh"></i>  Refresh LHP
+                </button>
             </div>
         </div>
     </div>
@@ -91,7 +94,10 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <h4 class="card-header-title">THP Entry</h4>
+                        <div class="col-6">
+                            <h4 class="card-header-title">THP Entry</h4>
+                        </div>
+                        <div class="col-6"><h4 class="card-header-title text-right">Date : <span id="thp-date">{{date('d/m/Y')}}</span></h4></div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -99,19 +105,20 @@
                         <div class="col">
                             <div class="">
                                 <div class="table-responsive">
-                                    <table id="thp-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer">
+                                    <table id="thp-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer;font-size:12px;">
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr>
-                                                <th>THP Number</th>
                                                 <th>Date</th>
                                                 {{-- <th>Date Order</th> --}}
                                                 <th>Customer</th>
                                                 <th>Production Code</th>
                                                 <th>Part Name</th>
-                                                <th>Part Type</th>
+                                                {{-- <th>Part Type</th> --}}
                                                 <th>Route</th>
                                                 <th>Process</th>
                                                 <th>THP Qty</th>
+                                                <th>LHP Qty</th>
+                                                <th>Apnormal.</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -130,6 +137,7 @@
 @include('tms.manufacturing.thp_entry._modal.create.createForm')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._productioncode')
 @include('tms.manufacturing.thp_entry._modal.detail.indexDetail')
+@include('tms.manufacturing.thp_entry._modal.detail.apnormal')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._viewlog')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThp')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal._printThpsummary')
@@ -159,19 +167,20 @@ $(document).ready(function(){
             data: {"date_thp":null}
         },
         columns: [
-            {data: 'id_thp', name: 'id_thp', searchable: false},
-            {data: 'thp_date', name: 'thp_date', className: "text-center"},
+            {data: 'thp_date', name: 'thp_date', className: "text-center", orderable: false},
             // {data: 'date_order', name: 'date_order', className: "text-center", visible: false}
-            {data: 'customer_code', name: 'customer_code'},
-            {data: 'production_code', name: 'production_code'},
-            {data: 'part_name', name: 'part_name'},
-            {data: 'part_type', name: 'part_type'},
-            {data: 'route', name: 'route'},
+            {data: 'customer_code', name: 'customer_code', orderable: false},
+            {data: 'production_code', name: 'production_code', orderable: false},
+            {data: 'part_name', name: 'part_name', orderable: false},
+            // {data: 'part_type', name: 'part_type', orderable: false},
+            {data: 'route', name: 'route', orderable: false},
             {data: 'process', name: 'process', orderable: false, searchable: false},
-            {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false},
+            {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false, className: "text-right"},
+            {data: 'lhp_qty', name: 'lhp_qty', orderable: false, searchable: false, className: "text-right"},
+            {data: 'apnormality', name: 'apnormality', orderable: false, className: "text-center"},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ],
-        "order": [[ 1, "desc" ]],
+        "order": [[ 2, "desc" ]],
     });
     $('#searchModal').on('click', function () {
         $('#thp-view-by-date-modal').modal('show');
@@ -182,6 +191,7 @@ $(document).ready(function(){
             $('#thp-view-by-date-modal').modal('hide');
             tbl_index.clear();
             dtbl_index(date);
+            $('#thp-date').text(date);
         });
     });
     function dtbl_index(date=null) {   
@@ -198,21 +208,63 @@ $(document).ready(function(){
                 data: {"date_thp":date}
             },
             columns: [
-                {data: 'id_thp', name: 'id_thp', searchable: false, className: "align-middle"},
-                {data: 'thp_date', name: 'thp_date', className: "text-center align-middle"},
-                // {data: 'date_order', name: 'date_order', className: "text-center", visible: false, className: "align-middle"},
-                {data: 'customer_code', name: 'customer_code', className: "align-middle"},
-                {data: 'production_code', name: 'production_code', className: "align-middle"},
-                {data: 'part_name', name: 'part_name', className: "align-middle"},
-                {data: 'part_type', name: 'part_type', className: "align-middle"},
-                {data: 'route', name: 'route', className: "align-middle"},
-                {data: 'process', name: 'process', orderable: false, searchable: false, className: "align-middle"},
-                {data: 'plan', name: 'plan', orderable: false, searchable: false, className: "align-middle"},
-                {data: 'action', name: 'action', orderable: false, searchable: false, className: "align-middle"},
+                {data: 'thp_date', name: 'thp_date', className: "text-center", orderable: false},
+                // {data: 'date_order', name: 'date_order', className: "text-center", visible: false}
+                {data: 'customer_code', name: 'customer_code', orderable: false},
+                {data: 'production_code', name: 'production_code', orderable: false},
+                {data: 'part_name', name: 'part_name', orderable: false},
+                // {data: 'part_type', name: 'part_type', orderable: false},
+                {data: 'route', name: 'route', orderable: false},
+                {data: 'process', name: 'process', orderable: false, searchable: false},
+                {data: 'thp_qty', name: 'thp_qty', orderable: false, searchable: false, className: "text-right"},
+                {data: 'lhp_qty', name: 'lhp_qty', orderable: false, searchable: false, className: "text-right"},
+                {data: 'apnormality', name: 'apnormality', orderable: false, className: "text-center"},
+                {data: 'action', name: 'action', orderable: false, searchable: false},
             ],
             "order": [[ 1, "desc" ]],
         });
     }
+    $('#refreshlhp').on('click', function () {
+        var date = $('#thp-date').text(),
+            thp_date = date.split('/').reverse().join('-')
+            route = "{{ route('tms.manufactuting.thp_entry.refresh', [':date']) }}";
+            route  = route.replace(':date', thp_date);
+        $('body').loading({
+            message: "wait for a moment...",
+            zIndex: 9999
+        });
+        ajaxCall({route: route, method: "GET"}).then(resolve => {
+            var status = resolve.status;
+            if (status == true) {
+                $('body').loading('stop');
+            }
+            tbl_index.clear();
+            dtbl_index(date);
+        });
+    });
+    $(document).on('click', '.thp-act-apnormal', function () {
+        var id = $(this).data('thp'),
+            route = "{{ route('tms.manufactuting.thp_entry.apnormal', [':number']) }}";
+            route  = route.replace(':number', id);
+        $('#thp-modal-apnormal').modal('show');
+        $('#thp-note-no').val(id);
+    });
+    $(document).on('submit', '#thp-form-apnormal', function () {
+        var route = "{{ route('tms.manufactuting.thp_entry.apnormal', [':number']) }}";
+            route  = route.replace(':number', $('#thp-note-no').val());
+        $('body').loading({
+            message: "wait for a moment...",
+            zIndex: 9999
+        });
+        ajaxCall({route: route, method: "PUT", data: {note: $('#thp-note-note').val(), apnormality: $('#thp-note-apnormality').val()}}).then(resolve => {
+            $('body').loading('stop');
+            $('#thp-modal-apnormal').modal('hide');
+            tbl_index.ajax.reload()
+        });
+    });
+    $('#thp-modal-apnormal').on('hidden.bs.modal', function () {
+        $('#thp-form-apnormal').trigger('reset');
+    });
     $(document).on('click', '.thp-act-view', function () {
         getThp($(this).data('thp'), function (response) {
             response = response.responseJSON;

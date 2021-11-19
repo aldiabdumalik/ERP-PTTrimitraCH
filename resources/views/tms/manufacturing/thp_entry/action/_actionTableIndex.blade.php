@@ -10,6 +10,7 @@
         @if ($data->closed == NULL)
         <a class="dropdown-item text-danger thp-act-close" href="javascript:void(0)" data-thp="{{ $data->id_thp }}" data-date="{{ $data->thp_date }}" data-prod="{{ $data->production_code }}"><i class="fa fa-times"></i> Close</a>
         @endif
+        <a class="dropdown-item text-danger thp-act-apnormal" href="javascript:void(0)" data-thp="{{ $data->id_thp }}" data-date="{{ $data->thp_date }}" data-prod="{{ $data->production_code }}"><i class="fa fa-pencil"></i> Apnormality</a>
         {{-- <a class="dropdown-item text-primary thp-act-print" href="javascript:void(0)" data-thp="{{ $data->id_thp }}"><i class="fa fa-print"></i> Print</a> --}}
         <a class="dropdown-item text-primary thp-act-log" href="javascript:void(0)" data-thp="{{ $data->id_thp }}" data-date="{{ $data->thp_date }}" data-prod="{{ $data->production_code }}"><i class="fa fa-share"></i> Log</a>
     </div>

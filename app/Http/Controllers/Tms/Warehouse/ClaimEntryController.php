@@ -83,7 +83,9 @@ class ClaimEntryController extends Controller
         $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
         $data = [];
         $items = $request->items;
+        $tot_qty = 0;
         if (!empty($request->items)) {
+            for ($i=0; $i < count($items); $i++) { $tot_qty += $items[$i][5]; }
             for ($i=0; $i < count($items); $i++) {
                 $tblItem =
                     DB::connection('db_tbs')
@@ -123,15 +125,21 @@ class ClaimEntryController extends Controller
                     'cost' => $tblItem->COST,
                     'tmp_qty' => 0,
                     'qty' => $items[$i][5],
+                    'tot_qty' => $tot_qty,
                     'qty_rg' => 0,
                     'notes' => $items[$i][7],
                     'creation_by' => $request->user,
                     'creation_date' => date('Y-m-d'),
                     'cl_date' => $date,
-                    'cl_time' => date('H:i:s'),
+                    'cl_time' => date('H:i:s')
                 ];
             }
         }
+        return response()->json([
+            'status' => true,
+            'content' => $data,
+            'message' => 'Claim berhasil di input!'
+        ], 201);
         $query = ClaimEntry::insert($data);
         $log = $this->createLOG($request->cl_no, 'ADD');
         if ($query) {
@@ -155,6 +163,7 @@ class ClaimEntryController extends Controller
         $date = $cd[2].'-'.$cd[1].'-'.$cd[0];
         $data = [];
         $items = $request->items;
+        $tot_qty = 0;
         if (!empty($request->items)) {
             $old = ClaimEntry::where('cl_no', $request->cl_no)->first();
             $creation_by = $old->operator;
@@ -162,6 +171,7 @@ class ClaimEntryController extends Controller
             $cl_date = $old->cl_date;
             $cl_time = $old->cl_time;
             $delete_first = ClaimEntry::where('cl_no', $request->cl_no)->delete();
+            for ($i=0; $i < count($items); $i++) { $tot_qty += $items[$i][5]; }
             for ($i=0; $i < count($items); $i++) {
                 $tblItem =
                     DB::connection('db_tbs')
@@ -201,6 +211,7 @@ class ClaimEntryController extends Controller
                     'cost' => $tblItem->COST,
                     'tmp_qty' => 0,
                     'qty' => $items[$i][5],
+                    'tot_qty' => $tot_qty,
                     'qty_rg' => 0,
                     'notes' => $items[$i][7],
                     'cl_date' => $cl_date,

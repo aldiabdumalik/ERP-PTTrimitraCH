@@ -63,3 +63,11 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@update', 
         'as' => 'tms.manufacturing.thp_entry.update'
     ]);
+    Route::get('/manufacturing/thp_entry/refresh/{date}', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@refresh_lhp', 
+        'as' => 'tms.manufactuting.thp_entry.refresh'
+    ]);
+    Route::put('/manufacturing/thp_entry/thp/apnormal/{number}', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@note_apnormal', 
+        'as' => 'tms.manufactuting.thp_entry.apnormal'
+    ]);

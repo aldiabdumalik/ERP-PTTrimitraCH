@@ -1218,6 +1218,7 @@ $(document).ready(function(){
         $('#claim-btn-create-submit').text('Simpan');
         $('#claim-btn-edit-item').prop('disabled', true);
         $('#claim-btn-delete-item').prop('disabled', true);
+        $('#claim-btn-create-submit').prop('disabled', false);
     });
     $(document).on('shown.bs.modal', '#claim-modal-create', function () {
         tbl_create.columns.adjust().draw();

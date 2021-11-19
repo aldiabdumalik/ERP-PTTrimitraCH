@@ -26,6 +26,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
     public function collection(Collection $rows)
     {
         $productioncode = [];
+        $log = [];
         foreach ($rows as $row) {
             if ($row->filter()->isNotEmpty()) {
                 $productioncode = DB::connection('oee')
@@ -94,11 +95,25 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             'user' => Auth::user()->FullName,
                             'thp_written' => date('Y-m-d H:i:s')
                         ];
-                        ThpEntry::create($data_insert);
+                        $insert = ThpEntry::insertGetId($data_insert);
+                        $log[] = [
+                            'id_thp' => $insert,
+                            'production_code' => $productioncode->production_code,
+                            'item_code' => ($productioncode->item_code !== null) ? $productioncode->item_code : $row[3],
+                            'remark' => $remark,
+                            'thp_date' => $this->date,
+                            'date_written' => date('Y-m-d'),
+                            'time_written' => date('H:i:s'),
+                            'status_change' => 'ADD',
+                            'user' => Auth::user()->FullName,
+                            'note' => null
+                        ];
                     }
                 }
             }
         }
+        $log = DB::table('oee.entry_thp_tbl_log')
+            ->insert($log);
     }
 
     public function startRow(): int
