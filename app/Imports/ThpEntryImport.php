@@ -46,8 +46,11 @@ class ThpEntryImport implements ToCollection, WithStartRow
 
                         $remark = $shift . "_" . $machine;
 
-                        $thp = ThpEntry::where('production_code', $productioncode->production_code)
-                                ->where('closed', NULL)
+                        $thp = ThpEntry::where('production_code', $row[2])
+                                ->whereNull('closed')
+                                ->where(function ($where){
+                                    $where->where('lhp_qty', '>', 0);
+                                })
                                 ->orderBy('thp_date', 'desc')
                                 ->first();
                         if (isset($thp)) {
