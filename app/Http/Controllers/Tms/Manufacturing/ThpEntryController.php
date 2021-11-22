@@ -118,6 +118,7 @@ class ThpEntryController extends Controller
                     ->table('entry_lhp_tbl')
                     ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
                     ->where($lhp_where)
+                    ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($val->thp_remark, 0, 1))
                     ->first();
                 $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
                 if (isset($lhp)) {
@@ -126,8 +127,8 @@ class ThpEntryController extends Controller
                             'lhp_qty' => $lhp_qty
                         ]);
                 }
-                
             }
+            return _Success('Ada');
         }
         return _Success(null);
     }
@@ -339,6 +340,7 @@ class ThpEntryController extends Controller
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
             ->where($lhp_where)
+            ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($query->thp_remark, 0, 1))
             ->first();
         $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
         if (isset($lhp)) {
@@ -384,6 +386,7 @@ class ThpEntryController extends Controller
             ->table('entry_lhp_tbl')
             ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
             ->where($lhp_where)
+            ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($data->thp_remark, 0, 1))
             ->first();
         if (isset($lhp)) {
             $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
@@ -866,6 +869,7 @@ class ThpEntryController extends Controller
                 $lhp = DB::table('oee.entry_lhp_tbl')
                     ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
                     ->where($lhp_where)
+                    ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($v->thp_remark, 0, 1))
                     ->first();
                 $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
                 $outstanding_qty =  $lhp_qty - $v->thp_qty;
@@ -973,6 +977,7 @@ class ThpEntryController extends Controller
                     ->table('entry_lhp_tbl')
                     ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
                     ->where($lhp_where)
+                    ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($v->thp_remark, 0, 1))
                     ->first();
                 $lhp_qty = ($lhp->lhp_qty != null) ? $lhp->lhp_qty : 0;
                 $outstanding_qty =  $lhp_qty - $v->thp_qty;

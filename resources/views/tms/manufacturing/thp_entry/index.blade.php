@@ -234,6 +234,7 @@ $(document).ready(function(){
             zIndex: 9999
         });
         ajaxCall({route: route, method: "GET"}).then(resolve => {
+            // console.log(resolve);
             var status = resolve.status;
             if (status == true) {
                 $('body').loading('stop');
@@ -445,7 +446,13 @@ $(document).ready(function(){
         var route = "{{ route('tms.manufacturing.thp_entry.check', [':prodcode', ':date']) }}";
         route  = route.replace(':prodcode', $('#thp-create-prodcode').val());
         route  = route.replace(':date', $('#thp-create-date').val().split("/").reverse().join("-"));
+        var date = $('#thp-create-date').val(),
+            thp_date = date.split('/').reverse().join('-');
         ajaxCall({route: route, method: "GET"}).then(resolve => {
+            $('body').loading({
+                message: "wait for a moment...",
+                zIndex: 9999
+            });
             var msg = resolve.message;
             if (msg === 'isnt_exist') {
                 ajaxCall({route: "{{ route('tms.manufacturing.thp_entry.save') }}", method: "POST", data: data}).then(resolve => { 
@@ -454,13 +461,27 @@ $(document).ready(function(){
                         text: resolve.message,
                         icon: 'success'
                     }).then(function(){
-                        window.location.reload();
+                        $('body').loading('stop');
+                        $('#thp-modal-index').modal('hide');
+                        tbl_index.clear();
+                        dtbl_index(date);
                     });
                 });
             }else{
                 var update = "{{ route('tms.manufacturing.thp_entry.update', [':prodcode']) }}";
                 update  = update.replace(':prodcode', $('#thp-create-prodcode').val());
-                ajaxCall({route: update, method: "PUT", data: data}).then(resolve => { console.log(resolve); });
+                ajaxCall({route: update, method: "PUT", data: data}).then(resolve => { 
+                    Swal.fire({
+                        title: 'Success!',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(function(){
+                        $('body').loading('stop');
+                        $('#thp-modal-index').modal('hide');
+                        tbl_index.clear();
+                        dtbl_index(date);
+                    });
+                });
             }
         });
     });
