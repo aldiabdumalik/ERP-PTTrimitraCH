@@ -86,6 +86,9 @@
                 <button type="button"  class="btn btn-success btn-flat btn-sm" id="refreshlhp">
                     <i class="fa fa-refresh"></i>  Refresh LHP
                 </button>
+                <button type="button" class="btn btn-warning btn-flat btn-sm" id="thpnotif">
+                    Notifications <span class="badge badge-pill badge-light thpnotif-num">{{$notif==0?'':$notif}}</span>
+                </button>
             </div>
         </div>
     </div>
@@ -144,6 +147,7 @@
 @include('tms.manufacturing.thp_entry._modal.import.importThp')
 @include('tms.manufacturing.thp_entry._modal.close_thp_modal._closethp')
 @include('tms.manufacturing.thp_entry._modal.setting.setPersentase')
+@include('tms.manufacturing.thp_entry._modal.setting.notif')
 @include('tms.manufacturing.thp_entry._modal.view_thp_modal.shortThpByDate')
 @include('tms.manufacturing.thp_entry._modal.form.index')
 
@@ -384,6 +388,39 @@ $(document).ready(function(){
         $('#thp-form-index').trigger('reset');
         $('input').not('.readonly-first').prop('readonly', false);
     });
+    $('#thpnotif').on('click', function () {
+        $('body').loading({
+            message: "wait for a moment...",
+            zIndex: 9999
+        });
+        $('#thp-notif-list').empty();
+        ajaxCall({route: "{{route('tms.manufactuting.thp_entry.get_notif')}}", method: "GET"}).then(resolve => {
+            $('body').loading('stop');
+            if (resolve.message != 'not_exist') {
+                $.each(resolve.content, function (i, data) {
+                    $('#thp-notif-list').append(`
+                        <div class="alert alert-warning alert-dismissible fade show alert-thp" role="alert" data-id="${data.id}">
+                            ${data.notif_note}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `);
+                });
+            }
+            $('#thp-modal-notif').modal('show');
+        });
+        // $('#thp-modal-notif').modal('show');
+    });
+    $(document).on('close.bs.alert', '.alert-thp',function () {
+        var id = $(this).data('id');
+        ajaxCall({route: "{{route('tms.manufactuting.thp_entry.delete_notif')}}", method: "POST", data: {id:id}}).then(resolve => {
+            var count = $('.thpnotif-num').text();
+            var jml = parseInt(count) - 1;
+            $('.thpnotif-num').html(jml);
+            $('.thpnotif-num2').html(jml);
+        });
+    })
     $(document).on('keypress', '#thp-create-prodcode', function(e){
         e.preventDefault();
         if(e.which == 13) {
@@ -606,7 +643,14 @@ $(document).ready(function(){
                         text: response.message,
                         icon: 'success'
                     }).then(function(){
-                        window.location.reload();
+                        // window.location.reload();
+                        $('.thp-import-btn').prop('disabled', false);
+                        $('.thp-import-btn').text('Import');
+                        $('#thp_import_file').css('display', 'block');
+                        $('.progress-import').css('display', 'none');
+                        $('#thp-import-modal').modal('hide');
+                        $('#thp_import_file').val('');
+                        tbl_index.ajax.reload();
                     });
                 }
             },

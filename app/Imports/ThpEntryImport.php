@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Oee\ThpEntry;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
@@ -27,6 +28,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
     {
         $productioncode = [];
         $log = [];
+        $notif = [];
         foreach ($rows as $row) {
             if ($row->filter()->isNotEmpty()) {
                 $productioncode = DB::connection('oee')
@@ -48,26 +50,48 @@ class ThpEntryImport implements ToCollection, WithStartRow
 
                         $thp = ThpEntry::where('production_code', $row[2])
                                 ->whereNull('closed')
-                                ->where(function ($where){
-                                    $where->where('lhp_qty', '>', 0);
-                                })
                                 ->orderBy('thp_date', 'desc')
                                 ->first();
+                        $thp_oldid = NULL;
                         if (isset($thp)) {
-                            $persentase = round(($thp->lhp_qty / $thp->plan)*100);
-                            $min_persen = $this->min_persen;
-                            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
-                            if ($persentase <= $min_persen) {
-                                $thp_qty = (int) $row[7] + abs($outstanding_qty);
+                            $thp_oldid = $thp->id_thp;
+                            if ($thp->lhp_qty > 0) {
+                                $persentase = round(($thp->lhp_qty / $thp->plan)*100);
+                                $min_persen = $this->min_persen;
+                                $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
+                                if ($persentase <= $min_persen) {
+                                    $thp_qty = (int) $row[7] + abs($outstanding_qty);
+                                    $notif = [
+                                        'id_thp_old' => $thp->id_thp,
+                                        'notif_outstanding' => $outstanding_qty,
+                                        'notif_date' => Carbon::now(),
+                                        'notif_note' => "THP dengan PROD. CODE $row[2] masih ada pendingan sebesar $outstanding_qty, dan akan langsung otomatis ditambahkan"
+                                    ];
+                                    $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insert($notif);
+                                }else{
+                                    $thp_qty = (int) $row[7];
+                                }
+                                $update = ThpEntry::where('production_code', $thp->production_code)
+                                    ->where('thp_date', $thp->thp_date)
+                                    ->update([
+                                        'closed' => date('Y-m-d'),
+                                        'status' => 'CLOSED'
+                                    ]);
                             }else{
                                 $thp_qty = (int) $row[7];
+                                $notif = [
+                                    'id_thp_old' => $thp->id_thp,
+                                    'notif_date' => Carbon::now(),
+                                    'notif_note' => "THP dengan PROD. CODE $row[2] pada tanggal $thp->thp_date masih tersedia dengan LHP Qty 0, akan otomatis di close."
+                                ];
+                                $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insert($notif);
+                                $update = ThpEntry::where('production_code', $thp->production_code)
+                                    ->where('thp_date', $thp->thp_date)
+                                    ->update([
+                                        'closed' => date('Y-m-d'),
+                                        'status' => 'CLOSED'
+                                    ]);
                             }
-                            $update = ThpEntry::where('production_code', $thp->production_code)
-                                ->where('thp_date', $thp->thp_date)
-                                ->update([
-                                    'closed' => date('Y-m-d'),
-                                    'status' => 'CLOSED'
-                                ]);
                         }else{
                             $thp_qty = (int) $row[7];
                         }
@@ -99,6 +123,9 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             'thp_written' => date('Y-m-d H:i:s')
                         ];
                         $insert = ThpEntry::insertGetId($data_insert);
+                        if (!is_null($thp_oldid)) {
+                           $update_notif = DB::table('oee.entry_thp_tbl_notif')->where('id_thp_old', $thp_oldid)->update(['id_thp' => $insert]);
+                        }
                         $log[] = [
                             'id_thp' => $insert,
                             'production_code' => $productioncode->production_code,

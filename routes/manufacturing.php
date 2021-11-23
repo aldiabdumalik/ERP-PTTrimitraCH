@@ -71,3 +71,11 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@note_apnormal', 
         'as' => 'tms.manufactuting.thp_entry.apnormal'
     ]);
+    Route::get('/manufacturing/thp_entry/get_notif', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@getNotification', 
+        'as' => 'tms.manufactuting.thp_entry.get_notif'
+    ]);
+    Route::post('/manufacturing/thp_entry/delete_notif', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@deleteNotification', 
+        'as' => 'tms.manufactuting.thp_entry.delete_notif'
+    ]);

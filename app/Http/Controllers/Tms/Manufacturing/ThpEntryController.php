@@ -29,7 +29,8 @@ class ThpEntryController extends Controller
         $customer = Customer::orderBy('customer_id', 'asc')->get();
         $getDate = Carbon::now()->format('d/m/Y');
         $getDate1 =  Carbon::now()->format('Y/m');
-        return view('tms.manufacturing.thp_entry.index', compact('getDate','getDate1','customer'));
+        $notif = DB::table('oee.entry_thp_tbl_notif')->count();
+        return view('tms.manufacturing.thp_entry.index', compact('getDate','getDate1','customer', 'notif'));
     }
 
     public function getThpTable(Request $request)
@@ -571,6 +572,22 @@ class ThpEntryController extends Controller
             'status' => true,
             'data' => $query
         ], 200);
+    }
+
+    public function getNotification()
+    {
+        $req = DB::table('oee.entry_thp_tbl_notif')->get();
+        if ($req->isNotEmpty()) {
+            return _Success(null, 200, $req);
+        }else{
+            return _Success('not_exist');
+        }
+    }
+
+    public function deleteNotification(Request $request)
+    {
+        $req = DB::table('oee.entry_thp_tbl_notif')->where('id', $request->id)->delete();
+        return _Success(null);
     }
 
     private function _createTHP(Request $request)
