@@ -216,11 +216,12 @@ class ThpEntryController extends Controller
                     $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
                     if ($persentase <= $min_persen) {
                         $thp_qty = $request->thp_qty + abs($outstanding_qty);
+                        $out_pls = abs($outstanding_qty);
                         $notif = [
                             'id_thp_old' => $thp->id_thp,
-                            'notif_outstanding' => $outstanding_qty,
+                            'notif_outstanding' => $out_pls,
                             'notif_date' => Carbon::now(),
-                            'notif_note' => "THP dengan PROD. CODE $request->production_code masih ada pendingan sebesar $outstanding_qty, dan akan langsung otomatis ditambahkan"
+                            'notif_note' => "THP dengan PROD. CODE $request->production_code masih ada pendingan sebesar $out_pls, dan akan langsung otomatis ditambahkan"
                         ];
                         $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
                     }else{

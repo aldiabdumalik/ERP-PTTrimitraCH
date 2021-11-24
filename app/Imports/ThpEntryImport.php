@@ -62,11 +62,12 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                 $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
                                 if ($persentase <= $min_persen) {
                                     $thp_qty = (int) $row[7] + abs($outstanding_qty);
+                                    $out_pls = abs($outstanding_qty);
                                     $notif = [
                                         'id_thp_old' => $thp->id_thp,
-                                        'notif_outstanding' => $outstanding_qty,
+                                        'notif_outstanding' => $out_pls,
                                         'notif_date' => Carbon::now(),
-                                        'notif_note' => "THP dengan PROD. CODE $row[2] masih ada pendingan sebesar $outstanding_qty, dan akan langsung otomatis ditambahkan"
+                                        'notif_note' => "THP dengan PROD. CODE $row[2] masih ada pendingan sebesar $out_pls, dan akan langsung otomatis ditambahkan"
                                     ];
                                     $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
                                 }else{
