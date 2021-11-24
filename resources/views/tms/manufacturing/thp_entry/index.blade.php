@@ -87,7 +87,7 @@
                     <i class="fa fa-refresh"></i>  Refresh LHP
                 </button>
                 <button type="button" class="btn btn-warning btn-flat btn-sm" id="thpnotif">
-                    Notifications <span class="badge badge-pill badge-light thpnotif-num">{{$notif==0?'':$notif}}</span>
+                    <i class="fa fa-bell-o"></i> Notifications <span class="badge badge-pill badge-light thpnotif-num">{{$notif==0?'':$notif}}</span>
                 </button>
             </div>
         </div>
@@ -198,6 +198,7 @@ $(document).ready(function(){
             tbl_index.clear();
             dtbl_index(date);
             $('#thp-date').text(date);
+            get_num_notif();
         });
     });
     function dtbl_index(date=null) {   
@@ -248,6 +249,7 @@ $(document).ready(function(){
             }
             tbl_index.clear();
             dtbl_index(date);
+            get_num_notif();
         });
     });
     $(document).on('click', '.thp-act-apnormal', function () {
@@ -267,7 +269,8 @@ $(document).ready(function(){
         ajaxCall({route: route, method: "PUT", data: {note: $('#thp-note-note').val(), apnormality: $('#thp-note-apnormality').val()}}).then(resolve => {
             $('body').loading('stop');
             $('#thp-modal-apnormal').modal('hide');
-            tbl_index.ajax.reload()
+            tbl_index.ajax.reload();
+            get_num_notif();
         });
     });
     $('#thp-modal-apnormal').on('hidden.bs.modal', function () {
@@ -506,6 +509,7 @@ $(document).ready(function(){
                         tbl_index.clear();
                         dtbl_index(date);
                         $('#thp-date').text(date);
+                        get_num_notif();
                     });
                 });
             }else{
@@ -522,6 +526,7 @@ $(document).ready(function(){
                         tbl_index.clear();
                         dtbl_index(date);
                         $('#thp-date').text(date);
+                        get_num_notif();
                     });
                 });
             }
@@ -656,6 +661,7 @@ $(document).ready(function(){
                         $('#thp-import-modal').modal('hide');
                         $('#thp_import_file').val('');
                         tbl_index.ajax.reload();
+                        get_num_notif();
                     });
                 }
             },
@@ -892,6 +898,19 @@ $(document).ready(function(){
             });
         });
     });
+    function get_num_notif() {
+        $.ajax({
+            url: "{{ route('tms.manufactuting.thp_entry.count_notif') }}",
+            method: "GET",
+            success: function (response) {
+                var num = response.content;
+                if (num != 0) {
+                    $('.thpnotif-num').html(num);
+                    $('.thpnotif-num2').html(num);
+                }
+            }
+        });
+    }
     function getShiftGrupMachine(type="", process=null, callback) {
         var query1 = {
             "type": type

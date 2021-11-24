@@ -75,6 +75,10 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@getNotification', 
         'as' => 'tms.manufactuting.thp_entry.get_notif'
     ]);
+    Route::get('/manufacturing/thp_entry/count_notif', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@count_notif', 
+        'as' => 'tms.manufactuting.thp_entry.count_notif'
+    ]);
     Route::post('/manufacturing/thp_entry/delete_notif', [
         'uses' => 'TMS\Manufacturing\ThpEntryController@deleteNotification', 
         'as' => 'tms.manufactuting.thp_entry.delete_notif'

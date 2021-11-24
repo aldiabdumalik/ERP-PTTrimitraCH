@@ -78,6 +78,16 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                         'closed' => date('Y-m-d'),
                                         'status' => 'CLOSED'
                                     ]);
+                                $log = DB::table('oee.entry_thp_tbl_log')
+                                    ->insert([
+                                        'id_thp' => $thp->id_thp,
+                                        'thp_date' => $thp->thp_date,
+                                        'date_written' => date('Y-m-d'),
+                                        'time_written' => date('H:i:s'),
+                                        'status_change' => 'CLOSED',
+                                        'user' => Auth::user()->FullName,
+                                        'note' => 'CLOSED BY SYSTEM, BECAUSE LHP QTY HAS BEEN ADDED TO NEXT THP'
+                                    ]);
                             }else{
                                 $thp_qty = (int) $row[7];
                                 $notif = [
@@ -91,6 +101,16 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                     ->update([
                                         'closed' => date('Y-m-d'),
                                         'status' => 'CLOSED'
+                                    ]);
+                                $log = DB::table('oee.entry_thp_tbl_log')
+                                    ->insert([
+                                        'id_thp' => $thp->id_thp,
+                                        'thp_date' => $thp->thp_date,
+                                        'date_written' => date('Y-m-d'),
+                                        'time_written' => date('H:i:s'),
+                                        'status_change' => 'CLOSED',
+                                        'user' => Auth::user()->FullName,
+                                        'note' => 'CLOSED BY SYSTEM, BECAUSE LHP QTY NOT FOUND'
                                     ]);
                             }
                         }else{

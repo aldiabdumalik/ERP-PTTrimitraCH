@@ -26,11 +26,11 @@ class ThpEntryController extends Controller
 
     public function index()
     {
-        $customer = Customer::orderBy('customer_id', 'asc')->get();
-        $getDate = Carbon::now()->format('d/m/Y');
-        $getDate1 =  Carbon::now()->format('Y/m');
+        // $customer = Customer::orderBy('customer_id', 'asc')->get();
+        // $getDate = Carbon::now()->format('d/m/Y');
+        // $getDate1 =  Carbon::now()->format('Y/m');
         $notif = DB::table('oee.entry_thp_tbl_notif')->count();
-        return view('tms.manufacturing.thp_entry.index', compact('getDate','getDate1','customer', 'notif'));
+        return view('tms.manufacturing.thp_entry.index', compact('notif'));
     }
 
     public function getThpTable(Request $request)
@@ -232,6 +232,16 @@ class ThpEntryController extends Controller
                             'closed' => date('Y-m-d'),
                             'status' => 'CLOSED'
                         ]);
+                    $log = DB::table('oee.entry_thp_tbl_log')
+                        ->insert([
+                            'id_thp' => $thp->id_thp,
+                            'thp_date' => $thp->thp_date,
+                            'date_written' => date('Y-m-d'),
+                            'time_written' => date('H:i:s'),
+                            'status_change' => 'CLOSED',
+                            'user' => Auth::user()->FullName,
+                            'note' => 'CLOSED BY SYSTEM, BECAUSE LHP QTY HAS BEEN ADDED TO NEXT THP'
+                        ]);
                 }else{
                     $notif = [
                         'id_thp_old' => $thp->id_thp,
@@ -246,6 +256,16 @@ class ThpEntryController extends Controller
                             'status' => 'CLOSED'
                         ]);
                     $thp_qty = $request->thp_qty;
+                    $log = DB::table('oee.entry_thp_tbl_log')
+                        ->insert([
+                            'id_thp' => $thp->id_thp,
+                            'thp_date' => $thp->thp_date,
+                            'date_written' => date('Y-m-d'),
+                            'time_written' => date('H:i:s'),
+                            'status_change' => 'CLOSED',
+                            'user' => Auth::user()->FullName,
+                            'note' => 'CLOSED BY SYSTEM, BECAUSE LHP QTY NOT FOUND'
+                        ]);
                 }
             }else{
                 $thp_qty = $request->thp_qty;
@@ -643,6 +663,12 @@ class ThpEntryController extends Controller
     {
         $req = DB::table('oee.entry_thp_tbl_notif')->where('id', $request->id)->delete();
         return _Success(null);
+    }
+
+    public function count_notif()
+    {
+        $notif = DB::table('oee.entry_thp_tbl_notif')->count();
+        return _Success(null, 200, $notif);
     }
 
     private function _createTHP(Request $request)
