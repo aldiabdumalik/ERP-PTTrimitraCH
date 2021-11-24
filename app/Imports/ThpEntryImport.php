@@ -53,6 +53,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                 ->orderBy('thp_date', 'desc')
                                 ->first();
                         $thp_oldid = NULL;
+                        $insert_notif = 0;
                         if (isset($thp)) {
                             $thp_oldid = $thp->id_thp;
                             if ($thp->lhp_qty > 0) {
@@ -67,7 +68,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                         'notif_date' => Carbon::now(),
                                         'notif_note' => "THP dengan PROD. CODE $row[2] masih ada pendingan sebesar $outstanding_qty, dan akan langsung otomatis ditambahkan"
                                     ];
-                                    $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insert($notif);
+                                    $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
                                 }else{
                                     $thp_qty = (int) $row[7];
                                 }
@@ -84,7 +85,7 @@ class ThpEntryImport implements ToCollection, WithStartRow
                                     'notif_date' => Carbon::now(),
                                     'notif_note' => "THP dengan PROD. CODE $row[2] pada tanggal $thp->thp_date masih tersedia dengan LHP Qty 0, akan otomatis di close."
                                 ];
-                                $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insert($notif);
+                                $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
                                 $update = ThpEntry::where('production_code', $thp->production_code)
                                     ->where('thp_date', $thp->thp_date)
                                     ->update([
@@ -123,8 +124,8 @@ class ThpEntryImport implements ToCollection, WithStartRow
                             'thp_written' => date('Y-m-d H:i:s')
                         ];
                         $insert = ThpEntry::insertGetId($data_insert);
-                        if (!is_null($thp_oldid)) {
-                           $update_notif = DB::table('oee.entry_thp_tbl_notif')->where('id_thp_old', $thp_oldid)->update(['id_thp' => $insert]);
+                        if ($insert_notif != 0) {
+                           $update_notif = DB::table('oee.entry_thp_tbl_notif')->where('id', $insert_notif)->update(['id_thp' => $insert]);
                         }
                         $log[] = [
                             'id_thp' => $insert,

@@ -198,6 +198,58 @@ class ThpEntryController extends Controller
             $prod = DB::table('oee.db_productioncode_tbl')
                 ->where(['code_status' => 1, 'production_code' => $request->production_code])
                 ->first();
+            $getsetting = DB::connection('oee')
+                ->table('entry_thp_tbl_setting')
+                ->select('value_setting')
+                ->where('id', 1)
+                ->first();
+            $thp = ThpEntry::where('production_code', $request->production_code)
+                ->whereNull('closed')
+                ->orderBy('thp_date', 'desc')
+                ->first();
+            $insert_notif = 0;
+            if (isset($thp)) {
+                $thp_oldid = $thp->id_thp;
+                if ($thp->lhp_qty > 0) {
+                    $persentase = round(($thp->lhp_qty / $thp->plan)*100);
+                    $min_persen = $getsetting->value_setting;
+                    $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
+                    if ($persentase <= $min_persen) {
+                        $thp_qty = $request->thp_qty + abs($outstanding_qty);
+                        $notif = [
+                            'id_thp_old' => $thp->id_thp,
+                            'notif_outstanding' => $outstanding_qty,
+                            'notif_date' => Carbon::now(),
+                            'notif_note' => "THP dengan PROD. CODE $request->production_code masih ada pendingan sebesar $outstanding_qty, dan akan langsung otomatis ditambahkan"
+                        ];
+                        $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
+                    }else{
+                        $thp_qty = $request->thp_qty;
+                    }
+                    $update = ThpEntry::where('production_code', $thp->production_code)
+                        ->where('thp_date', $thp->thp_date)
+                        ->update([
+                            'closed' => date('Y-m-d'),
+                            'status' => 'CLOSED'
+                        ]);
+                }else{
+                    $notif = [
+                        'id_thp_old' => $thp->id_thp,
+                        'notif_date' => Carbon::now(),
+                        'notif_note' => "THP dengan PROD. CODE $request->production_code pada tanggal $thp->thp_date masih tersedia dengan LHP Qty 0, akan otomatis di close."
+                    ];
+                    $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
+                    $update = ThpEntry::where('production_code', $thp->production_code)
+                        ->where('thp_date', $thp->thp_date)
+                        ->update([
+                            'closed' => date('Y-m-d'),
+                            'status' => 'CLOSED'
+                        ]);
+                    $thp_qty = $request->thp_qty;
+                }
+            }else{
+                $thp_qty = $request->thp_qty;
+            }
             $query = DB::connection('oee')
                 ->table('entry_thp_tbl')
                 ->insertGetId([
@@ -215,7 +267,7 @@ class ThpEntryController extends Controller
                     'ton' => $request->ton,
                     'time' => $request->time,
                     'plan_hour' => $request->plan_hour,
-                    'thp_qty' => $request->thp_qty,
+                    'thp_qty' => $thp_qty,
                     'plan' => $request->thp_qty,
                     'thp_remark' => $request->shift.'_'.$request->ton,
                     'note' => $request->note,
@@ -225,6 +277,9 @@ class ThpEntryController extends Controller
                     'user' => Auth::user()->FullName,
                     'thp_written' => date('Y-m-d H:i:s')
                 ]);
+            if ($insert_notif != 0) {
+                $update_notif = DB::table('oee.entry_thp_tbl_notif')->where('id', $insert_notif)->update(['id_thp' => $query]);
+            }
             $query2 = DB::table('oee.entry_thp_tbl_log')
                 ->insert([
                     'id_thp' => $query,
@@ -293,7 +348,7 @@ class ThpEntryController extends Controller
                 $query = $this->_createTHP($request);
                 $message = 'ditambahkan';
             }else{
-                $check = ThpEntry::where('closed', '!=', NULL)->where('id_thp', $request->id_thp)->first();
+                $check = ThpEntry::whereNotNull('closed')->where('id_thp', $request->id_thp)->first();
                 if (isset($check)) {
                     return response()->json([
                         'status' => false,
@@ -604,30 +659,55 @@ class ThpEntryController extends Controller
             return false;
         }
 
+        $getsetting = DB::connection('oee')
+            ->table('entry_thp_tbl_setting')
+            ->select('value_setting')
+            ->where('id', 1)
+            ->first();
         $thp = ThpEntry::where('production_code', $request->production_code)
             ->whereNull('closed')
             ->orderBy('thp_date', 'desc')
             ->first();
+        $insert_notif = 0;
         if (isset($thp)) {
-            $persentase = round(($thp->lhp_qty / $thp->plan)*100);
-            $getsetting = DB::connection('oee')
-                ->table('entry_thp_tbl_setting')
-                ->select('value_setting')
-                ->where('id', 1)
-                ->first();
-            $min_persen = $getsetting->value_setting;
-            $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
-            if ($persentase <= $min_persen) {
-                $thp_qty = $request->thp_qty + abs($outstanding_qty);
+            $thp_oldid = $thp->id_thp;
+            if ($thp->lhp_qty > 0) {
+                $persentase = round(($thp->lhp_qty / $thp->plan)*100);
+                $min_persen = $getsetting->value_setting;
+                $outstanding_qty = ($thp->outstanding_qty != null) ? $thp->outstanding_qty : ($thp->lhp_qty - $thp->plan);
+                if ($persentase <= $min_persen) {
+                    $thp_qty = $request->thp_qty + abs($outstanding_qty);
+                    $notif = [
+                        'id_thp_old' => $thp->id_thp,
+                        'notif_outstanding' => $outstanding_qty,
+                        'notif_date' => Carbon::now(),
+                        'notif_note' => "THP dengan PROD. CODE $request->production_code masih ada pendingan sebesar $outstanding_qty, dan akan langsung otomatis ditambahkan"
+                    ];
+                    $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
+                }else{
+                    $thp_qty = $request->thp_qty;
+                }
+                $update = ThpEntry::where('production_code', $thp->production_code)
+                    ->where('thp_date', $thp->thp_date)
+                    ->update([
+                        'closed' => date('Y-m-d'),
+                        'status' => 'CLOSED'
+                    ]);
             }else{
+                $notif = [
+                    'id_thp_old' => $thp->id_thp,
+                    'notif_date' => Carbon::now(),
+                    'notif_note' => "THP dengan PROD. CODE $request->production_code pada tanggal $thp->thp_date masih tersedia dengan LHP Qty 0, akan otomatis di close."
+                ];
+                $insert_notif = DB::table('oee.entry_thp_tbl_notif')->insertGetId($notif);
+                $update = ThpEntry::where('production_code', $thp->production_code)
+                    ->where('thp_date', $thp->thp_date)
+                    ->update([
+                        'closed' => date('Y-m-d'),
+                        'status' => 'CLOSED'
+                    ]);
                 $thp_qty = $request->thp_qty;
             }
-            $update = ThpEntry::where('production_code', $thp->production_code)
-                ->where('thp_date', $thp->thp_date)
-                ->update([
-                    'closed' => date('Y-m-d'),
-                    'status' => 'CLOSED'
-                ]);
         }else{
             $thp_qty = $request->thp_qty;
         }
@@ -660,6 +740,9 @@ class ThpEntryController extends Controller
                 'user' => Auth::user()->FullName,
                 'thp_written' => date('Y-m-d H:i:s')
             ]);
+        if ($insert_notif != 0) {
+            $update_notif = DB::table('oee.entry_thp_tbl_notif')->where('id', $insert_notif)->update(['id_thp' => $query]);
+         }
         $query2 = DB::connection('oee')
             ->table('entry_thp_tbl_log')
             ->insert([

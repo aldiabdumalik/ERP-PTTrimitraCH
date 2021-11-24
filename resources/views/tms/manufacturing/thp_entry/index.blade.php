@@ -111,6 +111,7 @@
                                     <table id="thp-datatables" class="table table-bordered table-hover" style="width:100%;cursor:pointer;font-size:12px;">
                                         <thead class="text-center" style="font-size: 15px;">
                                             <tr>
+                                                <th>THP No.</th>
                                                 <th>Date</th>
                                                 {{-- <th>Date Order</th> --}}
                                                 <th>Customer</th>
@@ -171,6 +172,7 @@ $(document).ready(function(){
             data: {"date_thp":null}
         },
         columns: [
+            {data: 'id_thp', name: 'id_thp', className: "text-center", orderable: false},
             {data: 'thp_date', name: 'thp_date', className: "text-center", orderable: false},
             // {data: 'date_order', name: 'date_order', className: "text-center", visible: false}
             {data: 'customer_code', name: 'customer_code', orderable: false},
@@ -212,6 +214,7 @@ $(document).ready(function(){
                 data: {"date_thp":date}
             },
             columns: [
+                {data: 'id_thp', name: 'id_thp', className: "text-center", orderable: false},
                 {data: 'thp_date', name: 'thp_date', className: "text-center", orderable: false},
                 // {data: 'date_order', name: 'date_order', className: "text-center", visible: false}
                 {data: 'customer_code', name: 'customer_code', orderable: false},
@@ -502,6 +505,7 @@ $(document).ready(function(){
                         $('#thp-modal-index').modal('hide');
                         tbl_index.clear();
                         dtbl_index(date);
+                        $('#thp-date').text(date);
                     });
                 });
             }else{
@@ -517,6 +521,7 @@ $(document).ready(function(){
                         $('#thp-modal-index').modal('hide');
                         tbl_index.clear();
                         dtbl_index(date);
+                        $('#thp-date').text(date);
                     });
                 });
             }
