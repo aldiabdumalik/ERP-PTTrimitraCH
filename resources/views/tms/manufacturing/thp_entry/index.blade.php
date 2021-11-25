@@ -305,7 +305,7 @@ $(document).ready(function(){
                 lhp_qty = (lhp.lhp_qty != null ? lhp.lhp_qty : 0)
                 $('#lhp-detail-qty').val(lhp_qty);
 
-                $('#thp-detail-itemcode').val(data.item_code);
+                $('#thp-detail-item-code').val(data.item_code);
                 $('#thp-detail-production-process').val(data.production_process);
                 $('#thp-detail-operator').val(data.user);
 
@@ -334,6 +334,7 @@ $(document).ready(function(){
                 date = data.thp_date.split("-").reverse().join("/");
                 $('#thp-create-date').val(date);
                 $('#thp-create-prodcode').val(data.production_code);
+                $('#thp-create-itemcode').val(data.item_code);
                 $('#thp-create-partno').val(data.part_number);
                 $('#thp-create-partname').val(data.part_name);
                 $('#thp-create-type').val(data.part_type);
@@ -755,6 +756,7 @@ $(document).ready(function(){
             $('#thp-create-partname').val(data.part_name);
             $('#thp-create-type').val(data.part_type);
             $('#thp-create-prodcode').val(data.production_code);
+            $('#thp-create-itemcode').val(data.item_code);
             $('#thp-create-cust').val(data.customer_id);
             $('#thp-create-route').val(data.process_detailname);
             $('#thp-create-subprocess1').val(processs[0]);

@@ -14,6 +14,14 @@
         <input type="text" name="thp-create-prodcode" id="thp-create-prodcode" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
+<div class="form-row align-items-center">
+    <div class="col-2">
+        <label class="auto-middle" for="thp-create-itemcode">Itemcode</label>
+    </div>
+    <div class="col-10">
+        <input type="text" name="thp-create-itemcode" id="thp-create-itemcode" class="form-control form-control-sm readonly-first" autocomplete="off" readonly>
+    </div>
+</div>
 <div class="form-row align-items-center mb-1">
     <div class="col-6">
         <div class="form-row align-items-center">

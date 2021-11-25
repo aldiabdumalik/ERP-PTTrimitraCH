@@ -6,6 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Print THP Entry</title>
 	<style>
+		* {
+			font-size: 12px;
+		}
 		html {
 			padding: 0;
 			margin: 0;
@@ -48,6 +51,8 @@
 					<tr>
 						<th rowspan="2">DATE</th>
 						<th rowspan="2">CUST</th>
+						<th rowspan="2">PART NO</th>
+						<th rowspan="2">ITEMCODE</th>
 						<th rowspan="2">NAME PART</th>
 						<th rowspan="2">TYPE</th>
 						<th rowspan="2">C/T</th>
@@ -84,6 +89,8 @@
 					<tr>
 						<td>{{date('d/m/Y', strtotime($v->thp_date))}}</td>
 						<td>{{$v->customer_code}}</td>
+						<td>{{$v->part_number}}</td>
+						<td>{{$v->item_code}}</td>
 						<td>{{$v->part_name}}</td>
 						<td>{{$v->part_type}}</td>
 						<td>{{$v->ct}}</td>
@@ -101,7 +108,7 @@
 					</tr>
 					@endforeach
 					<tr>
-						<th colspan="9">TOTAL</th>
+						<th colspan="11">TOTAL</th>
 						<td>{{$sum->total_plan_hour}}</td>
 						<td>{{$sum_thp}}</td>
 						<td>{{$sum_lhp_1}}</td>

@@ -15,7 +15,7 @@
         <label class="auto-middle" for="thp-create-machine">Machine (TON)</label>
     </div>
     <div class="col-10">
-        <input type="text" name="thp-create-machine" id="thp-create-machine" class="form-control form-control-sm" autocomplete="off" required>
+        <input type="text" name="thp-create-machine" id="thp-create-machine" class="form-control form-control-sm" autocomplete="off">
     </div>
 </div>
 <div class="form-row align-items-center">

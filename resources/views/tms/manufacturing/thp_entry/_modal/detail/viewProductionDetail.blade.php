@@ -23,6 +23,18 @@
     </div> 
 </div>
 <div class="row">
+    <div class="col-2">
+        <div class="">
+            <label style="font-size:12px;" for="thp-detail-item-code" class="col-form-label text-bold">Itemcode</label>
+        </div>
+    </div>
+    <div class="col-10">
+        <div class="">
+            <input type="text" name="thp-detail-item-code" id="thp-detail-item-code" class="form-control" autocomplete="off" required onkeydown="return false">
+        </div>
+    </div> 
+</div>
+<div class="row">
     <div class="col-6">
         <div class="row">
             <div class="col-4">

@@ -6,6 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>Print THP Entry</title>
 	<style>
+		* {
+			font-size: 12px;
+		}
 		html {
 			padding: 0;
 			margin: 0;
@@ -60,7 +63,9 @@
 				<table border="1" cellspacing="0" cellpadding="10" style="width:100%">
 					<tr>
 						<th rowspan="2">CUST</th>
-						<th rowspan="2">NAME PART</th>
+						<th rowspan="2">PART NO</th>
+						<th rowspan="2">ITEMCODE</th>
+						<th rowspan="2">PART NAME</th>
 						<th rowspan="2">TYPE</th>
 						<th rowspan="2">C/T</th>
 						<th rowspan="2">ROUTE</th>
@@ -98,6 +103,8 @@
 						@endphp
 					<tr>
 						<td>{{$v->customer_code}}</td>
+						<td>{{$v->part_number}}</td>
+						<td>{{$v->item_code}}</td>
 						<td>{{$v->part_name}}</td>
 						<td>{{$v->part_type}}</td>
 						<td>{{$v->ct}}</td>
@@ -118,7 +125,7 @@
 					</tr>
 					@endforeach
 					<tr>
-						<th colspan="8">TOTAL</th>
+						<th colspan="10">TOTAL</th>
 						<td>{{$sum->total_plan_hour}}</td>
 						<td>{{$sum_thp}}</td>
 						<td>{{$sum_lhp_1}}</td>

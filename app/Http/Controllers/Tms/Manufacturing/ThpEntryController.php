@@ -117,7 +117,7 @@ class ThpEntryController extends Controller
                 }
                 $lhp = DB::connection('oee')
                     ->table('entry_lhp_tbl')
-                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+                    ->select([DB::raw('SUM(lhp_qty) as lhp_qty'), DB::raw("SUBSTRING_INDEX(remark, '_', -1) as machine")])
                     ->where($lhp_where)
                     ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($val->thp_remark, 0, 1))
                     ->first();
@@ -125,7 +125,8 @@ class ThpEntryController extends Controller
                 if (isset($lhp)) {
                     $update = ThpEntry::where('id_thp', $val->id_thp)
                         ->update([
-                            'lhp_qty' => $lhp_qty
+                            'lhp_qty' => $lhp_qty,
+                            'ton' => $lhp->machine
                         ]);
                 }
             }
@@ -415,7 +416,7 @@ class ThpEntryController extends Controller
         }
         $lhp = DB::connection('oee')
             ->table('entry_lhp_tbl')
-            ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+            ->select([DB::raw('SUM(lhp_qty) as lhp_qty'), DB::raw("SUBSTRING_INDEX(remark, '_', -1) as machine")])
             ->where($lhp_where)
             ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($query->thp_remark, 0, 1))
             ->first();
@@ -425,6 +426,7 @@ class ThpEntryController extends Controller
             $update = ThpEntry::where('id_thp', $query->id_thp)
                 ->update([
                     'lhp_qty' => $lhp_qty,
+                    'ton' => $lhp->machine,
                     'outstanding_qty' => $outstanding_qty
                 ]);
         }
@@ -461,7 +463,7 @@ class ThpEntryController extends Controller
         }
         $lhp = DB::connection('oee')
             ->table('entry_lhp_tbl')
-            ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+            ->select([DB::raw('SUM(lhp_qty) as lhp_qty'), DB::raw("SUBSTRING_INDEX(remark, '_', -1) as machine")])
             ->where($lhp_where)
             ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($data->thp_remark, 0, 1))
             ->first();
@@ -473,6 +475,7 @@ class ThpEntryController extends Controller
                 ->where('id_thp', $data->id_thp)
                 ->update([
                     'lhp_qty' => $lhp_qty,
+                    'ton' => $lhp->machine,
                     'outstanding_qty' => $outstanding_qty
                 ]);
         }
@@ -994,7 +997,7 @@ class ThpEntryController extends Controller
                     ];
                 }
                 $lhp = DB::table('oee.entry_lhp_tbl')
-                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+                    ->select([DB::raw('SUM(lhp_qty) as lhp_qty'), DB::raw("SUBSTRING_INDEX(remark, '_', -1) as machine")])
                     ->where($lhp_where)
                     ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($v->thp_remark, 0, 1))
                     ->first();
@@ -1005,6 +1008,7 @@ class ThpEntryController extends Controller
                     ->where('id_thp', $v->id_thp)
                     ->update([
                         'lhp_qty' => $lhp_qty,
+                        'ton' => $lhp->machine,
                         'outstanding_qty' => $outstanding_qty
                     ]);
             }
@@ -1102,7 +1106,7 @@ class ThpEntryController extends Controller
                 }
                 $lhp = DB::connection('oee')
                     ->table('entry_lhp_tbl')
-                    ->select(DB::raw('SUM(lhp_qty) as lhp_qty'))
+                    ->select([DB::raw('SUM(lhp_qty) as lhp_qty'), DB::raw("SUBSTRING_INDEX(remark, '_', -1) as machine")])
                     ->where($lhp_where)
                     ->where(DB::raw('SUBSTR(remark, 1, 1)'), substr($v->thp_remark, 0, 1))
                     ->first();
@@ -1113,6 +1117,7 @@ class ThpEntryController extends Controller
                     ->where('id_thp', $v->id_thp)
                     ->update([
                         'lhp_qty' => $lhp_qty,
+                        'ton' => $lhp->machine,
                         'outstanding_qty' => $outstanding_qty
                     ]);
             }
