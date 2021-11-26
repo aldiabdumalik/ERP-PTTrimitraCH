@@ -17,7 +17,7 @@
     <tr>
         <td></td>
         <td>HARI/TANGGAL</td>
-        <td>: {{date('D, d M Y', strtotime($date1))}}</td>
+        <td>: {{date('D, d M Y', strtotime($date1))}} sd {{date('D, d M Y', strtotime($date2))}}</td>
     </tr>
     <tr>
         <td></td>
