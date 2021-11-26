@@ -24,6 +24,8 @@ class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadi
         $first = 8;
         $total = 1;
         $this->row = $first + $total + $row_count;
+        $this->bottom = $this->row + 2;
+        $this->bottom2 = $this->bottom + 3;
     }
     
     public function view(): View
@@ -66,7 +68,10 @@ class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadi
                 $event->sheet->getColumnDimension("U")->setAutoSize(true);
                 $cellRange = 'B7:U8';
                 $event->sheet->getDelegate()->getStyle($cellRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal('center');
-            
+                
+
+                $event->sheet->getDelegate()->getStyle('B'.$this->bottom.':B'.$this->bottom2)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal('center');
+
             },
         ];
     }

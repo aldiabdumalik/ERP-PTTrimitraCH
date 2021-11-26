@@ -119,7 +119,7 @@
     <tr>
         <td></td>
         <td>EFF</td>
-        <td>{{$eff * 100}} %</td>
+        <td align="right">{{$eff * 100}} %</td>
         <td></td>
         <td>TOTAL MP</td>
         <td>{{$total_mp}} ORANG</td>
@@ -139,5 +139,10 @@
         <td></td>
         <td></td>
         <td></td>
+    </tr>
+</table>
+<table align="right">
+    <tr>
+        <td>Test</td>
     </tr>
 </table>
