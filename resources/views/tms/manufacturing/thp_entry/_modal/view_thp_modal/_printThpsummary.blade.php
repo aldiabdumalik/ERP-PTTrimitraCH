@@ -45,6 +45,20 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="col-2">
+                            <div class="">
+                                <label style="font-size:12px;" for="thp_print_type_summary" class="col-form-label text-bold">Type.</label>
+                            </div>
+                        </div>
+                        <div class="col-10" style="margin-left:-25px;">
+                            <div class="">
+                                <select name="thp_print_type_summary" id="thp_print_type_summary" class="form-control" required>
+                                    <option value="PDF">PDF</option>
+                                    <option value="EXCEL" selected>EXCEL</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

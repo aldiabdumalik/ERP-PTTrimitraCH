@@ -38,6 +38,10 @@
         'uses' => 'TMS\Manufacturing\ThpEntryController@printThpEntry', 
         'as' => 'tms.manufacturing.thp_entry.printThpEntry'
     ]);
+    Route::get('/manufacturing/thp_entry/thpentryprintxls', [
+        'uses' => 'TMS\Manufacturing\ThpEntryController@dailyExcel', 
+        'as' => 'tms.manufacturing.thp_entry.daily_xls'
+    ]);
     Route::post('/manufacturing/thp_entry/get/shiftgroupmachine', [
         'uses' => 'TMS\Manufacturing\ThpEntryController@getShiftGroupMachine', 
         'as' => 'tms.manufacturing.thp_entry.getShiftGroupMachine'

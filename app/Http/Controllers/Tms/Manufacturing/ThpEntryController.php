@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tms\Manufacturing;
 
 use App\Exports\ThpEntryExport;
+use App\Exports\ThpEntryExportSummary;
 use App\Http\Controllers\Controller;
 use App\Imports\ThpEntryImport;
 use App\Models\Oee\Customer;
@@ -539,6 +540,11 @@ class ThpEntryController extends Controller
                 $request->session()->flash('msg', 'Data tidak ditemukan!');
                 return Redirect::back();
             }
+            if ($request->what == 'EXCEL') {
+                $row_count = count($params['data']);
+                $name = 'DAILY REPORT THP TGL'. $params['date1'] .'.xlsx';
+                return Excel::download(new ThpEntryExport($params, $row_count), $name);
+            }
             $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpall', $params)->setPaper('a3', 'landscape');
             return $pdf->stream();
         }else{
@@ -546,6 +552,11 @@ class ThpEntryController extends Controller
             if (count($params['data']) <= 0) {
                 $request->session()->flash('msg', 'Data tidak ditemukan!');
                 return Redirect::back();
+            }
+            if ($request->what == 'EXCEL') {
+                $row_count = count($params['data']);
+                $name = 'SUMMARY REPORT THP TGL'. $params['date1'] .' sd TGL '.$params['date2'].'.xlsx';
+                return Excel::download(new ThpEntryExportSummary($params, $row_count), $name);
             }
             $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpsummary', $params)->setPaper('a3', 'landscape');
             return $pdf->stream();
@@ -1158,6 +1169,7 @@ class ThpEntryController extends Controller
             'data' => $query,
             'sum' => $sum,
             'date1' => $fixDate_1,
+            'date2' => $fixDate_2,
             'dept' => $production_process
         ];
         return $params;
@@ -1179,6 +1191,14 @@ class ThpEntryController extends Controller
             ->where($data->where)
             ->update($data->data);
         return $query;
+    }
+
+    public function dailyExcel(Request $request)
+    {
+        $data = $this->_reportByDate($request);
+        $row_count = count($data['data']);
+        $name = 'THP vs LHP Tgl ';
+        return Excel::download(new ThpEntryExport($data, $row_count), 'invoices.xlsx');
     }
 
     private function _QueryRawReport()

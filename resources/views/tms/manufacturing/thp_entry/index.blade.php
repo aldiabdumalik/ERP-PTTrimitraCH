@@ -71,7 +71,7 @@
                         <i class="fa fa-download"></i> Report
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a id="printModal" class="dropdown-item" href="javascript:void(0)">Report Harian</a>
+                        <a id="printModal" class="dropdown-item" href="javascript:void(0)">Daily Report</a>
                         <a id="printModalSummary" class="dropdown-item" href="javascript:void(0)">Summary Report</a>
                     </div>
                 </div>
@@ -853,7 +853,7 @@ $(document).ready(function(){
         var process = $('#thp_print_process').val();
         var type = 'reportDate';
         var encrypt = btoa(`${dari}&${process}&${type}`);
-        var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
+        var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt + '&what='+$('#thp_print_type').val();
         window.open(url, '_blank');
     });
     $(document).on('submit', '#thp-form-print-summary', function () {
@@ -862,7 +862,7 @@ $(document).ready(function(){
         var process = $('#thp_print_process_summary').val();
         var type = 'reportSummary';
         var encrypt = btoa(`${dari}&${sampai}&${process}&${type}`);
-        var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt;
+        var url = '{{route('tms.manufacturing.thp_entry.printThpEntry')}}?print=' + encrypt + '&what='+$('#thp_print_type_summary').val();
         window.open(url, '_blank');
     });
     $('#settingPersentaseModal').on('click', function () {

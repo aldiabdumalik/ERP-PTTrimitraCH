@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadings
+class ThpEntryExportSummary implements FromView,  WithEvents, ShouldAutoSize, WithHeadings
 {
     use Exportable;
     protected $result;
@@ -28,13 +28,13 @@ class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadi
     
     public function view(): View
     {
-        return view('tms.manufacturing.thp_entry._report.excelDaily', $this->result);
+        return view('tms.manufacturing.thp_entry._report.excelSummary', $this->result);
     }
     public function registerEvents(): array
     {
         return [
             AfterSheet::class  => function(AfterSheet $event) {
-                $event->sheet->getStyle('B7:U'.$this->row)->applyFromArray([
+                $event->sheet->getStyle('B7:S'.$this->row)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -64,7 +64,7 @@ class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadi
                 $event->sheet->getColumnDimension("S")->setAutoSize(true);
                 $event->sheet->getColumnDimension("T")->setAutoSize(true);
                 $event->sheet->getColumnDimension("U")->setAutoSize(true);
-                $cellRange = 'B7:U8';
+                $cellRange = 'B7:S8';
                 $event->sheet->getDelegate()->getStyle($cellRange)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal('center');
             
             },
@@ -73,6 +73,7 @@ class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadi
     public function headings(): array
     {
         return [
+            'DATE',
             'CUST',
             'PART NO',
             'ITEMCODE',
@@ -86,10 +87,7 @@ class ThpEntryExport implements FromView,  WithEvents, ShouldAutoSize, WithHeadi
             'PLAN THP',
             'ACTUAL LHP',
             'ACT HOUR',
-            'OUTSTANDING',
-            'NOTE',
-            'APNORMALITY',
-            'ACTION PLAN'
+            'OUTSTANDING'
         ];
     }
 }
