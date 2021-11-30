@@ -47,9 +47,9 @@
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="do-btn-modal-print">
                     <i class="fa fa-print"></i>  Print
                 </button>
-                <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="do-btn-modal-table-setting">
+                {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="do-btn-modal-table-setting">
                     <i class="fa fa-cogs"></i>
-                </button>
+                </button> --}}
             </div>
         </div>
     </div>

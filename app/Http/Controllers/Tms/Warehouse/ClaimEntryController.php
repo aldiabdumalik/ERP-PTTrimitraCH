@@ -84,6 +84,7 @@ class ClaimEntryController extends Controller
         $data = [];
         $items = $request->items;
         $tot_qty = 0;
+        $num = 0;
         if (!empty($request->items)) {
             for ($i=0; $i < count($items); $i++) { $tot_qty += $items[$i][5]; }
             for ($i=0; $i < count($items); $i++) {
@@ -93,9 +94,11 @@ class ClaimEntryController extends Controller
                         ->selectRaw('ITEMCODE, PART_NO, DESCRIPT, UNIT, PRICE, COST, FAC_UNIT, FACTOR, WAREHOUSE, GROUPS, TYPES')
                         ->where('ITEMCODE', $items[$i][1])
                         ->first();
+                $num++;
 
                 $data[] = [
                     'cl_no' => $request->cl_no,
+                    'num' => addZeroFirst($num),
                     'ref_no' => $request->refno,
                     'po_no' => $request->pono,
                     'rr_no' => $request->rrno,
@@ -164,6 +167,7 @@ class ClaimEntryController extends Controller
         $data = [];
         $items = $request->items;
         $tot_qty = 0;
+        $num = 0;
         if (!empty($request->items)) {
             $old = ClaimEntry::where('cl_no', $request->cl_no)->first();
             $creation_by = $old->operator;
@@ -179,9 +183,11 @@ class ClaimEntryController extends Controller
                         ->selectRaw('ITEMCODE, PART_NO, DESCRIPT, UNIT, PRICE, COST, FAC_UNIT, FACTOR, WAREHOUSE, GROUPS, TYPES')
                         ->where('ITEMCODE', $items[$i][1])
                         ->first();
+                $num++;
 
                 $data[] = [
                     'cl_no' => $request->cl_no,
+                    'num' => addZeroFirst($num),
                     'ref_no' => $request->refno,
                     'po_no' => $request->pono,
                     'rr_no' => $request->rrno,

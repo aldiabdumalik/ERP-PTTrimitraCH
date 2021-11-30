@@ -523,7 +523,8 @@ class DoEntryController extends Controller
     {
         switch ($request->type) {
             case "DONo":
-                return $this->headerToolsDoEntryNo($request);
+                // return $this->headerToolsDoEntryNo($request);
+                return $this->headerToolsDoEntryNoTbs();
                 break;
             case "branch":
                 return DataTables::of($this->headerToolsBranch($request))->make(true);

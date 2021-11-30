@@ -12,6 +12,8 @@ class DoEntry extends Model
 
     protected $connection = 'db_tbs';
     protected $table = 'entry_do_tbl';
+    // protected $primaryKey = 'do_no';
+    // public $incrementing = false;
     protected $fillable = [
         'id_do',
         'do_no',

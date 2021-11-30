@@ -409,6 +409,29 @@ trait DoEntryTrait {
         return $log;
     }
 
+    protected function headerToolsDoEntryNoTbs()
+    {
+        $tbsDoNo = DB::table('tch_tbs.numbers')->where('label','DO NUMBER')
+            ->select('contents')
+            ->first();
+        $checkDoNo = $tbsDoNo->contents + 1;
+        $cekDoTbl = DoEntry::where('do_no', $checkDoNo)
+            ->select(['do_no'])
+            ->get();
+        if ($cekDoTbl->isEmpty()) {
+            $do_no = $checkDoNo;
+        }else{
+            do {
+                $checkDoNo++;
+                $cekDoTbl = DoEntry::where('do_no', $checkDoNo)
+                    ->select(['do_no'])
+                    ->get();
+            } while (!$cekDoTbl->isEmpty());
+        }
+        $do_no = $checkDoNo;
+        return $do_no;
+    }
+
     protected function headerToolsDoEntryNo(Request $request)
     {
         $reference = 

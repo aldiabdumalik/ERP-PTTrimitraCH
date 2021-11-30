@@ -16,6 +16,7 @@ class ClaimEntry extends Model
     protected $fillable = [
         'id',
         'cl_no',
+        'num',
         'ref_no',
         'po_no',
         'rr_no',

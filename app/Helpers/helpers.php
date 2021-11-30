@@ -57,6 +57,20 @@ function addZero($num)
 	return $num;
 }
 
+function addZeroFirst($num)
+{
+	$jml = strlen($num);
+	$hasil = null;
+	if ($jml == 1) {
+		$hasil = "00$num";
+	}elseif ($jml == 2) {
+		$hasil = "0$num";
+	}else{
+		$hasil = "$num";
+	}
+	return $hasil;
+}
+
 function bulan($tanggal)
 {
 	$bulan = array (
