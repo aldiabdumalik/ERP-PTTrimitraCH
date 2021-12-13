@@ -23,15 +23,25 @@ class CustPriceController extends Controller
 
     public function custPriceTable(Request $request)
     {
-        $query = CustPrice::select([
-                'entry_custprice_tbl.*', 
-                'ekanban_customermaster.CustomerCode_eKanban', 
-                'ekanban_customermaster.CustomerName'
-            ])
-            ->join('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
-            ->groupBy(['cust_id', 'active_date'])
-            ->orderBy('created_date', 'DESC')
-            ->get();
+        $query = null;
+        if (!isset($request->customer)) {
+            $query = CustPrice::select([
+                    'entry_custprice_tbl.*', 
+                    'ekanban_customermaster.CustomerCode_eKanban as custcode', 
+                    'ekanban_customermaster.CustomerName as cust_name',
+                    'item.PART_NO as part_no',
+                    'item.DESCRIPT as desc',
+                    'item.DESCRIPT1 as model'
+                ])
+                ->join('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+                ->join('db_tbs.item', function ($join){
+                    $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
+                    $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
+                })
+                // ->groupBy(['cust_id', 'active_date'])
+                ->orderBy('created_date', 'DESC')
+                ->get();
+        }
             
         return DataTables::of($query)
             ->editColumn('created_date', function($query) {
@@ -50,6 +60,17 @@ class CustPriceController extends Controller
                     return ($query->voided_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->voided_date));
                 }
             )
+            ->editColumn('price_new', function ($query){
+                return rupiah(addZero($query->price_new));
+            })
+            ->editColumn('price_old', function ($query){
+                return rupiah(addZero($query->price_old));
+            })
+            ->addColumn('group', function($query){
+                    return "$query->cust_id - ".date('d/m/Y', strtotime($query->active_date));
+                }
+            )
+            ->rawColumns(['action'])
             ->addColumn('action', function($query){
                     return view('tms.warehouse.cust-price.button.btnTableIndex', ['data' => $query]);
                 }

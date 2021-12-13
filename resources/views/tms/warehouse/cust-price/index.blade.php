@@ -13,6 +13,7 @@
 </div>
 @include('tms.warehouse.cust-price.modal.create.index')
 @include('tms.warehouse.cust-price.modal.header.customer')
+@include('tms.warehouse.cust-price.modal.header.customer-search')
 @include('tms.warehouse.cust-price.modal.create.itemTableAdd')
 @include('tms.warehouse.cust-price.modal.create.itemFormAdd')
 @include('tms.warehouse.cust-price.modal.log.tableLog')
@@ -44,6 +45,7 @@
         };
 
         const index_data = new Promise(function(resolve, reject) {
+            var groupColumn = 0;
             let tbl_index = $('#custprice-datatables').DataTable({
                 processing: true,
                 serverSide: true,
@@ -54,18 +56,130 @@
                     headers: token_header
                 },
                 columns: [
-                    {data:'cust_id', name: 'cust_id', className: "text-center align-middle"},
-                    {data:'CustomerName', name: 'CustomerName', className: "text-left align-middle"},
-                    {data:'created_date', name: 'created_date', className: "text-center align-middle"},
-                    {data:'active_date', name: 'active_date', className: "text-center align-middle"},
-                    {data:'posted_date', name: 'posted_date', className: "text-center align-middle"},
-                    {data:'voided_date', name: 'voided_date', className: "text-center align-middle"},
-                    {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center align-middle"},
+                    {data:'group', name: 'group', className: "align-middle"},
+                    {data:'part_no', name: 'part_no', className: "align-middle"},
+                    {data:'item_code', name: 'item_code', className: "align-middle"},
+                    {data:'desc', name: 'desc', className: "align-middle"},
+                    {data:'price_new', name: 'price_new', className: "align-middle"},
+                    {data:'price_old', name: 'price_old', className: "align-middle"},
+                    // {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center align-middle"},
                 ],
                 ordering: false,
+                columnDefs: [
+                    { "visible": false, "targets": groupColumn },
+                    {
+                        targets: [4, 5],
+                        createdCell:  function (td, cellData, rowData, row, col) {
+                            $(td).addClass('text-right');
+                        }
+                    }
+                ],
+                displayLength: 50,
+                drawCallback: function ( settings ) {
+                    var api = this.api();
+                    var rows = api.rows( {page:'current'} ).nodes();
+                    var last=null;
+                    var x = 1;
+
+                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                        var cellNode = api.cell(i, 1).node();
+                        if (last !== group) {
+                            x = 1;
+                        }
+                        if ( last !== group ) {
+                            $(rows).eq( i ).before(`
+                                <tr class="group bg-y" data-id="${group}">
+                                    <td colspan="6" class="text-bold">${group}</td>
+                                </tr>
+                            `);
+
+                            last = group;
+                        }
+                        // $(cellNode).html(`${x++} ${$(cellNode).text()}`);
+                    });
+                }
             });
             resolve(tbl_index);
         });
+
+        $('#custprice-datatables tbody').on( 'dblclick', 'tr.group', function () {
+            var group = $(this).data('id');
+                group = group.split(' ');
+            var cust = group[0];
+            var date = group[2].split('/').reverse().join('-');
+            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            route  = route.replace(':cust', cust);
+            route  = route.replace(':date', date);
+            modalAction('#custprice-modal-index').then(resolve => {
+                $(tbl_item.table().header())
+                    .removeClass('btn-info')
+                    .addClass('bg-abu');
+                isHidden('#custprice-btn-table-item', true);
+                isHidden('#custprice-btn-index-submit', true);
+                $('input').prop('readonly', true);
+
+                ajaxCall({route: route, method: "GET"}).then(resolve => {
+                    if (resolve.status == true) {
+                        var no = 1;
+                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
+                        $.each(resolve.content, function (i, data) {
+                            tbl_item.row.add([
+                                no,
+                                data.item_code,
+                                data.PART_NO,
+                                data.DESCRIPT,
+                                (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
+                                currency(addZeroes(String(data.price_old))),
+                            ]);
+                            no++;
+                            cust_id = data.cust_id;
+                            cust_name = data.CustomerName;
+                            valas = data.currency;
+                            active_date = data.active_date;
+                            created = data.created_date;
+                            user = data.created_by;
+                            posted = data.posted_date;
+                            voided = data.voided_date;
+                            printed = data.printed_date;
+                        });
+                        tbl_item.draw();
+                        $('#custprice-create-customercode').val(cust_id);
+                        $('#custprice-create-customername').val(cust_name);
+                        $('#custprice-create-posted').val(date_convert(posted));
+                        $('#custprice-create-voided').val(date_convert(voided));
+                        $('#custprice-create-printed').val(date_convert(printed));
+                        $('#custprice-create-user').val(user);
+                        $('#custprice-create-valas').val(valas);
+                        $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+                        $('#custprice-create-activedate').val(date_convert(active_date));
+                        $('#custprice-create-entrydate').val(date_convert(created));
+                    }
+                });
+            });
+        });
+
+        var tbl_customer_s = $('#custprice-datatables-customer-search').DataTable({
+            destroy: true,
+            lengthChange: false,
+            ordering: false,
+            fixedHeader: true,
+        });
+        $('#custprice-btn-modal-search').on('click', function () {
+            modalAction('#custprice-modal-customer-search').then(resolve => {
+                ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
+                    let customer = resolve.content;
+                    $.each(customer, function (i, cust) {
+                        tbl_customer_s.row.add([
+                            cust.code,
+                            cust.name
+                        ]);
+                    });
+                    tbl_customer_s.draw();
+                    $('#custprice-datatables-customer-item').DataTable().destroy();
+                    item_select = [];
+                });
+            });
+        })
 
         $('#custprice-btn-modal-create').on('click', function () {
             modalAction('#custprice-modal-index').then(() => {

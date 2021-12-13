@@ -1,15 +1,15 @@
 <div class="row">
     <div class="col-12 mt-5">
         <div class="#">
+            <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="custprice-btn-modal-search">
+                <i class="fa fa-search"></i> Order By
+            </button>
             <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-create">
                 <i class="ti-plus"></i>  Add New Data
             </button>
-            {{-- <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-print">
+            <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-print">
                 <i class="fa fa-print"></i>  Print
-            </button> --}}
-            {{-- <button type="button"  class="btn btn-outline-primary btn-flat btn-sm" id="custprice-btn-modal-table-setting">
-                <i class="fa fa-cogs"></i>
-            </button> --}}
+            </button>
         </div>
     </div>
 </div>
@@ -26,16 +26,16 @@
                     <div class="col">
                         <div class="">
                             <div class="table-responsive">
-                                <table id="custprice-datatables" class="table table-bordered table-striped table-hover" style="width:100%;cursor:pointer">
+                                <table id="custprice-datatables" class="table table-hover" style="width:100%;cursor:pointer">
                                     <thead>
                                         <tr>
-                                            <th class="align-middle">Cust ID</th>
-                                            <th class="align-middle">Customer Name</th>
-                                            <th class="align-middle">Written</th>
-                                            <th class="align-middle">Active Date</th>
-                                            <th class="align-middle">Posted</th>
-                                            <th class="align-middle">Voided</th>
-                                            <th class="align-middle">Action</th>
+                                            <th class="align-middle">Group</th>
+                                            <th class="align-middle">Part No</th>
+                                            <th class="align-middle">Itemcode</th>
+                                            <th class="align-middle">Descript.</th>
+                                            <th class="align-middle text-right">New Price</th>
+                                            <th class="align-middle text-right">Old Price</th>
+                                            {{-- <th class="align-middle">Action</th> --}}
                                         </tr>
                                     </thead>
                                 </table>

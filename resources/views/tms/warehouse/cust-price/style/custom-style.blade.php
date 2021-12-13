@@ -35,4 +35,7 @@
     .bg-abu {
         background-color: #d3d3d3;
     }
+    .bg-y {
+        background-color: #FFEF78;
+    }
 </style>
