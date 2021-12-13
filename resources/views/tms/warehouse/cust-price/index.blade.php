@@ -69,16 +69,17 @@
 
         $('#custprice-btn-modal-create').on('click', function () {
             modalAction('#custprice-modal-index').then(() => {
-                ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
-                    var data = resolve.content;
-                    $.each(data, function (i, valas) {
-                        $('#custprice-create-valas').append($('<option>', { 
-                            value: valas.valas,
-                            text : valas.valas 
-                        }));
-                    });
-                    $('#custprice-create-valas').val('IDR');
-                });
+                // ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+                //     var data = resolve.content;
+                //     $('#custprice-create-valas').html('');
+                //     $.each(data, function (i, valas) {
+                //         $('#custprice-create-valas').append($('<option>', { 
+                //             value: valas.valas,
+                //             text : valas.valas 
+                //         }));
+                //     });
+                //     $('#custprice-create-valas').val('IDR');
+                // });
             });
         });
 
@@ -86,6 +87,17 @@
         
         $('#custprice-modal-index').on('shown.bs.modal', function () {
             adjustDraw(tbl_item);
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+                var data = resolve.content;
+                $('#custprice-create-valas').html('');
+                $.each(data, function (i, valas) {
+                    $('#custprice-create-valas').append($('<option>', { 
+                        value: valas.valas,
+                        text : valas.valas 
+                    }));
+                });
+                $('#custprice-create-valas').val('IDR');
+            });
         });
 
         $('#custprice-datatables-index tbody').off('click', 'tr').on('click', 'tr', function () {
@@ -347,7 +359,11 @@
                         $('#custprice-create-voided').val(date_convert(voided));
                         $('#custprice-create-printed').val(date_convert(printed));
                         $('#custprice-create-user').val(user);
-                        $('#custprice-create-valas').val(valas);
+                        // $('#custprice-create-valas').val(valas);
+                        $('#custprice-create-valas').html('');
+                        $('#custprice-create-valas').append(`
+                            <option val="${valas}">${valas}</option>
+                        `);
                         $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
                         $('#custprice-create-activedate').val(date_convert(active_date));
                         $('#custprice-create-entrydate').val(date_convert(created));
@@ -359,6 +375,18 @@
         $(document).on('click', '.custprice-act-edit', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
+            // ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+            //     var data = resolve.content;
+            //     $('#custprice-create-valas').html('');
+            //     $.each(data, function (i, valas) {
+            //         $('#custprice-create-valas').append($('<option>', { 
+            //             value: valas.valas,
+            //             text : valas.valas 
+            //         }));
+            //     });
+            //     $('#custprice-create-valas').val('IDR');
+            // });
+
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
@@ -368,6 +396,7 @@
                 if (status == true) {
                     modalAction('#custprice-modal-index').then(resolve => {
                         ajaxCall({route: route, method: "GET"}).then(resolve => {
+                            console.log(resolve.content);
                             if (resolve.status == true) {
                                 var no = 1;
                                 var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
@@ -400,6 +429,10 @@
                                 $('#custprice-create-voided').val(date_convert(voided));
                                 $('#custprice-create-printed').val(date_convert(printed));
                                 $('#custprice-create-user').val(user);
+                                // $('#custprice-create-valas').html('');
+                                // $('#custprice-create-valas').append(`
+                                //     <option val="${valas}">${valas}</option>
+                                // `);
                                 $('#custprice-create-valas').val(valas);
                                 $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
                                 $('#custprice-create-activedate').val(date_convert(active_date));
