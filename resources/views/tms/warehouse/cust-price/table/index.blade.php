@@ -26,7 +26,7 @@
                     <div class="col">
                         <div class="">
                             <div class="table-responsive">
-                                <table id="custprice-datatables" class="table table-hover" style="width:100%;cursor:pointer">
+                                <table id="custprice-datatables" class="display compact table table-hover" style="width:100%;cursor:pointer">
                                     <thead>
                                         <tr>
                                             <th class="align-middle">Group</th>

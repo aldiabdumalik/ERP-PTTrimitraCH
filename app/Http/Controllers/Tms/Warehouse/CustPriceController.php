@@ -40,6 +40,26 @@ class CustPriceController extends Controller
                 })
                 // ->groupBy(['cust_id', 'active_date'])
                 ->orderBy('created_date', 'DESC')
+                ->orderBy('item_code', 'ASC')
+                ->get();
+        }else{
+            $query = CustPrice::select([
+                    'entry_custprice_tbl.*', 
+                    'ekanban_customermaster.CustomerCode_eKanban as custcode', 
+                    'ekanban_customermaster.CustomerName as cust_name',
+                    'item.PART_NO as part_no',
+                    'item.DESCRIPT as desc',
+                    'item.DESCRIPT1 as model'
+                ])
+                ->join('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+                ->join('db_tbs.item', function ($join){
+                    $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
+                    $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
+                })
+                ->where('entry_custprice_tbl.cust_id', $request->customer)
+                // ->groupBy(['cust_id', 'active_date'])
+                ->orderBy('created_date', 'DESC')
+                ->orderBy('item_code', 'ASC')
                 ->get();
         }
             

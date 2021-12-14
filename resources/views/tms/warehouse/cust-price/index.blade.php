@@ -102,6 +102,66 @@
             resolve(tbl_index);
         });
 
+        function tbl_index_bycust(cust) {
+            var groupColumn = 0;
+            let tbl_index_cust = $('#custprice-datatables').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.warehouse.cust_price.index')}}",
+                    method: 'POST',
+                    data: {customer: cust},
+                    headers: token_header
+                },
+                columns: [
+                    {data:'group', name: 'group', className: "align-middle"},
+                    {data:'part_no', name: 'part_no', className: "align-middle"},
+                    {data:'item_code', name: 'item_code', className: "align-middle"},
+                    {data:'desc', name: 'desc', className: "align-middle"},
+                    {data:'price_new', name: 'price_new', className: "align-middle"},
+                    {data:'price_old', name: 'price_old', className: "align-middle"},
+                    // {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center align-middle"},
+                ],
+                ordering: false,
+                columnDefs: [
+                    { "visible": false, "targets": groupColumn },
+                    {
+                        targets: [4, 5],
+                        createdCell:  function (td, cellData, rowData, row, col) {
+                            $(td).addClass('text-right');
+                        }
+                    }
+                ],
+                displayLength: 50,
+                drawCallback: function ( settings ) {
+                    var api = this.api();
+                    var rows = api.rows( {page:'current'} ).nodes();
+                    var last=null;
+                    var x = 1;
+
+                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                        var cellNode = api.cell(i, 1).node();
+                        if (last !== group) {
+                            x = 1;
+                        }
+                        if ( last !== group ) {
+                            $(rows).eq( i ).before(`
+                                <tr class="group bg-y" data-id="${group}">
+                                    <td colspan="6" class="text-bold">${group}</td>
+                                </tr>
+                            `);
+
+                            last = group;
+                        }
+                        // $(cellNode).html(`${x++} ${$(cellNode).text()}`);
+                    });
+                }
+            });
+        }
+
+        
+
         $('#custprice-datatables tbody').on( 'dblclick', 'tr.group', function () {
             var group = $(this).data('id');
                 group = group.split(' ');
@@ -180,6 +240,18 @@
                 });
             });
         })
+
+        $('#custprice-datatables-customer-search').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+            var data = tbl_customer_s.row(this).data();
+            var cust_id = data[0];
+            modalAction('#custprice-modal-customer-search', 'hide').then(() => {
+                tbl_index_bycust(cust_id);
+            });
+        })
+
+        $('#custprice-modal-customer-search').on('hidden.bs.modal', function () {
+            tbl_customer_s.clear();
+        });
 
         $('#custprice-btn-modal-create').on('click', function () {
             modalAction('#custprice-modal-index').then(() => {
