@@ -22,6 +22,7 @@ class CustPrice extends Model
         'price',
         'price_new',
         'active_date',
+        'price_by',
     ];
     protected $hidden = [];
     public $timestamps = false;

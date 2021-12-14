@@ -40,9 +40,9 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-4">
-                <select name="custprice-create-priceby" id="custprice-create-priceby" class="form-control form-control-sm" data-val="SO" required style="pointer-events: none">
-                    <option value="DATE">DATE</option>
-                    <option value="SO" selected>SO</option>
+                <select name="custprice-create-priceby" id="custprice-create-priceby" class="form-control form-control-sm" data-val="DATE" required>
+                    <option value="DATE" selected>DATE</option>
+                    <option value="SO">SO</option>
                 </select>
             </div>
             <div class="col-8">

@@ -181,7 +181,7 @@
                 ajaxCall({route: route, method: "GET"}).then(resolve => {
                     if (resolve.status == true) {
                         var no = 1;
-                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
+                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                         $.each(resolve.content, function (i, data) {
                             tbl_item.row.add([
                                 no,
@@ -201,6 +201,7 @@
                             posted = data.posted_date;
                             voided = data.voided_date;
                             printed = data.printed_date;
+                            price_by = data.price_by;
                         });
                         tbl_item.draw();
                         $('#custprice-create-customercode').val(cust_id);
@@ -210,7 +211,7 @@
                         $('#custprice-create-printed').val(date_convert(printed));
                         $('#custprice-create-user').val(user);
                         $('#custprice-create-valas').val(valas);
-                        $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+                        $('#custprice-create-priceby').val(price_by);
                         $('#custprice-create-activedate').val(date_convert(active_date));
                         $('#custprice-create-entrydate').val(date_convert(created));
                     }
@@ -285,6 +286,26 @@
                 $('#custprice-create-valas').val('IDR');
             });
         });
+
+        // $('#custprice-create-priceby').on('change', function () {
+        //     console.log($(this).val());
+        //     $('#custprice-create-activedate').datepicker('remove');
+        //     $('#custprice-create-activedate').val(null);
+        //     if ($(this).val() === 'SO') {
+        //         $('#custprice-create-activedate').datepicker({
+        //             format: "mm/yyyy",
+        //             viewMode: "months", 
+        //             minViewMode: "months",
+        //             autoclose: true,
+        //         });
+        //     }else{
+        //         $('#custprice-create-activedate').datepicker({
+        //             format: "dd/mm/yyyy",
+        //             autoclose: true,
+        //             enableOnReadonly: false,
+        //         });
+        //     }
+        // });
 
         $('#custprice-datatables-index tbody').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_item.row(this).data();
@@ -378,11 +399,11 @@
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
                 $('#custprice-create-customercode').val(data[0]);
                 $('#custprice-create-customername').val(data[1]);
-                if (data[0] === "A01") {
-                    $('#custprice-create-priceby').val('DATE');
-                }else{
-                    $('#custprice-create-priceby').val('SO');
-                }
+                // if (data[0] === "A01") {
+                //     $('#custprice-create-priceby').val('DATE');
+                // }else{
+                //     $('#custprice-create-priceby').val('SO');
+                // }
                 modalAction('#custprice-modal-item').then(function () {
                     getTblItem(cust_id);
                 });
@@ -517,7 +538,7 @@
                 ajaxCall({route: route, method: "GET"}).then(resolve => {
                     if (resolve.status == true) {
                         var no = 1;
-                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
+                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                         $.each(resolve.content, function (i, data) {
                             tbl_item.row.add([
                                 no,
@@ -537,6 +558,7 @@
                             posted = data.posted_date;
                             voided = data.voided_date;
                             printed = data.printed_date;
+                            price_by = data.price_by;
                         });
                         tbl_item.draw();
                         $('#custprice-create-customercode').val(cust_id);
@@ -550,7 +572,7 @@
                         $('#custprice-create-valas').append(`
                             <option val="${valas}">${valas}</option>
                         `);
-                        $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+                        $('#custprice-create-priceby').val(price_by);
                         $('#custprice-create-activedate').val(date_convert(active_date));
                         $('#custprice-create-entrydate').val(date_convert(created));
                     }
@@ -585,7 +607,7 @@
                             console.log(resolve.content);
                             if (resolve.status == true) {
                                 var no = 1;
-                                var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed;
+                                var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                                 $.each(resolve.content, function (i, data) {
                                     var price_new = (data.price_new == null ? "0.00" : addZeroes(String(data.price_new)));
                                     tbl_item.row.add([
@@ -607,6 +629,7 @@
                                     posted = data.posted_date;
                                     voided = data.voided_date;
                                     printed = data.printed_date;
+                                    price_by = data.price_by;
                                 });
                                 tbl_item.draw();
                                 $('#custprice-create-customercode').val(cust_id);
@@ -620,7 +643,7 @@
                                 //     <option val="${valas}">${valas}</option>
                                 // `);
                                 $('#custprice-create-valas').val(valas);
-                                $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+                                $('#custprice-create-priceby').val(price_by);
                                 $('#custprice-create-activedate').val(date_convert(active_date));
                                 $('#custprice-create-entrydate').val(date_convert(created));
                                 $('#custprice-create-activedate').prop('readonly', true);
@@ -849,7 +872,7 @@
             $('#custprice-create-printed').val(null);
             $('#custprice-create-user').val($('#custprice-create-user').data('val'));
             $('#custprice-create-valas').val($('#custprice-create-valas').data('val'));
-            $('#custprice-create-priceby').val($('#custprice-create-priceby').data('val'));
+            $('#custprice-create-priceby').val('DATE');
             $('#custprice-create-activedate').val("{{date('d/m/Y')}}");
             $('#custprice-create-entrydate').val("{{date('d/m/Y')}}");
             $(tbl_item.table().header())
