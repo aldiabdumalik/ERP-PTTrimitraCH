@@ -24,7 +24,7 @@
                                 <button type="button" id="custprice-btn-add-item" class="btn btn-sm btn-info">
                                     Add Item
                                 </button>
-                                <button type="button" id="custprice-btn-delete-item" class="btn btn-sm btn-info" disabled>
+                                <button type="button" id="custprice-btn-delete-item" class="btn btn-sm btn-danger" disabled>
                                     Delete
                                 </button>
                             </div>

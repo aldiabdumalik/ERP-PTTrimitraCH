@@ -236,8 +236,6 @@
                         ]);
                     });
                     tbl_customer_s.draw();
-                    $('#custprice-datatables-customer-item').DataTable().destroy();
-                    item_select = [];
                 });
             });
         })
@@ -360,39 +358,6 @@
             resetForm();
         });
 
-        var tbl_item_add;
-        function getTblItem(cust_id) {
-            tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{route('tms.warehouse.cust_price.header')}}",
-                    method: "POST",
-                    data: {
-                        type: "items",
-                        cust_id: cust_id
-                    },
-                    headers: token_header
-                },
-                columns: [
-                    {data:'itemcode', name: 'itemcode', className: "text-center align-middle"},
-                    {data:'part_no', name: 'part_no', className: "text-left align-middle"},
-                    {data:'descript', name: 'descript', className: "text-left align-middle"},
-                    {data:'unit', name: 'unit', className: "text-center align-middle"},
-                ],
-                ordering: false,
-                lengthChange: false,
-                createdRow: function( row, data, dataIndex ) {
-                    $(row).attr('data-id', data.itemcode);
-                    $(row).attr('id', data.itemcode);
-                },
-                rowCallback: function( row, data ) {
-                    if ( $.inArray(data.itemcode, item_select) !== -1 ) {
-                        $(row).addClass('selected');
-                    }
-                }
-            });
-        }
         $('#custprice-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
             var data = tbl_customer.row(this).data();
             var cust_id = data[0];
@@ -404,11 +369,47 @@
                 // }else{
                 //     $('#custprice-create-priceby').val('SO');
                 // }
-                modalAction('#custprice-modal-item').then(function () {
-                    getTblItem(cust_id);
-                });
+                // modalAction('#custprice-modal-item').then(function () {
+                //     getTblItem(cust_id);
+                // });
             });
         });
+
+        var tbl_item_add;
+        function getTblItem(cust_id) {
+            tbl_item_add = $('#custprice-datatables-customer-item').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.warehouse.cust_price.header')}}",
+                    method: "POST",
+                    data: {
+                        type: "items",
+                        cust_id: cust_id
+                    },
+                    headers: token_header
+                },
+                columns: [
+                    {data:'itemcode', name: 'itemcode', className: "text-left align-middle"},
+                    {data:'part_no', name: 'part_no', className: "text-left align-middle"},
+                    {data:'model', name: 'model', className: "text-left align-middle"},
+                    {data:'descript', name: 'descript', className: "text-left align-middle"},
+                    {data:'unit', name: 'unit', className: "text-center align-middle"},
+                ],
+                ordering: false,
+                lengthChange: false,
+                createdRow: function( row, data, dataIndex ) {
+                    $(row).attr('data-id', data.itemcode);
+                    $(row).attr('id', data.itemcode);
+                },
+                // rowCallback: function( row, data ) {
+                //     if ( $.inArray(data.itemcode, item_select) !== -1 ) {
+                //         $(row).addClass('selected');
+                //     }
+                // }
+            });
+        }
 
         $('#custprice-btn-add-item').on('click', function () {
             var cust_id = $('#custprice-create-customercode').val();
@@ -420,25 +421,64 @@
                     icon: 'warning'
                 });
             }else{
-                modalAction('#custprice-modal-item').then(function () {
-                    tbl_item_add.destroy();
+                $('#custprice-datatables-customer-item').DataTable().clear();
+                modalAction('#custprice-modal-item').then(() => {
                     getTblItem(cust_id);
+                    // ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "items", cust_id: cust_id} }).then(resolve => {
+                    //     console.log(resolve);
+                    // });
                 });
             }
         });
 
-        $('#custprice-datatables-customer-item').off('click', 'tr').on('click', 'tr', function () {
-            var id = this.id;
-            var index = $.inArray(id, item_select);
-
-            if ( index === -1 ) {
-                item_select.push( id );
-            } else {
-                item_select.splice( index, 1 );
+        $('#custprice-datatables-customer-item').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+            var item = tbl_item_add.row(this).data();
+            var index = tbl_item.data().length;
+            var cek = tbl_item.rows().data().toArray();
+            var isExist = false;
+            if (cek.length > 0) {
+                for (let i = 0; i < cek.length; i++) {
+                    if (item.itemcode == cek[i][1]) {
+                        isExist = true;
+                        break;
+                    }
+                }
             }
-
-            $(this).toggleClass('selected');
+            if (isExist == true) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: "This item is already in the table!",
+                    icon: 'warning'
+                });
+            }else{
+                modalAction('#custprice-modal-item', 'hide').then(() => {
+                    var add = tbl_item.row.add([
+                        index+1,
+                        item.itemcode,
+                        item.part_no,
+                        item.descript,
+                        `<input type="number" class="form-control form-control-sm text-right" value="0.00">`,
+                        currency(addZeroes(String(item.price))),
+                    ]).node();
+                    $(add).attr('id', item.itemcode);
+                    $(add).addClass(item.itemcode);
+                    tbl_item.draw(false);
+                });
+            }
         });
+
+        // $('#custprice-datatables-customer-item').off('click', 'tr').on('click', 'tr', function () {
+        //     var id = this.id;
+        //     var index = $.inArray(id, item_select);
+
+        //     if ( index === -1 ) {
+        //         item_select.push( id );
+        //     } else {
+        //         item_select.splice( index, 1 );
+        //     }
+
+        //     $(this).toggleClass('selected');
+        // });
 
         $(document).on('click', '#custprice-btn-item-submit', function () {
             ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "items_selected", items: item_select}}).then(resolve => {

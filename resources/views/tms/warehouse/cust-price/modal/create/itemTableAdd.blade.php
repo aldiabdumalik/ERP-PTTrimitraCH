@@ -10,6 +10,7 @@
                                     <tr>
                                         <th class="align-middle">Itemcode</th>
                                         <th class="align-middle">Part No.</th>
+                                        <th class="align-middle">Model</th>
                                         <th class="align-middle">Desc</th>
                                         <th class="align-middle">Unit</th>
                                     </tr>
@@ -20,7 +21,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="custprice-btn-item-close" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" id="custprice-btn-item-submit" class="btn btn-info">Add Item</button>
+                    {{-- <button type="button" id="custprice-btn-item-submit" class="btn btn-info">Add Item</button> --}}
                 </div>
             </div>
         </form>

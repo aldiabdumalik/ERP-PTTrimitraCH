@@ -377,7 +377,8 @@ class CustPriceController extends Controller
             
             case "items":
                 if (isset($request->cust_id)) {
-                    return DataTables::of($this->items($request->cust_id))
+                    $item = $this->_item_with_oldprice($request->cust_id);
+                    return DataTables::of($item)
                         ->addIndexColumn()
                         ->make(true);
                     // return DataTables::of($this->items_with_old_price($request->cust_id))->make(true);
@@ -470,6 +471,32 @@ class CustPriceController extends Controller
             ->selectRaw('item_code, price_new')
             ->orderBy('active_date', 'DESC')
             ->first();
+        return $query;
+    }
+
+    private function _item_with_oldprice($cust)
+    {
+        $query = DB::table('db_tbs.item')
+            ->leftJoin(DB::raw('
+                (
+                    SELECT s1.* FROM db_tbs.entry_custprice_tbl as s1
+                    LEFT JOIN db_tbs.entry_custprice_tbl as s2 ON s1.item_code = s2.item_code AND s1.active_date < s2.active_date
+                    WHERE s2.item_code IS NULL
+                ) as custprice
+            '), function($join){
+                $join->on("custprice.item_code", "=", "item.ITEMCODE");
+            })
+            ->select([
+                'item.ITEMCODE as itemcode',
+                'item.PART_NO as part_no', 
+                'item.DESCRIPT as descript', 
+                'item.UNIT as unit', 
+                'item.DESCRIPT1 as model',
+                'custprice.active_date as active_date',
+                DB::raw('IFNULL(custprice.price_new, 0) as price')
+            ])
+            ->where('item.CUSTCODE', $cust)
+            ->get();
         return $query;
     }
 

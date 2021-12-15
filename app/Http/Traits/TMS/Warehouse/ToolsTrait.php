@@ -70,7 +70,7 @@ trait ToolsTrait {
         $query = 
             DB::connection('db_tbs')
                 ->table('item')
-                ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit')
+                ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit, DESCRIPT1 as model')
                 ->where('CUSTCODE', $id)
                 ->get();
         return $query;
@@ -81,7 +81,7 @@ trait ToolsTrait {
         $query = 
             DB::connection('db_tbs')
                 ->table('item')
-                ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit')
+                ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit, DESCRIPT1 as model')
                 ->where('ITEMCODE', $itemcode)
                 ->first();
         return $query;
