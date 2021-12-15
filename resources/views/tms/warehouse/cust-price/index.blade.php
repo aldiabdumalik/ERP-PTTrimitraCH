@@ -861,7 +861,7 @@
             var date = $(this).data('activedate');
             modalAction('#custprice-modal-index', 'hide').then(() => {
                 Swal.fire({
-                    title: `Do you want to unposted now ?`,
+                    title: `Do you want to unposted now?`,
                     input: 'text',
                     inputPlaceholder: 'Type your note here...',
                     showCancelButton: true,
