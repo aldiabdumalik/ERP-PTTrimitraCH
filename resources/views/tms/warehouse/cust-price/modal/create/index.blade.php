@@ -35,6 +35,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <div id="custprice-btn-action" class="d-none">
+                        <button type="button" id="custprice-btn-index-edit" class="btn btn-info custprice-act-edit">Edit</button>
+                        <button type="button" id="custprice-btn-index-post" class="btn btn-info custprice-act-posted">Post</button>
+                        <button type="button" id="custprice-btn-index-log" class="btn btn-info custprice-act-log">Log</button>
+                    </div>
                     <button type="button" id="custprice-btn-index-close" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="submit" id="custprice-btn-index-submit" class="btn btn-info">Save</button>
                 </div>

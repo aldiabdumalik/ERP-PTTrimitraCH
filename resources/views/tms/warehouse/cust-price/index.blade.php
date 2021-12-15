@@ -17,6 +17,7 @@
 @include('tms.warehouse.cust-price.modal.create.itemTableAdd')
 @include('tms.warehouse.cust-price.modal.create.itemFormAdd')
 @include('tms.warehouse.cust-price.modal.log.tableLog')
+@include('tms.warehouse.cust-price.modal.action.action')
 
 @endsection
 @section('script')
@@ -81,15 +82,18 @@
                     var last=null;
                     var x = 1;
 
+                    
                     api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
                         var cellNode = api.cell(i, 1).node();
+                        var cust = group.split(' ')[0];
+                        var date = group.split(' ')[2];
                         if (last !== group) {
                             x = 1;
                         }
                         if ( last !== group ) {
                             $(rows).eq( i ).before(`
                                 <tr class="group bg-y" data-id="${group}">
-                                    <td colspan="6" class="text-bold">${group}</td>
+                                    <td colspan="6" class="text-bold align-middle">${group}</td>
                                 </tr>
                             `);
 
@@ -176,6 +180,7 @@
                     .addClass('bg-abu');
                 isHidden('#custprice-btn-table-item', true);
                 isHidden('#custprice-btn-index-submit', true);
+                isHidden('#custprice-btn-action', false);
                 $('input').prop('readonly', true);
 
                 ajaxCall({route: route, method: "GET"}).then(resolve => {
@@ -214,6 +219,25 @@
                         $('#custprice-create-priceby').val(price_by);
                         $('#custprice-create-activedate').val(date_convert(active_date));
                         $('#custprice-create-entrydate').val(date_convert(created));
+                        
+                        $('#custprice-btn-index-edit').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
+                        $('#custprice-btn-index-log').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
+                        console.log(posted);
+                        if (!posted) {
+                            $('#custprice-btn-index-post')
+                                .removeClass('custprice-act-unposted')
+                                .addClass('custprice-act-posted')
+                                .attr('data-custid', cust_id)
+                                .attr('data-activedate', active_date.split('/').reverse().join('-'))
+                                .text('Post');;
+                        }else{
+                            $('#custprice-btn-index-post')
+                                .removeClass('custprice-act-posted')
+                                .addClass('custprice-act-unposted')
+                                .attr('data-custid', cust_id)
+                                .attr('data-activedate', active_date.split('/').reverse().join('-'))
+                                .text('Unpost');
+                        }
                     }
                 });
             });
@@ -615,6 +639,7 @@
                         $('#custprice-create-priceby').val(price_by);
                         $('#custprice-create-activedate').val(date_convert(active_date));
                         $('#custprice-create-entrydate').val(date_convert(created));
+
                     }
                 });
             });
@@ -623,76 +648,69 @@
         $(document).on('click', '.custprice-act-edit', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
-            // ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
-            //     var data = resolve.content;
-            //     $('#custprice-create-valas').html('');
-            //     $.each(data, function (i, valas) {
-            //         $('#custprice-create-valas').append($('<option>', { 
-            //             value: valas.valas,
-            //             text : valas.valas 
-            //         }));
-            //     });
-            //     $('#custprice-create-valas').val('IDR');
-            // });
 
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
 
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "validation", cust_id: cust, active: date} }).then(resolve => {
-                var status = resolve.status;
-                if (status == true) {
-                    modalAction('#custprice-modal-index').then(resolve => {
-                        ajaxCall({route: route, method: "GET"}).then(resolve => {
-                            console.log(resolve.content);
-                            if (resolve.status == true) {
-                                var no = 1;
-                                var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
-                                $.each(resolve.content, function (i, data) {
-                                    var price_new = (data.price_new == null ? "0.00" : addZeroes(String(data.price_new)));
-                                    tbl_item.row.add([
-                                        no,
-                                        data.item_code,
-                                        data.PART_NO,
-                                        data.DESCRIPT,
-                                        `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
-                                        // (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
-                                        currency(addZeroes(String(data.price_old))),
-                                    ]);
-                                    no++;
-                                    cust_id = data.cust_id;
-                                    cust_name = data.CustomerName;
-                                    valas = data.currency;
-                                    active_date = data.active_date;
-                                    created = data.created_date;
-                                    user = data.created_by;
-                                    posted = data.posted_date;
-                                    voided = data.voided_date;
-                                    printed = data.printed_date;
-                                    price_by = data.price_by;
+            modalAction('#custprice-modal-index', 'hide').then(() => {
+                setTimeout(() => {
+                    ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "validation", cust_id: cust, active: date} }).then(resolve => {
+                        var status = resolve.status;
+                        if (status == true) {
+                            modalAction('#custprice-modal-index').then(resolve => {
+                                ajaxCall({route: route, method: "GET"}).then(resolve => {
+                                    if (resolve.status == true) {
+                                        var no = 1;
+                                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
+                                        $.each(resolve.content, function (i, data) {
+                                            var price_new = (data.price_new == null ? "0.00" : addZeroes(String(data.price_new)));
+                                            tbl_item.row.add([
+                                                no,
+                                                data.item_code,
+                                                data.PART_NO,
+                                                data.DESCRIPT,
+                                                `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
+                                                // (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
+                                                currency(addZeroes(String(data.price_old))),
+                                            ]);
+                                            no++;
+                                            cust_id = data.cust_id;
+                                            cust_name = data.CustomerName;
+                                            valas = data.currency;
+                                            active_date = data.active_date;
+                                            created = data.created_date;
+                                            user = data.created_by;
+                                            posted = data.posted_date;
+                                            voided = data.voided_date;
+                                            printed = data.printed_date;
+                                            price_by = data.price_by;
+                                        });
+                                        tbl_item.draw();
+                                        $('#custprice-create-customercode').val(cust_id);
+                                        $('#custprice-create-customername').val(cust_name);
+                                        $('#custprice-create-posted').val(date_convert(posted));
+                                        $('#custprice-create-voided').val(date_convert(voided));
+                                        $('#custprice-create-printed').val(date_convert(printed));
+                                        $('#custprice-create-user').val(user);
+                                        // $('#custprice-create-valas').html('');
+                                        // $('#custprice-create-valas').append(`
+                                        //     <option val="${valas}">${valas}</option>
+                                        // `);
+                                        $('#custprice-create-valas').val(valas);
+                                        $('#custprice-create-priceby').val(price_by);
+                                        $('#custprice-create-activedate').val(date_convert(active_date));
+                                        $('#custprice-create-entrydate').val(date_convert(created));
+                                        $('#custprice-create-activedate').prop('readonly', true);
+                                        $('#custprice-create-customercode').prop('readonly', true);
+                                    }
                                 });
-                                tbl_item.draw();
-                                $('#custprice-create-customercode').val(cust_id);
-                                $('#custprice-create-customername').val(cust_name);
-                                $('#custprice-create-posted').val(date_convert(posted));
-                                $('#custprice-create-voided').val(date_convert(voided));
-                                $('#custprice-create-printed').val(date_convert(printed));
-                                $('#custprice-create-user').val(user);
-                                // $('#custprice-create-valas').html('');
-                                // $('#custprice-create-valas').append(`
-                                //     <option val="${valas}">${valas}</option>
-                                // `);
-                                $('#custprice-create-valas').val(valas);
-                                $('#custprice-create-priceby').val(price_by);
-                                $('#custprice-create-activedate').val(date_convert(active_date));
-                                $('#custprice-create-entrydate').val(date_convert(created));
-                                $('#custprice-create-activedate').prop('readonly', true);
-                                $('#custprice-create-customercode').prop('readonly', true);
-                            }
-                        });
+                            });
+                        }
                     });
-                }
+                }, 300)
             });
+
         });
 
         $(document).on('submit', '#custprice-form-index', function () {
@@ -821,15 +839,17 @@
         $(document).on('click', '.custprice-act-posted', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
-                var msg = resolve.message;
-                Swal.fire({
-                    title: 'Notification',
-                    text: msg,
-                    icon: 'success'
-                }).then(answer => {
-                    index_data.then(resolve => {
-                        resolve.ajax.reload();
+            modalAction('#custprice-modal-index', 'hide').then(() => {
+                ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+                    var msg = resolve.message;
+                    Swal.fire({
+                        title: 'Notification',
+                        text: msg,
+                        icon: 'success'
+                    }).then(answer => {
+                        index_data.then(resolve => {
+                            resolve.ajax.reload();
+                        });
                     });
                 });
             });
@@ -838,35 +858,38 @@
         $(document).on('click', '.custprice-act-unposted', function () {
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
-            Swal.fire({
-                title: `Do you want to unposted now ?`,
-                input: 'text',
-                inputPlaceholder: 'Type your note here...',
-                showCancelButton: true,
-                confirmButtonText: `Yes, unposted it!`,
-                confirmButtonColor: '#DC3545',
-                icon: 'warning',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'You need to write something!'
+            modalAction('#custprice-modal-index', 'hide').then(() => {
+                Swal.fire({
+                    title: `Do you want to unposted now ?`,
+                    input: 'text',
+                    inputPlaceholder: 'Type your note here...',
+                    showCancelButton: true,
+                    confirmButtonText: `Yes, unposted it!`,
+                    confirmButtonColor: '#DC3545',
+                    icon: 'warning',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to write something!'
+                        }
                     }
-                }
-            }).then((answer) => {
-                if (answer.value != "" && answer.value != undefined) {
-                    var note = answer.value;
-                    ajaxCall({route: "{{route('tms.warehouse.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
-                        var msg = resolve.message;
-                        Swal.fire({
-                            title: 'Notification',
-                            text: msg,
-                            icon: 'success'
-                        }).then(answer => {
-                            index_data.then(resolve => {
-                                resolve.ajax.reload();
+                }).then((answer) => {
+                    if (answer.value != "" && answer.value != undefined) {
+                        var note = answer.value;
+                        ajaxCall({route: "{{route('tms.warehouse.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
+                            var msg = resolve.message;
+                            Swal.fire({
+                                title: 'Notification',
+                                text: msg,
+                                icon: 'success'
+                            }).then(answer => {
+                                index_data.then(resolve => {
+                                    resolve.ajax.reload();
+                                });
                             });
                         });
-                    });
-                }
+                    }
+                });
+
             });
         });
         
@@ -922,6 +945,7 @@
             isHidden('#custprice-btn-table-item', false);
             isHidden('#custprice-btn-index-submit', false);
             $('input').not('.readonly-first').prop('readonly', false);
+            isHidden('#custprice-btn-action', true);
         }
         function date_convert($date) {
             if ($date == null) { return null; }
