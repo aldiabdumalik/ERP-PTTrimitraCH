@@ -272,3 +272,7 @@ Route::post('/warehouse/customer_price/unposted', [
     'uses' => 'TMS\Warehouse\CustPriceController@unposted', 
     'as' => 'tms.warehouse.cust_price.unposted'
 ]);
+Route::get('/warehouse/customer_price/{code}/print', [
+    'uses' => 'TMS\Warehouse\CustPriceController@print', 
+    'as' => 'tms.warehouse.cust_price.print'
+]);

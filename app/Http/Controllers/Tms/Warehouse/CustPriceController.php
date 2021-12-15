@@ -5,11 +5,13 @@ namespace App\Http\Controllers\TMS\Warehouse;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustPrice;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use Yajra\DataTables\Facades\DataTables;
 
 class CustPriceController extends Controller
@@ -366,6 +368,44 @@ class CustPriceController extends Controller
             ]);
         }
         return _Success('Customer Price has been Unposted');
+    }
+
+    public function print(Request $request, $code)
+    {
+        $decode = base64_decode($code);
+        $arr = explode('&', $decode);
+        $cust = $arr[0];
+        $date = $arr[1];
+        $query = CustPrice::select([
+                'entry_custprice_tbl.*', 
+                'ekanban_customermaster.CustomerCode_eKanban as custcode', 
+                'ekanban_customermaster.CustomerName as cust_name',
+                'item.PART_NO as part_no',
+                'item.DESCRIPT as desc',
+                'item.DESCRIPT1 as model'
+            ])
+            ->join('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+            ->join('db_tbs.item', function ($join){
+                $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
+                $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
+            })
+            ->where(function ($x) use ($cust, $date) {
+                $x->where('entry_custprice_tbl.cust_id', $cust);
+                $x->where('entry_custprice_tbl.active_date', $date);
+            })->get();
+        if ($query->isEmpty()) {
+            $request->session()->flash('message', 'Data Not Found!');
+            return Redirect::back();
+        }
+        CustPrice::where(function ($x) use ($cust, $date) {
+            $x->where('cust_id', $cust);
+            $x->where('active_date', $date);
+        })->update([
+            'printed_date' => date('Y-m-d')
+        ]);
+        $pdf = PDF::loadView('tms.warehouse.cust-price.report.report', compact('query'))->setPaper('a4', 'potrait');
+        $pdf->getDomPDF()->set_option("enable_php", true);
+        return $pdf->stream();
     }
     
     public function headerTools(Request $request)

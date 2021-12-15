@@ -222,7 +222,8 @@
                         
                         $('#custprice-btn-index-edit').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
                         $('#custprice-btn-index-log').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
-                        console.log(posted);
+                        $('#custprice-btn-index-print').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
+                        // console.log(posted);
                         if (!posted) {
                             $('#custprice-btn-index-post')
                                 .removeClass('custprice-act-unposted')
@@ -924,6 +925,23 @@
                     lengthChange: false
                 });
             });
+        });
+
+        $('#custprice-btn-modal-print').on('click', function () {
+            modalAction('#custprice-modal-action');
+        });
+
+        $(document).on('click', '.custprice-act-print', function () {
+            var cust = $(this).data('custid');
+            var date = $(this).data('activedate');
+            var encrypt = btoa(`${cust}&${date}`);
+            index_data.then(resolve => {
+                resolve.ajax.reload();
+            });
+            modalAction('#custprice-modal-index', 'hide');
+            var route = "{{route('tms.warehouse.cust_price.print', [':code'])}}";
+            route  = route.replace(':code', encrypt);
+            window.open(route, '_blank');
         });
 
         // Function lib

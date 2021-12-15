@@ -7,9 +7,9 @@
             <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-create">
                 <i class="ti-plus"></i>  Add New Data
             </button>
-            <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-print">
+            {{-- <button type="button"  class="btn btn-primary btn-flat btn-sm" id="custprice-btn-modal-print">
                 <i class="fa fa-print"></i>  Print
-            </button>
+            </button> --}}
         </div>
     </div>
 </div>
