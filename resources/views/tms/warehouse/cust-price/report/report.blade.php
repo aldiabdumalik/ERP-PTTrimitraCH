@@ -53,6 +53,12 @@
         .text-bold {
             font-weight: bold;
         }
+        .text-danger {
+            color: red;
+        }
+        .text-miring {
+            font-style: italic;
+        }
     </style>
 </head>
 <body style="margin-bottom: 100px;">
@@ -113,19 +119,19 @@
         <thead>
             <tr>
                 <th style="width:3%" align="left">#</th>
-                <th colspan="3" align="left" style="width:57%">Part No. / Description</th>
-                <th align="right" style="width:20%">New Price</th>
-                <th align="right" style="width:20%">Old Price</th>
+                <th colspan="3" align="left" style="width:67%">Part No. / Description</th>
+                <th align="right" style="width:15%">New Price</th>
+                <th align="right" style="width:15%">Old Price</th>
             </tr>
         </thead>
         @foreach ($query as $i => $item)
         <tr>
-            <td align="left">{{++$i}}</td>
-            <td align="left">{{$item->part_no}}</td>
-            <td align="left">{{$item->item_code}}</td>
-            <td align="left">{{$item->desc}}</td>
-            <td align="right">{{rupiah(addZero($item->price_new))}}</td>
-            <td align="right">{{rupiah(addZero($item->price_old))}}</td>
+            <td align="left" style="width: 3%;">{{++$i}}</td>
+            <td align="left" style="width: 10%;">{{$item->part_no}}</td>
+            <td align="left" style="width: 10%;">{{$item->item_code}}</td>
+            <td align="left" style="width: 47%;">{{$item->desc}}</td>
+            <td align="right" style="width:15%" class="{{ ($item->is_update == 1) ? 'text-danger text-miring text-bold' : '' }}">{{rupiah(addZero($item->price_new))}}</td>
+            <td align="right" style="width:15%">{{rupiah(addZero($item->price_old))}}</td>
         </tr>
         @endforeach
     </table>

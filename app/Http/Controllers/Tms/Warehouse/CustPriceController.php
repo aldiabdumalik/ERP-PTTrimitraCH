@@ -40,9 +40,10 @@ class CustPriceController extends Controller
                     $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
                     $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
                 })
+                ->where('entry_custprice_tbl.status', 'ACTIVE')
                 // ->groupBy(['cust_id', 'active_date'])
-                ->orderBy('created_date', 'DESC')
-                ->orderBy('item_code', 'ASC')
+                ->orderBy('entry_custprice_tbl.created_date', 'DESC')
+                ->orderBy('entry_custprice_tbl.item_code', 'ASC')
                 ->get();
         }else{
             $query = CustPrice::select([
@@ -58,6 +59,7 @@ class CustPriceController extends Controller
                     $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
                     $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
                 })
+                ->where('entry_custprice_tbl.status', 'ACTIVE')
                 ->where('entry_custprice_tbl.cust_id', $request->customer)
                 // ->groupBy(['cust_id', 'active_date'])
                 ->orderBy('created_date', 'DESC')
@@ -114,6 +116,7 @@ class CustPriceController extends Controller
             ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
             ->where('cust_id', $cust)
             ->where('active_date', $date)
+            ->where('entry_custprice_tbl.status', 'ACTIVE')
             ->get();
         return _Success(null, 200, $query);
     }
@@ -122,8 +125,12 @@ class CustPriceController extends Controller
     {
         $data = [];
         $items = $request->items;
+        $is_update = 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
+                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->first();
+                $prices = str_replace(',', '', $items[$i]['new_price']);
+                $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
                 $data[] = [
                     'cust_id' => $request->cust_id,
                     'item_code' => $items[$i]['itemcode'],
@@ -134,9 +141,11 @@ class CustPriceController extends Controller
                     'active_date' => $request->active_date,
                     'created_by' => Auth::user()->FullName,
                     'created_date' => Carbon::now(),
+                    'is_update' => $is_update
                 ];
             }
             try {
+                $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                 $query = CustPrice::insert($data);
                 $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                     'cust_id' => $request->cust_id,
@@ -177,16 +186,23 @@ class CustPriceController extends Controller
     {
         $cek = CustPrice::where('cust_id', $cust)
             ->where('active_date', $active)
+            ->where('entry_custprice_tbl.status', 'ACTIVE')
             ->first();
         $create_by = $cek->created_by;
         $create_date = $cek->created_date;
         $data = [];
         $items = $request->items;
-        $old_data = CustPrice::where('cust_id', $cust)
-            ->where('active_date', $active)
-            ->delete();
+        // $old_data = CustPrice::where('cust_id', $cust)
+        //     ->where('active_date', $active)
+        //     ->where('entry_custprice_tbl.status', 'ACTIVE')
+        //     ->delete();
+        $is_update = 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
+                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->first();
+                $prices = str_replace(',', '', $items[$i]['new_price']);
+                $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
+
                 $data[] = [
                     'cust_id' => $request->cust_id,
                     'item_code' => $items[$i]['itemcode'],
@@ -199,9 +215,14 @@ class CustPriceController extends Controller
                     'updated_date' => Carbon::now(),
                     'created_by' => $create_by,
                     'created_date' => $create_date,
+                    'is_update' => $is_update
                 ];
             }
             try {
+                $old_data = CustPrice::where('cust_id', $cust)
+                    ->where('active_date', $active)
+                    ->where('entry_custprice_tbl.status', 'ACTIVE')
+                    ->delete();
                 $query = CustPrice::insert($data);
                 $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                     'cust_id' => $request->cust_id,
@@ -498,6 +519,29 @@ class CustPriceController extends Controller
                 }
                 return _Error('Params not exist!', 404);
                 break;
+            
+            case 'customerclick':
+                if (isset($request->cust_id)) {
+                    $query = CustPrice::select([
+                            'entry_custprice_tbl.*', 
+                            'ekanban_customermaster.CustomerCode_eKanban as cuscode', 
+                            'ekanban_customermaster.CustomerName as custname',
+                            'item.PART_NO as part_no',
+                            'item.DESCRIPT as desc'
+                        ])
+                        ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
+                        ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+                        ->where('entry_custprice_tbl.cust_id', $request->cust_id)
+                        ->where('entry_custprice_tbl.status', 'ACTIVE')
+                        ->get();
+                    if ($query->isEmpty()) {
+                        return _Success(null, 200);
+                    }else{
+                        return _Success(null, 200, $query);
+                    }
+                }
+                return _Error('Params not exist!', 404);
+                break;
 
             default:
                 return _Error('Params not exist!', 404);
@@ -536,6 +580,7 @@ class CustPriceController extends Controller
                 DB::raw('IFNULL(custprice.price_new, 0) as price')
             ])
             ->where('item.CUSTCODE', $cust)
+            ->where('custprice.status', 'ACTIVE')
             ->get();
         return $query;
     }

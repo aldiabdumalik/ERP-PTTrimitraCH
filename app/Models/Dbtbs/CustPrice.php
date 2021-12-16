@@ -29,6 +29,8 @@ class CustPrice extends Model
         'posted_by',
         'posted_date',
         'printed_date',
+        'is_active',
+        'is_update',
     ];
     protected $hidden = [];
     public $timestamps = false;

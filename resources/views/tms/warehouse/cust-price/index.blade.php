@@ -182,7 +182,7 @@
                 isHidden('#custprice-btn-index-submit', true);
                 isHidden('#custprice-btn-action', false);
                 $('input').prop('readonly', true);
-
+                loading_start();
                 ajaxCall({route: route, method: "GET"}).then(resolve => {
                     if (resolve.status == true) {
                         var no = 1;
@@ -358,6 +358,7 @@
             if (e.keyCode == 13) {
                 modalAction('#custprice-modal-customer').then(resolve => {
                     tbl_item.clear().draw(false);
+                    tbl_customer.clear().draw(false);
                     ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
                         let customer = resolve.content;
                         $.each(customer, function (i, cust) {
@@ -369,6 +370,7 @@
                         tbl_customer.draw();
                         $('#custprice-datatables-customer-item').DataTable().destroy();
                         item_select = [];
+
                     });
                 });
             }
@@ -389,6 +391,36 @@
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
                 $('#custprice-create-customercode').val(data[0]);
                 $('#custprice-create-customername').val(data[1]);
+                ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customerclick", cust_id: data[0]}}).then(resolve => {
+                    if (resolve.content) {
+                        var no = 1;
+                        var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
+                        $.each(resolve.content, function (i, data) {
+                            var price_new = (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new))));
+                            tbl_item.row.add([
+                                no,
+                                data.item_code,
+                                data.part_no,
+                                data.desc,
+                                `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
+                                // currency(addZeroes(String(data.price_old))),
+                                price_new
+                            ]);
+                            no++;
+                            cust_id = data.cust_id;
+                            cust_name = data.CustomerName;
+                            valas = data.currency;
+                            active_date = data.active_date;
+                            created = data.created_date;
+                            user = data.created_by;
+                            posted = data.posted_date;
+                            voided = data.voided_date;
+                            printed = data.printed_date;
+                            price_by = data.price_by;
+                        });
+                        tbl_item.draw();
+                    }
+                });
                 // if (data[0] === "A01") {
                 //     $('#custprice-create-priceby').val('DATE');
                 // }else{
@@ -655,6 +687,7 @@
             route  = route.replace(':date', date);
 
             modalAction('#custprice-modal-index', 'hide').then(() => {
+                loading_start();
                 setTimeout(() => {
                     ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "validation", cust_id: cust, active: date} }).then(resolve => {
                         var status = resolve.status;
@@ -673,7 +706,8 @@
                                                 data.DESCRIPT,
                                                 `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
                                                 // (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
-                                                currency(addZeroes(String(data.price_old))),
+                                                // currency(addZeroes(String(data.price_old))),
+                                                price_new
                                             ]);
                                             no++;
                                             cust_id = data.cust_id;
@@ -702,7 +736,7 @@
                                         $('#custprice-create-priceby').val(price_by);
                                         $('#custprice-create-activedate').val(date_convert(active_date));
                                         $('#custprice-create-entrydate').val(date_convert(created));
-                                        $('#custprice-create-activedate').prop('readonly', true);
+                                        // $('#custprice-create-activedate').prop('readonly', true);
                                         $('#custprice-create-customercode').prop('readonly', true);
                                     }
                                 });
@@ -715,6 +749,7 @@
         });
 
         $(document).on('submit', '#custprice-form-index', function () {
+            loading_start();
             var items = tbl_item.rows().data().toArray();
             var items_fix = [];
             for (let i = 0; i < items.length; i++) {
@@ -756,6 +791,7 @@
 
         function submit(route, data) {
             var method = (route == "{{route('tms.warehouse.cust_price.save')}}" ? "POST" : "PUT");
+            var cust_id = data.cust_id;
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You will save and post!",
@@ -766,6 +802,7 @@
                 confirmButtonText: 'Yes, save and post it!'
             }).then((result) => {
                 if (result.value == true) {
+                    loading_start();
                     ajaxCall({route: route, method: method, data: data}).then(resolve => {
                         var msg = resolve.message;
                         if (resolve.status == true) {
@@ -775,9 +812,10 @@
                                 text: msg,
                                 icon: 'success'
                             }).then(answer => {
-                                index_data.then(resolve => {
-                                    resolve.ajax.reload();
-                                });
+                                // index_data.then(resolve => {
+                                //     resolve.ajax.reload();
+                                // });
+                                tbl_index_bycust(cust_id);
                             });
                         }
                     });
@@ -806,7 +844,7 @@
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
             Swal.fire({
-                title: `Do you want to unvoid Cust Price, now ?`,
+                title: `Do you want to unvoid Cust Price, now?`,
                 input: 'text',
                 inputPlaceholder: 'Type your note here...',
                 showCancelButton: true,
@@ -987,12 +1025,19 @@
             });
         }
 
+        function loading_start() {
+            $('body').loading({
+                message: "wait for a moment...",
+                zIndex: 9999
+            });
+        }
+
         function ajaxCall(params) {
             return new Promise((resolve, reject) => {
-                $('body').loading({
-                    message: "wait for a moment...",
-                    zIndex: 9999
-                });
+                // $('body').loading({
+                //     message: "wait for a moment...",
+                //     zIndex: 9999
+                // });
                 $.ajax({
                     url: params.route,
                     method: params.method,
