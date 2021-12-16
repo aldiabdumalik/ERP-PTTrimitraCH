@@ -45,7 +45,12 @@
             return obj;
         };
 
-        const index_data = new Promise(function(resolve, reject) {
+        // const index_data = new Promise(function(resolve, reject) {
+            
+        //     resolve(tbl_index);
+        // });
+
+        function tbl_custprice_index() {
             var groupColumn = 0;
             let tbl_index = $('#custprice-datatables').DataTable({
                 processing: true,
@@ -103,8 +108,8 @@
                     });
                 }
             });
-            resolve(tbl_index);
-        });
+        }
+        tbl_custprice_index();
 
         function tbl_index_bycust(cust) {
             var groupColumn = 0;
@@ -403,8 +408,8 @@
                                 data.part_no,
                                 data.desc,
                                 `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
-                                // currency(addZeroes(String(data.price_old))),
-                                price_new
+                                currency(addZeroes(String(data.price_old))),
+                                // price_new
                             ]);
                             no++;
                             cust_id = data.cust_id;
@@ -706,8 +711,8 @@
                                                 data.DESCRIPT,
                                                 `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
                                                 // (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
-                                                // currency(addZeroes(String(data.price_old))),
-                                                price_new
+                                                currency(addZeroes(String(data.price_old))),
+                                                // price_new
                                             ]);
                                             no++;
                                             cust_id = data.cust_id;
@@ -815,7 +820,8 @@
                                 // index_data.then(resolve => {
                                 //     resolve.ajax.reload();
                                 // });
-                                tbl_index_bycust(cust_id);
+                                // tbl_index_bycust(cust_id);
+                                tbl_custprice_index();
                             });
                         }
                     });
@@ -833,9 +839,10 @@
                     text: msg,
                     icon: 'success'
                 }).then(answer => {
-                    index_data.then(resolve => {
-                        resolve.ajax.reload();
-                    });
+                    // index_data.then(resolve => {
+                    //     resolve.ajax.reload();
+                    // });
+                    tbl_custprice_index();
                 });
             });
         });
@@ -866,9 +873,10 @@
                             text: msg,
                             icon: 'success'
                         }).then(answer => {
-                            index_data.then(resolve => {
-                                resolve.ajax.reload();
-                            });
+                            // index_data.then(resolve => {
+                            //     resolve.ajax.reload();
+                            // });
+                            tbl_custprice_index();
                         });
                     });
                 }
@@ -886,9 +894,10 @@
                         text: msg,
                         icon: 'success'
                     }).then(answer => {
-                        index_data.then(resolve => {
-                            resolve.ajax.reload();
-                        });
+                        // index_data.then(resolve => {
+                        //     resolve.ajax.reload();
+                        // });
+                        tbl_custprice_index();
                     });
                 });
             });
@@ -921,9 +930,10 @@
                                 text: msg,
                                 icon: 'success'
                             }).then(answer => {
-                                index_data.then(resolve => {
-                                    resolve.ajax.reload();
-                                });
+                                // index_data.then(resolve => {
+                                //     resolve.ajax.reload();
+                                // });
+                                tbl_custprice_index();
                             });
                         });
                     }
@@ -973,9 +983,10 @@
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
             var encrypt = btoa(`${cust}&${date}`);
-            index_data.then(resolve => {
-                resolve.ajax.reload();
-            });
+            // index_data.then(resolve => {
+            //     resolve.ajax.reload();
+            // });
+            tbl_custprice_index();
             modalAction('#custprice-modal-index', 'hide');
             var route = "{{route('tms.warehouse.cust_price.print', [':code'])}}";
             route  = route.replace(':code', encrypt);
