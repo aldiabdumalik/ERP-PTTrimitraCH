@@ -126,24 +126,32 @@ class CustPriceController extends Controller
         $data = [];
         $items = $request->items;
         $is_update = 0;
+        $price_old = 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
                 $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->first();
-                $prices = str_replace(',', '', $items[$i]['new_price']);
-                $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
+                if ($old) {
+                    $prices = str_replace(',', '', $items[$i]['new_price']);
+                    $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
+                    $price_old = $old->price_new;
+                }else{
+                    $is_update = 0;
+                    $price_old = 0;
+                }
                 $data[] = [
                     'cust_id' => $request->cust_id,
                     'item_code' => $items[$i]['itemcode'],
                     'currency' => $request->valas,
                     'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['new_price'],
                     'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i][4],
-                    'price_old' =>  $old->price_new, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
+                    'price_old' =>  $price_old, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
                     'active_date' => $request->active_date,
                     'created_by' => Auth::user()->FullName,
                     'created_date' => Carbon::now(),
                     'is_update' => $is_update
                 ];
             }
+            DB::beginTransaction();
             try {
                 $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                 $query = CustPrice::insert($data);
@@ -174,8 +182,10 @@ class CustPriceController extends Controller
                         'note' => null
                     ]);
                 }
+                DB::commit();
                 return $this->_Success('Saved successfully!', 201);
             } catch (Exception $e) {
+                DB::rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
@@ -197,11 +207,20 @@ class CustPriceController extends Controller
         //     ->where('entry_custprice_tbl.status', 'ACTIVE')
         //     ->delete();
         $is_update = 0;
+        $price_old = 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
                 $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->first();
-                $prices = str_replace(',', '', $items[$i]['new_price']);
-                $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
+                // $prices = str_replace(',', '', $items[$i]['new_price']);
+                // $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
+                if ($old) {
+                    $prices = str_replace(',', '', $items[$i]['new_price']);
+                    $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
+                    $price_old = $old->price_new;
+                }else{
+                    $is_update = 0;
+                    $price_old = 0;
+                }
 
                 $data[] = [
                     'cust_id' => $request->cust_id,
@@ -209,7 +228,7 @@ class CustPriceController extends Controller
                     'currency' => $request->valas,
                     'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
                     'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
-                    'price_old' =>  $old->price_new, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
+                    'price_old' =>  $price_old, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
                     'active_date' => $request->active_date,
                     'updated_by' => Auth::user()->FullName,
                     'updated_date' => Carbon::now(),
@@ -218,6 +237,7 @@ class CustPriceController extends Controller
                     'is_update' => $is_update
                 ];
             }
+            DB::beginTransaction();
             try {
                 $old_data = CustPrice::where('cust_id', $cust)
                     ->where('active_date', $active)
@@ -251,8 +271,10 @@ class CustPriceController extends Controller
                         'note' => null
                     ]);
                 }
+                DB::commit();
                 return $this->_Success('Cust Price has been update & posted!', 201);
             } catch (Exception $e) {
+                DB::rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
