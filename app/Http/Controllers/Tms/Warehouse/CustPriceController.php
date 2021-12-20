@@ -129,7 +129,7 @@ class CustPriceController extends Controller
         $price_old = 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
-                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->first();
+                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
                 if ($old) {
                     $prices = str_replace(',', '', $items[$i]['new_price']);
                     $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
@@ -148,12 +148,22 @@ class CustPriceController extends Controller
                     'active_date' => $request->active_date,
                     'created_by' => Auth::user()->FullName,
                     'created_date' => Carbon::now(),
-                    'is_update' => $is_update
+                    'is_update' => $is_update,
+                    'price_by' => $request->price_by
                 ];
             }
             DB::beginTransaction();
             try {
-                $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                if ($request->price_by == 'DATE') {
+                    $cekBln = CustPrice::where('cust_id', $request->cust_id)
+                        ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
+                        ->first();
+                    if (!$cekBln) {
+                        $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    }
+                }else{
+                    $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                }
                 $query = CustPrice::insert($data);
                 $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                     'cust_id' => $request->cust_id,
@@ -210,7 +220,7 @@ class CustPriceController extends Controller
         $price_old = 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
-                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->first();
+                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
                 // $prices = str_replace(',', '', $items[$i]['new_price']);
                 // $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
                 if ($old) {

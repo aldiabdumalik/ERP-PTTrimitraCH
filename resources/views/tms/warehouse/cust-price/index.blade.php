@@ -18,6 +18,7 @@
 @include('tms.warehouse.cust-price.modal.create.itemFormAdd')
 @include('tms.warehouse.cust-price.modal.log.tableLog')
 @include('tms.warehouse.cust-price.modal.action.action')
+@include('tms.warehouse.cust-price.modal.action.posted')
 
 @endsection
 @section('script')
@@ -775,6 +776,7 @@
                 cust_id: $('#custprice-create-customercode').val(),
                 valas: $('#custprice-create-valas').val(),
                 active_date: $('#custprice-create-activedate').val().split("/").reverse().join("-"),
+                price_by: $('#custprice-create-priceby').val(),
                 items: items_fix
             };
             // Cek
@@ -887,19 +889,20 @@
             var cust = $(this).data('custid');
             var date = $(this).data('activedate');
             modalAction('#custprice-modal-index', 'hide').then(() => {
-                ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
-                    var msg = resolve.message;
-                    Swal.fire({
-                        title: 'Notification',
-                        text: msg,
-                        icon: 'success'
-                    }).then(answer => {
-                        // index_data.then(resolve => {
-                        //     resolve.ajax.reload();
-                        // });
-                        tbl_custprice_index();
-                    });
-                });
+                // modalAction('#custprice-modal-post');
+                // ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+                //     var msg = resolve.message;
+                //     Swal.fire({
+                //         title: 'Notification',
+                //         text: msg,
+                //         icon: 'success'
+                //     }).then(answer => {
+                //         // index_data.then(resolve => {
+                //         //     resolve.ajax.reload();
+                //         // });
+                //         tbl_custprice_index();
+                //     });
+                // });
             });
         });
 
