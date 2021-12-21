@@ -236,6 +236,7 @@
                                 .addClass('custprice-act-posted')
                                 .attr('data-custid', cust_id)
                                 .attr('data-activedate', active_date.split('/').reverse().join('-'))
+                                .attr('data-priceby', price_by)
                                 .text('Post');;
                         }else{
                             $('#custprice-btn-index-post')
@@ -243,8 +244,12 @@
                                 .addClass('custprice-act-unposted')
                                 .attr('data-custid', cust_id)
                                 .attr('data-activedate', active_date.split('/').reverse().join('-'))
+                                .attr('data-priceby', price_by)
                                 .text('Unpost');
                         }
+                        
+                        $('#custprice-create-valas').prop('disabled', true);
+                        $('#custprice-create-priceby').prop('disabled', true);
                     }
                 });
             });
@@ -625,8 +630,8 @@
         });
 
         $(document).on('click', '.custprice-act-view', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
@@ -685,8 +690,8 @@
         });
 
         $(document).on('click', '.custprice-act-edit', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
 
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
@@ -792,48 +797,112 @@
                     rou  = rou.replace(':cust', $('#custprice-create-customercode').val());
                     rou  = rou.replace(':active', $('#custprice-create-activedate').val().split("/").reverse().join("-"));
                 }
-                submit(rou, data);
+                // submit(rou, data);
+
+                var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+                var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
+                var priceby = $('#custprice-create-priceby').val(); // $(this).data('priceby');
+                // modalAction('#custprice-modal-index', 'hide').then(() => {
+                    modalAction('#custprice-modal-post').then(() => {
+                        $('#custprice-post-id').val(cust);
+                        $('#custprice-post-activedate').val(date);
+                        $('#custprice-post-priceby').val(priceby);
+                        if ($('#custprice-post-priceby').val() == 'SO') {
+                            $('#custprice-post-sso').prop('disabled', false);
+                            $('#custprice-post-sj').prop('disabled', false);
+
+                            $('#custprice-post-stock').prop('checked', true);
+                            $('#custprice-post-sso').prop('checked', true);
+                            $('#custprice-post-so').prop('checked', true);
+                            $('#custprice-post-sj').prop('checked', true);
+                        }else{
+                            $('#custprice-post-stock').prop('checked', true);
+                            $('#custprice-post-so').prop('checked', true);
+                            $('#custprice-post-sso').prop('checked', false);
+                            $('#custprice-post-sj').prop('checked', false);
+
+                            $('#custprice-post-sso').prop('disabled', true);
+                            $('#custprice-post-sj').prop('disabled', true);
+                        }
+
+                        $('#custprice-btn-post-submit').addClass('d-none');
+                        $('#custprice-btn-post-submit-save').removeClass('d-none');
+
+                        $('#custprice-btn-post-submit-save').off('click').on('click', function () {
+                            var post_data = {
+                                post: {
+                                    cust_id: $('#custprice-post-id').val(),
+                                    date: $('#custprice-post-activedate').val(),
+                                    priceby: $('#custprice-post-priceby').val(),
+                                    stock: $('#custprice-post-stock').is(':checked'),
+                                    so: $('#custprice-post-so').is(':checked'),
+                                    sso: $('#custprice-post-sso').is(':checked'),
+                                    sj: $('#custprice-post-sj').is(':checked'),
+                                }
+                            };
+                            data = {...data, ...post_data};
+                            submit(rou, data);
+                        });
+                    });
+                // });
             });
         });
 
         function submit(route, data) {
             var method = (route == "{{route('tms.warehouse.cust_price.save')}}" ? "POST" : "PUT");
-            var cust_id = data.cust_id;
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You will save and post!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, save and post it!'
-            }).then((result) => {
-                if (result.value == true) {
-                    loading_start();
-                    ajaxCall({route: route, method: method, data: data}).then(resolve => {
-                        var msg = resolve.message;
-                        if (resolve.status == true) {
-                            modalAction('#custprice-modal-index', 'hide');
-                            Swal.fire({
-                                title: 'Notification',
-                                text: msg,
-                                icon: 'success'
-                            }).then(answer => {
-                                // index_data.then(resolve => {
-                                //     resolve.ajax.reload();
-                                // });
-                                // tbl_index_bycust(cust_id);
-                                tbl_custprice_index();
-                            });
-                        }
+            loading_start();
+            ajaxCall({route: route, method: method, data: data}).then(resolve => {
+                var msg = resolve.message;
+                if (resolve.status == true) {
+                    modalAction('#custprice-modal-index', 'hide');
+                    Swal.fire({
+                        title: 'Notification',
+                        text: msg,
+                        icon: 'success'
+                    }).then(answer => {
+                        modalAction('#custprice-modal-post', 'hide').then(() => {
+                            tbl_custprice_index();
+                        });
                     });
                 }
-            })
+            });
+
+            
+            // Swal.fire({
+            //     title: 'Are you sure?',
+            //     text: "You will save and post!",
+            //     icon: 'warning',
+            //     showCancelButton: true,
+            //     confirmButtonColor: '#3085d6',
+            //     cancelButtonColor: '#d33',
+            //     confirmButtonText: 'Yes, save and post it!'
+            // }).then((result) => {
+            //     if (result.value == true) {
+            //         loading_start();
+            //         ajaxCall({route: route, method: method, data: data}).then(resolve => {
+            //             var msg = resolve.message;
+            //             if (resolve.status == true) {
+            //                 modalAction('#custprice-modal-index', 'hide');
+            //                 Swal.fire({
+            //                     title: 'Notification',
+            //                     text: msg,
+            //                     icon: 'success'
+            //                 }).then(answer => {
+            //                     // index_data.then(resolve => {
+            //                     //     resolve.ajax.reload();
+            //                     // });
+            //                     // tbl_index_bycust(cust_id);
+            //                     tbl_custprice_index();
+            //                 });
+            //             }
+            //         });
+            //     }
+            // })
         }
 
         $(document).on('click', '.custprice-act-voided', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
             ajaxCall({route: "{{route('tms.warehouse.cust_price.voided')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
                 var msg = resolve.message;
                 Swal.fire({
@@ -850,8 +919,8 @@
         });
 
         $(document).on('click', '.custprice-act-unvoided', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
             Swal.fire({
                 title: `Do you want to unvoid Cust Price, now?`,
                 input: 'text',
@@ -886,29 +955,64 @@
         });
 
         $(document).on('click', '.custprice-act-posted', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
+            var priceby = $('#custprice-create-priceby').val(); // $(this).data('priceby');
             modalAction('#custprice-modal-index', 'hide').then(() => {
-                // modalAction('#custprice-modal-post');
-                // ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
-                //     var msg = resolve.message;
-                //     Swal.fire({
-                //         title: 'Notification',
-                //         text: msg,
-                //         icon: 'success'
-                //     }).then(answer => {
-                //         // index_data.then(resolve => {
-                //         //     resolve.ajax.reload();
-                //         // });
-                //         tbl_custprice_index();
-                //     });
-                // });
+                modalAction('#custprice-modal-post').then(() => {
+                    $('#custprice-btn-post-submit').removeClass('d-none');
+                    $('#custprice-btn-post-submit-save').addClass('d-none');
+
+                    $('#custprice-post-id').val(cust);
+                    $('#custprice-post-activedate').val(date);
+                    $('#custprice-post-priceby').val(priceby);
+                    if ($('#custprice-post-priceby').val() == 'SO') {
+                        $('#custprice-post-sso').prop('disabled', false);
+                        $('#custprice-post-sj').prop('disabled', false);
+
+                        $('#custprice-post-stock').prop('checked', true);
+                        $('#custprice-post-sso').prop('checked', true);
+                        $('#custprice-post-so').prop('checked', true);
+                        $('#custprice-post-sj').prop('checked', true);
+                    }else{
+                        $('#custprice-post-stock').prop('checked', true);
+                        $('#custprice-post-so').prop('checked', true);
+                        $('#custprice-post-sso').prop('checked', false);
+                        $('#custprice-post-sj').prop('checked', false);
+
+                        $('#custprice-post-sso').prop('disabled', true);
+                        $('#custprice-post-sj').prop('disabled', true);
+                    }
+                });
+            });
+        });
+        $(document).on('click', '#custprice-btn-post-submit', function () {
+            const data = {
+                cust_id: $('#custprice-post-id').val(),
+                date: $('#custprice-post-activedate').val(),
+                priceby: $('#custprice-post-priceby').val(),
+                stock: $('#custprice-post-stock').is(':checked'),
+                so: $('#custprice-post-so').is(':checked'),
+                sso: $('#custprice-post-sso').is(':checked'),
+                sj: $('#custprice-post-sj').is(':checked'),
+            };
+            ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: data}).then(resolve => {
+                var msg = resolve.message;
+                Swal.fire({
+                    title: 'Notification',
+                    text: msg,
+                    icon: 'success'
+                }).then(answer => {
+                    modalAction('#custprice-modal-post', 'hide').then(() => {
+                        tbl_custprice_index();
+                    });
+                });
             });
         });
 
         $(document).on('click', '.custprice-act-unposted', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
             modalAction('#custprice-modal-index', 'hide').then(() => {
                 Swal.fire({
                     title: `Do you want to unposted now?`,
@@ -947,8 +1051,8 @@
         
         var tbl_log;
         $(document).on('click', '.custprice-act-log', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
             modalAction('#custprice-modal-log').then(resolve => {
                 tbl_log = $('#custprice-datatables-log').DataTable({
                     processing: true,
@@ -983,8 +1087,8 @@
         });
 
         $(document).on('click', '.custprice-act-print', function () {
-            var cust = $(this).data('custid');
-            var date = $(this).data('activedate');
+            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
             var encrypt = btoa(`${cust}&${date}`);
             // index_data.then(resolve => {
             //     resolve.ajax.reload();
@@ -1016,6 +1120,9 @@
             isHidden('#custprice-btn-index-submit', false);
             $('input').not('.readonly-first').prop('readonly', false);
             isHidden('#custprice-btn-action', true);
+
+            $('#custprice-create-valas').prop('disabled', false);
+            $('#custprice-create-priceby').prop('disabled', false);
         }
         function date_convert($date) {
             if ($date == null) { return null; }

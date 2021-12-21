@@ -38,16 +38,21 @@
     .bg-y {
         background-color: #FFEF78;
     }
-    .custom-control-lg .custom-control-label::before,
-    .custom-control-lg .custom-control-label::after {
-        top: 0.1rem !important;
-        left: -2rem !important;
-        width: 1.25rem !important;
-        height: 1.25rem !important;
+    .form-check {
+        padding: 0;
     }
-
-    .custom-control-lg .custom-control-label {
-        margin-left: 0.5rem !important;
-        font-size: 1rem !important;
+    .form-check .custom-control-label {
+        font-size: 14px;
+        line-height: 2.0;
+        padding-left:10px;
+    }
+    .form-check .custom-control-label::after,
+    .form-check .custom-control-label::before {
+        height: 25px;
+        width: 25px;
+    }
+    .form-check .custom-control-label::before {
+        background-color: #fff;
+        border: 1px solid #2c2b2c;
     }
 </style>

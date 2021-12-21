@@ -31,6 +31,10 @@ class CustPrice extends Model
         'printed_date',
         'is_active',
         'is_update',
+        'is_stock',
+        'is_so',
+        'is_sso',
+        'is_sj',
     ];
     protected $hidden = [];
     public $timestamps = false;

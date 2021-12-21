@@ -165,14 +165,21 @@ class CustPriceController extends Controller
                     $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                 }
                 $query = CustPrice::insert($data);
-                $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                    'cust_id' => $request->cust_id,
-                    'active_date' => $request->active_date,
-                    'written_date' => Carbon::now(),
-                    'status' => 'ADD',
-                    'user' => Auth::user()->FullName,
-                    'note' => null
-                ]);
+                if ($query) {
+                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                        'cust_id' => $request->cust_id,
+                        'active_date' => $request->active_date,
+                        'written_date' => Carbon::now(),
+                        'status' => 'ADD',
+                        'user' => Auth::user()->FullName,
+                        'note' => null
+                    ]);
+                }
+
+                $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
+                $is_so = ($request->post['so'] == 'true') ? 1 : 0;
+                $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
+                $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
 
                 // Post
                 $posted = CustPrice::where([
@@ -180,10 +187,14 @@ class CustPriceController extends Controller
                         'active_date' => $request->active_date
                     ])->update([
                         'posted_date' => Carbon::now(),
-                        'posted_by' => Auth::user()->FullName
+                        'posted_by' => Auth::user()->FullName,
+                        'is_stock' => $is_stock,
+                        'is_so' => $is_so,
+                        'is_sso' => $is_sso,
+                        'is_sj' => $is_sj
                     ]);
                 if ($posted) {
-                    $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                         'cust_id' => $request->cust_id,
                         'active_date' => $request->active_date,
                         'written_date' => Carbon::now(),
@@ -244,7 +255,8 @@ class CustPriceController extends Controller
                     'updated_date' => Carbon::now(),
                     'created_by' => $create_by,
                     'created_date' => $create_date,
-                    'is_update' => $is_update
+                    'is_update' => $is_update,
+                    'price_by' => $request->price_by
                 ];
             }
             DB::beginTransaction();
@@ -254,25 +266,35 @@ class CustPriceController extends Controller
                     ->where('entry_custprice_tbl.status', 'ACTIVE')
                     ->delete();
                 $query = CustPrice::insert($data);
-                $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                    'cust_id' => $request->cust_id,
-                    'active_date' => $request->active_date,
-                    'written_date' => Carbon::now(),
-                    'status' => 'EDIT',
-                    'user' => Auth::user()->FullName,
-                    'note' => null
-                ]);
+                if ($query) {
+                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                        'cust_id' => $request->cust_id,
+                        'active_date' => $request->active_date,
+                        'written_date' => Carbon::now(),
+                        'status' => 'EDIT',
+                        'user' => Auth::user()->FullName,
+                        'note' => null
+                    ]);
+                }
 
                 // Post
+                $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
+                $is_so = ($request->post['so'] == 'true') ? 1 : 0;
+                $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
+                $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
                 $posted = CustPrice::where([
                         'cust_id' => $request->cust_id,
                         'active_date' => $request->active_date
                     ])->update([
                         'posted_date' => Carbon::now(),
-                        'posted_by' => Auth::user()->FullName
+                        'posted_by' => Auth::user()->FullName,
+                        'is_stock' => $is_stock,
+                        'is_so' => $is_so,
+                        'is_sso' => $is_sso,
+                        'is_sj' => $is_sj
                     ]);
                 if ($posted) {
-                    $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
                         'cust_id' => $request->cust_id,
                         'active_date' => $request->active_date,
                         'written_date' => Carbon::now(),
@@ -370,12 +392,21 @@ class CustPriceController extends Controller
             return _Error('Customer Price has been voided');
         }
 
+        $is_stock = ($request->stock == 'true') ? 1 : 0;
+        $is_so = ($request->so == 'true') ? 1 : 0;
+        $is_sso = ($request->sso == 'true') ? 1 : 0;
+        $is_sj = ($request->sj == 'true') ? 1 : 0;
+
         $posted = CustPrice::where([
                 'cust_id' => $request->cust_id,
                 'active_date' => $request->date
             ])->update([
                 'posted_date' => Carbon::now(),
-                'posted_by' => Auth::user()->FullName
+                'posted_by' => Auth::user()->FullName,
+                'is_stock' => $is_stock,
+                'is_so' => $is_so,
+                'is_sso' => $is_sso,
+                'is_sj' => $is_sj
             ]);
         if ($posted) {
             $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
@@ -408,7 +439,11 @@ class CustPriceController extends Controller
                 'active_date' => $request->date
             ])->update([
                 'posted_date' => null,
-                'posted_by' => null
+                'posted_by' => null,
+                'is_stock' => 0,
+                'is_so' => 0,
+                'is_sso' => 0,
+                'is_sj' => 0
             ]);
         if ($unposted) {
             $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
