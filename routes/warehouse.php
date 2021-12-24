@@ -276,3 +276,7 @@ Route::get('/warehouse/customer_price/{code}/print', [
     'uses' => 'TMS\Warehouse\CustPriceController@print', 
     'as' => 'tms.warehouse.cust_price.print'
 ]);
+Route::get('/warehouse/customer_price/trigger', [
+    'uses' => 'TMS\Warehouse\CustPriceController@trigger', 
+    'as' => 'tms.warehouse.cust_price.trigger'
+]);

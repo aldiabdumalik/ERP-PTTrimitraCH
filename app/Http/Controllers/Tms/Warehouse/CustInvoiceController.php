@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\CustInvTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\CustInvoice;
+use App\Models\Dbtbs\DoEntry;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -144,51 +145,57 @@ class CustInvoiceController extends Controller
                 }
             }
 
-            for ($i=0; $i < count($item); $i++) { 
-                $data_insert[] = [
-                    'inv_no' => $request->inv_no,
-                    'inv_type' => $request->inv_type,
-                    'do_no' => $item[$i][1],
-                    'cust_id' => $request->inv_customercode,
-                    'combine_id' => $request->inv_customerdoaddr,
-                    'cust_type' => null,
-                    'do_addr' => null,
-                    'cust_contact' => $request->inv_an,
-                    'ref_no' => $request->inv_refno,
-                    'pref_tax' => $request->inv_vat1,
-                    'tax_no' => $request->inv_vat2,
-                    'tax_rate' => $request->inv_vat3,
-                    'periode' => $request->inv_priod,
-                    'due_date' => $request->inv_duedate,
-                    'branch' => $request->inv_branch,
-                    // 'warehouse' => $request->inv_no,
-                    'valas' => $request->inv_currencytype,
-                    'rate' => str_replace(',', '', $request->inv_currencyvalue),
-                    'amount_sub' => str_replace(',', '', $request->inv_subtotal),
-                    'amount_dis' => str_replace(',', '', $request->inv_cndisc),
-                    'amount_tax' => str_replace(',', '', $request->inv_vat),
-                    'amount_cn' => 0.00,
-                    'amount_dn' => 0.00,
-                    'amount_pay' => str_replace(',', '', $request->inv_payment),
-                    'amount_bal' => str_replace(',', '', $request->inv_balance),
-                    'amount_exp' => 0.00,
-                    'amount_cos' => 0.00,
-                    'commission' => 0.00,
-                    'term' => $request->inv_term,
-                    'totline' => $request->inv_totline,
-                    'glar' => $request->inv_glcode,
-                    'remark' => $request->inv_remark,
-                    'note_po' => implode(', ', $tmp_po),
-                    'note_sj' => implode(', ', $tmp_sj),
-                    'written_date' => Carbon::now(),
-                    'written_by' => Auth::user()->FullName
-                ];
-            }
+            DB::beginTransaction();
             try {
+                for ($i=0; $i < count($item); $i++) { 
+                    $data_insert[] = [
+                        'inv_no' => $request->inv_no,
+                        'inv_type' => $request->inv_type,
+                        'do_no' => $item[$i][1],
+                        'cust_id' => $request->inv_customercode,
+                        'combine_id' => $request->inv_customerdoaddr,
+                        'cust_type' => null,
+                        'do_addr' => null,
+                        'cust_contact' => $request->inv_an,
+                        'ref_no' => $request->inv_refno,
+                        'pref_tax' => $request->inv_vat1,
+                        'tax_no' => $request->inv_vat2,
+                        'tax_rate' => $request->inv_vat3,
+                        'periode' => $request->inv_priod,
+                        'due_date' => $request->inv_duedate,
+                        'branch' => $request->inv_branch,
+                        // 'warehouse' => $request->inv_no,
+                        'valas' => $request->inv_currencytype,
+                        'rate' => str_replace(',', '', $request->inv_currencyvalue),
+                        'amount_sub' => str_replace(',', '', $request->inv_subtotal),
+                        'amount_dis' => str_replace(',', '', $request->inv_cndisc),
+                        'amount_tax' => str_replace(',', '', $request->inv_vat),
+                        'amount_cn' => 0.00,
+                        'amount_dn' => 0.00,
+                        'amount_pay' => str_replace(',', '', $request->inv_payment),
+                        'amount_bal' => str_replace(',', '', $request->inv_balance),
+                        'amount_exp' => 0.00,
+                        'amount_cos' => 0.00,
+                        'commission' => 0.00,
+                        'term' => $request->inv_term,
+                        'totline' => $request->inv_totline,
+                        'glar' => $request->inv_glcode,
+                        'remark' => $request->inv_remark,
+                        'note_po' => implode(', ', $tmp_po),
+                        'note_sj' => implode(', ', $tmp_sj),
+                        'written_date' => Carbon::now(),
+                        'written_by' => Auth::user()->FullName
+                    ];
+
+                    DoEntry::where('do_no', $item[$i][1])->update([
+                        'invoice_date' => date('Y-m-d')
+                    ]);
+                }
+            
                 $query = CustInvoice::insert($data_insert);
                 if ($query) {
                     $note = "Qty:".array_sum(array_column($item, 7))."/Total:".str_replace(',', '', $request->inv_subtotal);
-                    $log = $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
+                    $this->createGlobalLog('db_tbs.entry_custinvoice_tbl_log', [
                         'inv_no' => $request->inv_no,
                         'status' => 'ADD',
                         'note' => $note,
@@ -196,8 +203,10 @@ class CustInvoiceController extends Controller
                         'written_by' => Auth::user()->FullName
                     ]);
                 }
+                DB::commit();
                 return _Success('Saved successfully!', 201);
             } catch (Exception $e) {
+                DB::rollBack();
                 return _Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
@@ -206,6 +215,7 @@ class CustInvoiceController extends Controller
 
     public function update($inv_no, Request $request)
     {
+        
         if ($request->ajax()) {
             $old = CustInvoice::where('inv_no', $inv_no)->first();
             $create_by = $old->written_by;
@@ -222,50 +232,54 @@ class CustInvoiceController extends Controller
                     array_push($tmp_sj, $item[$x][2]);
                 }
             }
-
-            for ($i=0; $i < count($item); $i++) { 
-                $data_insert[] = [
-                    'inv_no' => $request->inv_no,
-                    'inv_type' => $request->inv_type,
-                    'do_no' => $item[$i][1],
-                    'cust_id' => $request->inv_customercode,
-                    'combine_id' => $request->inv_customerdoaddr,
-                    'cust_type' => null,
-                    'do_addr' => null,
-                    'cust_contact' => $request->inv_an,
-                    'ref_no' => $request->inv_refno,
-                    'pref_tax' => $request->inv_vat1,
-                    'tax_no' => $request->inv_vat2,
-                    'tax_rate' => $request->inv_vat3,
-                    'periode' => $request->inv_priod,
-                    'due_date' => $request->inv_duedate,
-                    'branch' => $request->inv_branch,
-                    // 'warehouse' => $request->inv_no,
-                    'valas' => $request->inv_currencytype,
-                    'rate' => str_replace(',', '', $request->inv_currencyvalue),
-                    'amount_sub' => str_replace(',', '', $request->inv_subtotal),
-                    'amount_dis' => str_replace(',', '', $request->inv_cndisc),
-                    'amount_tax' => str_replace(',', '', $request->inv_vat),
-                    'amount_cn' => 0.00,
-                    'amount_dn' => 0.00,
-                    'amount_pay' => str_replace(',', '', $request->inv_payment),
-                    'amount_bal' => str_replace(',', '', $request->inv_balance),
-                    'amount_exp' => 0.00,
-                    'amount_cos' => 0.00,
-                    'commission' => 0.00,
-                    'term' => $request->inv_term,
-                    'totline' => $request->inv_totline,
-                    'glar' => $request->inv_glcode,
-                    'remark' => $request->inv_remark,
-                    'note_po' => implode(', ', $tmp_po),
-                    'note_sj' => implode(', ', $tmp_sj),
-                    'written_date' => $create_date,
-                    'written_by' => $create_by,
-                    'updated_date' => Carbon::now(),
-                    'updated_by' => Auth::user()->FullName
-                ];
-            }
+            DB::beginTransaction();
             try {
+                for ($i=0; $i < count($item); $i++) { 
+                    $data_insert[] = [
+                        'inv_no' => $request->inv_no,
+                        'inv_type' => $request->inv_type,
+                        'do_no' => $item[$i][1],
+                        'cust_id' => $request->inv_customercode,
+                        'combine_id' => $request->inv_customerdoaddr,
+                        'cust_type' => null,
+                        'do_addr' => null,
+                        'cust_contact' => $request->inv_an,
+                        'ref_no' => $request->inv_refno,
+                        'pref_tax' => $request->inv_vat1,
+                        'tax_no' => $request->inv_vat2,
+                        'tax_rate' => $request->inv_vat3,
+                        'periode' => $request->inv_priod,
+                        'due_date' => $request->inv_duedate,
+                        'branch' => $request->inv_branch,
+                        // 'warehouse' => $request->inv_no,
+                        'valas' => $request->inv_currencytype,
+                        'rate' => str_replace(',', '', $request->inv_currencyvalue),
+                        'amount_sub' => str_replace(',', '', $request->inv_subtotal),
+                        'amount_dis' => str_replace(',', '', $request->inv_cndisc),
+                        'amount_tax' => str_replace(',', '', $request->inv_vat),
+                        'amount_cn' => 0.00,
+                        'amount_dn' => 0.00,
+                        'amount_pay' => str_replace(',', '', $request->inv_payment),
+                        'amount_bal' => str_replace(',', '', $request->inv_balance),
+                        'amount_exp' => 0.00,
+                        'amount_cos' => 0.00,
+                        'commission' => 0.00,
+                        'term' => $request->inv_term,
+                        'totline' => $request->inv_totline,
+                        'glar' => $request->inv_glcode,
+                        'remark' => $request->inv_remark,
+                        'note_po' => implode(', ', $tmp_po),
+                        'note_sj' => implode(', ', $tmp_sj),
+                        'written_date' => $create_date,
+                        'written_by' => $create_by,
+                        'updated_date' => Carbon::now(),
+                        'updated_by' => Auth::user()->FullName
+                    ];
+                    DoEntry::where('do_no', $item[$i][1])->update([
+                        'invoice_date' => date('Y-m-d')
+                    ]);
+                }
+            
                 // delete dulu
                 $delete = CustInvoice::where('inv_no', $inv_no)->delete();
 
@@ -280,8 +294,10 @@ class CustInvoiceController extends Controller
                         'written_by' => Auth::user()->FullName
                     ]);
                 }
+                DB::commit();
                 return _Success('Update successfully!', 201);
             } catch (Exception $e) {
+                DB::rollBack();
                 return _Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }

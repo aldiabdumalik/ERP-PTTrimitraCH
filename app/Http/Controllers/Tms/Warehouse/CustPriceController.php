@@ -616,6 +616,43 @@ class CustPriceController extends Controller
         }
     }
 
+    public function trigger()
+    {
+        $cust = 'Y02';
+        $act_date = date('Y-m', strtotime('2020-01-01'));
+        $so = DB::table('db_tbs.entry_so_tbl as so')
+                ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
+                    $join->on('sso.so_header', '=', 'so.so_header');
+                    $join->on('sso.item_code', '=', 'so.item_code');
+                })
+                ->leftJoin('db_tbs.entry_do_tbl as sj', function ($join){
+                    $join->on('sj.so_no', '=', 'so.so_header');
+                    $join->on('sj.sso_no', '=', 'sso.sso_header');
+                    $join->on('sj.item_code', '=', 'so.item_code');
+                })
+                ->where('so.cust_id', $cust)
+                ->where('so.so_period', $act_date)
+                ->whereNull('sj.invoice_date')
+                ->select([
+                    'so.so_header',
+                    'so.so_period',
+                    'so.tax_rate as so_tax_rate',
+                    'so.item_code as so_item_code',
+                    'so.price as so_price',
+                    'so.qty_so as so_qty_so',
+                    'so.sub_amount as so_sub_amount',
+                    'so.tot_vat as so_tot_vat',
+                    'so.total_amount as so_total_amount',
+                    'sso.sso_header as sso_header',
+                    'sj.do_no as sj_number',
+                ])
+                ->count();
+                // ->limit(100)
+                // ->offset(0)
+                // ->get();
+        return $so;
+    }
+
     private function _oldPrice($itemcode)
     {
         $query = CustPrice::where('item_code', $itemcode)
