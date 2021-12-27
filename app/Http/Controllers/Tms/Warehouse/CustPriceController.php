@@ -4,6 +4,7 @@ namespace App\Http\Controllers\TMS\Warehouse;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
+use App\Jobs\CustPricePosted;
 use App\Models\Dbtbs\CustPrice;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
@@ -618,6 +619,7 @@ class CustPriceController extends Controller
 
     public function trigger()
     {
+        // CustPricePosted::dispatch();
         $cust = 'Y02';
         $act_date = date('Y-m', strtotime('2020-01-01'));
         $so = DB::table('db_tbs.entry_so_tbl as so')
