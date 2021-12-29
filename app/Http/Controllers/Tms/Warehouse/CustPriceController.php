@@ -129,6 +129,10 @@ class CustPriceController extends Controller
         $items = $request->items;
         $is_update = 0;
         $price_old = 0;
+        $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
+        $is_so = ($request->post['so'] == 'true') ? 1 : 0;
+        $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
+        $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
                 $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
@@ -151,20 +155,33 @@ class CustPriceController extends Controller
                     'created_by' => Auth::user()->FullName,
                     'created_date' => Carbon::now(),
                     'is_update' => $is_update,
-                    'price_by' => $request->price_by
+                    'price_by' => $request->price_by,
+                    'is_stock' => $is_stock,
+                    'is_so' => $is_so,
+                    'is_sso' => $is_sso,
+                    'is_sj' => $is_sj
                 ];
             }
             DB::beginTransaction();
             try {
+                $isext = 0;
                 if ($request->price_by == 'DATE') {
                     $cekBln = CustPrice::where('cust_id', $request->cust_id)
                         ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
+                        ->whereYear('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'Y'))
                         ->first();
                     if (!$cekBln) {
+                        $isext = 0;
                         $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    }else{
+                        $isext = 1;
                     }
+
+                    // Trigger By Date
+                    // $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
                 }else{
                     $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    // $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
                 }
                 $query = CustPrice::insert($data);
                 if ($query) {
@@ -178,10 +195,10 @@ class CustPriceController extends Controller
                     ]);
                 }
 
-                $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
-                $is_so = ($request->post['so'] == 'true') ? 1 : 0;
-                $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
-                $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
+                // $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
+                // $is_so = ($request->post['so'] == 'true') ? 1 : 0;
+                // $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
+                // $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
 
                 // Post
                 $posted = CustPrice::where([
@@ -231,6 +248,10 @@ class CustPriceController extends Controller
         //     ->delete();
         $is_update = 0;
         $price_old = 0;
+        $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
+        $is_so = ($request->post['so'] == 'true') ? 1 : 0;
+        $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
+        $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
                 $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
@@ -258,11 +279,34 @@ class CustPriceController extends Controller
                     'created_by' => $create_by,
                     'created_date' => $create_date,
                     'is_update' => $is_update,
-                    'price_by' => $request->price_by
+                    'price_by' => $request->price_by,
+                    'is_stock' => $is_stock,
+                    'is_so' => $is_so,
+                    'is_sso' => $is_sso,
+                    'is_sj' => $is_sj
                 ];
             }
             DB::beginTransaction();
             try {
+                $isext = 0;
+                if ($request->price_by == 'DATE') {
+                    $cekBln = CustPrice::where('cust_id', $request->cust_id)
+                        ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
+                        ->whereYear('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'Y'))
+                        ->first();
+                    if (!$cekBln) {
+                        $isext = 0;
+                        // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    }else{
+                        $isext = 1;
+                    }
+
+                    // Trigger By Date
+                    // $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
+                }else{
+                    // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    // $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
+                }
                 $old_data = CustPrice::where('cust_id', $cust)
                     ->where('active_date', $active)
                     ->where('entry_custprice_tbl.status', 'ACTIVE')
@@ -280,10 +324,10 @@ class CustPriceController extends Controller
                 }
 
                 // Post
-                $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
-                $is_so = ($request->post['so'] == 'true') ? 1 : 0;
-                $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
-                $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
+                // $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
+                // $is_so = ($request->post['so'] == 'true') ? 1 : 0;
+                // $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
+                // $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
                 $posted = CustPrice::where([
                         'cust_id' => $request->cust_id,
                         'active_date' => $request->active_date
