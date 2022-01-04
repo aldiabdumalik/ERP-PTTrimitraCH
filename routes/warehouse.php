@@ -147,6 +147,20 @@ Route::post('/warehouse/do_entry/cancel_form', [
 ]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |   TMS - WAREHOUSE - DO PENDING ENTRY
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    |
+*/
+Route::get('/warehouse/do_pending_entry', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@index', 
+    'as' => 'tms.warehouse.do_pending.index'
+]);
+Route::post('/warehouse/do_pending_entry/index_table', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@index_table', 
+    'as' => 'tms.warehouse.do_pending.tbl_index'
+]);
+/*
+    | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |   TMS - WAREHOUSE - RR ENTRY
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |
