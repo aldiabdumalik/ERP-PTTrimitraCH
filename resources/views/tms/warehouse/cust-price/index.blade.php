@@ -87,19 +87,19 @@
                     var rows = api.rows( {page:'current'} ).nodes();
                     var last=null;
                     var x = 1;
-
-                    
                     api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
-                        var cellNode = api.cell(i, 1).node();
-                        var cust = group.split(' ')[0];
-                        var date = group.split(' ')[2];
+                        // var cellNode = api.cell(i, 1).node();
+                        // var cust = group.split(' ')[0];
+                        // var date = group.split(' ')[2];
+                        var arr_group = group.split('|');
                         if (last !== group) {
                             x = 1;
                         }
                         if ( last !== group ) {
                             $(rows).eq( i ).before(`
-                                <tr class="group bg-y" data-id="${group}">
-                                    <td colspan="6" class="text-bold align-middle">${group}</td>
+                                <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
+                                    <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
+                                    <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
                                 </tr>
                             `);
 
@@ -145,27 +145,24 @@
                 ],
                 displayLength: 50,
                 drawCallback: function ( settings ) {
-                    var api = this.api();
-                    var rows = api.rows( {page:'current'} ).nodes();
-                    var last=null;
-                    var x = 1;
+                    // var cellNode = api.cell(i, 1).node();
+                    // var cust = group.split(' ')[0];
+                    // var date = group.split(' ')[2];
+                    var arr_group = group.split('|');
+                    if (last !== group) {
+                        x = 1;
+                    }
+                    if ( last !== group ) {
+                        $(rows).eq( i ).before(`
+                            <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
+                                <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
+                                <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
+                            </tr>
+                        `);
 
-                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
-                        var cellNode = api.cell(i, 1).node();
-                        if (last !== group) {
-                            x = 1;
-                        }
-                        if ( last !== group ) {
-                            $(rows).eq( i ).before(`
-                                <tr class="group bg-y" data-id="${group}">
-                                    <td colspan="6" class="text-bold">${group}</td>
-                                </tr>
-                            `);
-
-                            last = group;
-                        }
-                        // $(cellNode).html(`${x++} ${$(cellNode).text()}`);
-                    });
+                        last = group;
+                    }
+                    // $(cellNode).html(`${x++} ${$(cellNode).text()}`);
                 }
             });
         }
@@ -187,7 +184,7 @@
                 isHidden('#custprice-btn-table-item', true);
                 isHidden('#custprice-btn-index-submit', true);
                 isHidden('#custprice-btn-action', false);
-                $('input').prop('readonly', true);
+                $('input').not('.custprice-dtsearch').prop('readonly', true);
                 loading_start();
                 ajaxCall({route: route, method: "GET"}).then(resolve => {
                     if (resolve.status == true) {
@@ -304,7 +301,27 @@
             });
         });
 
-        var tbl_item = $('#custprice-datatables-index').DataTable(tbl_attr([0,4,5]));
+        var tbl_item = $('#custprice-datatables-index').DataTable({
+            destroy: true,
+            lengthChange: false,
+            // searching: false,
+            sDom: 'lrtip',
+            paging: false,
+            ordering: false,
+            scrollY: "200px",
+            scrollCollapse: true,
+            fixedHeader: true,
+            columnDefs: [{
+                targets: [0,4,5],
+                createdCell:  function (td, cellData, rowData, row, col) {
+                    $(td).addClass('text-right');
+                }
+            }]
+        });
+
+        $(document).on('input', '#custprice-dtsearch', function () {
+            tbl_item.search($(this).val()).draw();
+        });
         
         $('#custprice-modal-index').on('shown.bs.modal', function () {
             adjustDraw(tbl_item);
@@ -413,9 +430,9 @@
                                 data.item_code,
                                 data.part_no,
                                 data.desc,
-                                `<input type="text" class="form-control form-control-sm text-right" value="${price_new}">`,
-                                currency(addZeroes(String(data.price_old))),
-                                // price_new
+                                `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${price_new}">`,
+                                // currency(addZeroes(String(data.price_old))),
+                                price_new
                             ]);
                             no++;
                             cust_id = data.cust_id;
@@ -440,6 +457,15 @@
                 // modalAction('#custprice-modal-item').then(function () {
                 //     getTblItem(cust_id);
                 // });
+            });
+        });
+
+        $(document).on('change click keyup input paste', '.item-price-text', function () {
+            $(this).val(function (index, value) {
+                return value.replace(/(?!\.)\D/g, "")
+                    .replace(/(?<=\..*)\./g, "")
+                    .replace(/(?<=\.\d\d).*/g, "")
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             });
         });
 
@@ -782,7 +808,7 @@
                 valas: $('#custprice-create-valas').val(),
                 active_date: $('#custprice-create-activedate').val().split("/").reverse().join("-"),
                 price_by: $('#custprice-create-priceby').val(),
-                items: items_fix
+                items: JSON.stringify(items_fix)
             };
             // Cek
             var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
@@ -1080,6 +1106,7 @@
             $('#custprice-create-priceby').val('DATE');
             $('#custprice-create-activedate').val("{{date('d/m/Y')}}");
             $('#custprice-create-entrydate').val("{{date('d/m/Y')}}");
+            $('#custprice-dtsearch').val(null);
             $(tbl_item.table().header())
                 .removeClass('bg-abu')
                 .addClass('btn-info');

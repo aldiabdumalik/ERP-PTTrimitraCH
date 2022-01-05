@@ -45,7 +45,7 @@ class CustPriceController extends Controller
                 ->where('entry_custprice_tbl.status', 'ACTIVE')
                 // ->groupBy(['cust_id', 'active_date'])
                 ->orderBy('entry_custprice_tbl.created_date', 'DESC')
-                ->orderBy('entry_custprice_tbl.item_code', 'ASC')
+                ->orderBy('part_no', 'ASC')
                 ->get();
         }else{
             $query = CustPrice::select([
@@ -65,7 +65,7 @@ class CustPriceController extends Controller
                 ->where('entry_custprice_tbl.cust_id', $request->customer)
                 // ->groupBy(['cust_id', 'active_date'])
                 ->orderBy('created_date', 'DESC')
-                ->orderBy('item_code', 'ASC')
+                ->orderBy('part_no', 'ASC')
                 ->get();
         }
             
@@ -93,7 +93,7 @@ class CustPriceController extends Controller
                 return rupiah(addZero($query->price_old));
             })
             ->addColumn('group', function($query){
-                    return "$query->cust_id - ".date('d/m/Y', strtotime($query->active_date));
+                    return "$query->cust_id|".date('d/m/Y', strtotime($query->active_date))."|Active date|$query->cust_name";
                 }
             )
             ->rawColumns(['action'])
@@ -119,6 +119,7 @@ class CustPriceController extends Controller
             ->where('cust_id', $cust)
             ->where('active_date', $date)
             ->where('entry_custprice_tbl.status', 'ACTIVE')
+            ->orderBy('entry_custprice_tbl.item_code', 'ASC')
             ->get();
         return _Success(null, 200, $query);
     }
@@ -126,7 +127,7 @@ class CustPriceController extends Controller
     public function save(Request $request)
     {
         $data = [];
-        $items = $request->items;
+        $items = json_decode($request->items, true);
         $is_update = 0;
         $price_old = 0;
         $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
@@ -241,7 +242,7 @@ class CustPriceController extends Controller
         $create_by = $cek->created_by;
         $create_date = $cek->created_date;
         $data = [];
-        $items = $request->items;
+        $items = json_decode($request->items, true);
         // $old_data = CustPrice::where('cust_id', $cust)
         //     ->where('active_date', $active)
         //     ->where('entry_custprice_tbl.status', 'ACTIVE')
@@ -526,7 +527,9 @@ class CustPriceController extends Controller
             ->where(function ($x) use ($cust, $date) {
                 $x->where('entry_custprice_tbl.cust_id', $cust);
                 $x->where('entry_custprice_tbl.active_date', $date);
-            })->get();
+            })
+            ->orderBy('entry_custprice_tbl.item_code', 'ASC')
+            ->get();
         if ($query->isEmpty()) {
             $request->session()->flash('message', 'Data Not Found!');
             return Redirect::back();
@@ -707,6 +710,7 @@ class CustPriceController extends Controller
             
             foreach ($data as $d) {
                 $item_i = $d['item_code'];
+                $act_date = $d['active_date'];
                 $so = DB::table('db_tbs.entry_so_tbl as so')
                     ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
                         $join->on('sso.so_header', '=', 'so.so_header');
@@ -718,8 +722,8 @@ class CustPriceController extends Controller
                         $join->on('sj.item_code', '=', 'so.item_code');
                     })
                     ->where('so.cust_id', $cust)
-                    ->where('so.so_period', '>=', $period)
-                    ->where('so.item_code', $d['item_code'])
+                    ->where('so.written_date', '>=', $act_date)
+                    ->where('so.item_code', $item_i)
                     ->whereNull('sj.invoice_date')
                     ->select([
                         'so.so_header',
@@ -738,9 +742,11 @@ class CustPriceController extends Controller
 
                 if ($so->isNotEmpty()) {
                     foreach ($so as $s) {
+                        $so_header = $s->so_header;
                         $sub_amt = $d['price_new'] * $s->so_qty_so;
                         $tot_vat = $sub_amt * $s->so_tax_rate / 100;
                         $total_amount = $sub_amt + $tot_vat;
+
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
                                 $join->on('sso.so_header', '=', 'so.so_header');
@@ -751,8 +757,7 @@ class CustPriceController extends Controller
                                 $join->on('sj.sso_no', '=', 'sso.sso_header');
                                 $join->on('sj.item_code', '=', 'so.item_code');
                             })
-                            ->where('so.cust_id', $cust)
-                            ->where('so.so_period', $period)
+                            ->where('so.so_header', $so_header)
                             ->where('so.item_code', $d['item_code'])
                             ->whereNull('sj.invoice_date')
                             ->update([
@@ -761,6 +766,19 @@ class CustPriceController extends Controller
                                 'so.tot_vat' => $tot_vat,
                                 'so.total_amount' => $total_amount
                             ]);
+                        
+                        if ($d['is_sj'] == 1) {
+                            $cvrt = date('Ymd', strtotime($act_date));
+                            $custprice_id = $cust.$cvrt;
+                            DB::table('db_tbs.entry_do_tbl as sj')
+                                ->where('sj.so_no', $so_header)
+                                ->where('sj.item_code', $d['item_code'])
+                                ->whereNull('sj.invoice_date')
+                                ->whereRaw('DATE(sj.created_date) >= ?', [$act_date])
+                                ->update([
+                                    'sj.custprice' => $custprice_id
+                                ]);
+                        }
                     }
                 }
 
@@ -780,9 +798,9 @@ class CustPriceController extends Controller
                     ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                         $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                     })
-                    ->where(function ($wh) use ($cust, $period, $item_i){
+                    ->where(function ($wh) use ($cust, $act_date, $item_i){
                         $wh->where('so_hdr.custcode', $cust);
-                        $wh->where('so_hdr.period', $period);
+                        $wh->where('so_hdr.written', '>=', $act_date);
                         $wh->where('so_dtl.itemcode', $item_i);
                         $wh->whereNull('inv_dtl.do_no');
                     })
@@ -800,176 +818,163 @@ class CustPriceController extends Controller
                     ])
                     ->get();
                 if ($so_tch->isNotEmpty()) {
-                    if ($data['is_so'] == 1) {
-                        $so_tch = DB::table('tch_tbs.soline as so_dtl')
-                            ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
-                            ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
-                                $join->on('sj_dtl.so_no', '=', 'so_dtl.so_no');
-                                $join->on('sj_dtl.itemcode', '=', 'so_dtl.itemcode');
-                            })
-                            ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
-                            ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
-                                $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
-                            })
-                            ->where(function ($wh) use ($cust, $period, $item_i){
-                                $wh->where('so_hdr.custcode', $cust);
-                                $wh->where('so_hdr.period', $period);
-                                $wh->where('so_dtl.itemcode', $item_i);
-                                $wh->whereNull('inv_dtl.do_no');
-                            })
-                            ->select([
-                                'so_dtl.so_no',
-                                'so_hdr.period as so_period',
-                                'so_hdr.taxrate as so_tax_rate',
-                                'so_dtl.itemcode as so_item_code',
-                                'so_dtl.price as so_price',
-                                'so_dtl.quantity as so_qty_so',
-                                'so_hdr.sub_amt as so_sub_amount',
-                                'so_hdr.tot_disc as so_tot_vat',
-                                'so_hdr.tot_amt as so_total_amount',
-                                'inv_dtl.do_no as inv_do'
-                            ])
-                            ->get();
-                        if ($so_tch->isNotEmpty()) {
-                            foreach ($so_tch as $s) {
-                                $sub_amt = $d['price_new'] * $s->so_qty_so;
-                                $tot_vat = $sub_amt * $s->so_tax_rate / 100;
-                                $total_amount = $sub_amt + $tot_vat;
-                                DB::table('tch_tbs.soline as so_dtl')
-                                    ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
-                                    ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
-                                        $join->on('sj_dtl.so_no', '=', 'so_dtl.so_no');
-                                        $join->on('sj_dtl.itemcode', '=', 'so_dtl.itemcode');
-                                    })
-                                    ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
-                                    ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
-                                        $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
-                                    })
-                                    ->where(function ($wh) use ($cust, $period, $item_i){
-                                        $wh->where('so_hdr.custcode', $cust);
-                                        $wh->where('so_hdr.period', $period);
-                                        $wh->where('so_dtl.itemcode', $item_i);
-                                        $wh->whereNull('inv_dtl.do_no');
-                                    })
-                                    ->update([
-                                        'so_dtl.price' => $d['price_new'],
-                                        'so_hdr.sub_amt' => $sub_amt,
-                                        'so_hdr.tot_disc' => $tot_vat,
-                                        'so_hdr.tot_amt' => $total_amount
-                                    ]);
-                            }
-                        }
-                    }
-                    if ($data['is_sso'] == 1) {
-                        $sso_tch = DB::table('tch_tbs.sso_dtl as sso_dtl')
-                            ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
-                            ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
-                                $join->on('sj_dtl.sso_no', '=', 'sso_dtl.sso_no');
-                                $join->on('sj_dtl.itemcode', '=', 'sso_dtl.itemcode');
-                            })
-                            ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
-                            ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
-                                $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
-                            })
-                            ->where(function ($wh) use ($cust, $period, $item_i){
-                                $wh->where('sso_hdr.custcode', $cust);
-                                $wh->where('sso_hdr.period', $period);
-                                $wh->where('sso_dtl.itemcode', $item_i);
-                                $wh->whereNull('inv_dtl.do_no');
-                            })
-                            ->select([
-                                'sso_dtl.so_no',
-                                'sso_hdr.period as sso_period',
-                                'sso_hdr.taxrate as sso_tax_rate',
-                                'sso_dtl.itemcode as sso_item_code',
-                                'sso_dtl.price as sso_price',
-                                'sso_dtl.quantity as sso_qty_sso',
-                                'sso_hdr.sub_amt as sso_sub_amount',
-                                'sso_hdr.tot_disc as sso_tot_vat',
-                                'sso_hdr.tot_amt as sso_total_amount',
-                                'inv_dtl.do_no as inv_do'
-                            ])
-                            ->get();
-                        if ($sso_tch->isNotEmpty()) {
-                            foreach ($sso_tch as $s) {
-                                $sub_amt = $d['price_new'] * $s->sso_qty_sso;
-                                $tot_vat = $sub_amt * $s->sso_tax_rate / 100;
-                                $total_amount = $sub_amt + $tot_vat;
-                                DB::table('tch_tbs.sso_dtl as sso_dtl')
-                                    ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
-                                    ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
-                                        $join->on('sj_dtl.sso_no', '=', 'sso_dtl.sso_no');
-                                        $join->on('sj_dtl.itemcode', '=', 'sso_dtl.itemcode');
-                                    })
-                                    ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
-                                    ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
-                                        $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
-                                    })
-                                    ->where(function ($wh) use ($cust, $period, $item_i){
-                                        $wh->where('sso_hdr.custcode', $cust);
-                                        $wh->where('sso_hdr.period', $period);
-                                        $wh->where('sso_dtl.itemcode', $item_i);
-                                        $wh->whereNull('inv_dtl.do_no');
-                                    })
-                                    ->update([
-                                        'sso_dtl.price' => $d['price_new'],
-                                        'sso_hdr.sub_amt' => $sub_amt,
-                                        'sso_hdr.tot_disc' => $tot_vat,
-                                        'sso_hdr.tot_amt' => $total_amount
-                                    ]);
-                            }
-                        }
-                    }
-                    if ($data['is_sj'] == 1) {
-                        $do_tch = DB::table('tch_tbs.do_dtl as sj_dtl')
-                            ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
-                            ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
-                                $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
-                            })
-                            ->where(function ($wh) use ($cust, $period, $item_i){
-                                $wh->where('sj_hdr.custcode', $cust);
-                                $wh->where('sj_hdr.period', $period);
-                                $wh->where('sj_dtl.itemcode', $item_i);
-                                $wh->whereNull('inv_dtl.do_no');
-                            })
-                            ->select([
-                                'sj_dtl.do_no',
-                                'sj_hdr.period as sj_period',
-                                'sj_hdr.taxrate as sj_tax_rate',
-                                'sj_dtl.itemcode as sj_item_code',
-                                'sj_dtl.price as sj_price',
-                                'sj_dtl.quantity as sj_qty',
-                                'sj_hdr.sub_amt as sj_sub_amount',
-                                'sj_hdr.tot_disc as sj_tot_vat',
-                                'sj_hdr.tot_amt as sj_total_amount',
-                                'inv_dtl.do_no as inv_do'
-                            ])
-                            ->get();
-                        if ($do_tch->isNotEmpty()) {
-                            foreach ($do_tch as $s) {
-                                $sub_amt = $d['price_new'] * $s->sj_qty;
-                                $tot_vat = $sub_amt * $s->sj_tax_rate / 100;
-                                $total_amount = $sub_amt + $tot_vat;
-                                DB::table('tch_tbs.do_dtl as sj_dtl')
-                                    ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
-                                    ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
-                                        $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
-                                    })
-                                    ->where(function ($wh) use ($cust, $period, $item_i){
-                                        $wh->where('sj_hdr.custcode', $cust);
-                                        $wh->where('sj_hdr.period', $period);
-                                        $wh->where('sj_dtl.itemcode', $item_i);
-                                        $wh->whereNull('inv_dtl.do_no');
-                                    })
+
+                    foreach ($so_tch as $so) {
+                        $so_header = $so->so_no;
+                        if ($d['is_so'] == 1) {
+                            $sub_amt = $d['price_new'] * $s->so_qty_so;
+                            $tot_vat = $sub_amt * $s->so_tax_rate / 100;
+                            $total_amount = $sub_amt + $tot_vat;
+
+                            DB::table('tch_tbs.soline as so_dtl')
+                                ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
+                                ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
+                                    $join->on('sj_dtl.so_no', '=', 'so_dtl.so_no');
+                                    $join->on('sj_dtl.itemcode', '=', 'so_dtl.itemcode');
+                                })
+                                ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
+                                ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
+                                    $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
+                                })
+                                ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                    $wh->where('so_dtl.so_no', $so_header);
+                                    $wh->where('so_dtl.itemcode', $item_i);
+                                    $wh->where('so_dtl.written', '>=', $act_date);
+                                    $wh->whereNull('inv_dtl.do_no');
+                                })
                                 ->update([
-                                    'sj_dtl.price' => $d['price_new'],
-                                    'sj_hdr.sub_amt' => $sub_amt,
-                                    'sj_hdr.tot_disc' => $tot_vat,
-                                    'sj_hdr.tot_amt' => $total_amount
+                                    'so_dtl.price' => $d['price_new'],
+                                    'so_hdr.sub_amt' => $sub_amt,
+                                    'so_hdr.tot_disc' => $tot_vat,
+                                    'so_hdr.tot_amt' => $total_amount
                                 ]);
+                        }
+                        if ($d['is_sso'] == 1) {
+                            $sso_tch = DB::table('tch_tbs.sso_dtl as sso_dtl')
+                                ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
+                                ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
+                                    $join->on('sj_dtl.sso_no', '=', 'sso_dtl.sso_no');
+                                    $join->on('sj_dtl.itemcode', '=', 'sso_dtl.itemcode');
+                                })
+                                ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
+                                ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
+                                    $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
+                                })
+                                ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                    $wh->where('sso_dtl.so_no', $so_header);
+                                    $wh->where('sso_dtl.itemcode', $item_i);
+                                    $wh->where('sso_dtl.written', '>=', $act_date);
+                                    $wh->whereNull('inv_dtl.do_no');
+                                })
+                                ->select([
+                                    'sso_dtl.so_no',
+                                    'sso_hdr.period as sso_period',
+                                    'sso_hdr.taxrate as sso_tax_rate',
+                                    'sso_dtl.itemcode as sso_item_code',
+                                    'sso_dtl.price as sso_price',
+                                    'sso_dtl.quantity as sso_qty_sso',
+                                    'sso_hdr.sub_amt as sso_sub_amount',
+                                    'sso_hdr.tot_disc as sso_tot_vat',
+                                    'sso_hdr.tot_amt as sso_total_amount',
+                                    'inv_dtl.do_no as inv_do'
+                                ])
+                                ->get();
+                            if ($sso_tch->isNotEmpty()) {
+                                foreach ($sso_tch as $s) {
+                                    $sub_amt = $d['price_new'] * $s->sso_qty_sso;
+                                    $tot_vat = $sub_amt * $s->sso_tax_rate / 100;
+                                    $total_amount = $sub_amt + $tot_vat;
+                                    DB::table('tch_tbs.sso_dtl as sso_dtl')
+                                        ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
+                                        ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
+                                            $join->on('sj_dtl.sso_no', '=', 'sso_dtl.sso_no');
+                                            $join->on('sj_dtl.itemcode', '=', 'sso_dtl.itemcode');
+                                        })
+                                        ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
+                                        ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
+                                            $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
+                                        })
+                                        ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                            $wh->where('sso_dtl.so_no', $so_header);
+                                            $wh->where('sso_dtl.itemcode', $item_i);
+                                            $wh->where('sso_dtl.written', '>=', $act_date);
+                                            $wh->whereNull('inv_dtl.do_no');
+                                        })
+                                        ->update([
+                                            'sso_dtl.price' => $d['price_new'],
+                                            'sso_hdr.sub_amt' => $sub_amt,
+                                            'sso_hdr.tot_disc' => $tot_vat,
+                                            'sso_hdr.tot_amt' => $total_amount
+                                        ]);
+                                }
+                            }
+                        }
+
+                        if ($d['is_sj'] == 1) {
+                            $do_tch = DB::table('tch_tbs.do_dtl as sj_dtl')
+                                ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
+                                ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
+                                    $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
+                                })
+                                ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                    $wh->where('sj_dtl.so_no', $so_header);
+                                    $wh->where('sj_dtl.itemcode', $item_i);
+                                    $wh->where('sj_dtl.written', '>=', $act_date);
+                                    $wh->whereNull('inv_dtl.do_no');
+                                })
+                                ->select([
+                                    'sj_dtl.do_no',
+                                    'sj_hdr.period as sj_period',
+                                    'sj_hdr.taxrate as sj_tax_rate',
+                                    'sj_dtl.itemcode as sj_item_code',
+                                    'sj_dtl.price as sj_price',
+                                    'sj_dtl.quantity as sj_qty',
+                                    'sj_hdr.sub_amt as sj_sub_amount',
+                                    'sj_hdr.tot_disc as sj_tot_vat',
+                                    'sj_hdr.tot_amt as sj_total_amount',
+                                    'inv_dtl.do_no as inv_do'
+                                ])
+                                ->get();
+                            if ($do_tch->isNotEmpty()) {
+                                foreach ($do_tch as $s) {
+                                    $sub_amt = $d['price_new'] * $s->sj_qty;
+                                    $tot_vat = $sub_amt * $s->sj_tax_rate / 100;
+                                    $total_amount = $sub_amt + $tot_vat;
+                                    DB::table('tch_tbs.do_dtl as sj_dtl')
+                                        ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
+                                        ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
+                                            $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
+                                        })
+                                        ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                            $wh->where('sj_dtl.so_no', $so_header);
+                                            $wh->where('sj_dtl.itemcode', $item_i);
+                                            $wh->where('sj_dtl.written', '>=', $act_date);
+                                            $wh->whereNull('inv_dtl.do_no');
+                                        })
+                                    ->update([
+                                        'sj_dtl.price' => $d['price_new'],
+                                        'sj_hdr.sub_amt' => $sub_amt,
+                                        'sj_hdr.tot_disc' => $tot_vat,
+                                        'sj_hdr.tot_amt' => $total_amount
+                                    ]);
+                                }
                             }
                         }
                     }
+                    // END
+                }
+
+                if ($d['is_stock'] == 1) {
+                    DB::table('db_tbs.item')
+                        ->where('ITEMCODE', $d['item_code'])
+                        ->update([
+                            'PRICE' => $d['price_new']
+                        ]);
+                    DB::table('tch_tbs.item')
+                        ->where('itemcode', $d['item_code'])
+                        ->update([
+                            'price' => $d['price_new']
+                        ]);
                 }
                 Log::channel('queue')->info("Itemcode ".$d['item_code']." updated price");
             }
@@ -1002,12 +1007,13 @@ class CustPriceController extends Controller
                     // ->where('so.so_period', '>=', $period)
                     ->where('so.item_code', $d['item_code'])
                     ->where(function ($where) use ($act_date, $is_exist){
-                        $where->whereNotNull('so.posted_date');
-                        if ($is_exist == 1) {
-                            $where->where('so.posted_date', '>=', $act_date);
-                        }
-                        $where->whereMonth('so.posted_date', date('m', strtotime($act_date)));
-                        $where->whereYear('so.posted_date', date('Y', strtotime($act_date)));
+                        $where->whereNotNull('so.written_date');
+                        $where->where('so.written_date', '>=', $act_date);
+                        // if ($is_exist == 1) {
+                        //     $where->where('so.posted_date', '>=', $act_date);
+                        // }
+                        // $where->whereMonth('so.posted_date', date('m', strtotime($act_date)));
+                        // $where->whereYear('so.posted_date', date('Y', strtotime($act_date)));
                     })
                     ->whereNull('sj.invoice_date')
                     ->select([
@@ -1044,12 +1050,14 @@ class CustPriceController extends Controller
                             // ->where('so.so_period', '>=', $period)
                             ->where('so.item_code', $d['item_code'])
                             ->where(function ($where) use ($act_date, $is_exist){
-                                $where->whereNotNull('so.posted_date');
-                                if ($is_exist == 1) {
-                                    $where->where('so.posted_date', '>=', $act_date);
-                                }
-                                $where->whereMonth('so.posted_date', date('m', strtotime($act_date)));
-                                $where->whereYear('so.posted_date', date('Y', strtotime($act_date)));
+                                $where->whereNotNull('so.written_date');
+                                $where->where('so.written_date', '>=', $act_date);
+                                // $where->whereNotNull('so.posted_date');
+                                // if ($is_exist == 1) {
+                                //     $where->where('so.posted_date', '>=', $act_date);
+                                // }
+                                // $where->whereMonth('so.posted_date', date('m', strtotime($act_date)));
+                                // $where->whereYear('so.posted_date', date('Y', strtotime($act_date)));
                             })
                             ->whereNull('sj.invoice_date')
                             ->update([
@@ -1062,7 +1070,7 @@ class CustPriceController extends Controller
                     }
                 }
 
-                if ($data['is_so'] == 1) {
+                if ($d['is_so'] == 1) {
                     $so_tch = DB::table('tch_tbs.soline as so_dtl')
                         ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
                         ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
@@ -1074,12 +1082,13 @@ class CustPriceController extends Controller
                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                         })
                         ->where(function ($where) use ($act_date, $is_exist){
-                            $where->whereNotNull('so_hdr.posted');
-                            if ($is_exist == 1) {
-                                $where->where('so_hdr.posted', '>=', $act_date);
-                            }
-                            $where->whereMonth('so_hdr.posted', date('m', strtotime($act_date)));
-                            $where->whereYear('so_hdr.posted', date('Y', strtotime($act_date)));
+                            $where->whereNotNull('so_hdr.written');
+                            $where->where('so_hdr.written', '>=', $act_date);
+                            // if ($is_exist == 1) {
+                            //     $where->where('so_hdr.posted', '>=', $act_date);
+                            // }
+                            // $where->whereMonth('so_hdr.posted', date('m', strtotime($act_date)));
+                            // $where->whereYear('so_hdr.posted', date('Y', strtotime($act_date)));
                         })
                         ->where(function ($wh) use ($cust, $item_i){
                             $wh->where('so_hdr.custcode', $cust);
@@ -1116,12 +1125,14 @@ class CustPriceController extends Controller
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
                                 ->where(function ($where) use ($act_date, $is_exist){
-                                    $where->whereNotNull('so_hdr.posted');
-                                    if ($is_exist == 1) {
-                                        $where->where('so_hdr.posted', '>=', $act_date);
-                                    }
-                                    $where->whereMonth('so_hdr.posted', date('m', strtotime($act_date)));
-                                    $where->whereYear('so_hdr.posted', date('Y', strtotime($act_date)));
+                                    $where->whereNotNull('so_hdr.written');
+                                    $where->where('so_hdr.written', '>=', $act_date);
+                                    // $where->whereNotNull('so_hdr.posted');
+                                    // if ($is_exist == 1) {
+                                    //     $where->where('so_hdr.posted', '>=', $act_date);
+                                    // }
+                                    // $where->whereMonth('so_hdr.posted', date('m', strtotime($act_date)));
+                                    // $where->whereYear('so_hdr.posted', date('Y', strtotime($act_date)));
                                 })
                                 ->where(function ($wh) use ($cust, $item_i){
                                     $wh->where('so_hdr.custcode', $cust);
@@ -1139,7 +1150,7 @@ class CustPriceController extends Controller
                     }
                 }
 
-                if ($data['is_sso'] == 1) {
+                if ($d['is_sso'] == 1) {
                     $sso_tch = DB::table('tch_tbs.sso_dtl as sso_dtl')
                         ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
                         ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
@@ -1151,12 +1162,14 @@ class CustPriceController extends Controller
                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                         })
                         ->where(function ($where) use ($act_date, $is_exist){
-                            $where->whereNotNull('sso_hdr.posted');
-                            if ($is_exist == 1) {
-                                $where->where('sso_hdr.posted', '>=', $act_date);
-                            }
-                            $where->whereMonth('sso_hdr.posted', date('m', strtotime($act_date)));
-                            $where->whereYear('sso_hdr.posted', date('Y', strtotime($act_date)));
+                            $where->whereNotNull('sso_hdr.written');
+                            $where->where('sso_hdr.written', '>=', $act_date);
+                            // $where->whereNotNull('sso_hdr.posted');
+                            // if ($is_exist == 1) {
+                            //     $where->where('sso_hdr.posted', '>=', $act_date);
+                            // }
+                            // $where->whereMonth('sso_hdr.posted', date('m', strtotime($act_date)));
+                            // $where->whereYear('sso_hdr.posted', date('Y', strtotime($act_date)));
                         })
                         ->where(function ($wh) use ($cust, $period, $item_i){
                             $wh->where('sso_hdr.custcode', $cust);
@@ -1192,12 +1205,14 @@ class CustPriceController extends Controller
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
                                 ->where(function ($where) use ($act_date, $is_exist){
-                                    $where->whereNotNull('sso_hdr.posted');
-                                    if ($is_exist == 1) {
-                                        $where->where('sso_hdr.posted', '>=', $act_date);
-                                    }
-                                    $where->whereMonth('sso_hdr.posted', date('m', strtotime($act_date)));
-                                    $where->whereYear('sso_hdr.posted', date('Y', strtotime($act_date)));
+                                    $where->whereNotNull('sso_hdr.written');
+                                    $where->where('sso_hdr.written', '>=', $act_date);
+                                    // $where->whereNotNull('sso_hdr.posted');
+                                    // if ($is_exist == 1) {
+                                    //     $where->where('sso_hdr.posted', '>=', $act_date);
+                                    // }
+                                    // $where->whereMonth('sso_hdr.posted', date('m', strtotime($act_date)));
+                                    // $where->whereYear('sso_hdr.posted', date('Y', strtotime($act_date)));
                                 })
                                 ->where(function ($wh) use ($cust, $period, $item_i){
                                     $wh->where('sso_hdr.custcode', $cust);
@@ -1213,19 +1228,22 @@ class CustPriceController extends Controller
                         }
                     }
                 }
-                if ($data['is_sj'] == 1) {
+
+                if ($d['is_sj'] == 1) {
                     $do_tch = DB::table('tch_tbs.do_dtl as sj_dtl')
                         ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
                         ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                         })
                         ->where(function ($where) use ($act_date, $is_exist){
-                            $where->whereNotNull('sj_hdr.posted');
-                            if ($is_exist == 1) {
-                                $where->where('sj_hdr.posted', '>=', $act_date);
-                            }
-                            $where->whereMonth('sj_hdr.posted', date('m', strtotime($act_date)));
-                            $where->whereYear('sj_hdr.posted', date('Y', strtotime($act_date)));
+                            $where->whereNotNull('sj_hdr.written');
+                            $where->where('sj_hdr.written', '>=', $act_date);
+                            // $where->whereNotNull('sj_hdr.posted');
+                            // if ($is_exist == 1) {
+                            //     $where->where('sj_hdr.posted', '>=', $act_date);
+                            // }
+                            // $where->whereMonth('sj_hdr.posted', date('m', strtotime($act_date)));
+                            // $where->whereYear('sj_hdr.posted', date('Y', strtotime($act_date)));
                         })
                         ->where(function ($wh) use ($cust, $period, $item_i){
                             $wh->where('sj_hdr.custcode', $cust);
@@ -1256,12 +1274,14 @@ class CustPriceController extends Controller
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
                                 ->where(function ($where) use ($act_date, $is_exist){
-                                    $where->whereNotNull('sj_hdr.posted');
-                                    if ($is_exist == 1) {
-                                        $where->where('sj_hdr.posted', '>=', $act_date);
-                                    }
-                                    $where->whereMonth('sj_hdr.posted', date('m', strtotime($act_date)));
-                                    $where->whereYear('sj_hdr.posted', date('Y', strtotime($act_date)));
+                                    $where->whereNotNull('sj_hdr.written');
+                                    $where->where('sj_hdr.written', '>=', $act_date);
+                                    // $where->whereNotNull('sj_hdr.posted');
+                                    // if ($is_exist == 1) {
+                                    //     $where->where('sj_hdr.posted', '>=', $act_date);
+                                    // }
+                                    // $where->whereMonth('sj_hdr.posted', date('m', strtotime($act_date)));
+                                    // $where->whereYear('sj_hdr.posted', date('Y', strtotime($act_date)));
                                 })
                                 ->where(function ($wh) use ($cust, $period, $item_i){
                                     $wh->where('sj_hdr.custcode', $cust);
@@ -1276,6 +1296,48 @@ class CustPriceController extends Controller
                                 ]);
                         }
                     }
+
+                    $tbs_do = DB::table('db_tbs.entry_do_tbl as sj')
+                        ->where('sj.cust_id', $cust)
+                        ->where('sj.item_code', $d['item_code'])
+                        ->where(function ($where) use ($act_date, $is_exist){
+                            $where->whereNotNull('sj.created_date');
+                            $where->where('sj.created_date', '>=', $act_date);
+                        })
+                        ->whereNull('sj.invoice_date')
+                        ->select([
+                            '*'
+                        ])
+                    ->get();
+
+                    if ($tbs_do->isNotEmpty()) {
+                        $cvrt = date('Ymd', strtotime($act_date));
+                        $custprice_id = $cust.$cvrt;
+                        DB::table('db_tbs.entry_do_tbl as sj')
+                            ->where('sj.cust_id', $cust)
+                            ->where('sj.item_code', $d['item_code'])
+                            ->where(function ($where) use ($act_date, $is_exist){
+                                $where->whereNotNull('sj.created_date');
+                                $where->where('sj.created_date', '>=', $act_date);
+                            })
+                            ->whereNull('sj.invoice_date')
+                            ->update([
+                                'custprice' => $custprice_id
+                            ]);
+                    }
+                }
+
+                if ($d['is_stock'] == 1) {
+                    DB::table('db_tbs.item')
+                        ->where('ITEMCODE', $d['item_code'])
+                        ->update([
+                            'PRICE' => $d['price_new']
+                        ]);
+                    DB::table('tch_tbs.item')
+                        ->where('itemcode', $d['item_code'])
+                        ->update([
+                            'price' => $d['price_new']
+                        ]);
                 }
             }
             

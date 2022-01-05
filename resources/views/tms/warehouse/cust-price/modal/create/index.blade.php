@@ -20,7 +20,10 @@
                     </div>
                     <div class="mt-4">
                         <div class="row">
-                            <div id="custprice-btn-table-item" class="col-12 text-right">
+                            <div id="custprice-search-table-item" class="col-4 text-right align-items-center">
+                                <input type="text" id="custprice-dtsearch" class="form-control form-control-sm custprice-dtsearch" placeholder="Search item...">
+                            </div>
+                            <div id="custprice-btn-table-item" class="col-8 text-right">
                                 <button type="button" id="custprice-btn-add-item" class="btn btn-sm btn-info">
                                     Add Item
                                 </button>
@@ -36,8 +39,8 @@
                 </div>
                 <div class="modal-footer">
                     <div id="custprice-btn-action" class="d-none">
-                        <button type="button" id="custprice-btn-index-edit" class="btn btn-info custprice-act-edit">Edit</button>
-                        <button type="button" id="custprice-btn-index-post" class="btn btn-info custprice-act-posted">Post</button>
+                        {{-- <button type="button" id="custprice-btn-index-edit" class="btn btn-info custprice-act-edit">Edit</button>
+                        <button type="button" id="custprice-btn-index-post" class="btn btn-info custprice-act-posted">Post</button> --}}
                         <button type="button" id="custprice-btn-index-log" class="btn btn-info custprice-act-log">Log</button>
                         <button type="button" id="custprice-btn-index-print" class="btn btn-info custprice-act-print">Print</button>
                     </div>
