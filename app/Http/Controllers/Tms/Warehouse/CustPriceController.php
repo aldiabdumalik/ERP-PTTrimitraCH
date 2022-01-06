@@ -706,6 +706,11 @@ class CustPriceController extends Controller
 
     private function _trgSO($data, $period, $cust)
     {
+        $arr_so = [];
+        $arr_so['customer'] = $cust;
+        $arr_so['item_code'] = $data[0]['item_code'];
+        $arr_so['active_date'] = $data[0]['active_date'];
+        $soFileName = 'so_'.$cust.'_'.$data[0]['active_date'].'_'.time().'.json';
         DB::beginTransaction();
         try {
             $arr_so_tms = [];
@@ -741,12 +746,20 @@ class CustPriceController extends Controller
                     ])
                 ->get();
 
+                
                 if ($so->isNotEmpty()) {
                     foreach ($so as $s) {
                         $so_header = $s->so_header;
                         $sub_amt = $d['price_new'] * $s->so_qty_so;
                         $tot_vat = $sub_amt * $s->so_tax_rate / 100;
                         $total_amount = $sub_amt + $tot_vat;
+
+                        $arr_so['so_tms'][$so_header] = [
+                            'price' => $d['price_new'],
+                            'sub_amt' => $sub_amt,
+                            'tot_vat' => $tot_vat,
+                            'total_amount' => $total_amount,
+                        ];
 
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
@@ -843,6 +856,13 @@ class CustPriceController extends Controller
                             $sub_amt = $d['price_new'] * $s->so_qty_so;
                             $tot_vat = $sub_amt * $s->so_tax_rate / 100;
                             $total_amount = $sub_amt + $tot_vat;
+
+                            $arr_so['so_ttbs'][$so_header] = [
+                                'price' => $d['price_new'],
+                                'sub_amt' => $sub_amt,
+                                'tot_vat' => $tot_vat,
+                                'total_amount' => $total_amount,
+                            ];
 
                             DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
@@ -994,7 +1014,7 @@ class CustPriceController extends Controller
                             'price' => $d['price_new']
                         ]);
                 }
-                Log::channel('queue')->info("Itemcode ".$d['item_code']." updated price");
+                Storage::put(public_path("/custprice-test/$soFileName"), json_encode($arr_so));
             }
             DB::commit();
         } catch (Exception $e) {
