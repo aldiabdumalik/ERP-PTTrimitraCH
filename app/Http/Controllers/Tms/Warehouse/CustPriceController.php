@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
 class CustPriceController extends Controller
@@ -707,7 +708,7 @@ class CustPriceController extends Controller
     {
         DB::beginTransaction();
         try {
-            
+            $arr_so_tms = [];
             foreach ($data as $d) {
                 $item_i = $d['item_code'];
                 $act_date = $d['active_date'];
@@ -766,10 +767,27 @@ class CustPriceController extends Controller
                                 'so.tot_vat' => $tot_vat,
                                 'so.total_amount' => $total_amount
                             ]);
+
+                        if ($d['is_sso'] == 1) {
+                            $cvrt = $act_date;
+                            $custprice_id = $cust.'.'.$cvrt;
+                            DB::table('db_tbs.entry_sso_tbl as sso')
+                                ->leftJoin('db_tbs.entry_do_tbl as sj', function ($join){
+                                    $join->on('sj.sso_no', '=', 'sso.sso_header');
+                                    $join->on('sj.item_code', '=', 'sso.item_code');
+                                })
+                                ->where('sso.so_header', $so_header)
+                                ->where('sso.item_code', $d['item_code'])
+                                ->whereNull('sj.invoice_date')
+                                ->whereRaw('DATE(sso.created_date) >= ?', [$act_date])
+                                ->update([
+                                    'sso.custprice' => $custprice_id
+                                ]);
+                        }
                         
                         if ($d['is_sj'] == 1) {
-                            $cvrt = date('Ymd', strtotime($act_date));
-                            $custprice_id = $cust.$cvrt;
+                            $cvrt = $act_date;
+                            $custprice_id = $cust.'.'.$cvrt;
                             DB::table('db_tbs.entry_do_tbl as sj')
                                 ->where('sj.so_no', $so_header)
                                 ->where('sj.item_code', $d['item_code'])
@@ -1004,16 +1022,9 @@ class CustPriceController extends Controller
                         $join->on('sj.item_code', '=', 'so.item_code');
                     })
                     ->where('so.cust_id', $cust)
-                    // ->where('so.so_period', '>=', $period)
                     ->where('so.item_code', $d['item_code'])
-                    ->where(function ($where) use ($act_date, $is_exist){
-                        $where->whereNotNull('so.written_date');
-                        $where->where('so.written_date', '>=', $act_date);
-                        // if ($is_exist == 1) {
-                        //     $where->where('so.posted_date', '>=', $act_date);
-                        // }
-                        // $where->whereMonth('so.posted_date', date('m', strtotime($act_date)));
-                        // $where->whereYear('so.posted_date', date('Y', strtotime($act_date)));
+                    ->where(function ($where) use ($act_date){
+                        $where->whereRaw('DATE(so.written_date) >= ?', [$act_date]);
                     })
                     ->whereNull('sj.invoice_date')
                     ->select([
@@ -1047,17 +1058,9 @@ class CustPriceController extends Controller
                                 $join->on('sj.item_code', '=', 'so.item_code');
                             })
                             ->where('so.cust_id', $cust)
-                            // ->where('so.so_period', '>=', $period)
                             ->where('so.item_code', $d['item_code'])
-                            ->where(function ($where) use ($act_date, $is_exist){
-                                $where->whereNotNull('so.written_date');
-                                $where->where('so.written_date', '>=', $act_date);
-                                // $where->whereNotNull('so.posted_date');
-                                // if ($is_exist == 1) {
-                                //     $where->where('so.posted_date', '>=', $act_date);
-                                // }
-                                // $where->whereMonth('so.posted_date', date('m', strtotime($act_date)));
-                                // $where->whereYear('so.posted_date', date('Y', strtotime($act_date)));
+                            ->where(function ($where) use ($act_date){
+                                $where->whereRaw('DATE(so.written_date) >= ?', [$act_date]);
                             })
                             ->whereNull('sj.invoice_date')
                             ->update([
@@ -1067,6 +1070,37 @@ class CustPriceController extends Controller
                                 'total_amount' => $total_amount
                             ]);
                         Log::channel('queue')->info("Itemcode ".$d['item_code']." updated price");
+                    }
+                }
+
+                if ($d['is_sso'] == 1) {
+                    $sso_tms = DB::table('db_tbs.entry_sso_tbl as sso')
+                        ->leftJoin('db_tbs.entry_do_tbl as sj', function ($join){
+                            $join->on('sj.sso_no', '=', 'sso.sso_header');
+                            $join->on('sj.item_code', '=', 'sso.item_code');
+                        })
+                        ->where('sso.item_code', $d['item_code'])
+                        ->where(function ($where) use ($act_date){
+                            $where->whereRaw('DATE(sso.created_date) >= ?', [$act_date]);
+                        })
+                        ->whereNull('sj.invoice_date')
+                        ->get();
+                    if ($sso_tms->isNotEmpty()) {
+                        $cvrt = $act_date;
+                        $custprice_id = $cust.'.'.$cvrt;
+                        DB::table('db_tbs.entry_sso_tbl as sso')
+                            ->leftJoin('db_tbs.entry_do_tbl as sj', function ($join){
+                                $join->on('sj.sso_no', '=', 'sso.sso_header');
+                                $join->on('sj.item_code', '=', 'sso.item_code');
+                            })
+                            ->where('sso.item_code', $d['item_code'])
+                            ->where(function ($where) use ($act_date){
+                                $where->whereRaw('DATE(sso.created_date) >= ?', [$act_date]);
+                            })
+                            ->whereNull('sj.invoice_date')
+                            ->update([
+                                'sso.custprice' => $custprice_id
+                            ]);
                     }
                 }
 
@@ -1311,8 +1345,8 @@ class CustPriceController extends Controller
                     ->get();
 
                     if ($tbs_do->isNotEmpty()) {
-                        $cvrt = date('Ymd', strtotime($act_date));
-                        $custprice_id = $cust.$cvrt;
+                        $cvrt = $act_date;
+                        $custprice_id = $cust.'.'.$cvrt;
                         DB::table('db_tbs.entry_do_tbl as sj')
                             ->where('sj.cust_id', $cust)
                             ->where('sj.item_code', $d['item_code'])
@@ -1378,7 +1412,7 @@ class CustPriceController extends Controller
                 DB::raw('IFNULL(custprice.price_new, 0) as price')
             ])
             ->where('item.CUSTCODE', $cust)
-            ->where('custprice.status', 'ACTIVE')
+            // ->where('custprice.status', 'ACTIVE')
             ->get();
         return $query;
     }

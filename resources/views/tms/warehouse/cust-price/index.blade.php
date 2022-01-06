@@ -834,14 +834,6 @@
                         $('#custprice-post-activedate').val(date);
                         $('#custprice-post-priceby').val(priceby);
                         if ($('#custprice-post-priceby').val() == 'SO') {
-                            $('#custprice-post-sso').prop('disabled', false);
-                            $('#custprice-post-sj').prop('disabled', false);
-
-                            $('#custprice-post-stock').prop('checked', true);
-                            $('#custprice-post-sso').prop('checked', true);
-                            $('#custprice-post-so').prop('checked', true);
-                            $('#custprice-post-sj').prop('checked', true);
-                        }else{
                             $('#custprice-post-stock').prop('checked', true);
                             $('#custprice-post-so').prop('checked', true);
                             $('#custprice-post-sso').prop('checked', false);
@@ -849,6 +841,14 @@
 
                             $('#custprice-post-sso').prop('disabled', true);
                             $('#custprice-post-sj').prop('disabled', true);
+                        }else{
+                            $('#custprice-post-sso').prop('disabled', false);
+                            $('#custprice-post-sj').prop('disabled', false);
+
+                            $('#custprice-post-stock').prop('checked', true);
+                            $('#custprice-post-sso').prop('checked', true);
+                            $('#custprice-post-so').prop('checked', true);
+                            $('#custprice-post-sj').prop('checked', true);
                         }
 
                         $('#custprice-btn-post-submit').addClass('d-none');
