@@ -164,7 +164,7 @@ class CustPriceController extends Controller
                     'is_sj' => $is_sj
                 ];
             }
-            DB::beginTransaction();
+            DB::connection('db_tbs')->beginTransaction();
             try {
                 $isext = 0;
                 if ($request->price_by == 'DATE') {
@@ -224,10 +224,10 @@ class CustPriceController extends Controller
                         'note' => null
                     ]);
                 }
-                DB::commit();
+                DB::connection('db_tbs')->commit();
                 return $this->_Success('Saved successfully!', 201);
             } catch (Exception $e) {
-                DB::rollBack();
+                DB::connection('db_tbs')->rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
@@ -288,7 +288,7 @@ class CustPriceController extends Controller
                     'is_sj' => $is_sj
                 ];
             }
-            DB::beginTransaction();
+            DB::connection('db_tbs')->beginTransaction();
             try {
                 $isext = 0;
                 if ($request->price_by == 'DATE') {
@@ -351,10 +351,10 @@ class CustPriceController extends Controller
                         'note' => null
                     ]);
                 }
-                DB::commit();
+                DB::connection('db_tbs')->commit();
                 return $this->_Success('Cust Price has been update & posted!', 201);
             } catch (Exception $e) {
-                DB::rollBack();
+                DB::connection('db_tbs')->rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
