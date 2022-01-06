@@ -185,6 +185,7 @@ class CustPriceController extends Controller
                     $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                     // $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
                 }
+                $this->_trgTest($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
                 $query = CustPrice::insert($data);
                 if ($query) {
                     $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
@@ -704,6 +705,120 @@ class CustPriceController extends Controller
         return $so;
     }
 
+    private function _trgTest($data, $period, $cust)
+    {
+        $arr_so = [];
+        $arr_so['customer'] = $cust;
+        $arr_so['active_date'] = $data[0]['active_date'];
+        $soFileName = 'so_'.$cust.'_'.$data[0]['active_date'].'_'.time().'.json';
+        foreach ($data as $d) {
+            $item_i = $d['item_code'];
+            $act_date = $d['active_date'];
+            $so = DB::table('db_tbs.entry_so_tbl as so')
+                ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
+                    $join->on('sso.so_header', '=', 'so.so_header');
+                    $join->on('sso.item_code', '=', 'so.item_code');
+                })
+                ->leftJoin('db_tbs.entry_do_tbl as sj', function ($join){
+                    $join->on('sj.so_no', '=', 'so.so_header');
+                    $join->on('sj.sso_no', '=', 'sso.sso_header');
+                    $join->on('sj.item_code', '=', 'so.item_code');
+                })
+                ->where('so.cust_id', $cust)
+                ->where('so.written_date', '>=', $act_date)
+                ->where('so.item_code', $item_i)
+                ->whereNull('sj.invoice_date')
+                ->select([
+                    'so.so_header',
+                    'so.so_period',
+                    'so.tax_rate as so_tax_rate',
+                    'so.item_code as so_item_code',
+                    'so.price as so_price',
+                    'so.qty_so as so_qty_so',
+                    'so.sub_amount as so_sub_amount',
+                    'so.tot_vat as so_tot_vat',
+                    'so.total_amount as so_total_amount',
+                    'sso.sso_header as sso_header',
+                    'sj.do_no as sj_number',
+                ])
+            ->get();
+
+            
+            if ($so->isNotEmpty()) {
+                foreach ($so as $s) {
+                    $so_header = $s->so_header;
+                    $sub_amt = $d['price_new'] * $s->so_qty_so;
+                    $tot_vat = $sub_amt * $s->so_tax_rate / 100;
+                    $total_amount = $sub_amt + $tot_vat;
+
+                    $arr_so['so_tms'][$item_i][$so_header][] = [
+                        'price' => $d['price_new'],
+                        'sub_amt' => $sub_amt,
+                        'tot_vat' => $tot_vat,
+                        'total_amount' => $total_amount,
+                    ];
+                }
+            }
+            // End SO
+
+            $so_tch = DB::table('tch_tbs.soline as so_dtl')
+                ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
+                ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.so_no', '=', 'so_dtl.so_no')
+                ->leftJoin('tch_tbs.sso_dtl as sso_dtl', function ($join){
+                    $join->on('sso_dtl.so_no', '=', 'so_dtl.so_no');
+                    $join->on('sso_dtl.itemcode', '=', 'so_dtl.itemcode');
+                })
+                ->leftJoin('tch_tbs.do_dtl as sj_dtl', function ($join){
+                    $join->on('sj_dtl.so_no', '=', 'so_dtl.so_no');
+                    $join->on('sj_dtl.sso_no', '=', 'sso_dtl.sso_no');
+                    $join->on('sj_dtl.itemcode', '=', 'so_dtl.itemcode');
+                })
+                ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
+                ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
+                    $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
+                })
+                ->where(function ($wh) use ($cust, $act_date, $item_i){
+                    $wh->where('so_hdr.custcode', $cust);
+                    $wh->where('so_hdr.written', '>=', $act_date);
+                    $wh->where('so_dtl.itemcode', $item_i);
+                    $wh->whereNull('inv_dtl.do_no');
+                })
+                ->select([
+                    'so_dtl.so_no',
+                    'so_hdr.period as so_period',
+                    'so_hdr.taxrate as so_tax_rate',
+                    'so_dtl.itemcode as so_item_code',
+                    'so_dtl.price as so_price',
+                    'so_dtl.quantity as so_qty_so',
+                    'so_hdr.sub_amt as so_sub_amount',
+                    'so_hdr.tot_disc as so_tot_vat',
+                    'so_hdr.tot_amt as so_total_amount',
+                    'inv_dtl.do_no as inv_do'
+                ])
+                ->get();
+            if ($so_tch->isNotEmpty()) {
+                foreach ($so_tch as $so) {
+                    $so_header = $so->so_no;
+                    if ($d['is_so'] == 1) {
+                        $sub_amt = $d['price_new'] * $s->so_qty_so;
+                        $tot_vat = $sub_amt * $s->so_tax_rate / 100;
+                        $total_amount = $sub_amt + $tot_vat;
+
+                        $arr_so['so_tbs'][$item_i][$so_header][] = [
+                            'price' => $d['price_new'],
+                            'sub_amt' => $sub_amt,
+                            'tot_vat' => $tot_vat,
+                            'total_amount' => $total_amount,
+                        ];
+                    }
+                }
+            }
+            // END SO TBS
+            Log::channel('queue')->info("Itemcode ".$d['item_code']." updated price");
+        }
+        Storage::disk('local')->put("/custprice-test/$soFileName", json_encode($arr_so));
+    }
+
     private function _trgSO($data, $period, $cust)
     {
         $arr_so = [];
@@ -1014,7 +1129,7 @@ class CustPriceController extends Controller
                             'price' => $d['price_new']
                         ]);
                 }
-                Storage::put(public_path("/custprice-test/$soFileName"), json_encode($arr_so));
+                // Storage::put(public_path("/custprice-test/$soFileName"), json_encode($arr_so));
             }
             DB::commit();
         } catch (Exception $e) {
