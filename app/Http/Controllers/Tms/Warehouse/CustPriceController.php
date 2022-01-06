@@ -185,7 +185,6 @@ class CustPriceController extends Controller
                     $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                     // $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
                 }
-                $this->_trgTest($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
                 $query = CustPrice::insert($data);
                 if ($query) {
                     $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
