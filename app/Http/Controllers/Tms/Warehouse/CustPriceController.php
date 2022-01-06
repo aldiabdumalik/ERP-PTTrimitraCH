@@ -825,7 +825,8 @@ class CustPriceController extends Controller
         $arr_so['item_code'] = $data[0]['item_code'];
         $arr_so['active_date'] = $data[0]['active_date'];
         $soFileName = 'so_'.$cust.'_'.$data[0]['active_date'].'_'.time().'.json';
-        DB::beginTransaction();
+        DB::connection('db_tbs')->beginTransaction();
+        DB::connection('tch_tbs')->beginTransaction();
         try {
             $arr_so_tms = [];
             foreach ($data as $d) {
@@ -1130,16 +1131,19 @@ class CustPriceController extends Controller
                 }
                 // Storage::put(public_path("/custprice-test/$soFileName"), json_encode($arr_so));
             }
-            DB::commit();
+            DB::connection('db_tbs')->commit();
+            DB::connection('tch_tbs')->commit();
         } catch (Exception $e) {
             Log::channel('queue')->info($e->getMessage());
-            DB::rollBack();
+            DB::connection('db_tbs')->rollBack();
+            DB::connection('tch_tbs')->rollBack();
         }
     }
 
     private function _trgDate($data, $period, $cust, $is_exist)
     {
-        DB::beginTransaction();
+        DB::connection('db_tbs')->beginTransaction();
+        DB::connection('tch_tbs')->beginTransaction();
         try {
 
             foreach ($data as $key => $d) {
@@ -1509,9 +1513,11 @@ class CustPriceController extends Controller
                 }
             }
             
-            DB::commit();
+            DB::connection('db_tbs')->commit();
+            DB::connection('tch_tbs')->commit();
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::connection('db_tbs')->rollBack();
+            DB::connection('tch_tbs')->rollBack();
         }
     }
 
