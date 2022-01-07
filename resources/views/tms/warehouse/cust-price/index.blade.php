@@ -325,6 +325,7 @@
         
         $('#custprice-modal-index').on('shown.bs.modal', function () {
             adjustDraw(tbl_item);
+            $('#custprice-create-customercode').focus();
             ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
                 var data = resolve.content;
                 $('#custprice-create-valas').html('');
