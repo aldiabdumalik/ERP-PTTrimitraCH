@@ -358,7 +358,7 @@
         //     }
         // });
 
-        $('#custprice-datatables-index tbody').off('click', 'tr').on('click', 'tr', function () {
+        $('#custprice-datatables-index tbody').off('dblclick', 'tr').on('dblclick', 'tr', function () {
             var data = tbl_item.row(this).data();
             if (data != undefined) {
                 if ($(this).hasClass('selected')) {
@@ -551,7 +551,7 @@
                         item.itemcode,
                         item.part_no,
                         item.descript,
-                        `<input type="number" class="form-control form-control-sm text-right" value="0.00">`,
+                        `<input type="text" class="form-control form-control-sm text-right item-price-text" value="0.00">`,
                         currency(addZeroes(String(item.price))),
                     ]).node();
                     $(add).attr('id', item.itemcode);
@@ -839,11 +839,11 @@
                             $('#custprice-post-sso').prop('checked', false);
                             $('#custprice-post-sj').prop('checked', false);
 
-                            $('#custprice-post-sso').prop('disabled', true);
-                            $('#custprice-post-sj').prop('disabled', true);
+                            // $('#custprice-post-sso').prop('disabled', true);
+                            // $('#custprice-post-sj').prop('disabled', true);
                         }else{
-                            $('#custprice-post-sso').prop('disabled', false);
-                            $('#custprice-post-sj').prop('disabled', false);
+                            // $('#custprice-post-sso').prop('disabled', false);
+                            // $('#custprice-post-sj').prop('disabled', false);
 
                             $('#custprice-post-stock').prop('checked', true);
                             $('#custprice-post-sso').prop('checked', true);
@@ -1110,7 +1110,8 @@
             $(tbl_item.table().header())
                 .removeClass('bg-abu')
                 .addClass('btn-info');
-            tbl_item.clear().draw(false);
+            tbl_item.clear().draw();
+            tbl_item.search('').draw();
             isHidden('#custprice-btn-table-item', false);
             isHidden('#custprice-btn-index-submit', false);
             $('input').not('.readonly-first').prop('readonly', false);

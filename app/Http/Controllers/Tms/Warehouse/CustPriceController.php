@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\TMS\Warehouse;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\TMS\AR\CustPriceTrait;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Jobs\CustPricePosted;
 use App\Models\Dbtbs\CustPrice;
@@ -19,7 +20,7 @@ use Yajra\DataTables\Facades\DataTables;
 
 class CustPriceController extends Controller
 {
-    use ToolsTrait;
+    use ToolsTrait, CustPriceTrait;
 
     public function index()
     {
@@ -164,7 +165,7 @@ class CustPriceController extends Controller
                     'is_sj' => $is_sj
                 ];
             }
-            DB::connection('db_tbs')->beginTransaction();
+            // DB::connection('db_tbs')->beginTransaction();
             try {
                 $isext = 0;
                 if ($request->price_by == 'DATE') {
@@ -180,10 +181,12 @@ class CustPriceController extends Controller
                     }
 
                     // Trigger By Date
-                    // $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
+                    // $trg = $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
+                    $trg = $this->triggerDate($data);
                 }else{
                     $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    // $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
+                    // $trg = $this->_trgSOTest($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
+                    $trg = $this->triggerSO($data);
                 }
                 $query = CustPrice::insert($data);
                 if ($query) {
@@ -224,10 +227,10 @@ class CustPriceController extends Controller
                         'note' => null
                     ]);
                 }
-                DB::connection('db_tbs')->commit();
-                return $this->_Success('Saved successfully!', 201);
+                // DB::connection('db_tbs')->commit();
+                return $this->_Success('Saved successfully!', 201, $trg);
             } catch (Exception $e) {
-                DB::connection('db_tbs')->rollBack();
+                // DB::connection('db_tbs')->rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
@@ -288,7 +291,7 @@ class CustPriceController extends Controller
                     'is_sj' => $is_sj
                 ];
             }
-            DB::connection('db_tbs')->beginTransaction();
+            // DB::connection('db_tbs')->beginTransaction();
             try {
                 $isext = 0;
                 if ($request->price_by == 'DATE') {
@@ -304,10 +307,12 @@ class CustPriceController extends Controller
                     }
 
                     // Trigger By Date
-                    // $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
+                    // $trg = $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
+                    $trg = $this->triggerDate($data);
                 }else{
                     // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    // $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
+                    // $trg = $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
+                    $trg = $this->triggerSO($data);
                 }
                 $old_data = CustPrice::where('cust_id', $cust)
                     ->where('active_date', $active)
@@ -351,10 +356,10 @@ class CustPriceController extends Controller
                         'note' => null
                     ]);
                 }
-                DB::connection('db_tbs')->commit();
-                return $this->_Success('Cust Price has been update & posted!', 201);
+                // DB::connection('db_tbs')->commit();
+                return $this->_Success('Cust Price has been update & posted!', 201, $trg);
             } catch (Exception $e) {
-                DB::connection('db_tbs')->rollBack();
+                // DB::connection('db_tbs')->rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
             }
         }
@@ -639,7 +644,12 @@ class CustPriceController extends Controller
             
             case 'customerclick':
                 if (isset($request->cust_id)) {
-                    $query = CustPrice::select([
+                    $last = CustPrice::where('entry_custprice_tbl.cust_id', $request->cust_id)
+                        ->where('entry_custprice_tbl.status', 'ACTIVE')
+                        ->orderBy('active_date', 'DESC')
+                        ->first();
+                    if ($last) {
+                        $query = CustPrice::select([
                             'entry_custprice_tbl.*', 
                             'ekanban_customermaster.CustomerCode_eKanban as cuscode', 
                             'ekanban_customermaster.CustomerName as custname',
@@ -649,8 +659,23 @@ class CustPriceController extends Controller
                         ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
                         ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
                         ->where('entry_custprice_tbl.cust_id', $request->cust_id)
+                        ->where('entry_custprice_tbl.active_date', $last->active_date)
                         ->where('entry_custprice_tbl.status', 'ACTIVE')
                         ->get();
+                    }else{
+                        $query = CustPrice::select([
+                                'entry_custprice_tbl.*', 
+                                'ekanban_customermaster.CustomerCode_eKanban as cuscode', 
+                                'ekanban_customermaster.CustomerName as custname',
+                                'item.PART_NO as part_no',
+                                'item.DESCRIPT as desc'
+                            ])
+                            ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
+                            ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
+                            ->where('entry_custprice_tbl.cust_id', $request->cust_id)
+                            ->where('entry_custprice_tbl.status', 'ACTIVE')
+                            ->get();
+                    }
                     if ($query->isEmpty()) {
                         return _Success(null, 200);
                     }else{
@@ -668,40 +693,7 @@ class CustPriceController extends Controller
 
     public function trigger()
     {
-        // CustPricePosted::dispatch();
-        $cust = 'Y02';
-        $act_date = date('Y-m', strtotime('2020-01-01'));
-        $so = DB::table('db_tbs.entry_so_tbl as so')
-                ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
-                    $join->on('sso.so_header', '=', 'so.so_header');
-                    $join->on('sso.item_code', '=', 'so.item_code');
-                })
-                ->leftJoin('db_tbs.entry_do_tbl as sj', function ($join){
-                    $join->on('sj.so_no', '=', 'so.so_header');
-                    $join->on('sj.sso_no', '=', 'sso.sso_header');
-                    $join->on('sj.item_code', '=', 'so.item_code');
-                })
-                ->where('so.cust_id', $cust)
-                ->where('so.so_period', $act_date)
-                ->whereNull('sj.invoice_date')
-                ->select([
-                    'so.so_header',
-                    'so.so_period',
-                    'so.tax_rate as so_tax_rate',
-                    'so.item_code as so_item_code',
-                    'so.price as so_price',
-                    'so.qty_so as so_qty_so',
-                    'so.sub_amount as so_sub_amount',
-                    'so.tot_vat as so_tot_vat',
-                    'so.total_amount as so_total_amount',
-                    'sso.sso_header as sso_header',
-                    'sj.do_no as sj_number',
-                ])
-                ->count();
-                // ->limit(100)
-                // ->offset(0)
-                // ->get();
-        return $so;
+        
     }
 
     private function _trgTest($data, $period, $cust)
@@ -818,20 +810,62 @@ class CustPriceController extends Controller
         Storage::disk('local')->put("/custprice-test/$soFileName", json_encode($arr_so));
     }
 
+    private function _trgSOTest($data, $period, $cust)
+    {
+        // DB::connection('db_tbs')->beginTransaction();
+        // DB::connection('tch_tbs')->beginTransaction();
+        try {
+            $dd = [];
+            for ($x=0; $x < count($data); $x++) { 
+                $dd[] = [
+                    'itemcode' => $data[$x]['item_code'],
+                    'is_stock' => $data[$x]['is_stock']
+                ];
+                if ($data[$x]['is_stock'] == 1) {
+                    DB::table('db_tbs.item')
+                        ->where('ITEMCODE', $data[$x]['item_code'])
+                        ->update([
+                            'PRICE' => $data[$x]['price_new']
+                        ]);
+                    // DB::table('tch_tbs.item')
+                    //     ->where('itemcode', $d['item_code'])
+                    //     ->update([
+                    //         'price' => $d['price_new']
+                    //     ]);
+                }
+            }
+            // DB::connection('db_tbs')->commit();
+            // DB::connection('tch_tbs')->commit();
+            return $dd;
+        } catch (Exception $e) {
+            // DB::connection('db_tbs')->rollBack();
+            // DB::connection('tch_tbs')->rollBack();
+            return $e->getMessage();
+        }
+    }
+
     private function _trgSO($data, $period, $cust)
     {
-        $arr_so = [];
-        $arr_so['customer'] = $cust;
-        $arr_so['item_code'] = $data[0]['item_code'];
-        $arr_so['active_date'] = $data[0]['active_date'];
-        $soFileName = 'so_'.$cust.'_'.$data[0]['active_date'].'_'.time().'.json';
         DB::connection('db_tbs')->beginTransaction();
         DB::connection('tch_tbs')->beginTransaction();
         try {
-            $arr_so_tms = [];
             foreach ($data as $d) {
                 $item_i = $d['item_code'];
                 $act_date = $d['active_date'];
+
+                if ($d['is_stock'] == 1) {
+                    DB::table('db_tbs.item')
+                        ->where('ITEMCODE', $d['item_code'])
+                        ->update([
+                            'PRICE' => $d['price_new']
+                        ]);
+                    DB::table('tch_tbs.item')
+                        ->where('itemcode', $d['item_code'])
+                        ->update([
+                            'price' => $d['price_new']
+                        ]);
+                }
+
                 $so = DB::table('db_tbs.entry_so_tbl as so')
                     ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
                         $join->on('sso.so_header', '=', 'so.so_header');
@@ -868,13 +902,6 @@ class CustPriceController extends Controller
                         $sub_amt = $d['price_new'] * $s->so_qty_so;
                         $tot_vat = $sub_amt * $s->so_tax_rate / 100;
                         $total_amount = $sub_amt + $tot_vat;
-
-                        $arr_so['so_tms'][$so_header] = [
-                            'price' => $d['price_new'],
-                            'sub_amt' => $sub_amt,
-                            'tot_vat' => $tot_vat,
-                            'total_amount' => $total_amount,
-                        ];
 
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->leftJoin('db_tbs.entry_sso_tbl as sso', function ($join){
@@ -971,13 +998,6 @@ class CustPriceController extends Controller
                             $sub_amt = $d['price_new'] * $s->so_qty_so;
                             $tot_vat = $sub_amt * $s->so_tax_rate / 100;
                             $total_amount = $sub_amt + $tot_vat;
-
-                            $arr_so['so_ttbs'][$so_header] = [
-                                'price' => $d['price_new'],
-                                'sub_amt' => $sub_amt,
-                                'tot_vat' => $tot_vat,
-                                'total_amount' => $total_amount,
-                            ];
 
                             DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
@@ -1116,23 +1136,10 @@ class CustPriceController extends Controller
                     }
                     // END
                 }
-
-                if ($d['is_stock'] == 1) {
-                    DB::table('db_tbs.item')
-                        ->where('ITEMCODE', $d['item_code'])
-                        ->update([
-                            'PRICE' => $d['price_new']
-                        ]);
-                    DB::table('tch_tbs.item')
-                        ->where('itemcode', $d['item_code'])
-                        ->update([
-                            'price' => $d['price_new']
-                        ]);
-                }
-                // Storage::put(public_path("/custprice-test/$soFileName"), json_encode($arr_so));
             }
             DB::connection('db_tbs')->commit();
             DB::connection('tch_tbs')->commit();
+            return true;
         } catch (Exception $e) {
             Log::channel('queue')->info($e->getMessage());
             DB::connection('db_tbs')->rollBack();
@@ -1469,34 +1476,34 @@ class CustPriceController extends Controller
                         }
                     }
 
-                    $tbs_do = DB::table('db_tbs.entry_do_tbl as sj')
-                        ->where('sj.cust_id', $cust)
-                        ->where('sj.item_code', $d['item_code'])
-                        ->where(function ($where) use ($act_date, $is_exist){
-                            $where->whereNotNull('sj.created_date');
-                            $where->where('sj.created_date', '>=', $act_date);
-                        })
-                        ->whereNull('sj.invoice_date')
-                        ->select([
-                            '*'
-                        ])
-                    ->get();
+                    // $tbs_do = DB::table('db_tbs.entry_do_tbl as sj')
+                    //     ->where('sj.cust_id', $cust)
+                    //     ->where('sj.item_code', $d['item_code'])
+                    //     ->where(function ($where) use ($act_date, $is_exist){
+                    //         $where->whereNotNull('sj.created_date');
+                    //         $where->where('sj.created_date', '>=', $act_date);
+                    //     })
+                    //     ->whereNull('sj.invoice_date')
+                    //     ->select([
+                    //         '*'
+                    //     ])
+                    // ->get();
 
-                    if ($tbs_do->isNotEmpty()) {
-                        $cvrt = $act_date;
-                        $custprice_id = $cust.'.'.$cvrt;
-                        DB::table('db_tbs.entry_do_tbl as sj')
-                            ->where('sj.cust_id', $cust)
-                            ->where('sj.item_code', $d['item_code'])
-                            ->where(function ($where) use ($act_date, $is_exist){
-                                $where->whereNotNull('sj.created_date');
-                                $where->where('sj.created_date', '>=', $act_date);
-                            })
-                            ->whereNull('sj.invoice_date')
-                            ->update([
-                                'custprice' => $custprice_id
-                            ]);
-                    }
+                    // if ($tbs_do->isNotEmpty()) {
+                    //     $cvrt = $act_date;
+                    //     $custprice_id = $cust.'.'.$cvrt;
+                    //     DB::table('db_tbs.entry_do_tbl as sj')
+                    //         ->where('sj.cust_id', $cust)
+                    //         ->where('sj.item_code', $d['item_code'])
+                    //         ->where(function ($where) use ($act_date, $is_exist){
+                    //             $where->whereNotNull('sj.created_date');
+                    //             $where->where('sj.created_date', '>=', $act_date);
+                    //         })
+                    //         ->whereNull('sj.invoice_date')
+                    //         ->update([
+                    //             'custprice' => $custprice_id
+                    //         ]);
+                    // }
                 }
 
                 if ($d['is_stock'] == 1) {
@@ -1515,6 +1522,7 @@ class CustPriceController extends Controller
             
             DB::connection('db_tbs')->commit();
             DB::connection('tch_tbs')->commit();
+            return true;
         } catch (Exception $e) {
             DB::connection('db_tbs')->rollBack();
             DB::connection('tch_tbs')->rollBack();
