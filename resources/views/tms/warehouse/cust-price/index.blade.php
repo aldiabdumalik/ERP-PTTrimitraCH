@@ -405,8 +405,13 @@
             return false;
         });
 
+        $('#custprice-modal-item').on('shown.bs.modal', function () {
+            $('#custprice-datatables-customer-item_filter input').focus();
+        });
+
         $('#custprice-modal-customer').on('shown.bs.modal', function () {
             adjustDraw(tbl_customer);
+            $('#custprice-datatables-customer_filter input').focus();
         });
 
         $('#custprice-modal-index').on('hidden.bs.modal', function () {
