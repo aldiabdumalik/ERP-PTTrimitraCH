@@ -22,6 +22,11 @@ class CustPriceController extends Controller
 {
     use ToolsTrait, CustPriceTrait;
 
+    function __construct() 
+    {
+        date_default_timezone_set('Asia/Jakarta');
+    }
+
     public function index()
     {
         return view('tms.warehouse.cust-price.index');
