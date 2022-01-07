@@ -413,7 +413,7 @@
             resetForm();
         });
 
-        $('#custprice-datatables-customer').off('click', 'tr').on('click', 'tr', function () {
+        $('#custprice-datatables-customer').off('dblclick', 'tr').on('dblclick', 'tr', function () {
             var data = tbl_customer.row(this).data();
             var cust_id = data[0];
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
