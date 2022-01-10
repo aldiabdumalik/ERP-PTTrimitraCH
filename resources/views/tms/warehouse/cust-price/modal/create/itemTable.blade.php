@@ -6,7 +6,7 @@
                     <th class="align-middle">#</th>
                     <th class="align-middle">Itemcode</th>
                     <th class="align-middle">Part No.</th>
-                    <th class="align-middle">Desc.</th>
+                    <th class="align-middle">Partname.</th>
                     <th class="align-middle">New Price</th>
                     <th class="align-middle">Old Price</th>
                 </tr>
