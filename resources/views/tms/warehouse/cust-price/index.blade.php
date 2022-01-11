@@ -145,24 +145,30 @@
                 ],
                 displayLength: 50,
                 drawCallback: function ( settings ) {
-                    // var cellNode = api.cell(i, 1).node();
-                    // var cust = group.split(' ')[0];
-                    // var date = group.split(' ')[2];
-                    var arr_group = group.split('|');
-                    if (last !== group) {
-                        x = 1;
-                    }
-                    if ( last !== group ) {
-                        $(rows).eq( i ).before(`
-                            <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
-                                <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
-                                <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
-                            </tr>
-                        `);
+                    var api = this.api();
+                    var rows = api.rows( {page:'current'} ).nodes();
+                    var last=null;
+                    var x = 1;
+                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                        // var cellNode = api.cell(i, 1).node();
+                        // var cust = group.split(' ')[0];
+                        // var date = group.split(' ')[2];
+                        var arr_group = group.split('|');
+                        if (last !== group) {
+                            x = 1;
+                        }
+                        if ( last !== group ) {
+                            $(rows).eq( i ).before(`
+                                <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
+                                    <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
+                                    <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
+                                </tr>
+                            `);
 
-                        last = group;
-                    }
-                    // $(cellNode).html(`${x++} ${$(cellNode).text()}`);
+                            last = group;
+                        }
+                        // $(cellNode).html(`${x++} ${$(cellNode).text()}`);
+                    });
                 }
             });
         }
