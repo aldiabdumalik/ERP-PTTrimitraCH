@@ -167,7 +167,9 @@ class CustPriceController extends Controller
                     'is_stock' => $is_stock,
                     'is_so' => $is_so,
                     'is_sso' => $is_sso,
-                    'is_sj' => $is_sj
+                    'is_sj' => $is_sj,
+                    'posted_date' => Carbon::now(),
+                    'posted_by' => Auth::user()->FullName
                 ];
             }
             // DB::connection('db_tbs')->beginTransaction();
@@ -186,51 +188,32 @@ class CustPriceController extends Controller
                     }
 
                     // Trigger By Date
-                    // $trg = $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
                     $trg = $this->triggerDate($data);
                 }else{
                     $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    // $trg = $this->_trgSOTest($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
                     $trg = $this->triggerSO($data);
                 }
                 $query = CustPrice::insert($data);
                 if ($query) {
-                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                        'cust_id' => $request->cust_id,
-                        'active_date' => $request->active_date,
-                        'written_date' => Carbon::now(),
-                        'status' => 'ADD',
-                        'user' => Auth::user()->FullName,
-                        'note' => null
-                    ]);
-                }
-
-                // $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
-                // $is_so = ($request->post['so'] == 'true') ? 1 : 0;
-                // $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
-                // $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
-
-                // Post
-                $posted = CustPrice::where([
-                        'cust_id' => $request->cust_id,
-                        'active_date' => $request->active_date
-                    ])->update([
-                        'posted_date' => Carbon::now(),
-                        'posted_by' => Auth::user()->FullName,
-                        'is_stock' => $is_stock,
-                        'is_so' => $is_so,
-                        'is_sso' => $is_sso,
-                        'is_sj' => $is_sj
-                    ]);
-                if ($posted) {
-                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                        'cust_id' => $request->cust_id,
-                        'active_date' => $request->active_date,
-                        'written_date' => Carbon::now(),
-                        'status' => 'POSTED',
-                        'user' => Auth::user()->FullName,
-                        'note' => null
-                    ]);
+                    $log = [
+                        [
+                            'cust_id' => $request->cust_id,
+                            'active_date' => $request->active_date,
+                            'written_date' => Carbon::now(),
+                            'status' => 'ADD',
+                            'user' => Auth::user()->FullName,
+                            'note' => null
+                        ],
+                        [
+                            'cust_id' => $request->cust_id,
+                            'active_date' => $request->active_date,
+                            'written_date' => Carbon::now(),
+                            'status' => 'POSTED',
+                            'user' => Auth::user()->FullName,
+                            'note' => null
+                        ]
+                    ];
+                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', $log);
                 }
                 // DB::connection('db_tbs')->commit();
                 return $this->_Success('Saved successfully!', 201, $trg);
@@ -252,10 +235,6 @@ class CustPriceController extends Controller
         $create_date = $cek->created_date;
         $data = [];
         $items = json_decode($request->items, true);
-        // $old_data = CustPrice::where('cust_id', $cust)
-        //     ->where('active_date', $active)
-        //     ->where('entry_custprice_tbl.status', 'ACTIVE')
-        //     ->delete();
         $is_update = 0;
         $price_old = 0;
         $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
@@ -265,8 +244,6 @@ class CustPriceController extends Controller
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
                 $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
-                // $prices = str_replace(',', '', $items[$i]['new_price']);
-                // $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
                 if ($old) {
                     $prices = str_replace(',', '', $items[$i]['new_price']);
                     $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
@@ -287,13 +264,15 @@ class CustPriceController extends Controller
                     'updated_by' => Auth::user()->FullName,
                     'updated_date' => Carbon::now(),
                     'created_by' => $create_by,
-                    'created_date' => $create_date,
+                    'created_date' => Carbon::now(),
                     'is_update' => $is_update,
                     'price_by' => $request->price_by,
                     'is_stock' => $is_stock,
                     'is_so' => $is_so,
                     'is_sso' => $is_sso,
-                    'is_sj' => $is_sj
+                    'is_sj' => $is_sj,
+                    'posted_date' => Carbon::now(),
+                    'posted_by' => Auth::user()->FullName
                 ];
             }
             // DB::connection('db_tbs')->beginTransaction();
@@ -312,63 +291,48 @@ class CustPriceController extends Controller
                     }
 
                     // Trigger By Date
-                    // $trg = $this->_trgDate($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id, $isext);
                     $trg = $this->triggerDate($data);
                 }else{
-                    // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    // $trg = $this->_trgSO($data, convertDate($request->active_date, 'Y-m-d', 'Y-m'), $request->cust_id);
+                    // Trigger By SO
                     $trg = $this->triggerSO($data);
                 }
-                $old_data = CustPrice::where('cust_id', $cust)
+                
+                CustPrice::where('cust_id', $cust)
                     ->where('active_date', $active)
                     ->where('entry_custprice_tbl.status', 'ACTIVE')
                     ->delete();
+
                 $query = CustPrice::insert($data);
                 if ($query) {
-                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                        'cust_id' => $request->cust_id,
-                        'active_date' => $request->active_date,
-                        'written_date' => Carbon::now(),
-                        'status' => 'EDIT',
-                        'user' => Auth::user()->FullName,
-                        'note' => null
-                    ]);
+                    $log = [
+                        [
+                            'cust_id' => $request->cust_id,
+                            'active_date' => $request->active_date,
+                            'written_date' => Carbon::now(),
+                            'status' => 'EDIT',
+                            'user' => Auth::user()->FullName,
+                            'note' => null
+                        ],
+                        [
+                            'cust_id' => $request->cust_id,
+                            'active_date' => $request->active_date,
+                            'written_date' => Carbon::now(),
+                            'status' => 'POSTED',
+                            'user' => Auth::user()->FullName,
+                            'note' => null
+                        ]
+                    ];
+                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', $log);
                 }
 
-                // Post
-                // $is_stock = ($request->post['stock'] == 'true') ? 1 : 0;
-                // $is_so = ($request->post['so'] == 'true') ? 1 : 0;
-                // $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
-                // $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
-                $posted = CustPrice::where([
-                        'cust_id' => $request->cust_id,
-                        'active_date' => $request->active_date
-                    ])->update([
-                        'posted_date' => Carbon::now(),
-                        'posted_by' => Auth::user()->FullName,
-                        'is_stock' => $is_stock,
-                        'is_so' => $is_so,
-                        'is_sso' => $is_sso,
-                        'is_sj' => $is_sj
-                    ]);
-                if ($posted) {
-                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                        'cust_id' => $request->cust_id,
-                        'active_date' => $request->active_date,
-                        'written_date' => Carbon::now(),
-                        'status' => 'POSTED',
-                        'user' => Auth::user()->FullName,
-                        'note' => null
-                    ]);
-                }
                 // DB::connection('db_tbs')->commit();
                 return $this->_Success('Cust Price has been update & posted!', 201, $trg);
             } catch (Exception $e) {
                 // DB::connection('db_tbs')->rollBack();
-                return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+                return $this->_Error('failed to update, please check your form again', 401, $e->getMessage());
             }
         }
-        return _Error('failed to save');
+        return _Error('failed to update');
     }
 
     public function voided(Request $request)
