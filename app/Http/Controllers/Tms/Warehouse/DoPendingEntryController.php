@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Redirect;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade as PDF;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class DoPendingEntryController extends Controller
 {
@@ -46,6 +47,57 @@ class DoPendingEntryController extends Controller
                 return ($query->voided_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->voided_date));
             })
             ->make(true);
+    }
+
+    public function detail($do_no, $is_check=0)
+    {
+        if ($is_check == 1) {
+            $query = DoPendingEntry::where('do_no', $do_no)->first();
+            if ($query) {
+                $content = 'exist';
+            }else{
+                $content = 'not_exist';
+            }
+        }
+        return _Success(null, 200, $content);
+    }
+
+    public function store(Request $request)
+    {
+        if ($request->ajax()) {
+            try {
+                $data = [];
+                $item = json_decode($request->items);
+                for ($i=0; $i < count($item); $i++) {
+                    $data[] = [
+                        'do_no' => $request->no,
+                        'item_code' => $item[$i]['itemcode'],
+                        'quantity' => $item[$i]['qty'],
+                        'unit' => $item[$i]['unit'],
+                        'so_no' => $request->so,
+                        'sso_no' => $request->sso,
+                        'ref_no' => $request->refno,
+                        'po_no' => $request->pono,
+                        'dn_no' => $request->dnno,
+                        'period' => $request->priod,
+                        'cust_id' => $request->cust_id,
+                        'do_address' => $request->doaddr,
+                        'cust_name' => $request->cust_name,
+                        'id_driver' => Auth::user()->FullName,
+                        'remark' => $request->remark,
+                        'branch' => $request->branch,
+                        'warehouse' => $request->warehouse,
+                        'delivery_date' => $request->date,
+                        'created_by' => Auth::user()->FullName,
+                        'created_date' => Carbon::now()
+                    ];
+                }
+                return _Success('Saved successfully', 201, $data);
+            } catch (Exception $e) {
+                return _Error($e->getMessage());
+            }
+            
+        }
     }
 
     public function DoEntryRead(Request $request)
@@ -476,18 +528,19 @@ class DoPendingEntryController extends Controller
         return $this->_Success('Successfuly create Qty NG');
     }
 
-    public function DoEntryHeader(Request $request)
+    public function header_tools(Request $request)
     {
         switch ($request->type) {
             case "DONo":
-                // return $this->headerToolsDoEntryNo($request);
-                return $this->headerToolsDoEntryNoTbs();
+                return $this->headerToolsDoPendingEntryNo($request);
+                // return $this->headerToolsDoEntryNoTbs();
                 break;
             case "branch":
                 return DataTables::of($this->headerToolsBranch($request))->make(true);
                 break;
             case "warehouse":
                 return DataTables::of($this->headerToolsWarehouse($request))->make(true);
+                // return _Success(null, 200, $this->headerToolsWarehouse($request));
                 break;
             case "customer":
                 return DataTables::of($this->headerToolsCustomer($request))->make(true);
@@ -500,6 +553,14 @@ class DoPendingEntryController extends Controller
                 break;
             case "item":
                 return DataTables::of($this->headerToolsItem($request))->make(true);
+                break;
+            case 'item_select':
+                $query = 
+                    DB::table('db_tbs.item')
+                    ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit, DESCRIPT1 as model')
+                    ->whereIn('ITEMCODE', json_decode($request->item_selected))
+                    ->get();
+                return _Success(null, 200, $query);
                 break;
             case "log":
                 return DataTables::of($this->headerToolsLog($request))->make(true);

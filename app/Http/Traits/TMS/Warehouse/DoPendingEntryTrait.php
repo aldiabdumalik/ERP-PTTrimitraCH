@@ -258,10 +258,13 @@ trait DoPendingEntryTrait {
                 'status' => 'ACTIVE'
             ];
         }
+        $branch = $request->branch;
         $query = DB::connection('db_tbs')
             ->table('sys_warehouse')
             ->selectRaw('warehouse_id as code, descript as name')
-            ->where($where)
+            ->where(function ($whr) use($branch){
+                $whr->where('branch', $branch);
+            })
             ->get();
         return $query;
     }
@@ -314,7 +317,7 @@ trait DoPendingEntryTrait {
         $query = 
             DB::connection('db_tbs')
             ->table('item')
-            ->selectRaw('ITEMCODE, PART_NO, DESCRIPT, UNIT')
+            ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit, DESCRIPT1 as model')
             ->where('CUSTCODE', $request->cust_code)
             ->get();
         return $query;

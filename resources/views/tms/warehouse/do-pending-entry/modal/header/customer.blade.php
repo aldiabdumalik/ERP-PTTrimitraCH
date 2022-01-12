@@ -3,7 +3,7 @@
         <form id="do-form-customer" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Select customer</h4>
+                    <h4 class="modal-title">Select customer <span style="font-size: 12px;">(Double click to select)</span></h4>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">
@@ -15,7 +15,6 @@
                                         <th class="align-middle">Nama</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
                             </table>
                         </div>
                     </div>

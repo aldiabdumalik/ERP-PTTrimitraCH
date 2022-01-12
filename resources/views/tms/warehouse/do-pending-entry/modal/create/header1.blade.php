@@ -1,6 +1,6 @@
 <div class="form-row align-items-center mb-1">
     <div class="col-3">
-        <input type="text" name="do-create-customercode" id="do-create-customercode" class="form-control form-control-sm" autocomplete="off" required>
+        <input type="text" name="do-create-customercode" id="do-create-customercode" class="form-control form-control-sm" placeholder="ENTER" autocomplete="off" required>
     </div>
     <div class="col-9">
         <div class="form-row align-items-center">
@@ -10,7 +10,7 @@
                         <label for="do-create-sso">SSO</label>
                     </div>
                     <div class="col-10">
-                        <input type="text" name="do-create-sso" id="do-create-sso" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly>
+                        <input type="text" name="do-create-sso" id="do-create-sso" class="form-control form-control-sm" autocomplete="off" required>
                     </div>
                 </div>
             </div>
@@ -20,7 +20,7 @@
                         <label for="do-create-so">SO</label>
                     </div>
                     <div class="col-10">
-                        <input type="text" name="do-create-so" id="do-create-so" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly>
+                        <input type="text" name="do-create-so" id="do-create-so" class="form-control form-control-sm" autocomplete="off" required>
                     </div>
                 </div>
             </div>
@@ -34,7 +34,7 @@
     <div class="col-4">
         <div class="row no-gutters">
             <div class="col-8">
-                <input type="text" name="do-create-customerdoaddr" id="do-create-customerdoaddr" class="form-control form-control-sm readonly-first" autocomplete="off" readonly required>
+                <input type="text" name="do-create-customerdoaddr" id="do-create-customerdoaddr" class="form-control form-control-sm" placeholder="ENTER" autocomplete="off" required>
             </div>
             <div class="col-4">
                 <input type="text" name="do-create-customergroup" id="do-create-customergroup" class="form-control form-control-sm readonly-first" autocomplete="off" readonly value="10" required>

@@ -8,13 +8,13 @@
                 <div class="modal-body">
                     <div class="form-row" style="font-size: 11px;">
                         <div class="col-xl-4 border-left">
-                            @include('tms.warehouse.do-entry.modal.create.header1')
+                            @include('tms.warehouse.do-pending-entry.modal.create.header1')
                         </div>
                         <div class="col-xl-4 border-left">
-                            @include('tms.warehouse.do-entry.modal.create.header2')
+                            @include('tms.warehouse.do-pending-entry.modal.create.header2')
                         </div>
                         <div class="col-xl-4 border-left border-right">
-                            @include('tms.warehouse.do-entry.modal.create.header3')
+                            @include('tms.warehouse.do-pending-entry.modal.create.header3')
                         </div>
                     </div>
                     <div class="row mt-4">
@@ -30,12 +30,12 @@
                             </button>
                         </div>
                         <div class="col-12">
-                            @include('tms.warehouse.do-entry.modal.create.table_create_item')
+                            @include('tms.warehouse.do-pending-entry.modal.create.table_create_item')
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="do-btn-create-close" class="btn btn-secondary">Batal</button>
+                    <button type="button" id="do-btn-create-close" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                     <button type="submit" id="do-btn-create-submit" class="btn btn-info">Simpan</button>
                     <button type="button" id="do-btn-revise" class="btn btn-info d-none">Revise</button>
                 </div>

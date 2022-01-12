@@ -3,7 +3,7 @@
         <form id="do-form-branch" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Select Branch</h4>
+                    <h4 class="modal-title">Select Branch <span style="font-size: 12px;">(Double click to select)</span></h4>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">

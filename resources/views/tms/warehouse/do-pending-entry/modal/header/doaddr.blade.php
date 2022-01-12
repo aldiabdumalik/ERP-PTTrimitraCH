@@ -1,9 +1,9 @@
 <div class="modal fade do-modal-doaddr" style="z-index: 1041" tabindex="-1" id="do-modal-doaddr" data-target="#do-modal-doaddr" data-whatever="@domodaldoaddr"  role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <form id="do-form-doaddr" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Select addres</h4>
+                    <h4 class="modal-title">Select addres <span style="font-size: 12px;">(Double click to select)</span></h4>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">
@@ -19,7 +19,6 @@
                                         <th class="align-middle">Address 4</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
                             </table>
                         </div>
                     </div>

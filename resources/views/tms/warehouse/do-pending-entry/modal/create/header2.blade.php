@@ -8,10 +8,10 @@
                 <input type="text" name="do-create-no" id="do-create-no" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
             <div class="col-2">
-                <input type="text" name="do-create-branch" id="do-create-branch" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly>
+                <input type="text" name="do-create-branch" id="do-create-branch" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly value="{{ auth()->user()->Branch }}">
             </div>
             <div class="col-2">
-                <input type="text" name="do-create-warehouse" id="do-create-warehouse" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly>
+                <input type="text" name="do-create-warehouse" id="do-create-warehouse" class="form-control form-control-sm" placeholder="ENTER" autocomplete="off" required>
             </div>
             <div class="col-4">
                 <select name="do-create-direct" id="do-create-direct" class="form-control form-control-sm" required>
@@ -42,7 +42,7 @@
         <label for="do-create-dnno">DN No</label>
     </div>
     <div class="col-10">
-        <input type="text" name="do-create-dnno" id="do-create-dnno" class="form-control form-control-sm readonly-first" autocomplete="off" readonly required>
+        <input type="text" name="do-create-dnno" id="do-create-dnno" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
@@ -50,7 +50,7 @@
         <label for="do-create-pono">PO No</label>
     </div>
     <div class="col-10">
-        <input type="text" name="do-create-pono" id="do-create-pono" class="form-control form-control-sm readonly-first" autocomplete="off" readonly required>
+        <input type="text" name="do-create-pono" id="do-create-pono" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
@@ -81,6 +81,6 @@
         <label for="do-create-remark" style="margin-bottom:0rem !important;">Remark</label>
     </div>
     <div class="col-10">
-        <input type="text" name="do-create-remark" id="do-create-remark" class="form-control form-control-sm" autocomplete="off" required>
+        <input type="text" name="do-create-remark" id="do-create-remark" class="form-control form-control-sm" autocomplete="off">
     </div>
 </div>

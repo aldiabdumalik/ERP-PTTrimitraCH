@@ -151,78 +151,29 @@ Route::post('/warehouse/do_entry/cancel_form', [
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |
 */
-Route::get('/warehouse/do_pending_entry', [
+Route::get('/warehouse/do_temporary_entry', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@index', 
-    'as' => 'tms.warehouse.do_pending.index'
+    'as' => 'tms.warehouse.do_temp.index'
 ]);
-Route::post('/warehouse/do_pending_entry/index_table', [
+Route::post('/warehouse/do_temporary_entry/index_table', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@index_table', 
-    'as' => 'tms.warehouse.do_pending.tbl_index'
+    'as' => 'tms.warehouse.do_temp.tbl_index'
 ]);
-
-Route::get('/warehouse/do_pending_entry/read', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryRead', 
-    'as' => 'tms.warehouse.do_pending.read'
+Route::get('/warehouse/do_temporary_entry/detail/{do_no}/cek/{is_check}', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@detail', 
+    'as' => 'tms.warehouse.do_temp.detail'
 ]);
-Route::post('/warehouse/do_pending_entry/create', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryCreate', 
-    'as' => 'tms.warehouse.do_pending.create'
+Route::post('/warehouse/do_temporary_entry/store', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@store', 
+    'as' => 'tms.warehouse.do_temp.store'
 ]);
-Route::post('/warehouse/do_pending_entry/update', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryUpdate', 
-    'as' => 'tms.warehouse.do_pending.update'
+Route::put('/warehouse/do_temporary_entry/{do_no}/update', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@update', 
+    'as' => 'tms.warehouse.do_temp.update'
 ]);
-Route::post('/warehouse/do_pending_entry/header_tools', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryHeader', 
-    'as' => 'tms.warehouse.do_pending.header_tools'
-]);
-Route::get('/warehouse/do_pending_entry/table_index_setting', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryTableSetting', 
-    'as' => 'tms.warehouse.do_pending.table_index_setting'
-]);
-Route::post('/warehouse/do_pending_entry/void', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryVoid', 
-    'as' => 'tms.warehouse.do_pending.void'
-]);
-Route::post('/warehouse/do_pending_entry/unvoid', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryUnvoid', 
-    'as' => 'tms.warehouse.do_pending.unvoid'
-]);
-Route::post('/warehouse/do_pending_entry/post', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryPost', 
-    'as' => 'tms.warehouse.do_pending.post'
-]);
-Route::post('/warehouse/do_pending_entry/unpost', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryUnpost', 
-    'as' => 'tms.warehouse.do_pending.unpost'
-]);
-Route::post('/warehouse/do_pending_entry/finish', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryFinish', 
-    'as' => 'tms.warehouse.do_pending.finish'
-]);
-Route::post('/warehouse/do_pending_entry/unfinish', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryUnfinish', 
-    'as' => 'tms.warehouse.do_pending.unfinish'
-]);
-Route::get('/warehouse/do_pending_entry/print', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryPrint', 
-    'as' => 'tms.warehouse.do_pending.print'
-]);
-Route::post('/warehouse/do_pending_entry/revise', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryRevise', 
-    'as' => 'tms.warehouse.do_pending.revise'
-]);
-Route::post('/warehouse/do_pending_entry/qtyng', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryNG', 
-    'as' => 'tms.warehouse.do_pending.ng'
-]);
-Route::post('/warehouse/do_pending_entry/delete_item', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryDeleteItem', 
-    'as' => 'tms.warehouse.do_pending.delete_item'
-]);
-Route::post('/warehouse/do_pending_entry/cancel_form', [
-    'uses' => 'TMS\Warehouse\DoPendingEntryController@DoEntryCancel', 
-    'as' => 'tms.warehouse.do_pending.cancel_form'
+Route::post('/warehouse/do_temporary_entry/header_tools', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@header_tools', 
+    'as' => 'tms.warehouse.do_temp.header_tools'
 ]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
