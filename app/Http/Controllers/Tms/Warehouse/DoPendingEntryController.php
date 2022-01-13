@@ -46,6 +46,11 @@ class DoPendingEntryController extends Controller
             ->editColumn('voided_date', function($query) {
                 return ($query->voided_date == NULL) ? '/ /' : date('d/m/Y', strtotime($query->voided_date));
             })
+            ->addColumn('action', function($query){
+                return view('tms.warehouse.do-pending-entry.button.btnTableIndex', [
+                    'data' => $query,
+                ]);
+            })->rawColumns(['action'])
             ->make(true);
     }
 
@@ -58,474 +63,235 @@ class DoPendingEntryController extends Controller
             }else{
                 $content = 'not_exist';
             }
+        }else{
+            $content = DB::table('db_tbs.entry_do_pending_tbl as do_temp')
+            ->leftJoin('ekanban.ekanban_customermaster as tb_cust', 'tb_cust.CustomerCode_eKanban', '=', 'do_temp.cust_id')
+            ->leftJoin('db_tbs.sys_do_address as tb_doaddr', 'tb_doaddr.id_do', '=', 'do_temp.do_address')
+            ->leftJoin('db_tbs.item as tb_item', function ($join){
+                $join->on('do_temp.cust_id', '=', 'tb_item.CUSTCODE');
+                $join->on('do_temp.item_code', '=', 'tb_item.ITEMCODE');
+            })
+            ->where('do_temp.do_no', $do_no)
+            ->select([
+                'do_temp.*',
+                'tb_cust.CustomerCode_eKanban as custcode', 
+                'tb_cust.CustomerName as custname', 
+                'tb_cust.Cus_Group as custgroup',
+                'tb_item.ITEMCODE as itemcode', 
+                'tb_item.PART_NO as part_no', 
+                'tb_item.DESCRIPT as descript', 
+                'tb_item.UNIT as unit', 
+                'tb_item.DESCRIPT1 as model',
+                'tb_doaddr.do_addr1', 
+                'tb_doaddr.do_addr2', 
+                'tb_doaddr.do_addr3', 
+                'tb_doaddr.do_addr4'
+            ])
+            ->get();
         }
         return _Success(null, 200, $content);
+    }
+
+    public function edit($do_no)
+    {
+        $query = DoPendingEntry::where('do_no', $do_no)->first();
+        if (!is_null($query->voided_date)) {
+            return _Error('DO Temp Entry has been voided');
+        }elseif(!is_null($query->posted_date)){
+            return _Error('DO Temp Entry has been posted');
+        }elseif($query->period < date('Y-m')){
+            return _Error('DO Temp Entry has been closed');
+        }
+        return _Success(true);
     }
 
     public function store(Request $request)
     {
         if ($request->ajax()) {
+            $data = [];
+            $item = json_decode($request->items, true);
+            for ($i=0; $i < count($item); $i++) {
+                $data[] = [
+                    'do_no' => $request->no,
+                    'item_code' => $item[$i]['itemcode'],
+                    'quantity' => $item[$i]['qty'],
+                    'unit' => $item[$i]['unit'],
+                    'so_no' => $request->so,
+                    'sso_no' => $request->sso,
+                    'ref_no' => $request->refno,
+                    'po_no' => $request->pono,
+                    'dn_no' => $request->dnno,
+                    'period' => $request->priod,
+                    'cust_id' => $request->cust_id,
+                    'do_address' => $request->doaddr,
+                    'cust_name' => $request->cust_name,
+                    'id_driver' => Auth::user()->FullName,
+                    'remark' => $request->remark,
+                    'branch' => $request->branch,
+                    'warehouse' => $request->warehouse,
+                    'delivery_date' => $request->date,
+                    'created_by' => Auth::user()->FullName,
+                    'created_date' => Carbon::now(),
+                    'sj_type' => $request->direct
+                ];
+            }
+            DB::connection('db_tbs')->beginTransaction();
             try {
-                $data = [];
-                $item = json_decode($request->items);
-                for ($i=0; $i < count($item); $i++) {
-                    $data[] = [
+                $query = DoPendingEntry::insert($data);
+                if ($query) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
                         'do_no' => $request->no,
-                        'item_code' => $item[$i]['itemcode'],
-                        'quantity' => $item[$i]['qty'],
-                        'unit' => $item[$i]['unit'],
-                        'so_no' => $request->so,
-                        'sso_no' => $request->sso,
-                        'ref_no' => $request->refno,
-                        'po_no' => $request->pono,
-                        'dn_no' => $request->dnno,
-                        'period' => $request->priod,
-                        'cust_id' => $request->cust_id,
-                        'do_address' => $request->doaddr,
-                        'cust_name' => $request->cust_name,
-                        'id_driver' => Auth::user()->FullName,
-                        'remark' => $request->remark,
-                        'branch' => $request->branch,
-                        'warehouse' => $request->warehouse,
-                        'delivery_date' => $request->date,
-                        'created_by' => Auth::user()->FullName,
-                        'created_date' => Carbon::now()
-                    ];
+                        'status' => 'ADD',
+                        'created_at' => Carbon::now(),
+                        'created_by' => Auth::user()->FullName
+                    ]);
                 }
-                return _Success('Saved successfully', 201, $data);
+                DB::connection('db_tbs')->commit();
+                return _Success('Saved successfully', 201);
             } catch (Exception $e) {
+                DB::connection('db_tbs')->rollBack();
                 return _Error($e->getMessage());
             }
             
         }
     }
 
-    public function DoEntryRead(Request $request)
+    public function posted($do_no, Request $request)
     {
-        if (isset($request->do_no)) {
-            $query = DoEntry::where('do_no', $request->do_no)->get();
-            if (isset($request->view_do)) {
-                $check = $query->first();
-                if ($check->sso_no !== '*') {
-                    $check_by = 'sso';
-                }else{
-                    $check_by = 'so';
-                }
+        if ($request->ajax()) {
+            $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            if (!is_null($cek->voided_date)) {
+                return _Error('DO Temp has been voided');
+            }elseif($cek->period < date('Y-m')){
+                return _Error('DO Temp has been closed');
+            };
 
-                $data = (object)[
-                    'do_no' => $request->do_no,
-                    'check_by' => $check_by
-                ];
-                $query = $this->headerToolsViewDo($data);
-                return $this->_Success('Data exist!', 200, $query);
-            }elseif (isset($request->check)) {
-                $message = $this->headerToolsCheckDO($request);
-                return $this->_Success($message);
-            }elseif (isset($request->check_print)) {
-                $message = $this->headerToolsCheckDO($request);
-                return $this->_Success($message);
-            }
-            if ($query->isEmpty()) {
-                return $this->_Success('false');
-            }else{
-                return $this->_Success('Data exist!', 200, $query);
-            }
-        }
-        return $this->_Error('Methode not exist!');
-    }
-
-    public function DoEntryCreate(Request $request)
-    {
-        $items = $request->items;
-        $data = [];
-        for ($i=0; $i < count($items); $i++) { 
-            $data[] = [
-                'do_no' => $request->do_no,
-                'row_no' => $items[$i][0],
-                'item_code' => $items[$i][1],
-                'quantity' => $items[$i][4],
-                'unit' => $items[$i][3],
-                'so_no' => $request->so,
-                'sso_no' => $request->sso,
-                'ref_no' => $request->refno,
-                'po_no' => $request->pono,
-                'rr_no' => $request->pono,
-                'dn_no' => $request->dnno,
-                'invoice' => $request->inv,
-                'period' => $request->priod,
-                'cust_id' => $request->customercode,
-                'do_address' => $request->customerdoaddr,
-                'cust_name' => $request->customername,
-                'source' => "",
-                'id_driver' => "",
-                'remark' => $request->remark,
-                'branch' => $request->branch,
-                'warehouse' => $request->warehouse,
-                'sj_type' => $request->sj_type,
-                'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
-                'direct_date' => null,
-                'do_trans' => 0,
-                'created_by' => Auth::user()->FullName,
-                'created_date' => date('Y-m-d H:i:s')
-            ];
-        }
-        try {
-            $query = DoEntry::insert($data);
-            $log = $this->createLOG($request->do_no, 'ADD');
-            return $this->_Success('Saved successfully!', 201);
-        } catch (Exception $e) {
-            return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
-        }
-    }
-
-    public function DoEntryUpdate(Request $request)
-    {
-        $items = $request->items;
-        $data = [];
-        $old_data = DoEntry::where('do_no', $request->do_no)->first();
-        $create_by = $old_data->created_by;
-        $create_date = $old_data->created_date;
-        $old_data = DoEntry::where('do_no', $request->do_no)->delete();
-        for ($i=0; $i < count($items); $i++) { 
-            $data[] = [
-                'do_no' => $request->do_no,
-                'row_no' => $items[$i][0],
-                'item_code' => $items[$i][1],
-                'quantity' => $items[$i][4],
-                'unit' => $items[$i][3],
-                'so_no' => $request->so,
-                'sso_no' => $request->sso,
-                'ref_no' => $request->refno,
-                'po_no' => $request->pono,
-                'rr_no' => $request->pono,
-                'dn_no' => $request->dnno,
-                'invoice' => $request->inv,
-                'period' => $request->priod,
-                'cust_id' => $request->customercode,
-                'do_address' => $request->customerdoaddr,
-                'cust_name' => $request->customername,
-                'source' => "",
-                'id_driver' => "",
-                'remark' => $request->remark,
-                'branch' => $request->branch,
-                'warehouse' => $request->warehouse,
-                'sj_type' => $request->sj_type,
-                'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
-                'direct_date' => null,
-                'do_trans' => 0,
-                'created_by' => $create_by,
-                'created_date' => $create_date,
-                'update_by' => Auth::user()->FullName,
-                'update_date' => date('Y-m-d H:i:s')
-            ];
-        }
-        try {
-            $query = DoEntry::insert($data);
-            $log = $this->createLOG($request->do_no, 'EDIT');
-            return $this->_Success('Saved successfully!', 201);
-        } catch (Exception $e) {
-            return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
-        }
-    }
-
-    public function DoEntryDeleteItem(Request $request)
-    {
-        $do = DoEntry::where('do_no', $request->do_no)->get();
-        if ($do->isEmpty()) {
-            return $this->_Success(NULL);
-        }
-        $update = DoEntry::where('do_no', $request->do_no)
-            ->where('item_code', $request->itemcode)
-            ->update([
-                'delete_by' => Auth::user()->FullName,
-                'delete_date' => date('Y-m-d H:i:s')
-            ]);
-        return $this->_Success('Data Exist');
-    }
-
-    public function DoEntryCancel(Request $request)
-    {
-        $do = DoEntry::where('do_no', $request->do_no)->get();
-        if ($do->isEmpty()) {
-            return $this->_Success(NULL);
-        }
-        $update = DoEntry::where('do_no', $request->do_no)
-            ->update([
-                'delete_by' => null,
-                'delete_date' => null
-            ]);
-        return $this->_Success('Data Exist');
-    }
-
-    public function DoEntryPost(Request $request)
-    {
-        $query = DoEntry::where('do_no', $request->do_no)->first();
-        if (isset($query)) {
-            $posted = DoEntry::where('do_no', $request->do_no)->update([
-                'posted_date' => date('Y-m-d H:i:s'),
-                'posted_by' => Auth::user()->FullName,
-                'rr_no' => $request->rr_no
-            ]);
-            $log = $this->createLOG($request->do_no, 'POST');
-            if ($posted) {
-                return $this->_Success("DO No. $request->do_no, has been posted!", 201);
-            }else{
-                return $this->_Error("DO No. $request->do_no, failed to posting!");
-            }
-        }
-        return $this->_Error('Data or Method Not Found!');
-    }
-
-    public function DoEntryVoid(Request $request)
-    {
-        $query = DoEntry::where('do_no', $request->do_no)->first();
-        if (isset($query)) {
-            $voided = DoEntry::where('do_no', $request->do_no)->update([
-                'voided_date' => date('Y-m-d H:i:s'),
-                'voided_by' => Auth::user()->FullName
-            ]);
-            $log = $this->createLOG($request->do_no, 'VOID');
-            if ($voided) {
-                return $this->_Success("DO No. $request->do_no, has been voided!", 201);
-            }else{
-                return $this->_Error("DO No. $request->do_no, failed to void!");
-            }
-        }
-        return $this->_Error('Data or Method Not Found!');
-    }
-
-    public function DoEntryUnpost(Request $request)
-    {
-        $query = DoEntry::where('do_no', $request->do_no)->first();
-        if (isset($query)) {
-            $posted = DoEntry::where('do_no', $request->do_no)->update([
-                'posted_date' => null,
-                'posted_by' => null,
-                'rr_no' => null
-            ]);
-            $log = $this->createLOG($request->do_no, 'UNPOST', $request->note);
-            if ($posted) {
-                return $this->_Success("DO No. $request->do_no, has been unposted!", 201);
-            }else{
-                return $this->_Error("DO No. $request->do_no, failed to unposting!");
-            }
-        }
-        return $this->_Error('Data or Method Not Found!');
-    }
-
-    public function DoEntryUnvoid(Request $request)
-    {
-        $query = DoEntry::where('do_no', $request->do_no)->first();
-        if (isset($query)) {
-            if ($query->revised_date != null) {
-                return $this->_Error("DO No. $request->do_no failed to unvoid, because it has been revised to DO No. $query->revised_to!");
-            }
-            $voided = DoEntry::where('do_no', $request->do_no)->update([
-                'voided_date' => null,
-                'voided_by' => null
-            ]);
-            $log = $this->createLOG($request->do_no, 'UNVOID', $request->note);
-            if ($voided) {
-                return $this->_Success("DO No. $request->do_no, has been unvoided!", 201);
-            }else{
-                return $this->_Error("DO No. $request->do_no, failed to unvoid!");
-            }
-        }
-        return $this->_Error('Data or Method Not Found!');
-    }
-
-    public function DoEntryPrint(Request $request)
-    {
-        if (isset($request->params) && $request->params != "") {
-            $decode = base64_decode($request->params);
-            $arr = explode('&', $decode);
-
-            $data = (object) [];
-            $data->dari = $arr[0];
-            $data->sampai = $arr[1];
-            $data->type = $arr[2];
-
-            if ($data->sampai <= $data->dari && $data->sampai !== $data->dari) {
-                $request->session()->flash('message', 'Invalid data input!');
-                return Redirect::back();
-            }
-
-            $result = $this->headerToolsDataForPrint($data);
-
-            if ($result->isEmpty()) {
-                $request->session()->flash('message', 'Data tidak ditemukan!');
-                return Redirect::back();
-            }
-
-            $groupItem = $result->groupBy('do_no');
-            $getKey = [];
-            $getValue = [];
-            foreach ($groupItem as $key => $v) {
-                $getKey[] = $key;
-                $getValue[] = $v;
-            }
-
-            $log_print = [];
-            $log_post = [];
-            for ($i=0; $i < count($getKey); $i++) { 
-                $log_print[] = [
-                    'do_no' => $getKey[$i],
-                    'date_log' => date('Y-m-d'),
-                    'time_log' => date('H:i:s'),
-                    'status_log' => 'PRINT',
-                    'user' => Auth::user()->FullName,
-                    'note' => null
-                ];
-
-                if ($getValue[$i][0]['posted'] === null) {
-                    $log_post[] = [
-                        'do_no' => $getKey[$i],
-                        'date_log' => date('Y-m-d'),
-                        'time_log' => date('H:i:s'),
-                        'status_log' => 'POST',
-                        'user' => Auth::user()->FullName,
-                        'note' => null
-                    ];
-                }
-            }
-
-            $posted = DoEntry::where('do_no', '>=', $data->dari)
-                ->where('do_no', '<=', $data->sampai)
-                ->where('voided_date', '=', null)
-                ->update([
-                    'posted_date' => date('Y-m-d H:i:s'),
+            DB::connection('db_tbs')->beginTransaction();
+            try {
+                $update = DoPendingEntry::where('do_no', $do_no)->update([
+                    'posted_date' => Carbon::now(),
                     'posted_by' => Auth::user()->FullName,
+                    'rr_no' => $request->rr_no,
+                    'rr_date' => $request->rr_date,
+                    'scurity_stamp' => $request->st
                 ]);
-            $insert_log_print = $this->createLOGBatch($log_print);
-            $insert_log_post = $this->createLOGBatch($log_post);
-            
-            $template = 'tms.warehouse.do-entry.report.report';
-            if ($data->type == 'blank') {
-                $template = 'tms.warehouse.do-entry.report.report';
-            }else{
-                $template = 'tms.warehouse.do-entry.report.reportTemplate';
-            }
-            $pdf = PDF::loadView($template, compact('data', 'groupItem', 'getKey'))->setPaper('a4', 'potrait');
-            return $pdf->stream();
-        }else{
-            $request->session()->flash('message', 'Data tidak ditemukan!');
-            return Redirect::back();
-        }
-    }
-
-    public function DoEntryRevise(Request $request)
-    {
-        if (!isset($request->posted)) {
-            return $this->_Error('Can\'t revised. it has not been posted');
-        }
-        $do_no = $request->do_no;
-        $do_new = $this->headerToolsDoEntryNo($request);
-        $voided = DoEntry::where('do_no', $do_no)->update([
-            'voided_date' => date('Y-m-d H:i:s'),
-            'voided_by' => Auth::user()->FullName,
-            'finished_date' => null,
-            'finished_by' => null,
-            'posted_date' => null,
-            'posted_by' => null,
-            'revised_date' => date('Y-m-d H:i:s'),
-            'revised_by' => Auth::user()->FullName,
-            'revised_to' => $do_new,
-        ]);
-        $log = $this->createLOG($do_no, 'VOID', 'VOIDED BY SYSTEM');
-
-        $items = $request->items;
-        $data = [];
-        for ($i=0; $i < count($items); $i++) { 
-            $data[] = [
-                'do_no' => $do_new,
-                'row_no' => $items[$i][0],
-                'item_code' => $items[$i][1],
-                'quantity' => $items[$i][4],
-                'unit' => $items[$i][3],
-                'so_no' => $request->so,
-                'sso_no' => $request->sso,
-                'ref_no' => $request->refno,
-                'po_no' => $request->pono,
-                'dn_no' => $request->dnno,
-                'invoice' => $request->inv,
-                'period' => $request->priod,
-                'cust_id' => $request->customercode,
-                'do_address' => $request->customerdoaddr,
-                'cust_name' => $request->customername,
-                'source' => "",
-                'id_driver' => "",
-                'remark' => $request->remark,
-                'branch' => $request->branch,
-                'warehouse' => $request->warehouse,
-                'sj_type' => $request->sj_type,
-                'delivery_date' => Carbon::createFromFormat('d/m/Y', $request->date)->format('Y-m-d'),
-                'direct_date' => null,
-                'do_trans' => 0,
-                'created_by' => Auth::user()->FullName,
-                'created_date' => date('Y-m-d H:i:s')
-            ];
-        }
-        try {
-            $query = DoEntry::insert($data);
-            $log = $this->createLOG($do_new, "ADD", "REVISE FROM DO No. $do_no");
-            return $this->_Success("Revise successfully! New DO No. $do_new", 201);
-        } catch (Exception $e) {
-            return $this->_Error('failed to Revise, please check your form again', 401, $e->getMessage());
-        }
-    }
-
-    public function DoEntryFinish(Request $request)
-    {
-        $check = DoEntry::where('do_no', $request->do_no)->first();
-        if ($check->posted_date == null) {
-            return $this->_Error('Can\'t finished. it has not been posted');
-        }else{
-            $update = DoEntry::where('do_no', $request->do_no)
-                ->update([
-                    'finished_date' => date('Y-m-d H:i:s'),
-                    'finished_by' => Auth::user()->FullName,
-                ]);
-            $log = $this->createLOG($request->do_no, "FINISH");
-            return $this->_Success('DO entry has been finished');
-        }
-    }
-
-    public function DoEntryUnfinish(Request $request)
-    {
-        $check = DoEntry::where('do_no', $request->do_no)->first();
-        if ($check->finished_date == null) {
-            return $this->_Error('Can\'t unfinished. it has not been finished');
-        }
-        $update = DoEntry::where('do_no', $request->do_no)
-            ->update([
-                'finished_date' => null,
-                'finished_by' => null,
-            ]);
-        $log = $this->createLOG($request->do_no, "UNFINISH", $request->note);
-        return $this->_Success('DO entry has been unfinished');
-    }
-
-    public function DoEntryNG(Request $request)
-    {
-        $items = $request->items;
-        if (count($items) > 0) {
-            $ng = 0;
-            for ($i=0; $i < count($items); $i++) {
-                $ng = (($items[$i]['qty_ng'] == "") ? 0 : $items[$i]['qty_ng']);
-                if (((int)$items[$i]['qty_sj'] - (int)$ng) === 0) {
-                    DoEntry::where('do_no', $items[$i]['do_no'])
-                        ->where('item_code', $items[$i]['itemcode'])
-                        ->delete();
-                }else{
-                    DoEntry::where('do_no', $items[$i]['do_no'])
-                        ->where('item_code', $items[$i]['itemcode'])
-                        ->update([
-                            'quantity' => (int)$items[$i]['qty_sj'] - (int)$items[$i]['qty_ng']
-                        ]);
+                if ($update) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
+                        'do_no' => $do_no,
+                        'status' => 'POSTED',
+                        'note' => $request->note,
+                        'created_at' => Carbon::now(),
+                        'created_by' => Auth::user()->FullName
+                    ]);
                 }
+                DB::connection('db_tbs')->commit();
+                return _Success('DO Temp posted successfully!');
+            } catch (Exception $e) {
+                DB::connection('db_tbs')->rollBack();
+                return _Error($e->getMessage());
             }
         }
-        return $this->_Success('Successfuly create Qty NG');
+    }
+
+    public function unposted($do_no, Request $request)
+    {
+        if ($request->ajax()) {
+            $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            if($cek->period < date('Y-m')){
+                return _Error('DO Temp has been finished');
+            };
+
+            DB::connection('db_tbs')->beginTransaction();
+            try {
+                $update = DoPendingEntry::where('do_no', $do_no)->update([
+                    'posted_date' => null,
+                    'posted_by' => null,
+                    'rr_no' => null,
+                    'rr_date' => null,
+                    'scurity_stamp' => null
+                ]);
+                if ($update) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
+                        'do_no' => $do_no,
+                        'status' => 'UNPOSTED',
+                        'note' => $request->note,
+                        'created_at' => Carbon::now(),
+                        'created_by' => Auth::user()->FullName
+                    ]);
+                }
+                DB::connection('db_tbs')->commit();
+                return _Success('DO Temp unposted successfully!');
+            } catch (Exception $e) {
+                DB::connection('db_tbs')->rollBack();
+                return _Error($e->getMessage());
+            }
+        }
+    }
+
+    public function voided($do_no, Request $request)
+    {
+        if ($request->ajax()) {
+            $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            if (!is_null($cek->posted_date)) {
+                return _Error('DO Temp has been posted');
+            }elseif($cek->period < date('Y-m')){
+                return _Error('DO Temp has been closed');
+            };
+
+            DB::connection('db_tbs')->beginTransaction();
+            try {
+                $update = DoPendingEntry::where('do_no', $do_no)->update([
+                    'voided_date' => Carbon::now(),
+                    'voided_by' => Auth::user()->FullName
+                ]);
+                if ($update) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
+                        'do_no' => $do_no,
+                        'status' => 'VOIDED',
+                        'note' => $request->note,
+                        'created_at' => Carbon::now(),
+                        'created_by' => Auth::user()->FullName
+                    ]);
+                }
+                DB::connection('db_tbs')->commit();
+                return _Success('DO Temp voided successfully!');
+            } catch (Exception $e) {
+                DB::connection('db_tbs')->rollBack();
+                return _Error($e->getMessage());
+            }
+        }
+    }
+
+    public function unvoided($do_no, Request $request)
+    {
+        if ($request->ajax()) {
+            $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            if($cek->period < date('Y-m')){
+                return _Error('DO Temp has been closed');
+            };
+
+            DB::connection('db_tbs')->beginTransaction();
+            try {
+                $update = DoPendingEntry::where('do_no', $do_no)->update([
+                    'voided_date' => null,
+                    'voided_by' => null
+                ]);
+                if ($update) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
+                        'do_no' => $do_no,
+                        'status' => 'UNVOIDED',
+                        'note' => $request->note,
+                        'created_at' => Carbon::now(),
+                        'created_by' => Auth::user()->FullName
+                    ]);
+                }
+                DB::connection('db_tbs')->commit();
+                return _Success('DO Temp unvoid successfully!');
+            } catch (Exception $e) {
+                DB::connection('db_tbs')->rollBack();
+                return _Error($e->getMessage());
+            }
+        }
     }
 
     public function header_tools(Request $request)
@@ -562,41 +328,36 @@ class DoPendingEntryController extends Controller
                     ->get();
                 return _Success(null, 200, $query);
                 break;
+            case "validation":
+                $query = DoPendingEntry::where('do_no', $request->do_no)->first();
+                if ($request->cek == 'posted') {
+                    if (!is_null($query->voided_date)) {
+                        return _Error('DO Temp has been voided');
+                    }elseif($query->period < date('Y-m')){
+                        return _Error('DO Temp has been closed');
+                    };
+                }elseif($request->cek == 'voided'){
+                    if (!is_null($query->posted_date)) {
+                        return _Error('DO Temp has been posted');
+                    }elseif($query->period < date('Y-m')){
+                        return _Error('DO Temp has been closed');
+                    };
+                }
+                return _Success(true);
+                break;
             case "log":
-                return DataTables::of($this->headerToolsLog($request))->make(true);
-                break;
-            case "setting":
-                return $this->_Success('Setting saved!', 201, $this->headerToolsTableSetting($request));
-                break;
-            case "sso_header":
-                $sso = $this->headerToolsSSOHeader($request);
-                if (!isset($sso)) {
-                    return $this->_Error('SSO data not found!', 404);
-                }else{
-                    if ($sso->branch !== Auth::user()->Branch) {
-                        return $this->_Error('SSO/SO data not match with your branch!', 404);
-                    }
-                    return $this->_Success('OK!', 200, $sso);
-                }
-                break;
-            case "so_header":
-                $so = $this->headerToolsSOHeader($request);
-                if (!isset($so)) {
-                    return $this->_Error('SO data not found!', 404);
-                }else{
-                    if ($so->branch !== Auth::user()->Branch) {
-                        return $this->_Error('SSO/SO data not match with your branch!', 404);
-                    }
-                    return $this->_Success('OK!', 200, $so);
-                }
-                break;
-            case "sso_detail":
-                $result = $this->headerToolsSSODetail($request);
-                if ($result->isEmpty()) {
-                    return $this->_Error('SSO/SO data not found!', 404);
-                }else{
-                    return $this->_Success('OK!', 200, $result);
-                }
+                $query = $this->headerToolsLog($request);
+                return DataTables::of($query)
+                    ->addColumn('created_date', function($query){
+                        return date('d/m/Y', strtotime($query->created_at));
+                    })->rawColumns(['created_date'])
+                    ->addColumn('created_time', function($query){
+                        return date('H:i:s', strtotime($query->created_at));
+                    })->rawColumns(['created_time'])
+                    ->editColumn('note', function($query) {
+                        return (is_null($query->note)) ? '/ /' : $query->note;
+                    })
+                    ->make(true);
                 break;
             case "dodataforprint":
                 $query = $this->headerToolsDataDoForPrint($request);

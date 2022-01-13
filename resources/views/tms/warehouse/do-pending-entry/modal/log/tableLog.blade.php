@@ -10,6 +10,7 @@
                         <table id="do-datatables-log" class="table table-bordered table-hover" style="width:100%;cursor:pointer;overflow: hidden;">
                             <thead class="text-center" style="font-size: 15px;">
                                 <tr style="font-size: 14px;">
+                                    <th class="align-middle">DO No.</th>
                                     <th class="align-middle">Date</th>
                                     <th class="align-middle">Time</th>
                                     <th class="align-middle">Status</th>

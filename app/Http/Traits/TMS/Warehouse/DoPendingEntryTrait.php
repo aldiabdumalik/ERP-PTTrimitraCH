@@ -323,12 +323,19 @@ trait DoPendingEntryTrait {
         return $query;
     }
 
+    protected function createLogDoTemp($request, $status, $note=null)
+    {
+        // return DB::table('db_tbs.entry_do_pending_tbl_log')->insert([
+        // ]);
+    }
+
     protected function headerToolsLog($request)
     {
         $query = 
             DB::connection('db_tbs')
             ->table('entry_do_pending_tbl_log')
             ->where('do_no', $request->do_no)
+            ->orderBy('created_at', 'DESC')
             ->get();
         return $query;
     }

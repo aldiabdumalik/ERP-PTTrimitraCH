@@ -41,6 +41,9 @@
         width: 100%;
         height: 100%;
     }
+    .bg-abu {
+        background-color: #d3d3d3;
+    }
 </style>
 <div class="main-content-inner">
     <div class="row">
@@ -83,6 +86,7 @@
                                                 <th>DN No</th>
                                                 <th>PO No</th>
                                                 <th>Customer</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -100,6 +104,7 @@
 @include('tms.warehouse.do-pending-entry.modal.header.warehouse')
 @include('tms.warehouse.do-pending-entry.modal.header.customer')
 @include('tms.warehouse.do-pending-entry.modal.header.doaddr')
+@include('tms.warehouse.do-pending-entry.modal.header.posted')
 @include('tms.warehouse.do-pending-entry.modal.item.table_item')
 {{-- @include('tms.warehouse.do-pending-entry.modal.item.add_item') --}}
 @include('tms.warehouse.do-pending-entry.modal.log.tableLog')
@@ -135,16 +140,17 @@ $(document).ready(function () {
             },
             columns: [
                 {data:'do_no', name: 'do_no', className: "align-middle"},
-                {data:'written_date', name: 'written_date', className: "align-middle"},
+                {data:'delivery_date', name: 'delivery_date', className: "align-middle"},
                 {data:'posted_date', name: 'posted_date', className: "align-middle"},
                 {data:'finished_date', name: 'finished_date', className: "align-middle"},
                 {data:'voided_date', name: 'voided_date', className: "align-middle"},
                 {data:'ref_no', name: 'ref_no', className: "align-middle"},
                 {data:'dn_no', name: 'dn_no', className: "align-middle"},
                 {data:'po_no', name: 'po_no', className: "align-middle"},
-                {data:'cust_id', name: 'cust_id', className: "align-middle"},
+                {data:'cust_name', name: 'cust_name', className: "align-middle"},
+                {data:'action', name: 'action', className: "align-middle text-center"},
             ],
-            order: [[ 0, "desc" ]],
+            order: [[ 1, "desc" ]],
         });
         resolve(tbl_index);
     });
@@ -157,15 +163,14 @@ $(document).ready(function () {
         scrollY: "200px",
         scrollCollapse: true,
         fixedHeader: true,
-        // columnDefs: [
-        //     {
-        //         targets: [6],
-        //         createdCell:  function (td, cellData, rowData, row, col) {
-        //             console.log(rowData);
-        //             $(td).addClass('text-center');
-        //         }
-        //     }
-        // ],
+        columnDefs: [
+            {
+                targets: [5],
+                createdCell:  function (td, cellData, rowData, row, col) {
+                    $(td).addClass('text-right');
+                }
+            }
+        ],
     });
 
     var tbl_items;
@@ -484,7 +489,7 @@ $(document).ready(function () {
     });
 
     $(document).off('submit', '#do-modal-create').on('submit', '#do-modal-create', function () {
-        // loading_start();
+        loading_start();
         var items = tbl_item.rows().data().toArray();
         var items_fix = [];
         for (let i = 0; i < items.length; i++) {
@@ -541,9 +546,358 @@ $(document).ready(function () {
 
     function submit_form(route, method, data) {
         ajaxCall({route: route, method: method, data: data}).then(resolve => {
-            console.log(resolve);
+            loading_stop();
+            Swal.fire({
+                title: 'Success',
+                text: resolve.message,
+                icon: 'success'
+            }).then(() => {
+                modalAction('#do-modal-create', 'hide').then(() => {
+                    table_index.then((resolve) => {
+                        resolve.ajax.reload();
+                    });
+                });
+            });
         });
     }
+
+    $(document).on('click', '.do-act-view', function () {
+        var id = $(this).data('dono'),
+            route = "{{route('tms.warehouse.do_temp.detail', [':do_no', ':is_check'])}}";
+            route  = route.replace(':do_no', id);
+            route  = route.replace(':is_check', 0);
+        loading_start();
+        modalAction('#do-modal-create').then(() => {
+            isHidden('#item-button-div', true);
+            isHidden('#do-btn-create-submit', true);
+            isHidden('#do-btn-revise', true);
+            $(tbl_item.table().header())
+                    .removeClass('btn-info')
+                    .addClass('bg-abu');
+            $('#do-form-create input').prop('readonly', true);
+            $('#do-form-create select').prop('disabled', true);
+            ajaxCall({route: route, method: "GET"}).then(resolve => {
+                var content = resolve.content;
+                var no = 1;
+                $.each(content, function (i, data) {
+                    $('#do-create-customercode').val(data.cust_id)
+                    $('#do-create-customername').val(data.custname)
+                    $('#do-create-sso').val(data.sso_no)
+                    $('#do-create-so').val(data.so_no)
+                    $('#do-create-customerdoaddr').val(data.do_address)
+                    $('#do-create-no').val(data.do_no)
+                    $('#do-create-branch').val(data.branch)
+                    $('#do-create-warehouse').val(data.warehouse)
+                    $('#do-create-direct').val(data.sj_type)
+                    $('#do-create-priod').val(data.period)
+                    $('#do-create-date').val(date_convert(data.delivery_date))
+                    $('#do-create-dnno').val(data.dn_no)
+                    $('#do-create-pono').val(data.po_no)
+                    $('#do-create-refno').val(data.ref_no)
+                    $('#do-create-remark').val(data.remark)
+                    $('#do-create-customergroup').val(data.custgroup);
+                    $('#do-create-customeraddr1').val(data.do_addr1);
+                    $('#do-create-customeraddr2').val(data.do_addr2);
+                    $('#do-create-customeraddr3').val(data.do_addr3);
+                    $('#do-create-customeraddr4').val(data.do_addr4);
+                    $('#do-create-user').val(data.created_by);
+                    $('#do-create-printed').val(date_convert(data.printed_date));
+                    $('#do-create-voided').val(date_convert(data.voided_date));
+                    $('#do-create-posted').val(date_convert(data.posted_date));
+                    $('#do-create-finished').val(date_convert(data.finished_date));
+                    $('#do-create-inv').val(data.invoice);
+                    $('#do-create-rrno').val(data.rr_no);
+                    $('#do-create-rgno').val(data.rg_no);
+
+                    tbl_item.row.add([
+                        no,
+                        data.item_code,
+                        data.part_no,
+                        data.descript,
+                        data.unit,
+                        currency(addZeroes(String(data.quantity))),
+                    ]).draw();
+                    no++;
+                });
+                loading_stop();
+            });
+        });
+    });
+    $(document).on('click', '.do-act-edit', function () {
+        var id = $(this).data('dono'),
+            route = "{{route('tms.warehouse.do_temp.edit', [':do_no'])}}";
+            route  = route.replace(':do_no', id);
+        loading_start();
+        ajaxCall({route: route, method: "GET"}).then(resolve => {
+            if (resolve.message == true) {
+                route = "{{route('tms.warehouse.do_temp.detail', [':do_no', ':is_check'])}}";
+                route  = route.replace(':do_no', id);
+                route  = route.replace(':is_check', 0);
+                modalAction('#do-modal-create').then(() => {
+                    isHidden('#item-button-div', false);
+                    isHidden('#do-btn-create-submit', false);
+
+                    $('#do-create-customercode').prop('readonly', true);
+                    item_select = [];
+
+                    ajaxCall({route: route, method: "GET"}).then(resolve => {
+                        var content = resolve.content;
+                        var no = 1;
+                        $.each(content, function (i, data) {
+                            item_select.push( data.item_code );
+                            $('#do-create-customercode').val(data.cust_id)
+                            $('#do-create-customername').val(data.custname)
+                            $('#do-create-sso').val(data.sso_no)
+                            $('#do-create-so').val(data.so_no)
+                            $('#do-create-customerdoaddr').val(data.do_address)
+                            $('#do-create-no').val(data.do_no)
+                            $('#do-create-branch').val(data.branch)
+                            $('#do-create-warehouse').val(data.warehouse)
+                            $('#do-create-direct').val(data.sj_type)
+                            $('#do-create-priod').val(data.period)
+                            $('#do-create-date').val(date_convert(data.delivery_date))
+                            $('#do-create-dnno').val(data.dn_no)
+                            $('#do-create-pono').val(data.po_no)
+                            $('#do-create-refno').val(data.ref_no)
+                            $('#do-create-remark').val(data.remark)
+                            $('#do-create-customergroup').val(data.custgroup);
+                            $('#do-create-customeraddr1').val(data.do_addr1);
+                            $('#do-create-customeraddr2').val(data.do_addr2);
+                            $('#do-create-customeraddr3').val(data.do_addr3);
+                            $('#do-create-customeraddr4').val(data.do_addr4);
+                            $('#do-create-user').val(data.created_by);
+                            $('#do-create-printed').val(date_convert(data.printed_date));
+                            $('#do-create-voided').val(date_convert(data.voided_date));
+                            $('#do-create-posted').val(date_convert(data.posted_date));
+                            $('#do-create-finished').val(date_convert(data.finished_date));
+                            $('#do-create-inv').val(data.invoice);
+                            $('#do-create-rrno').val(data.rr_no);
+                            $('#do-create-rgno').val(data.rg_no);
+
+                            tbl_item.row.add([
+                                no,
+                                data.item_code,
+                                data.part_no,
+                                data.descript,
+                                data.unit,
+                                `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${currency(addZeroes(String(data.quantity)))}">`,
+                                // currency(addZeroes(String(data.quantity))),
+                            ]).draw();
+                            no++;
+                        });
+                        loading_stop();
+                    });
+                });
+            }
+        });
+    });
+    $(document).on('click', '.do-act-posted', function () {
+        var id = $(this).data('dono');
+        loading_start();
+        ajaxCall({route: "{{route('tms.warehouse.do_temp.header_tools')}}", method: "POST", data:{type: "validation", do_no: id, cek: "posted"} }).then(resolve => {
+            if (resolve.message == true) {
+                modalAction('#do-modal-posted').then(() => {
+                    loading_stop();
+                    $('#do-posted-id').val(id);
+                });
+            }
+        });
+    });
+    $(document).on('submit', '#do-form-posted', function () {
+        Swal.fire({
+            text: `POSTED DO Temporary ${$('#do-posted-id').val()} Now?`,
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        }).then(answer => {
+            if (answer.value == true) {
+                loading_start();
+                var data = {
+                    rr_no: $('#do-posted-rrno').val(),
+                    rr_date: $('#do-posted-rrdate').val(),
+                    st: $('#do-posted-st').val(),
+                    note: $('#do-posted-note').val()
+                };
+                var route = "{{route('tms.warehouse.do_temp.posted', [':do_no'])}}";
+                    route  = route.replace(':do_no', $('#do-posted-id').val());
+                ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                    loading_stop();
+                    Swal.fire({
+                        title: 'Success',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(() => {
+                        modalAction('#do-modal-posted', 'hide').then(() => {
+                            table_index.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                });
+                // End
+            }
+        });
+    });
+    $(document).on('click', '.do-act-unposted', function () {
+        var id = $(this).data('dono');
+        Swal.fire({
+            title: `Do you want to UNPOSTED DO Temporary ${id}, now ?`,
+            input: 'text',
+            inputPlaceholder: 'Type your note here...',
+            showCancelButton: true,
+            confirmButtonText: `Yes, Unposted it!`,
+            confirmButtonColor: '#DC3545',
+            icon: 'warning',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        }).then((answer) => {
+            if (answer.value != "" && answer.value != undefined) {
+                var note = answer.value;
+                loading_start();
+                var data = {
+                    note: note
+                };
+                var route = "{{route('tms.warehouse.do_temp.unposted', [':do_no'])}}";
+                    route  = route.replace(':do_no', id);
+                ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                    loading_stop();
+                    Swal.fire({
+                        title: 'Success',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(() => {
+                        table_index.then(resolve => {
+                            resolve.ajax.reload();
+                        });
+                    });
+                });
+                // End
+            }
+        });
+    });
+
+    $(document).on('click', '.do-act-voided', function () {
+        var id = $(this).data('dono');
+        loading_start();
+        ajaxCall({route: "{{route('tms.warehouse.do_temp.header_tools')}}", method: "POST", data:{type: "validation", do_no: id, cek: "voided"} }).then(resolve => {
+            if (resolve.message == true) {
+                loading_stop();
+                Swal.fire({
+                    title: `Do you want to VOID DO Temporary ${id}, now ?`,
+                    input: 'text',
+                    inputPlaceholder: 'Type your note here...',
+                    showCancelButton: true,
+                    confirmButtonText: `Yes, Void it!`,
+                    confirmButtonColor: '#DC3545',
+                    icon: 'warning',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to write something!'
+                        }
+                    }
+                }).then((answer) => {
+                    if (answer.value != "" && answer.value != undefined) {
+                        var note = answer.value;
+                        loading_start();
+                        var data = {
+                            note: note
+                        };
+                        var route = "{{route('tms.warehouse.do_temp.voided', [':do_no'])}}";
+                            route  = route.replace(':do_no', id);
+                        ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                            loading_stop();
+                            Swal.fire({
+                                title: 'Success',
+                                text: resolve.message,
+                                icon: 'success'
+                            }).then(() => {
+                                table_index.then(resolve => {
+                                    resolve.ajax.reload();
+                                });
+                            });
+                        });
+                        // End
+                    }
+                });
+            } // END IF MESSAGE
+        });
+    });
+
+    $(document).on('click', '.do-act-unvoided', function () {
+        var id = $(this).data('dono');
+        Swal.fire({
+            title: `Do you want to UNVOID DO Temporary ${id}, now ?`,
+            input: 'text',
+            inputPlaceholder: 'Type your note here...',
+            showCancelButton: true,
+            confirmButtonText: `Yes, Unvoid it!`,
+            confirmButtonColor: '#DC3545',
+            icon: 'warning',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            }
+        }).then((answer) => {
+            if (answer.value != "" && answer.value != undefined) {
+                var note = answer.value;
+                loading_start();
+                var data = {
+                    note: note
+                };
+                var route = "{{route('tms.warehouse.do_temp.unvoided', [':do_no'])}}";
+                    route  = route.replace(':do_no', id);
+                ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                    loading_stop();
+                    Swal.fire({
+                        title: 'Success',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(() => {
+                        table_index.then(resolve => {
+                            resolve.ajax.reload();
+                        });
+                    });
+                });
+                // End
+            }
+        });
+    });
+
+    var tbl_log;
+    $(document).on('click', '.do-act-log', function () {
+        var id = $(this).data('dono');
+        modalAction('#do-modal-log').then(() => {
+            tbl_log = $('#do-datatables-log').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.warehouse.do_temp.header_tools')}}",
+                    method: "POST",
+                    data: {
+                        type: "log",
+                        do_no: id
+                    },
+                    headers: token_header
+                },
+                columns: [
+                    {data:'do_no', name: 'do_no', className: "text-left align-middle"},
+                    {data:'created_date', name: 'created_date', className: "text-left align-middle"},
+                    {data:'created_time', name: 'created_time', className: "text-left align-middle"},
+                    {data:'status', name: 'status', className: "text-left align-middle"},
+                    {data:'created_by', name: 'created_by', className: "text-center align-middle"},
+                    {data:'note', name: 'note', className: "text-center align-middle"},
+                ],
+                ordering: false,
+                lengthChange: false,
+                searching: false
+            });
+        });
+    });
 
     $(document).on('change click keyup input paste', '.item-price-text', function () {
         $(this).val(function (index, value) {
@@ -556,7 +910,15 @@ $(document).ready(function () {
     });
     $('#do-modal-create').on('hidden.bs.modal', function () {
         $('#do-form-create').trigger('reset');
+        $(tbl_item.table().header())
+                .removeClass('bg-abu')
+                .addClass('btn-info');
         tbl_item.clear().draw();
+        isHidden('#item-button-div', false);
+        isHidden('#do-btn-create-submit', false);
+        isHidden('#do-btn-revise', true);
+        $('#do-form-create input').not('.readonly-first').prop('readonly', false);
+        $('#do-form-create select').prop('disabled', false);
     });
     function ajaxCall(params) {
         return new Promise((resolve, reject) => {
@@ -572,6 +934,8 @@ $(document).ready(function () {
                         title: 'Access Denied',
                         text: response.responseJSON.message,
                         icon: 'error'
+                    }).then(() => {
+                        console.clear();
                     });
                     $('body').loading('stop');
                     reject(response);
@@ -660,6 +1024,14 @@ $(document).ready(function () {
             rupiah += separator + ribuan.join(',');
         }
         return rupiah = split[1] != undefined ? rupiah + '.' + split[1] : rupiah;
+    }
+    function addZeroes( num ) {
+        var value = Number(num);
+        var res = num.split(".");
+        if(res.length == 1 || (res[1].length < 4)) {
+            value = value.toFixed(2);
+        }
+        return value;
     }
 });
 </script>

@@ -163,6 +163,10 @@ Route::get('/warehouse/do_temporary_entry/detail/{do_no}/cek/{is_check}', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@detail', 
     'as' => 'tms.warehouse.do_temp.detail'
 ]);
+Route::get('/warehouse/do_temporary_entry/edit/{do_no}', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@edit', 
+    'as' => 'tms.warehouse.do_temp.edit'
+]);
 Route::post('/warehouse/do_temporary_entry/store', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@store', 
     'as' => 'tms.warehouse.do_temp.store'
@@ -174,6 +178,22 @@ Route::put('/warehouse/do_temporary_entry/{do_no}/update', [
 Route::post('/warehouse/do_temporary_entry/header_tools', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@header_tools', 
     'as' => 'tms.warehouse.do_temp.header_tools'
+]);
+Route::put('/warehouse/do_temporary_entry/{do_no}/posted', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@posted', 
+    'as' => 'tms.warehouse.do_temp.posted'
+]);
+Route::put('/warehouse/do_temporary_entry/{do_no}/unposted', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@unposted', 
+    'as' => 'tms.warehouse.do_temp.unposted'
+]);
+Route::put('/warehouse/do_temporary_entry/{do_no}/voided', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@voided', 
+    'as' => 'tms.warehouse.do_temp.voided'
+]);
+Route::put('/warehouse/do_temporary_entry/{do_no}/unvoided', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@unvoided', 
+    'as' => 'tms.warehouse.do_temp.unvoided'
 ]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

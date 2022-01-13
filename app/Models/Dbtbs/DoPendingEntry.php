@@ -53,6 +53,7 @@ class DoPendingEntry extends Model
         'update_date',
         'do_trans',
         'invoice_date',
+        'sj_type'
     ];
     protected $hidden = [];
     public $timestamps = false;
