@@ -195,6 +195,10 @@ Route::put('/warehouse/do_temporary_entry/{do_no}/unvoided', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@unvoided', 
     'as' => 'tms.warehouse.do_temp.unvoided'
 ]);
+Route::get('/warehouse/do_temporary_entry/print/{enc}', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@print', 
+    'as' => 'tms.warehouse.do_temp.print'
+]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |   TMS - WAREHOUSE - RR ENTRY

@@ -156,28 +156,58 @@ trait DoPendingEntryTrait {
         return $data;
     }
 
-    protected function headerToolsDataForPrint($data)
+    protected function dataForPrint($data)
     {
-        $query = DoPendingEntry::where('db_tbs.entry_do_pending_tbl.do_no', '>=', $data->dari)
-            ->where('db_tbs.entry_do_pending_tbl.do_no', '<=', $data->sampai)
-            ->where('db_tbs.entry_do_pending_tbl.voided_date', '=', null)
-            ->leftJoin('db_tbs.item','item_code','=','db_tbs.item.itemcode')
-            ->leftJoin('db_tbs.sys_do_address', function($join) {
-                $join->on('db_tbs.entry_do_pending_tbl.cust_id','=','db_tbs.sys_do_address.cust_code');
-                $join->on('db_tbs.entry_do_pending_tbl.do_address','=','db_tbs.sys_do_address.id_do');
+        return DB::table('db_tbs.entry_do_pending_tbl as do_temp')
+            ->leftJoin('ekanban.ekanban_customermaster as tb_cust', 'tb_cust.CustomerCode_eKanban', '=', 'do_temp.cust_id')
+            ->leftJoin('db_tbs.sys_do_address as tb_doaddr', 'tb_doaddr.id_do', '=', 'do_temp.do_address')
+            ->leftJoin('db_tbs.item as tb_item', function ($join){
+                $join->on('do_temp.cust_id', '=', 'tb_item.CUSTCODE');
+                $join->on('do_temp.item_code', '=', 'tb_item.ITEMCODE');
             })
-            ->leftJoin('db_tbs.entry_sso_tbl', function ($join) {
-                $join->on('db_tbs.entry_do_pending_tbl.sso_no','=','db_tbs.entry_sso_tbl.sso_header');
-                $join->on('db_tbs.entry_do_pending_tbl.item_code','=','db_tbs.entry_sso_tbl.item_code');
+            ->where(function ($on) use($data){
+                $on->where('do_temp.do_no', '>=', $data->dari);
+                $on->where('do_temp.do_no', '<=', $data->sampai);
+                $on->whereNull('do_temp.voided_date');
             })
-            ->leftJoin('db_tbs.entry_so_tbl',function($join){
-                $join->on('db_tbs.entry_do_pending_tbl.so_no','=','db_tbs.entry_so_tbl.so_header');
-                $join->on('db_tbs.entry_do_pending_tbl.item_code','=','db_tbs.entry_so_tbl.item_code');
-            })
-            ->select($this->columnOfDoView())
-            // ->groupBy('db_tbs.entry_do_pending_tbl.do_no')
+            ->select([
+                'do_temp.so_no',
+                'do_temp.sso_no',
+                'do_temp.cust_id',
+                'do_temp.delivery_date',
+                'do_temp.period',
+                'do_temp.do_no',
+                'tb_doaddr.cust_name',
+                'tb_doaddr.id_do',
+                'tb_doaddr.do_addr1 as address1',
+                'tb_doaddr.do_addr2 as address2',
+                'tb_doaddr.do_addr3 as address3',
+                'tb_doaddr.do_addr4 as address4',
+                'do_temp.item_code',
+                'tb_item.part_no as part_no',
+                'tb_item.descript as part_name',
+                'tb_item.descript1 as model',
+                'tb_item.unit as unit',
+                'tb_item.fac_unit as fac_unit',
+                'do_temp.quantity',
+                'do_temp.branch',
+                'do_temp.warehouse',
+                'do_temp.dn_no',
+                'do_temp.po_no',
+                'do_temp.ref_no',
+                'do_temp.remark',
+                'do_temp.invoice',
+                'do_temp.created_by as user',
+                'do_temp.sj_type',
+                'do_temp.rr_no',
+                DB::raw('
+                    date(do_temp.printed_date) as printed,
+                    date(do_temp.posted_date) as posted,
+                    date(do_temp.finished_date) as finished,
+                    date(do_temp.voided_date) as voided
+                ')
+            ])
             ->get();
-        return $query;
     }
 
     protected function headerToolsDataDoForPrint($request)

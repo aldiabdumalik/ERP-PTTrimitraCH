@@ -899,6 +899,111 @@ $(document).ready(function () {
         });
     });
 
+    $(document).off('click', '.do-act-report').on('click', '.do-act-report', function () {
+        var id = $(this).data('dono');
+        modalAction('#do-modal-print').then(resolve => {
+            $('#do-print-dari').val(id);
+            $('#do-print-sampai').val(id);
+
+            $('#do-print-dari').prop('readonly', true);
+            $('#do-print-sampai').prop('readonly', true);
+        });
+    });
+
+    $('#do-btn-modal-print').on('click', function () {
+        modalAction('#do-modal-print');
+    });
+
+    var tbl_do_print;
+    $(document).on('keypress keydown', '#do-print-dari', function (e) {
+        if(e.which == 13) {
+            modalAction('#do-modal-print-dodata').then(resolve => {
+                $('#do-print-dodata-where').val('dari');
+                var params = {"type": "dodataforprint"}
+                tbl_do_print = $('#do-print-dodata-datatables').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ordering: false,
+                    ajax: {
+                        url: "{{ route('tms.warehouse.do_temp.header_tools') }}",
+                        method: 'POST',
+                        data: params,
+                        headers: token_header
+                    },
+                    columns: [
+                        {data: 'do_no', name: 'do_no'},
+                        {data: 'delivery_date', name: 'delivery_date'},
+                        {data: 'po_no', name: 'po_no'},
+                        {data: 'cust_id', name: 'cust_id'},
+                    ],
+                });
+            });
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    });
+    $(document).on('keypress keydown', '#do-print-sampai', function (e) {
+        if(e.which == 13) {
+            if ($('#do-print-dari').val() !== "") {
+                modalAction('#do-modal-print-dodata').then(resolve => {
+                    $('#do-print-dodata-where').val('sampai');
+                    var params = {"type": "dodataforprint", "dari": $('#do-print-dari').val()}
+                    tbl_do_print = $('#do-print-dodata-datatables').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ordering: false,
+                        ajax: {
+                            url: "{{ route('tms.warehouse.do_temp.header_tools') }}",
+                            method: 'POST',
+                            data: params,
+                            headers: token_header
+                        },
+                        columns: [
+                            {data: 'do_no', name: 'do_no'},
+                            {data: 'delivery_date', name: 'delivery_date'},
+                            {data: 'po_no', name: 'po_no'},
+                            {data: 'cust_id', name: 'cust_id'},
+                        ],
+                    });
+                });
+            }
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    });
+    $('#do-print-dodata-datatables').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+        var data = tbl_do_print.row(this).data();
+        modalAction('#do-modal-print-dodata', 'hide').then((resolve) => {
+            if ($('#do-print-dodata-where').val() == 'dari') {
+                $('#do-print-dari').val(data.do_no);
+                $('#do-print-sampai').val(null);
+            }else{
+                $('#do-print-sampai').val(data.do_no);
+            }
+        });
+    });
+
+    $(document).on('submit', '#do-form-print', function () {
+        var dari = $('#do-print-dari').val();
+        var sampai = $('#do-print-sampai').val();
+        var type = $('#do-print-type').val();
+        var encrypt = btoa(`${dari}&${sampai}&${type}`);
+        table_index.then(resolve => {
+            resolve.ajax.reload();
+        });
+        modalAction('#do-modal-print', 'hide');
+        var url = "{{route('tms.warehouse.do_temp.print', [':enc'])}}";
+            url = url.replace(':enc', encrypt);
+        window.open(url, '_blank');
+    });
+
+    $('#do-modal-print').on('hidden.bs.modal', function () {
+        $(this).find('input').val(null);
+        $(this).find('input').prop('readonly', false);
+    });
+
     $(document).on('change click keyup input paste', '.item-price-text', function () {
         $(this).val(function (index, value) {
             return value.replace(/(?!\.)\D/g, "")

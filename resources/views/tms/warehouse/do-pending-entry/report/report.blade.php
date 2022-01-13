@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Print SJ</title>
     @include('tms.warehouse.do-entry.report.cssReport')
 </head>
 <body>
@@ -95,7 +96,7 @@
             </div>
             <div style="line-height: 20px;font-size: 12px;">
                 @foreach($groupItem[$getKey[$i]] as $item)
-                <div style="text-align: right;padding-right: 10px;">{{ $item->quantity }}.00 {{ $item->unit }}</div>
+                <div style="text-align: right;padding-right: 10px;">{{ rupiah(addZero($item->quantity)) }} {{ $item->unit }}</div>
                 @endforeach
             </div>
         </fieldset>

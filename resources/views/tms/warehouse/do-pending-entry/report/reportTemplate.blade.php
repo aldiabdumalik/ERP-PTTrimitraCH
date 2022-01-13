@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Print SJ</title>
     <style>
         * {margin: 0;}
         @page { size: 16.4cm 24.3cm landscape; }
@@ -303,7 +304,7 @@
             </div>
             <div style="line-height: 20px;font-size: 12px;">
                 @foreach($groupItem[$getKey[$i]] as $item)
-                <div style="text-align: right;padding-right: 10px;">{{ $item->quantity }}.00 {{ $item->unit }}</div>
+                <div style="text-align: right;padding-right: 10px;">{{ rupiah(addZero($item->quantity)) }} {{ $item->unit }}</div>
                 @endforeach
             </div>
         </fieldset>

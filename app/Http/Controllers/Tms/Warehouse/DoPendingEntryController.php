@@ -152,7 +152,65 @@ class DoPendingEntryController extends Controller
                 DB::connection('db_tbs')->rollBack();
                 return _Error($e->getMessage());
             }
-            
+        }
+    }
+
+    public function update($do_no, Request $request)
+    {
+        if ($request->ajax()) {
+            DB::connection('db_tbs')->beginTransaction();
+            $data = [];
+            $item = json_decode($request->items, true);
+
+            $old_data = DoPendingEntry::where('do_no', $do_no)->first();
+            $create_by = $old_data->created_by;
+            $create_date = $old_data->created_date;
+
+            $old_data = DoPendingEntry::where('do_no', $do_no)->delete();
+
+            for ($i=0; $i < count($item); $i++) {
+                $data[] = [
+                    'do_no' => $do_no,
+                    'item_code' => $item[$i]['itemcode'],
+                    'quantity' => $item[$i]['qty'],
+                    'unit' => $item[$i]['unit'],
+                    'so_no' => $request->so,
+                    'sso_no' => $request->sso,
+                    'ref_no' => $request->refno,
+                    'po_no' => $request->pono,
+                    'dn_no' => $request->dnno,
+                    'period' => $request->priod,
+                    'cust_id' => $request->cust_id,
+                    'do_address' => $request->doaddr,
+                    'cust_name' => $request->cust_name,
+                    'id_driver' => Auth::user()->FullName,
+                    'remark' => $request->remark,
+                    'branch' => $request->branch,
+                    'warehouse' => $request->warehouse,
+                    'delivery_date' => $request->date,
+                    'sj_type' => $request->direct,
+                    'created_by' => $create_by,
+                    'created_date' => $create_date,
+                    'updated_by' => Auth::user()->FullName,
+                    'updated_date' => Carbon::now(),
+                ];
+            }
+            try {
+                $query = DoPendingEntry::insert($data);
+                if ($query) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
+                        'do_no' => $do_no,
+                        'status' => 'EDIT',
+                        'created_at' => Carbon::now(),
+                        'created_by' => Auth::user()->FullName
+                    ]);
+                }
+                DB::connection('db_tbs')->commit();
+                return _Success('Saved successfully', 201);
+            } catch (Exception $e) {
+                DB::connection('db_tbs')->rollBack();
+                return _Error($e->getMessage());
+            }
         }
     }
 
@@ -292,6 +350,46 @@ class DoPendingEntryController extends Controller
                 return _Error($e->getMessage());
             }
         }
+    }
+
+    public function print($enc, Request $request)
+    {
+        $decode = base64_decode($enc);
+        $arr = explode('&', $decode);
+
+        $data = (object) [];
+        $data->dari = $arr[0];
+        $data->sampai = $arr[1];
+        $data->type = $arr[2];
+
+        if ($data->sampai <= $data->dari && $data->sampai !== $data->dari) {
+            $request->session()->flash('message', 'Invalid data input!');
+            return Redirect::back();
+        }
+
+        $result = $this->dataForPrint($data);
+
+        if ($result->isEmpty()) {
+            $request->session()->flash('message', 'Data tidak ditemukan!');
+            return Redirect::back();
+        }
+
+        $groupItem = $result->groupBy('do_no');
+        $getKey = [];
+        $getValue = [];
+        foreach ($groupItem as $key => $v) {
+            $getKey[] = $key;
+            $getValue[] = $v;
+        }
+
+        $template = 'tms.warehouse.do-pending-entry.report.report';
+        if ($data->type == 'blank') {
+            $template = 'tms.warehouse.do-pending-entry.report.report';
+        }else{
+            $template = 'tms.warehouse.do-pending-entry.report.reportTemplate';
+        }
+        $pdf = PDF::loadView($template, compact('data', 'groupItem', 'getKey'))->setPaper('a4', 'potrait');
+        return $pdf->stream();
     }
 
     public function header_tools(Request $request)
