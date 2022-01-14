@@ -199,6 +199,14 @@ Route::get('/warehouse/do_temporary_entry/print/{enc}', [
     'uses' => 'TMS\Warehouse\DoPendingEntryController@print', 
     'as' => 'tms.warehouse.do_temp.print'
 ]);
+Route::put('/warehouse/do_temporary_entry/{do_no}/revise', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@revise', 
+    'as' => 'tms.warehouse.do_temp.revise'
+]);
+Route::put('/warehouse/do_temporary_entry/{do_no}/ng_entry', [
+    'uses' => 'TMS\Warehouse\DoPendingEntryController@ng_entry', 
+    'as' => 'tms.warehouse.do_temp.ng_entry'
+]);
 /*
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |   TMS - WAREHOUSE - RR ENTRY

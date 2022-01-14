@@ -22,11 +22,11 @@
         {{-- @if ($data->posted_date != NULL && $data->finished_date == NULL)
         <a class="dropdown-item text-success do-act-finished" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-send"></i> Finish</a>
         @endif --}}
-        @if ($data->finished_date !== NULL)
+        {{-- @if ($data->finished_date !== NULL)
         <a class="dropdown-item text-danger do-act-unfinished" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-times"></i> Unfinish</a>
-        @endif
+        @endif --}}
 
-        @if ($data->finished_date !== NULL)
+        @if (!is_null($data->posted_date))
         <a class="dropdown-item text-success do-act-revise" href="javascript:void(0)" data-dono="{{ $data->do_no }}"><i class="fa fa-reply"></i> Revise</a>
         @endif
 

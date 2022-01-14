@@ -71,6 +71,10 @@ class DoPendingEntryController extends Controller
                 $join->on('do_temp.cust_id', '=', 'tb_item.CUSTCODE');
                 $join->on('do_temp.item_code', '=', 'tb_item.ITEMCODE');
             })
+            // ->leftJoin('db_tbs.entry_do_pending_tbl_ng as tb_ng', function ($join){
+            //     $join->on('tb_ng.do_no', '=', 'do_temp.do_no');
+            //     $join->on('tb_ng.itemcode', '=', 'do_temp.item_code');
+            // })
             ->where('do_temp.do_no', $do_no)
             ->select([
                 'do_temp.*',
@@ -85,7 +89,8 @@ class DoPendingEntryController extends Controller
                 'tb_doaddr.do_addr1', 
                 'tb_doaddr.do_addr2', 
                 'tb_doaddr.do_addr3', 
-                'tb_doaddr.do_addr4'
+                'tb_doaddr.do_addr4',
+                // 'tb_ng.qty_ng as qty_ng'
             ])
             ->get();
         }
@@ -102,7 +107,7 @@ class DoPendingEntryController extends Controller
         }elseif($query->period < date('Y-m')){
             return _Error('DO Temp Entry has been closed');
         }
-        return _Success(true);
+        return _Success(true, 200, $query);
     }
 
     public function store(Request $request)
@@ -326,7 +331,10 @@ class DoPendingEntryController extends Controller
             $cek = DoPendingEntry::where('do_no', $do_no)->first();
             if($cek->period < date('Y-m')){
                 return _Error('DO Temp has been closed');
-            };
+            }
+            if (!is_null($cek->revised_date)) {
+                return $this->_Error("DO No. $do_no failed to unvoid, because it has been revised to DO No. $cek->revised_to!");
+            }
 
             DB::connection('db_tbs')->beginTransaction();
             try {
@@ -349,6 +357,131 @@ class DoPendingEntryController extends Controller
                 DB::connection('db_tbs')->rollBack();
                 return _Error($e->getMessage());
             }
+        }
+    }
+
+    public function revise($do_no, Request $request)
+    {
+        $cek = DoPendingEntry::where('do_no', $do_no)->first();
+        if($cek->period < date('Y-m')){
+            return _Error('DO Temp has been closed');
+        }
+        if (is_null($cek->posted_date)) {
+            return $this->_Error('Can\'t revised. it has not been posted');
+        }
+        $new_do_no = $this->headerToolsDoPendingEntryNo($request);
+        DB::connection('db_tbs')->beginTransaction();
+        $data = [];
+        try {
+            $old = DoPendingEntry::where('do_no', $do_no)->get();
+            foreach ($old as $do) {
+                $data[] = [
+                    'do_no' => $new_do_no,
+                    'item_code' => $do->item_code,
+                    'quantity' => $do->quantity,
+                    'unit' => $do->unit,
+                    'so_no' => $do->so_no,
+                    'sso_no' => $do->sso_no,
+                    'ref_no' => $do->ref_no,
+                    'po_no' => $do->po_no,
+                    'dn_no' => $do->dn_no,
+                    'period' => $request->period,
+                    'cust_id' => $do->cust_id,
+                    'do_address' => $do->do_address,
+                    'cust_name' => $do->cust_name,
+                    'id_driver' => $do->id_driver,
+                    'remark' => $do->remark,
+                    'branch' => $do->branch,
+                    'warehouse' => $do->warehouse,
+                    'delivery_date' => $request->date,
+                    'created_by' => $do->created_by,
+                    'created_date' => $do->created_date,
+                    'sj_type' => $do->sj_type
+                ];
+            }
+            $insert = DoPendingEntry::insert($data);
+            if ($insert) {
+                $update = DoPendingEntry::where('do_no', $do_no)->update([
+                    'voided_date' => date('Y-m-d H:i:s'),
+                    'voided_by' => Auth::user()->FullName,
+                    'finished_date' => null,
+                    'finished_by' => null,
+                    'posted_date' => null,
+                    'posted_by' => null,
+                    'revised_date' => date('Y-m-d H:i:s'),
+                    'revised_by' => Auth::user()->FullName,
+                    'revised_to' => $new_do_no,
+                    'rr_no' => null,
+                    'rr_date' => null,
+                    'scurity_stamp' => null
+                ]);
+                if ($update) {
+                    $this->createGlobalLog('db_tbs.entry_do_pending_tbl_log', [
+                        [
+                            'do_no' => $do_no,
+                            'status' => 'VOIDED',
+                            'note' => "Revisi DO NO $do_no to $new_do_no",
+                            'created_at' => Carbon::now(),
+                            'created_by' => Auth::user()->FullName
+                        ],[
+                            'do_no' => $new_do_no,
+                            'status' => 'ADD',
+                            'note' => "Revisi DO NO $do_no to $new_do_no",
+                            'created_at' => Carbon::now(),
+                            'created_by' => Auth::user()->FullName
+                        ],
+                    ]);
+                }
+            }
+            DB::connection('db_tbs')->commit();
+            return _Success('DO Temp successfully revised!');
+        } catch (Exception $e) {
+            DB::connection('db_tbs')->rollBack();
+            return _Error($e->getMessage());
+        }
+    }
+
+    public function ng_entry($do_no, Request $request)
+    {
+        $cek = DoPendingEntry::where('do_no', $do_no)->first();
+        if($cek->period < date('Y-m')){
+            return _Error('DO Temp has been closed');
+        }elseif (!is_null($cek->posted_date)) {
+            return $this->_Error('Can\'t create NG. DO Temp has been posted');
+        }elseif(!is_null($cek->voided_date)){
+            return $this->_Error('Can\'t create NG. DO Temp has been voided');
+        }
+        DB::connection('db_tbs')->beginTransaction();
+        $item = json_decode($request->item, true);
+        try {
+            $ng = [];
+            for ($i=0; $i < count($item); $i++) { 
+                if ((floatval($item[$i]['qty_sj']) - floatval($item[$i]['qty_ng'])) === 0) {
+                    DoPendingEntry::where('do_no', $do_no)
+                        ->where('item_code', $item[$i]['itemcode'])
+                        ->delete();
+                }else{
+                    DoPendingEntry::where('do_no', $do_no)
+                        ->where('item_code', $item[$i]['itemcode'])
+                        ->update([
+                            'quantity' => floatval($item[$i]['qty_sj']) - floatval($item[$i]['qty_ng'])
+                        ]);
+                }
+                $ng[] = [
+                    'do_no' => $do_no,
+                    'itemcode' => $item[$i]['itemcode'],
+                    'qty_ng' => $item[$i]['qty_ng'],
+                    'created_at' => Carbon::now(),
+                    'created_by' => Auth::user()->FullName
+                ];
+            }
+
+            DB::table('db_tbs.entry_do_pending_tbl_ng')->insert($ng);
+            DB::connection('db_tbs')->commit();
+            return _Success('Successfuly create Qty NG', 200, );
+        } catch (Exception $e) {
+            DB::connection('db_tbs')->rollBack();
+            return _Error($e->getMessage());
         }
     }
 
@@ -439,7 +572,9 @@ class DoPendingEntryController extends Controller
                         return _Error('DO Temp has been posted');
                     }elseif($query->period < date('Y-m')){
                         return _Error('DO Temp has been closed');
-                    };
+                    }elseif (!is_null($query->revised_date)) {
+                        return $this->_Error("DO No. $request->do_no has been revised to DO No. $query->revised_to!");
+                    }
                 }
                 return _Success(true);
                 break;

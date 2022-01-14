@@ -110,7 +110,7 @@
 @include('tms.warehouse.do-pending-entry.modal.log.tableLog')
 @include('tms.warehouse.do-pending-entry.modal.print.modalPrint')
 @include('tms.warehouse.do-pending-entry.modal.print.modalPrintDo')
-{{-- @include('tms.warehouse.do-pending-entry.modal.table.tableNG') --}}
+@include('tms.warehouse.do-pending-entry.modal.table.tableNG')
 @endsection
 @section('script')
 <script>
@@ -601,10 +601,10 @@ $(document).ready(function () {
                     $('#do-create-customeraddr3').val(data.do_addr3);
                     $('#do-create-customeraddr4').val(data.do_addr4);
                     $('#do-create-user').val(data.created_by);
-                    $('#do-create-printed').val(date_convert(data.printed_date));
-                    $('#do-create-voided').val(date_convert(data.voided_date));
-                    $('#do-create-posted').val(date_convert(data.posted_date));
-                    $('#do-create-finished').val(date_convert(data.finished_date));
+                    $('#do-create-printed').val(datetime_convert(data.printed_date));
+                    $('#do-create-voided').val(datetime_convert(data.voided_date));
+                    $('#do-create-posted').val(datetime_convert(data.posted_date));
+                    $('#do-create-finished').val(datetime_convert(data.finished_date));
                     $('#do-create-inv').val(data.invoice);
                     $('#do-create-rrno').val(data.rr_no);
                     $('#do-create-rgno').val(data.rg_no);
@@ -623,6 +623,8 @@ $(document).ready(function () {
             });
         });
     });
+
+    var tbl_ng;
     $(document).on('click', '.do-act-edit', function () {
         var id = $(this).data('dono'),
             route = "{{route('tms.warehouse.do_temp.edit', [':do_no'])}}";
@@ -633,63 +635,170 @@ $(document).ready(function () {
                 route = "{{route('tms.warehouse.do_temp.detail', [':do_no', ':is_check'])}}";
                 route  = route.replace(':do_no', id);
                 route  = route.replace(':is_check', 0);
-                modalAction('#do-modal-create').then(() => {
-                    isHidden('#item-button-div', false);
-                    isHidden('#do-btn-create-submit', false);
+                ajaxCall({route: route, method: "GET"}).then(resolve => {
+                    loading_stop();
+                    var content = resolve.content;
+                    Swal.fire({
+                        text: 'Do you want to create NG?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'No'
+                    }).then(answer => {
+                        if (answer.value == true) {
+                            modalAction('#do-modal-ng').then(() => {
+                                tbl_ng = $('#do-ng-datatables').DataTable({
+                                    destroy: true,
+                                    lengthChange: false,
+                                    searching: false,
+                                    paging: false,
+                                    ordering: false,
+                                    scrollY: "200px",
+                                    scrollCollapse: true,
+                                    fixedHeader: true,
+                                    "columnDefs": [{
+                                        "targets": [0,6],
+                                        "createdCell":  function (td, cellData, rowData, row, col) {
+                                            $(td).addClass('text-right');
+                                        }
+                                    }]
+                                });
+                                var no = 1;
+                                var qty_ng;
+                                tbl_ng.clear().draw();
+                                $.each(content, function (i, data) {
+                                    $('#do-ng-no').val(data.do_no);
+                                    $('#do-ng-refno').val(data.ref_no);
+                                    qty_ng = "0.00"; // (data.qty_ng == null) ? "0.00" : currency(addZeroes(String(data.qty_ng)));
+                                    tbl_ng.row.add([
+                                        no,
+                                        data.part_no,
+                                        data.item_code,
+                                        data.descript,
+                                        data.unit,
+                                        currency(addZeroes(String(data.quantity))),
+                                        `<input type="text" class="form-control-sm text-right item-price-text" autocomplete="off" id="rowngid-${no}" value="${qty_ng}">`
+                                    ]).draw();
+                                    no++;
+                                });
+                            });
+                        }else{
+                            modalAction('#do-modal-create').then(() => {
+                                isHidden('#item-button-div', false);
+                                isHidden('#do-btn-create-submit', false);
 
-                    $('#do-create-customercode').prop('readonly', true);
-                    item_select = [];
+                                $('#do-create-customercode').prop('readonly', true);
+                                item_select = [];
+                                var no = 1;
+                                $.each(content, function (i, data) {
+                                    item_select.push( data.item_code );
+                                    $('#do-create-customercode').val(data.cust_id)
+                                    $('#do-create-customername').val(data.custname)
+                                    $('#do-create-sso').val(data.sso_no)
+                                    $('#do-create-so').val(data.so_no)
+                                    $('#do-create-customerdoaddr').val(data.do_address)
+                                    $('#do-create-no').val(data.do_no)
+                                    $('#do-create-branch').val(data.branch)
+                                    $('#do-create-warehouse').val(data.warehouse)
+                                    $('#do-create-direct').val(data.sj_type)
+                                    $('#do-create-priod').val(data.period)
+                                    $('#do-create-date').val(date_convert(data.delivery_date))
+                                    $('#do-create-dnno').val(data.dn_no)
+                                    $('#do-create-pono').val(data.po_no)
+                                    $('#do-create-refno').val(data.ref_no)
+                                    $('#do-create-remark').val(data.remark)
+                                    $('#do-create-customergroup').val(data.custgroup);
+                                    $('#do-create-customeraddr1').val(data.do_addr1);
+                                    $('#do-create-customeraddr2').val(data.do_addr2);
+                                    $('#do-create-customeraddr3').val(data.do_addr3);
+                                    $('#do-create-customeraddr4').val(data.do_addr4);
+                                    $('#do-create-user').val(data.created_by);
+                                    $('#do-create-printed').val(datetime_convert(data.printed_date));
+                                    $('#do-create-voided').val(datetime_convert(data.voided_date));
+                                    $('#do-create-posted').val(datetime_convert(data.posted_date));
+                                    $('#do-create-finished').val(datetime_convert(data.finished_date));
+                                    $('#do-create-inv').val(data.invoice);
+                                    $('#do-create-rrno').val(data.rr_no);
+                                    $('#do-create-rgno').val(data.rg_no);
 
-                    ajaxCall({route: route, method: "GET"}).then(resolve => {
-                        var content = resolve.content;
-                        var no = 1;
-                        $.each(content, function (i, data) {
-                            item_select.push( data.item_code );
-                            $('#do-create-customercode').val(data.cust_id)
-                            $('#do-create-customername').val(data.custname)
-                            $('#do-create-sso').val(data.sso_no)
-                            $('#do-create-so').val(data.so_no)
-                            $('#do-create-customerdoaddr').val(data.do_address)
-                            $('#do-create-no').val(data.do_no)
-                            $('#do-create-branch').val(data.branch)
-                            $('#do-create-warehouse').val(data.warehouse)
-                            $('#do-create-direct').val(data.sj_type)
-                            $('#do-create-priod').val(data.period)
-                            $('#do-create-date').val(date_convert(data.delivery_date))
-                            $('#do-create-dnno').val(data.dn_no)
-                            $('#do-create-pono').val(data.po_no)
-                            $('#do-create-refno').val(data.ref_no)
-                            $('#do-create-remark').val(data.remark)
-                            $('#do-create-customergroup').val(data.custgroup);
-                            $('#do-create-customeraddr1').val(data.do_addr1);
-                            $('#do-create-customeraddr2').val(data.do_addr2);
-                            $('#do-create-customeraddr3').val(data.do_addr3);
-                            $('#do-create-customeraddr4').val(data.do_addr4);
-                            $('#do-create-user').val(data.created_by);
-                            $('#do-create-printed').val(date_convert(data.printed_date));
-                            $('#do-create-voided').val(date_convert(data.voided_date));
-                            $('#do-create-posted').val(date_convert(data.posted_date));
-                            $('#do-create-finished').val(date_convert(data.finished_date));
-                            $('#do-create-inv').val(data.invoice);
-                            $('#do-create-rrno').val(data.rr_no);
-                            $('#do-create-rgno').val(data.rg_no);
-
-                            tbl_item.row.add([
-                                no,
-                                data.item_code,
-                                data.part_no,
-                                data.descript,
-                                data.unit,
-                                `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${currency(addZeroes(String(data.quantity)))}">`,
-                                // currency(addZeroes(String(data.quantity))),
-                            ]).draw();
-                            no++;
-                        });
-                        loading_stop();
+                                    tbl_item.row.add([
+                                        no,
+                                        data.item_code,
+                                        data.part_no,
+                                        data.descript,
+                                        data.unit,
+                                        `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${currency(addZeroes(String(data.quantity)))}">`,
+                                        // currency(addZeroes(String(data.quantity))),
+                                    ]).draw();
+                                    no++;
+                                });
+                            });
+                        }
                     });
                 });
             }
         });
+    });
+    $(document).off('submit', '#do-form-ng').on('submit', '#do-form-ng', function () {
+        loading_start();
+        var fix_data = [];
+        var item = tbl_ng.rows().data().toArray();
+        var id = 0;
+        var count = 0;
+        var nu = 0;
+        for (i=0;i < item.length; i++){
+            var obj_tbl_ng = {}
+            var qty_sj = tbl_ng.rows().cell(i, 6).nodes().to$().find('input').val();
+                qty_sj = qty_sj.replace(/,/g, '')
+
+            if (qty_sj != 0 && qty_sj != "" && qty_sj != "0.00") {
+                var max_val_sj  =  item[i][5];
+
+                obj_tbl_ng.do_no = $('#do-ng-no').val();
+                obj_tbl_ng.itemcode = item[i][2];
+                obj_tbl_ng.qty_sj = max_val_sj;
+                
+                obj_tbl_ng.qty_ng = qty_sj;
+
+                if(parseFloat(qty_sj) > parseFloat(max_val_sj)){
+                    count++;
+                    id++;
+                    if(qty_sj > 0){
+                        $(`#rowngid-${id}`).removeClass('alert-success');
+                        $(`#rowngid-${id}`).addClass('alert-danger'); 
+                    }    
+                }else if(qty_sj <= max_val_sj){
+                    id++;
+                    if(parseFloat(qty_sj) > 0){
+                        $(`#rowngid-${id}`).removeClass('alert-danger');
+                        $(`#rowngid-${id}`).addClass('alert-success'); 
+                    }
+                }
+
+                fix_data.push(obj_tbl_ng);
+            }
+        }
+        if (fix_data.length > 0) {
+            if (count == 0) {
+                var data = {"item": JSON.stringify(fix_data)},
+                    route = "{{route('tms.warehouse.do_temp.ng_entry', [':do_no'])}}";
+                    route  = route.replace(':do_no', $('#do-ng-no').val());
+                ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                    loading_stop();
+                    var message = resolve.message;
+                    modalAction('#do-modal-ng', 'hide').then(resolve => {
+                        Swal.fire({
+                            title: 'Success',
+                            text: message,
+                            icon: 'success'
+                        }).then(() => {
+                            table_index.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                });
+            }
+        }
     });
     $(document).on('click', '.do-act-posted', function () {
         var id = $(this).data('dono');
@@ -999,9 +1108,115 @@ $(document).ready(function () {
         window.open(url, '_blank');
     });
 
+    $(document).on('click', '.do-act-revise', function () {
+        var id = $(this).data('dono'),
+            route = "{{route('tms.warehouse.do_temp.detail', [':do_no', ':is_check'])}}";
+            route  = route.replace(':do_no', id);
+            route  = route.replace(':is_check', 0);
+        loading_start();
+        modalAction('#do-modal-create').then(resolve => {
+            hideShow('#item-button-div', true);
+            hideShow('#do-btn-create-submit', true);
+            isHidden('#do-btn-revise', false);
+            $('#do-form-create input').not('#do-create-date').prop('readonly', true);
+            $('#do-form-create select').prop('disabled', true);
+
+            ajaxCall({route: route, method: "GET"}).then(resolve => {
+                var content = resolve.content;
+                var no = 1;
+                $.each(content, function (i, data) {
+                    window.localStorage.setItem('date-old', date_convert(data.delivery_date));
+
+                    $('#do-create-customercode').val(data.cust_id)
+                    $('#do-create-customername').val(data.custname)
+                    $('#do-create-sso').val(data.sso_no)
+                    $('#do-create-so').val(data.so_no)
+                    $('#do-create-customerdoaddr').val(data.do_address)
+                    $('#do-create-no').val(data.do_no)
+                    $('#do-create-branch').val(data.branch)
+                    $('#do-create-warehouse').val(data.warehouse)
+                    $('#do-create-direct').val(data.sj_type)
+                    $('#do-create-priod').val(data.period)
+                    $('#do-create-date').val(date_convert(data.delivery_date))
+                    $('#do-create-dnno').val(data.dn_no)
+                    $('#do-create-pono').val(data.po_no)
+                    $('#do-create-refno').val(data.ref_no)
+                    $('#do-create-remark').val(data.remark)
+                    $('#do-create-customergroup').val(data.custgroup);
+                    $('#do-create-customeraddr1').val(data.do_addr1);
+                    $('#do-create-customeraddr2').val(data.do_addr2);
+                    $('#do-create-customeraddr3').val(data.do_addr3);
+                    $('#do-create-customeraddr4').val(data.do_addr4);
+                    $('#do-create-user').val(data.created_by);
+                    $('#do-create-printed').val(datetime_convert(data.printed_date));
+                    $('#do-create-voided').val(datetime_convert(data.voided_date));
+                    $('#do-create-posted').val(datetime_convert(data.posted_date));
+                    $('#do-create-finished').val(datetime_convert(data.finished_date));
+                    $('#do-create-inv').val(data.invoice);
+                    $('#do-create-rrno').val(data.rr_no);
+                    $('#do-create-rgno').val(data.rg_no);
+
+                    tbl_item.row.add([
+                        no,
+                        data.item_code,
+                        data.part_no,
+                        data.descript,
+                        data.unit,
+                        currency(addZeroes(String(data.quantity))),
+                    ]).draw();
+                    no++;
+                });
+                loading_stop();
+            });
+        });
+    });
+    $(document).on('click', '#do-btn-revise', function () {
+        if ($('#do-create-date').val() == "") {
+            Swal.fire({
+                title: 'Warning',
+                text: 'Date input cannot be empty!',
+                icon: 'warning'
+            });
+        }else{
+            if ($('#do-create-date').val() == window.localStorage.getItem('date-old')) {
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Input date cannot be the same as the previous date!',
+                    icon: 'warning'
+                });
+            }else{
+                loading_start();
+                var data = {
+                    "period": $('#do-create-priod').val(),
+                    "date": $('#do-create-date').val().split('/').reverse().join('-'),
+                }
+                var route = "{{route('tms.warehouse.do_temp.revise', [':do_no'])}}";
+                    route  = route.replace(':do_no', $('#do-create-no').val());
+                ajaxCall({route: route, method: "PUT", data: data}).then(resolve => {
+                    loading_stop();
+                    Swal.fire({
+                        title: 'Success',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(() => {
+                        modalAction('#do-modal-create', 'hide').then(() => {
+                            table_index.then(resolve => {
+                                resolve.ajax.reload();
+                            });
+                        });
+                    });
+                });
+            }
+        }
+    });
+
     $('#do-modal-print').on('hidden.bs.modal', function () {
         $(this).find('input').val(null);
         $(this).find('input').prop('readonly', false);
+    });
+
+    $('#do-modal-ng').on('shown.bs.modal', function () {
+        tbl_ng.columns.adjust().draw();
     });
 
     $(document).on('change click keyup input paste', '.item-price-text', function () {
@@ -1109,6 +1324,13 @@ $(document).ready(function () {
     function date_convert($date) {
         var convert = ($date !== null) ? $date.split('-') : null;
         return (convert !== null) ? `${convert[2]}/${convert[1]}/${convert[0]}` : null;
+    }
+    function datetime_convert($date) {
+        if ($date == null) {
+            return null;
+        }
+        $date = $date.split(' ');
+        return $date[0].split('-').reverse().join('/');
     }
     function isHidden(element=null, hide=true){
         return ((hide == true) ? $(element).addClass('d-none') : $(element).removeClass('d-none'));

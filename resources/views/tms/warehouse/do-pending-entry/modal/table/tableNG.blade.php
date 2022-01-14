@@ -3,12 +3,12 @@
         <form id="do-form-ng" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">DO Entry QTY NG</h4>
+                    <h4 class="modal-title">DO Temporary QTY NG</h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-row" style="font-size: 12px;">
                         <div class="col-2">
-                            <label for="do-ng-no">DO No.</label>
+                            <label for="do-ng-no">DO/Refs No.</label>
                         </div>
                         <div class="col-10">
                             <div class="row no-gutters">
@@ -33,7 +33,6 @@
                                                 <th class="align-middle">Itemcode</th>
                                                 <th class="align-middle">Descript</th>
                                                 <th class="align-middle">Unit</th>
-                                                <th class="align-middle">SSO No.</th>
                                                 <th class="align-middle">Qty SJ</th>
                                                 <th class="align-middle">Qty NG</th>
                                             </tr>

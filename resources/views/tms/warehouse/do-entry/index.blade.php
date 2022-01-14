@@ -191,8 +191,8 @@ $(document).ready(function () {
                     var resText = response.responseText;
                     response = response.responseJSON;
                     $('#do-create-no').val(response);
-                    var refno = `DO/${resText.substr(resText.length - 3)}/${toRoman(currentMonth)}/${now.getFullYear()}`;
-                    $('#do-create-refno').val(refno);
+                    // var refno = `DO/${resText.substr(resText.length - 3)}/${toRoman(currentMonth)}/${now.getFullYear()}`;
+                    // $('#do-create-refno').val(refno);
                     $('#do-create-date').datepicker("setDate",'now');
                 });
             resolve.on('shown.bs.modal', () => {
@@ -222,8 +222,8 @@ $(document).ready(function () {
         var bln = e.format(0, "mm");
         var thn = e.format(0, "yyyy");
         $('#do-create-priod').val(date);
-        var refno = `DO/${$('#do-create-no').val().substr($('#do-create-no').val().length - 3)}/${toRoman(bln)}/${thn}`;
-        $('#do-create-refno').val(refno);
+        // var refno = `DO/${$('#do-create-no').val().substr($('#do-create-no').val().length - 3)}/${toRoman(bln)}/${thn}`;
+        // $('#do-create-refno').val(refno);
     });
 
     $(document).on('keypress', '#do-create-customercode', function (e) {
@@ -581,10 +581,10 @@ $(document).ready(function () {
             var items = response.content.items;
 
             var date = date_convert(header.delivery_date);
-            var voided = date_convert(header.voided);
-            var posted = date_convert(header.posted);
-            var finished = date_convert(header.finished);
-            var printed = date_convert(header.printed);
+            var voided = datetime_convert(header.voided);
+            var posted = datetime_convert(header.posted);
+            var finished = datetime_convert(header.finished);
+            var printed = datetime_convert(header.printed);
 
             $('#do-create-no').val(header.do_no);
             $('#do-create-branch').val(header.branch);
@@ -1639,6 +1639,14 @@ $(document).ready(function () {
     function date_convert($date) {
         var convert = ($date !== null) ? $date.split('-') : null;
         return (convert !== null) ? `${convert[2]}/${convert[1]}/${convert[0]}` : null;
+    }
+
+    function datetime_convert($date) {
+        if ($date == null) {
+            return null;
+        }
+        $date = $date.split(' ');
+        return $date[0].split('-').reverse().join('/');
     }
 });
 </script>
