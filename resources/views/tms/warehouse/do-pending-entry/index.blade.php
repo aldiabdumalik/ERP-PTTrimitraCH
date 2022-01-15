@@ -688,6 +688,7 @@ $(document).ready(function () {
 
                                 $('#do-create-customercode').prop('readonly', true);
                                 item_select = [];
+                                var add;
                                 var no = 1;
                                 $.each(content, function (i, data) {
                                     item_select.push( data.item_code );
@@ -720,7 +721,7 @@ $(document).ready(function () {
                                     $('#do-create-rrno').val(data.rr_no);
                                     $('#do-create-rgno').val(data.rg_no);
 
-                                    tbl_item.row.add([
+                                    add = tbl_item.row.add([
                                         no,
                                         data.item_code,
                                         data.part_no,
@@ -728,9 +729,14 @@ $(document).ready(function () {
                                         data.unit,
                                         `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${currency(addZeroes(String(data.quantity)))}">`,
                                         // currency(addZeroes(String(data.quantity))),
-                                    ]).draw();
+                                    ]).node();
+                                    $(add).attr('data-id', no);
+                                    $(add).attr('id', data.itemcode);
+                                    $(add).addClass('data-'+no);
+                                    $(add).addClass(data.itemcode);
                                     no++;
                                 });
+                                tbl_item.draw();
                             });
                         }
                     });

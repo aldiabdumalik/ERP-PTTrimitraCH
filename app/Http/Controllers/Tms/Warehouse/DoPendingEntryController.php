@@ -66,15 +66,15 @@ class DoPendingEntryController extends Controller
         }else{
             $content = DB::table('db_tbs.entry_do_pending_tbl as do_temp')
             ->leftJoin('ekanban.ekanban_customermaster as tb_cust', 'tb_cust.CustomerCode_eKanban', '=', 'do_temp.cust_id')
-            ->leftJoin('db_tbs.sys_do_address as tb_doaddr', 'tb_doaddr.id_do', '=', 'do_temp.do_address')
+            ->leftJoin('db_tbs.sys_do_address as tb_doaddr', function ($join)
+            {
+                $join->on('tb_doaddr.id_do', '=', 'do_temp.do_address');
+                $join->on('tb_doaddr.cust_code', '=', 'do_temp.cust_id');
+            })
             ->leftJoin('db_tbs.item as tb_item', function ($join){
                 $join->on('do_temp.cust_id', '=', 'tb_item.CUSTCODE');
                 $join->on('do_temp.item_code', '=', 'tb_item.ITEMCODE');
             })
-            // ->leftJoin('db_tbs.entry_do_pending_tbl_ng as tb_ng', function ($join){
-            //     $join->on('tb_ng.do_no', '=', 'do_temp.do_no');
-            //     $join->on('tb_ng.itemcode', '=', 'do_temp.item_code');
-            // })
             ->where('do_temp.do_no', $do_no)
             ->select([
                 'do_temp.*',
@@ -89,8 +89,7 @@ class DoPendingEntryController extends Controller
                 'tb_doaddr.do_addr1', 
                 'tb_doaddr.do_addr2', 
                 'tb_doaddr.do_addr3', 
-                'tb_doaddr.do_addr4',
-                // 'tb_ng.qty_ng as qty_ng'
+                'tb_doaddr.do_addr4'
             ])
             ->get();
         }
@@ -119,7 +118,7 @@ class DoPendingEntryController extends Controller
                 $data[] = [
                     'do_no' => $request->no,
                     'item_code' => $item[$i]['itemcode'],
-                    'quantity' => $item[$i]['qty'],
+                    'quantity' => str_replace(',', '', $item[$i]['qty']),
                     'unit' => $item[$i]['unit'],
                     'so_no' => $request->so,
                     'sso_no' => $request->sso,
@@ -177,7 +176,7 @@ class DoPendingEntryController extends Controller
                 $data[] = [
                     'do_no' => $do_no,
                     'item_code' => $item[$i]['itemcode'],
-                    'quantity' => $item[$i]['qty'],
+                    'quantity' => str_replace(',', '', $item[$i]['qty']),
                     'unit' => $item[$i]['unit'],
                     'so_no' => $request->so,
                     'sso_no' => $request->sso,
@@ -196,8 +195,8 @@ class DoPendingEntryController extends Controller
                     'sj_type' => $request->direct,
                     'created_by' => $create_by,
                     'created_date' => $create_date,
-                    'updated_by' => Auth::user()->FullName,
-                    'updated_date' => Carbon::now(),
+                    'update_by' => Auth::user()->FullName,
+                    'update_date' => Carbon::now(),
                 ];
             }
             try {
