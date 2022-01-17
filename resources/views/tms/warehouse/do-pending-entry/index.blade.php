@@ -829,8 +829,8 @@ $(document).ready(function () {
                 loading_start();
                 var data = {
                     rr_no: $('#do-posted-rrno').val(),
-                    rr_date: $('#do-posted-rrdate').val(),
-                    st: $('#do-posted-st').val(),
+                    rr_date: $('#do-posted-rrdate').val().split('/').reverse().join('-'),
+                    st: $('#do-posted-st').val().split('/').reverse().join('-'),
                     note: $('#do-posted-note').val()
                 };
                 var route = "{{route('tms.warehouse.do_temp.posted', [':do_no'])}}";
