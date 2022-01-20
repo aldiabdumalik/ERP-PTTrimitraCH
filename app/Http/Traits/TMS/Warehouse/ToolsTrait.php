@@ -87,6 +87,16 @@ trait ToolsTrait {
         return $query;
     }
 
+    protected function unit()
+    {
+        $query = 
+            DB::connection('db_tbs')
+                ->table('unit')
+                ->selectRaw('UNIT as unit, DESCRIPT as des')
+                ->get();
+        return $query;
+    }
+
     protected function addZeroes($num)
     {
         $res = explode('.', $num);

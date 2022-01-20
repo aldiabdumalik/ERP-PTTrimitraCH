@@ -97,6 +97,11 @@ Breadcrumbs::for('tms_MasterItem_Index', function ($trail) {
     $trail->push('Master', '#');
     $trail->push('Master Item', route('tms_MasterItem_Index'));
 });
+//  2.2.2 Database Parts
+Breadcrumbs::for('tms.master.db_part', function ($trail) {
+    $trail->push('Master', '#');
+    $trail->push('Database Parts', route('tms.master.db_part'));
+});
 
 //  2.3.    Manufacturing
 
