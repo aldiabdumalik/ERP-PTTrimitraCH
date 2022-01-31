@@ -10,9 +10,13 @@
 <div class="main-content-inner">
     @include('tms.master.db-parts.table.index')
 </div>
-@include('tms.master.db-parts.modal.form.index')
+@include('tms.master.db-parts.modal.form.parts.index')
+@include('tms.master.db-parts.modal.form.parts.form-add')
+{{-- @include('tms.master.db-parts.modal.form.index') --}}
+@include('tms.master.db-parts.modal.form.processing')
 @include('tms.master.db-parts.modal.table.customer')
 @include('tms.master.db-parts.modal.table.unit')
+@include('tms.master.db-parts.modal.table.processing_detail')
 @endsection
 @section('script')
 <script>
@@ -113,7 +117,131 @@ $(document).ready(function () {
         });
     });
 
-    $('#dbpart-index-pict').on('change',function(){
+    $(document).on('click', '#dbpart-btn-add-item', function () {
+        modalAction('#dbpart-modal-fparts').then(() => {
+            // $('#dbpart-modal-index').addClass('d-none');
+        });
+    });
+    $('#dbpart-modal-fparts').on('hidden.bs.modal', function () {
+        $('#dbpart-form-fparts').trigger('reset');
+        $('#dbpart-fparts-pict-x').html('Choose file');
+    });
+
+    $('#dbpart-modal-processing').on('shown.bs.modal', function () {
+        ajaxCall({route: "{{ route('tms.master.db_part.header_tools') }}", method: "POST", data: {"type":"process"}}).then(resolve => {
+            $('#dbpart-processing-name').html('');
+            $.each(resolve.content, function (i, valas) {
+                $('#dbpart-processing-name').append($('<option>', { 
+                    value: valas.production_process,
+                    text : valas.production_process 
+                }));
+            });
+        })
+    })
+
+    $('#dbpart-modal-processing').on('hidden.bs.modal', function () {
+        $('#dbpart-modal-index').removeClass('d-none');
+    });
+
+    var tbl_process_detail;
+    $(document).on('keypree keydown', '.dbpart-processing-detail', function (e) {
+        var i = $(this).data('id');
+        if(e.which == 13) {
+            if (!$('#dbpart-processing-name').val()) {
+                console.log(null);
+                return false; 
+            }else{
+                modalAction('#dbpart-modal-process-detail').then((resolve) => {
+                    tbl_process_detail = $('#dbpart-datatables-process-detail').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ajax: {
+                            url: "{{ route('tms.master.db_part.header_tools') }}",
+                            method: 'POST',
+                            data: {"type": "process_detail", "process": $('#dbpart-processing-name').val()},
+                            headers: token_header
+                        },
+                        columns: [
+                            {data: 'production_process', name: 'production_process'},
+                            {data: 'process_detailname', name: 'process_detailname', className:`data_${i}`},
+                        ],
+                        createdRow: function( row, data, dataIndex ) {
+                            $(row).attr('data-id', i);
+                        }
+                    });
+                });
+            }
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    })
+
+    $('#dbpart-datatables-process-detail').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+        var id = $(this).data('id');
+        var data = tbl_process_detail.row(this).data();
+        modalAction('#dbpart-modal-process-detail', 'hide').then(() => {
+            $('.dbpart-processing-detail[data-id='+id+']').val(data.process_detailname);
+        });
+    });
+
+    $(document).on('click', '.add-row-proc_detail', function () {
+        var x;
+        $('.dbpart-processing-detail').each(function (i, d) {
+            x = i+2;
+        });
+        $('#tbl_proc_detail_form').append(`
+        <tr>
+            <td width="15%" class="align-middle">
+            </td>
+            <td class="align-middle">
+                <input type="text" name="dbpart-processing-detail" class="form-control form-control-sm dbpart-processing-detail" data-id="${x}">
+            </td>
+            <td width="5%" class="align-middle">
+                <a href="javascript:void(0)" class="fa fa-trash text-danger rm-row-proc_detail"></a>
+            </td>
+        </tr>
+        `);
+    })
+    $(document).on('click', '.rm-row-proc_detail', function () {
+        $(this).parents('tr').remove();
+        $('.dbpart-processing-detail').each(function (i, d) {
+            $(d).attr('data-id', ++i)
+        });
+    });
+
+    $(document).on('submit', '#dbpart-form-fparts', function (e) {
+        e.preventDefault();
+        loading_start();
+        var formData = new FormData();
+        formData.append('file', $('#dbpart-fparts-pict')[0].files[0]);
+        $.ajax({
+            url:"{{ route('tms.master.db_part.upload_temp') }}",
+            method:"POST",
+            data: formData,
+            dataType:'JSON',
+            contentType: false,
+            cache: false,
+            processData: false,
+            headers: token_header,
+            success: function (response) {
+                loading_stop();
+                
+            },
+            error: function(response, status, x){
+                Swal.fire({
+                    title: 'Something was wrong',
+                    text: response.responseJSON.message,
+                    icon: 'error'
+                }).then(() => {
+                    $('body').loading('stop');
+                    console.clear();;
+                });
+            },
+        });
+    });
+
+    $('#dbpart-fparts-pict').on('change', function(){
         var fileName = $(this).val().replace('C:\\fakepath\\', " ");
         var ext = fileName.lastIndexOf(".") + 1;
         var extFile = fileName.substr(ext, fileName.length).toLowerCase();
@@ -121,9 +249,9 @@ $(document).ready(function () {
             fileName = 'Choose file';
         }
         if (extFile=="jpg" || extFile=="jpeg" || extFile=="png" || !extFile){
-            $(this).next('.custom-file-label').html(fileName);
+            $(this).next('#dbpart-fparts-pict-x').html(fileName);
         }else{
-            $(this).next('.custom-file-label').html('Choose file');
+            $(this).next('#dbpart-fparts-pict-x').html('Choose file');
             $(this).val(null);
         }
     })
@@ -169,7 +297,7 @@ $(document).ready(function () {
                 data: params.data,
                 error: function(response, status, x){
                     Swal.fire({
-                        title: 'Access Denied',
+                        title: 'Something was wrong',
                         text: response.responseJSON.message,
                         icon: 'error'
                     }).then(() => {

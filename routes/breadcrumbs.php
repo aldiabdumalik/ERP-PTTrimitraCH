@@ -220,6 +220,9 @@ Breadcrumbs::for('tms.warehouse.mto-entry', function ($trail) {
     $trail->push('MTO-Entry', route('tms.warehouse.mto-entry'));
 });
 
-
-
+// 3.1 Database Parts
+Breadcrumbs::for('tms.db_parts.master.process', function ($trail) {
+    $trail->push('Database Parts', '#');
+    $trail->push('Master Process', route('tms.db_parts.master.process'));
+});
 

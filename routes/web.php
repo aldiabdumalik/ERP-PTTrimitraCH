@@ -426,7 +426,8 @@ Route::group([ 'middleware' => 'app.user'], function (){
         */
         include __DIR__.'/manufacturing.php';
         include __DIR__.'/warehouse.php';
-        include __DIR__.'/master.php';
+        // include __DIR__.'/master.php';
+        include __DIR__.'/dbparts.php';
        
         /*
         | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

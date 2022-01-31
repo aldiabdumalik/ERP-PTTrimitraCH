@@ -97,6 +97,29 @@ trait ToolsTrait {
         return $query;
     }
 
+    protected function process_name()
+    {
+        return DB::table('oee.db_processname_tbl')
+            ->select([
+                'process_id', 'production_process', 'routing'
+            ])
+            ->where('status', 'ACTIVE')
+            ->orderBy('production_process', 'ASC')
+            ->get();
+    }
+
+    protected function process_detail($process_name)
+    {
+        return DB::table('oee.db_processdetailname_tbl')
+            ->select(['process_detailname', 'production_process'])
+            ->where(function ($on) use($process_name){
+                $on->where('status', 'ACTIVE');
+                $on->where('production_process', $process_name);
+            })
+            ->orderBy('production_process', 'ASC')
+            ->get();
+    }
+
     protected function addZeroes($num)
     {
         $res = explode('.', $num);
