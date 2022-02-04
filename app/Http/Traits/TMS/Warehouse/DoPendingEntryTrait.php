@@ -349,6 +349,7 @@ trait DoPendingEntryTrait {
             ->table('item')
             ->selectRaw('ITEMCODE as itemcode, PART_NO as part_no, DESCRIPT as descript, UNIT as unit, DESCRIPT1 as model')
             ->where('CUSTCODE', $request->cust_code)
+            ->whereRaw('ITEMCODE like ?', ['1%'])
             ->get();
         return $query;
     }
