@@ -182,7 +182,7 @@ class MasterDetailProcessController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-        return redirect()->route('tms.db_parts.master.process');
+        return redirect()->route('tms.db_parts.master.detail_process');
     }
 
     public function trashToActive($id, Request $request)

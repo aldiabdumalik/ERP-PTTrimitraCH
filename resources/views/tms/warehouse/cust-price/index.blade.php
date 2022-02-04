@@ -276,6 +276,10 @@
                     });
                     tbl_customer_s.draw();
                 });
+
+                resolve.on('shown.bs.modal', function () {
+                    $('#custprice-datatables-customer-search_filter input').focus();
+                });
             });
         })
 

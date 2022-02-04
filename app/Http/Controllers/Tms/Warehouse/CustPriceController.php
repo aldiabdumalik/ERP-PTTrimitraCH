@@ -182,7 +182,7 @@ class CustPriceController extends Controller
                         ->first();
                     if (!$cekBln) {
                         $isext = 0;
-                        $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                        // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                     }else{
                         $isext = 1;
                     }
@@ -190,7 +190,7 @@ class CustPriceController extends Controller
                     // Trigger By Date
                     $trg = $this->triggerDate($data);
                 }else{
-                    $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                     $trg = $this->triggerSO($data);
                 }
                 $query = CustPrice::insert($data);
@@ -1376,6 +1376,7 @@ class CustPriceController extends Controller
                 DB::raw('IFNULL(custprice.price_new, 0) as price')
             ])
             ->where('item.CUSTCODE', $cust)
+            ->whereRaw('item.ITEMCODE like ?', ['1%'])
             // ->where('custprice.status', 'ACTIVE')
             ->get();
         return $query;
