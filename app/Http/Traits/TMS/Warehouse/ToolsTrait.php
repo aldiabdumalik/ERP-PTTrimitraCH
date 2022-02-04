@@ -167,4 +167,16 @@ trait ToolsTrait {
         return $temp;
     }
 
+    protected function processDetailCode($process_id)
+    {
+        $check = DB::table('db_tbs.dbparts_master_process_detail_tbl')
+            ->select(DB::raw('max(process_detail_id) as code'))
+            ->whereRaw('process_detail_id like ?', ["$process_id%"])
+            ->first();
+        $x = (int) substr($check->code, 3, 3);
+        $x++;
+        $code = $process_id . sprintf("%03s", $x);
+        return $code;
+    }
+
 }

@@ -1,5 +1,5 @@
 @extends('master')
-@section('title', 'TMS | Database Parts - Master Process')
+@section('title', 'TMS | Database Parts - Master Detail Process')
 @section('css')
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/Datatables/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/datepicker/bootstrap-datepicker.min.css') }}">
@@ -11,10 +11,10 @@
     <div class="row">
         <div class="col-12 mt-5">
             <div class="#">
-                <button type="button"  class="btn btn-primary btn-flat btn-sm" id="mprocess-btn-modal-create">
+                <button type="button"  class="btn btn-primary btn-flat btn-sm" id="mdprocess-btn-modal-create">
                     <i class="ti-plus"></i>  Add New Data
                 </button>
-                <button type="button"  class="btn btn-danger btn-flat btn-sm" id="mprocess-btn-modal-trash">
+                <button type="button"  class="btn btn-danger btn-flat btn-sm" id="mdprocess-btn-modal-trash">
                     <i class="ti-trash"></i>  View Trash Data
                 </button>
             </div>
@@ -23,7 +23,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <h4 class="card-header-title">Master Process</h4>
+                        <h4 class="card-header-title">Master Detail Process</h4>
                     </div>
                 </div>
                 <div class="card-body">
@@ -31,13 +31,12 @@
                         <div class="col">
                             <div class="">
                                 <div class="table-responsive">
-                                    <table id="mprocess-datatable" class="display compact table table-hover" style="width:100%;cursor:pointer">
+                                    <table id="mdprocess-datatable" class="display compact table table-hover" style="width:100%;cursor:pointer">
                                         <thead>
                                             <tr>
                                                 <th class="align-middle">Process ID</th>
-                                                <th class="align-middle">Code Process for Itemcode</th>
-                                                <th class="align-middle">Name</th>
-                                                <th class="align-middle">Routing</th>
+                                                <th class="align-middle">Process Name</th>
+                                                <th class="align-middle">Detail Name</th>
                                                 <th class="align-middle">Action</th>
                                             </tr>
                                         </thead>
@@ -51,57 +50,96 @@
         </div>
     </div>
 </div>
-@include('tms.db_parts.master_process.modal.form.index')
-@include('tms.db_parts.master_process.modal.table.logs')
-@include('tms.db_parts.master_process.modal.table.trash')
+@include('tms.db_parts.master_process_detail.modal.form.index')
+@include('tms.db_parts.master_process_detail.modal.table.logs')
+@include('tms.db_parts.master_process_detail.modal.table.trash')
+@include('tms.db_parts.master_process_detail.modal.table.process')
 @endsection
 @section('script')
 <script>
 $(document).ready(function () {
     const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
-    const table_index = $('#mprocess-datatable').DataTable({
+    const table_index = $('#mdprocess-datatable').DataTable({
         processing: true,
         serverSide: true,
         destroy: true,
         ajax: {
-            url: "{{route('tms.db_parts.master.process.tbl_index')}}",
+            url: "{{route('tms.db_parts.master.detail_process.tbl_index')}}",
             method: 'POST',
             headers: token_header
         },
         columns: [
             {data:'process_id', name: 'process_id'},
-            {data:'itemcode_process_id', name: 'itemcode_process_id'},
             {data:'process_name', name: 'process_name'},
-            {data:'routing', name: 'routing'},
+            {data:'process_detail_name', name: 'process_detail_name'},
             {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center"},
         ]
     });
 
-    $('#mprocess-btn-modal-create').on('click', function () {
-        modalAction('#mprocess-modal-index');
+    $('#mdprocess-btn-modal-create').on('click', function () {
+        modalAction('#mdprocess-modal-index');
     });
 
-    $(document).on('submit', '#mprocess-form-index', function () {
+    var tbl_process;
+    $(document).on('keypress keydown', '#mdprocess-index-procid', function (e) {
+        if(e.which == 13) {
+            modalAction('#mdprocess-modal-process').then(resolve => {
+                tbl_process = $('#mdprocess-datatable-process').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ordering: false,
+                    ajax: {
+                        url: "{{ route('tms.db_parts.master.detail_process.tbl_process') }}",
+                        method: 'POST',
+                        headers: token_header
+                    },
+                    columns: [
+                        {data:'process_id', name: 'process_id'},
+                        {data:'itemcode_process_id', name: 'itemcode_process_id'},
+                        {data:'process_name', name: 'process_name'},
+                        {data:'routing', name: 'routing'},
+                    ],
+                });
+
+                resolve.on('shown.bs.modal', function () {
+                    $('#mdprocess-datatable-process_filter input').focus();
+                });
+            });
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    });
+
+    $('#mdprocess-datatable-process').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+        var data = tbl_process.row(this).data();
+        modalAction('#mdprocess-modal-process', 'hide').then(() => {
+            $('#mdprocess-index-procid').val(data.process_id);
+            $('#mdprocess-index-procname').val(data.process_name);
+        });
+    });
+
+    $(document).on('submit', '#mdprocess-form-index', function () {
         loading_start();
         var data = {
-            process_id: $('#mprocess-index-procid').val(),
-            itemcode_process_id: $('#mprocess-index-procitem').val(),
-            process_name: $('#mprocess-index-procname').val(),
-            routing: $('#mprocess-index-routing').val()
+            id: $('#mdprocess-index-id').val(),
+            process_id: $('#mdprocess-index-procid').val(),
+            process_detail: $('#mdprocess-index-procdetailname').val(),
         };
 
-        let route = "{{route('tms.db_parts.master.process.detail', [':id'])}}";
-            route  = route.replace(':id', data.process_id);
+        let route = "{{route('tms.db_parts.master.detail_process.detail', [':id'])}}";
+            route  = route.replace(':id', data.id);
 
         ajaxCall({route: route, method: "GET"}).then(resolve => {
-            let route = "{{route('tms.db_parts.master.process.store')}}";
+            let route = "{{route('tms.db_parts.master.detail_process.store')}}";
             let method = "POST";
             if (resolve.message == 'OK') {
-                route = "{{route('tms.db_parts.master.process.update', [':id'])}}";
-                route = route.replace(':id', data.process_id);
+                route = "{{route('tms.db_parts.master.detail_process.update', [':id'])}}";
+                route = route.replace(':id', data.id);
                 method = "PUT";
             }
             submit(route, method, data);
+            // console.log(route, method, data);
         });
     });
 
@@ -113,41 +151,41 @@ $(document).ready(function () {
                 text: resolve.message,
                 icon: 'success'
             }).then(() => {
-                modalAction('#mprocess-modal-index', 'hide').then(() => {
+                modalAction('#mdprocess-modal-index', 'hide').then(() => {
                     table_index.ajax.reload();
                 });
             });
         });
     }
 
-    $(document).on('click', '.mprocess-act-edit', function () {
+    $(document).on('click', '.mdprocess-act-edit', function () {
         let id = $(this).data('id');
-        let route = "{{route('tms.db_parts.master.process.detail', [':id'])}}";
+        let route = "{{route('tms.db_parts.master.detail_process.detail', [':id'])}}";
             route  = route.replace(':id', id);
 
         ajaxCall({route: route, method: "GET"}).then(resolve => {
             let data = resolve.content;
             if (resolve.message == 'OK') {
-                modalAction('#mprocess-modal-index').then(resolve => {
-                    $('#mprocess-index-procid').val(data.process_id)
-                    $('#mprocess-index-procitem').val(data.itemcode_process_id)
-                    $('#mprocess-index-procname').val(data.process_name)
-                    $('#mprocess-index-routing').val(data.routing)
+                modalAction('#mdprocess-modal-index').then(resolve => {
+                    $('#mdprocess-index-procid').val(data.process_id)
+                    $('#mdprocess-index-procname').val(data.process_name)
+                    $('#mdprocess-index-procdetailname').val(data.process_detail_name)
+                    $('#mdprocess-index-id').val(id)
 
-                    $('#mprocess-index-procid').prop('readonly', true);
-                    $('#mprocess-index-procitem').prop('readonly', true);
+                    $('#mdprocess-index-procid').prop('readonly', true);
+                    $('#mdprocess-index-procname').prop('readonly', true);
                 });
             }
         });
     });
 
-    $('#mprocess-modal-index').on('hidden.bs.modal', function () {
-        $('#mprocess-form-index').trigger('reset');
-        $('#mprocess-index-procid').prop('readonly', false);
-        $('#mprocess-index-procitem').prop('readonly', false);
+    $('#mdprocess-modal-index').on('hidden.bs.modal', function () {
+        $('#mdprocess-form-index').trigger('reset');
+        $('#mdprocess-index-id').val(0);
+        $('#mdprocess-index-procid').prop('readonly', false);
     });
 
-    $(document).on('click', '.mprocess-act-delete', function () {
+    $(document).on('click', '.mdprocess-act-delete', function () {
         let id = $(this).data('id');
         Swal.fire({
             icon: 'warning',
@@ -158,9 +196,8 @@ $(document).ready(function () {
         }).then(answer => {
             if (answer.value == true) {
                 loading_start();
-                let route = "{{route('tms.db_parts.master.process.destroy', [':id'])}}";
+                let route = "{{route('tms.db_parts.master.detail_process.destroy', [':id'])}}";
                     route  = route.replace(':id', id);
-                    console.log(route);
                 ajaxCall({route: route, method: "DELETE"}).then(resolve => {
                     loading_stop();
                     Swal.fire({
@@ -175,21 +212,20 @@ $(document).ready(function () {
         });
     });
 
-    $(document).on('click', '.mprocess-act-log', function () {
+    $(document).on('click', '.mdprocess-act-log', function () {
         let id = $(this).data('id');
-        modalAction('#mprocess-modal-logs').then(() => {
-            $('#mprocess-datatable-logs').DataTable({
+        modalAction('#mdprocess-modal-logs').then(() => {
+            $('#mdprocess-datatable-logs').DataTable({
                 processing: true,
                 serverSide: true,
                 destroy: true,
                 ajax: {
-                    url: "{{route('tms.db_parts.master.process.logs')}}",
+                    url: "{{route('tms.db_parts.master.detail_process.logs')}}",
                     method: 'POST',
                     data: {id: id},
                     headers: token_header
                 },
                 columns: [
-                    {data:'process_id', name: 'process_id', orderable: false, searchable: false},
                     {data:'status', name: 'status', orderable: false, searchable: false},
                     {data:'date', name: 'date', orderable: false, searchable: false},
                     {data:'time', name: 'time', orderable: false, searchable: false},
@@ -202,22 +238,21 @@ $(document).ready(function () {
         });
     });
 
-    $('#mprocess-btn-modal-trash').on('click', function () {
-        modalAction('#mprocess-modal-trash').then(() => {
-            $('#mprocess-datatable-trash').DataTable({
+    $('#mdprocess-btn-modal-trash').on('click', function () {
+        modalAction('#mdprocess-modal-trash').then(() => {
+            $('#mdprocess-datatable-trash').DataTable({
                 processing: true,
                 serverSide: true,
                 destroy: true,
                 ajax: {
-                    url: "{{route('tms.db_parts.master.process.trash')}}",
+                    url: "{{route('tms.db_parts.master.detail_process.trash')}}",
                     method: 'POST',
                     headers: token_header
                 },
                 columns: [
                     {data:'process_id', name: 'process_id'},
-                    {data:'itemcode_process_id', name: 'itemcode_process_id'},
                     {data:'process_name', name: 'process_name'},
-                    {data:'routing', name: 'routing'},
+                    {data:'process_detail_name', name: 'process_detail_name'},
                     {data:'action', name: 'action', orderable: false, searchable: false, className: "text-center"},
                 ],
                 ordering: false,
@@ -227,12 +262,12 @@ $(document).ready(function () {
         });
     });
 
-    $(document).on('click', '.mprocess-act-active', function () {
+    $(document).on('click', '.mdprocess-act-active', function () {
         let id = $(this).data('id');
-        let route = "{{route('tms.db_parts.master.process.trash_to_active', [':id'])}}";
+        let route = "{{route('tms.db_parts.master.detail_process.trash_to_active', [':id'])}}";
             route  = route.replace(':id', id);
         loading_start();
-        modalAction('#mprocess-modal-trash', 'hide').then(() => {
+        modalAction('#mdprocess-modal-trash', 'hide').then(() => {
             ajaxCall({route: route, method: "PUT"}).then(resolve => {
                 loading_stop();
                 table_index.ajax.reload();
