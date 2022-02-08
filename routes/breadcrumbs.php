@@ -102,6 +102,10 @@ Breadcrumbs::for('tms.master.db_part', function ($trail) {
     $trail->push('Master', '#');
     $trail->push('Database Parts', route('tms.master.db_part'));
 });
+Breadcrumbs::for('tms.master.cust_price', function ($trail) {
+    $trail->push('Master', '#');
+    $trail->push('Customer Price', route('tms.master.cust_price'));
+});
 
 //  2.3.    Manufacturing
 
@@ -194,10 +198,10 @@ Breadcrumbs::for('tms.warehouse.cust_invoice', function ($trail) {
     $trail->push('Warehouse', '#');
     $trail->push('Customer Invoice', route('tms.warehouse.cust_invoice'));
 });
-Breadcrumbs::for('tms.warehouse.cust_price', function ($trail) {
-    $trail->push('Warehouse', '#');
-    $trail->push('Customer Price', route('tms.warehouse.cust_price'));
-});
+// Breadcrumbs::for('tms.warehouse.cust_price', function ($trail) {
+//     $trail->push('Warehouse', '#');
+//     $trail->push('Customer Price', route('tms.warehouse.cust_price'));
+// });
 //  2.4.1. Products
 Breadcrumbs::for('tms.warehouse.products', function ($trail) {
     $trail->push('Warehouse', '#');

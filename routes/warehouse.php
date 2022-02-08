@@ -290,55 +290,55 @@ Route::put('/warehouse/customer_invoice/update/{inv_no}/note', [
     | +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     |
 */
-Route::get('/warehouse/customer_price', [
-    'uses' => 'TMS\Warehouse\CustPriceController@index', 
-    'as' => 'tms.warehouse.cust_price'
-]);
-Route::post('/warehouse/customer_price/table-index', [
-    'uses' => 'TMS\Warehouse\CustPriceController@custPriceTable', 
-    'as' => 'tms.warehouse.cust_price.index'
-]);
-Route::post('/warehouse/customer_price/header', [
-    'uses' => 'TMS\Warehouse\CustPriceController@headerTools', 
-    'as' => 'tms.warehouse.cust_price.header'
-]);
-Route::get('/warehouse/customer_price/detail/{cust}/{date}', [
-    'uses' => 'TMS\Warehouse\CustPriceController@custPriceDetail', 
-    'as' => 'tms.warehouse.cust_price.detail'
-]);
-Route::get('/warehouse/customer_price/items', [
-    'uses' => 'TMS\Warehouse\CustPriceController@getitems', 
-    'as' => 'tms.warehouse.cust_price.getitems'
-]);
-Route::post('/warehouse/customer_price/save', [
-    'uses' => 'TMS\Warehouse\CustPriceController@save', 
-    'as' => 'tms.warehouse.cust_price.save'
-]);
-Route::put('/warehouse/customer_price/update/{cust}/{active}', [
-    'uses' => 'TMS\Warehouse\CustPriceController@update', 
-    'as' => 'tms.warehouse.cust_price.update'
-]);
-Route::post('/warehouse/customer_price/voided', [
-    'uses' => 'TMS\Warehouse\CustPriceController@voided', 
-    'as' => 'tms.warehouse.cust_price.voided'
-]);
-Route::post('/warehouse/customer_price/unvoided', [
-    'uses' => 'TMS\Warehouse\CustPriceController@unvoided', 
-    'as' => 'tms.warehouse.cust_price.unvoided'
-]);
-Route::post('/warehouse/customer_price/posted', [
-    'uses' => 'TMS\Warehouse\CustPriceController@posted', 
-    'as' => 'tms.warehouse.cust_price.posted'
-]);
-Route::post('/warehouse/customer_price/unposted', [
-    'uses' => 'TMS\Warehouse\CustPriceController@unposted', 
-    'as' => 'tms.warehouse.cust_price.unposted'
-]);
-Route::get('/warehouse/customer_price/{code}/print', [
-    'uses' => 'TMS\Warehouse\CustPriceController@print', 
-    'as' => 'tms.warehouse.cust_price.print'
-]);
-Route::get('/warehouse/customer_price/trigger', [
-    'uses' => 'TMS\Warehouse\CustPriceController@trigger', 
-    'as' => 'tms.warehouse.cust_price.trigger'
-]);
+// Route::get('/warehouse/customer_price', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@index', 
+//     'as' => 'tms.warehouse.cust_price'
+// ]);
+// Route::post('/warehouse/customer_price/table-index', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@custPriceTable', 
+//     'as' => 'tms.warehouse.cust_price.index'
+// ]);
+// Route::post('/warehouse/customer_price/header', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@headerTools', 
+//     'as' => 'tms.warehouse.cust_price.header'
+// ]);
+// Route::get('/warehouse/customer_price/detail/{cust}/{date}', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@custPriceDetail', 
+//     'as' => 'tms.warehouse.cust_price.detail'
+// ]);
+// Route::get('/warehouse/customer_price/items', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@getitems', 
+//     'as' => 'tms.warehouse.cust_price.getitems'
+// ]);
+// Route::post('/warehouse/customer_price/save', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@save', 
+//     'as' => 'tms.warehouse.cust_price.save'
+// ]);
+// Route::put('/warehouse/customer_price/update/{cust}/{active}', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@update', 
+//     'as' => 'tms.warehouse.cust_price.update'
+// ]);
+// Route::post('/warehouse/customer_price/voided', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@voided', 
+//     'as' => 'tms.warehouse.cust_price.voided'
+// ]);
+// Route::post('/warehouse/customer_price/unvoided', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@unvoided', 
+//     'as' => 'tms.warehouse.cust_price.unvoided'
+// ]);
+// Route::post('/warehouse/customer_price/posted', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@posted', 
+//     'as' => 'tms.warehouse.cust_price.posted'
+// ]);
+// Route::post('/warehouse/customer_price/unposted', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@unposted', 
+//     'as' => 'tms.warehouse.cust_price.unposted'
+// ]);
+// Route::get('/warehouse/customer_price/{code}/print', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@print', 
+//     'as' => 'tms.warehouse.cust_price.print'
+// ]);
+// Route::get('/warehouse/customer_price/trigger', [
+//     'uses' => 'TMS\Warehouse\CustPriceController@trigger', 
+//     'as' => 'tms.warehouse.cust_price.trigger'
+// ]);

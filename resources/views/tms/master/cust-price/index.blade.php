@@ -1,24 +1,24 @@
 @extends('master')
-@section('title', 'TMS | Warehouse - Customer Price')
+@section('title', 'TMS | Master - Customer Price')
 @section('css')
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/Datatables/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ asset('/vendor/datepicker/bootstrap-datepicker.min.css') }}">
 @endsection
 @section('content')
 
-@include('tms.warehouse.cust-price.style.custom-style')
+@include('tms.master.cust-price.style.custom-style')
 
 <div class="main-content-inner">
-    @include('tms.warehouse.cust-price.table.index')
+    @include('tms.master.cust-price.table.index')
 </div>
-@include('tms.warehouse.cust-price.modal.create.index')
-@include('tms.warehouse.cust-price.modal.header.customer')
-@include('tms.warehouse.cust-price.modal.header.customer-search')
-@include('tms.warehouse.cust-price.modal.create.itemTableAdd')
-@include('tms.warehouse.cust-price.modal.create.itemFormAdd')
-@include('tms.warehouse.cust-price.modal.log.tableLog')
-@include('tms.warehouse.cust-price.modal.action.action')
-@include('tms.warehouse.cust-price.modal.action.posted')
+@include('tms.master.cust-price.modal.create.index')
+@include('tms.master.cust-price.modal.header.customer')
+@include('tms.master.cust-price.modal.header.customer-search')
+@include('tms.master.cust-price.modal.create.itemTableAdd')
+@include('tms.master.cust-price.modal.create.itemFormAdd')
+@include('tms.master.cust-price.modal.log.tableLog')
+@include('tms.master.cust-price.modal.action.action')
+@include('tms.master.cust-price.modal.action.posted')
 
 @endsection
 @section('script')
@@ -58,7 +58,7 @@
                 serverSide: true,
                 destroy: true,
                 ajax: {
-                    url: "{{route('tms.warehouse.cust_price.index')}}",
+                    url: "{{route('tms.master.cust_price.index')}}",
                     method: 'POST',
                     headers: token_header
                 },
@@ -119,7 +119,7 @@
                 serverSide: true,
                 destroy: true,
                 ajax: {
-                    url: "{{route('tms.warehouse.cust_price.index')}}",
+                    url: "{{route('tms.master.cust_price.index')}}",
                     method: 'POST',
                     data: {customer: cust},
                     headers: token_header
@@ -180,7 +180,7 @@
                 group = group.split(' ');
             var cust = group[0];
             var date = group[2].split('/').reverse().join('-');
-            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            var route = "{{route('tms.master.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
             modalAction('#custprice-modal-index').then(resolve => {
@@ -266,7 +266,7 @@
         });
         $('#custprice-btn-modal-search').on('click', function () {
             modalAction('#custprice-modal-customer-search').then(resolve => {
-                ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
+                ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
                     let customer = resolve.content;
                     $.each(customer, function (i, cust) {
                         tbl_customer_s.row.add([
@@ -297,7 +297,7 @@
 
         $('#custprice-btn-modal-create').on('click', function () {
             modalAction('#custprice-modal-index').then(() => {
-                // ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+                // ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
                 //     var data = resolve.content;
                 //     $('#custprice-create-valas').html('');
                 //     $.each(data, function (i, valas) {
@@ -336,7 +336,7 @@
         $('#custprice-modal-index').on('shown.bs.modal', function () {
             adjustDraw(tbl_item);
             $('#custprice-create-customercode').focus();
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
+            ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
                 var data = resolve.content;
                 $('#custprice-create-valas').html('');
                 $.each(data, function (i, valas) {
@@ -398,7 +398,7 @@
                 modalAction('#custprice-modal-customer').then(resolve => {
                     tbl_item.clear().draw(false);
                     tbl_customer.clear().draw(false);
-                    ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
+                    ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
                         let customer = resolve.content;
                         $.each(customer, function (i, cust) {
                             tbl_customer.row.add([
@@ -435,7 +435,7 @@
             modalAction('#custprice-modal-customer', 'hide').then(resolve => {
                 $('#custprice-create-customercode').val(data[0]);
                 $('#custprice-create-customername').val(data[1]);
-                ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "customerclick", cust_id: data[0]}}).then(resolve => {
+                ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customerclick", cust_id: data[0]}}).then(resolve => {
                     if (resolve.content) {
                         var no = 1;
                         var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
@@ -443,7 +443,7 @@
                             var price_new = (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new))));
                             tbl_item.row.add([
                                 no,
-                                data.item_code,
+                                data.itemcode_trims,
                                 data.part_no,
                                 data.desc,
                                 `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${price_new}">`,
@@ -493,7 +493,7 @@
                 serverSide: true,
                 destroy: true,
                 ajax: {
-                    url: "{{route('tms.warehouse.cust_price.header')}}",
+                    url: "{{route('tms.master.cust_price.header')}}",
                     method: "POST",
                     data: {
                         type: "items",
@@ -535,7 +535,7 @@
                 $('#custprice-datatables-customer-item').DataTable().clear();
                 modalAction('#custprice-modal-item').then(() => {
                     getTblItem(cust_id);
-                    // ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "items", cust_id: cust_id} }).then(resolve => {
+                    // ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "items", cust_id: cust_id} }).then(resolve => {
                     //     console.log(resolve);
                     // });
                 });
@@ -592,7 +592,7 @@
         // });
 
         $(document).on('click', '#custprice-btn-item-submit', function () {
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "items_selected", items: item_select}}).then(resolve => {
+            ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "items_selected", items: item_select}}).then(resolve => {
                 var data = resolve.content;
                 modalAction('#custprice-modal-item', 'hide').then(resolve => {
 
@@ -675,7 +675,7 @@
         $(document).on('click', '.custprice-act-view', function () {
             var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
             var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
-            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            var route = "{{route('tms.master.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
             modalAction('#custprice-modal-index').then(resolve => {
@@ -736,14 +736,14 @@
             var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
             var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
 
-            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            var route = "{{route('tms.master.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', cust);
             route  = route.replace(':date', date);
 
             modalAction('#custprice-modal-index', 'hide').then(() => {
                 loading_start();
                 setTimeout(() => {
-                    ajaxCall({route: "{{route('tms.warehouse.cust_price.header')}}", method: "POST", data: {type: "validation", cust_id: cust, active: date} }).then(resolve => {
+                    ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "validation", cust_id: cust, active: date} }).then(resolve => {
                         var status = resolve.status;
                         if (status == true) {
                             modalAction('#custprice-modal-index').then(resolve => {
@@ -828,15 +828,15 @@
                 items: JSON.stringify(items_fix)
             };
             // Cek
-            var route = "{{route('tms.warehouse.cust_price.detail', [':cust', ':date'])}}";
+            var route = "{{route('tms.master.cust_price.detail', [':cust', ':date'])}}";
             route  = route.replace(':cust', $('#custprice-create-customercode').val());
             route  = route.replace(':date', $('#custprice-create-activedate').val().split("/").reverse().join("-"));
             ajaxCall({route: route, method: "GET"}).then(resolve => {
                 var rou;
                 if (resolve.content.length <= 0) {
-                    rou = "{{route('tms.warehouse.cust_price.save')}}";
+                    rou = "{{route('tms.master.cust_price.save')}}";
                 }else{
-                    rou = "{{route('tms.warehouse.cust_price.update', [':cust', ':active'])}}";
+                    rou = "{{route('tms.master.cust_price.update', [':cust', ':active'])}}";
                     rou  = rou.replace(':cust', $('#custprice-create-customercode').val());
                     rou  = rou.replace(':active', $('#custprice-create-activedate').val().split("/").reverse().join("-"));
                 }
@@ -892,7 +892,7 @@
         });
 
         function submit(route, data) {
-            var method = (route == "{{route('tms.warehouse.cust_price.save')}}" ? "POST" : "PUT");
+            var method = (route == "{{route('tms.master.cust_price.save')}}" ? "POST" : "PUT");
             loading_start();
             ajaxCall({route: route, method: method, data: data}).then(resolve => {
                 var msg = resolve.message;
@@ -914,7 +914,7 @@
         $(document).on('click', '.custprice-act-voided', function () {
             var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
             var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.voided')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
+            ajaxCall({route: "{{route('tms.master.cust_price.voided')}}", method: "POST", data: {cust_id: cust, date: date}}).then(resolve => {
                 var msg = resolve.message;
                 Swal.fire({
                     title: 'Notification',
@@ -948,7 +948,7 @@
             }).then((answer) => {
                 if (answer.value != "" && answer.value != undefined) {
                     var note = answer.value;
-                    ajaxCall({route: "{{route('tms.warehouse.cust_price.unvoided')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
+                    ajaxCall({route: "{{route('tms.master.cust_price.unvoided')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
                         var msg = resolve.message;
                         Swal.fire({
                             title: 'Notification',
@@ -1007,7 +1007,7 @@
                 sso: $('#custprice-post-sso').is(':checked'),
                 sj: $('#custprice-post-sj').is(':checked'),
             };
-            ajaxCall({route: "{{route('tms.warehouse.cust_price.posted')}}", method: "POST", data: data}).then(resolve => {
+            ajaxCall({route: "{{route('tms.master.cust_price.posted')}}", method: "POST", data: data}).then(resolve => {
                 var msg = resolve.message;
                 Swal.fire({
                     title: 'Notification',
@@ -1041,7 +1041,7 @@
                 }).then((answer) => {
                     if (answer.value != "" && answer.value != undefined) {
                         var note = answer.value;
-                        ajaxCall({route: "{{route('tms.warehouse.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
+                        ajaxCall({route: "{{route('tms.master.cust_price.unposted')}}", method: "POST", data: {cust_id: cust, date: date, note: note}}).then(resolve => {
                             var msg = resolve.message;
                             Swal.fire({
                                 title: 'Notification',
@@ -1071,7 +1071,7 @@
                     destroy: true,
                     searching: false,
                     ajax: {
-                        url: "{{route('tms.warehouse.cust_price.header')}}",
+                        url: "{{route('tms.master.cust_price.header')}}",
                         method: "POST",
                         data: {
                             type: "log",
@@ -1106,7 +1106,7 @@
             // });
             tbl_custprice_index();
             modalAction('#custprice-modal-index', 'hide');
-            var route = "{{route('tms.warehouse.cust_price.print', [':code'])}}";
+            var route = "{{route('tms.master.cust_price.print', [':code'])}}";
             route  = route.replace(':code', encrypt);
             window.open(route, '_blank');
         });

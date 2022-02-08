@@ -9,13 +9,13 @@
                 <div class="modal-body">
                     <div class="form-row" style="font-size: 11px;">
                         <div class="col-xl-8 border-left">
-                            @include('tms.warehouse.cust-price.modal.create.header1')
+                            @include('tms.master.cust-price.modal.create.header1')
                         </div>
                         {{-- <div class="col-xl-4 border-left">
-                            @include('tms.warehouse.cust-price.modal.create.header2')
+                            @include('tms.master.cust-price.modal.create.header2')
                         </div> --}}
                         <div class="col-xl-4 border-left border-right">
-                            @include('tms.warehouse.cust-price.modal.create.header3')
+                            @include('tms.master.cust-price.modal.create.header3')
                         </div>
                     </div>
                     <div class="mt-4">
@@ -32,7 +32,7 @@
                                 </button>
                             </div>
                             <div class="col-12 mt-2">
-                                @include('tms.warehouse.cust-price.modal.create.itemTable')
+                                @include('tms.master.cust-price.modal.create.itemTable')
                             </div>
                         </div>
                     </div>

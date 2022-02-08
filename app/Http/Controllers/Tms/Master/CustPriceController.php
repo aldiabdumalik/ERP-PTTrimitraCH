@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\TMS\Warehouse;
+namespace App\Http\Controllers\TMS\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\AR\CustPriceTrait;
@@ -29,7 +29,7 @@ class CustPriceController extends Controller
 
     public function index()
     {
-        return view('tms.warehouse.cust-price.index');
+        return view('tms.master.cust-price.index');
     }
 
     public function custPriceTable(Request $request)
@@ -49,7 +49,7 @@ class CustPriceController extends Controller
                     $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
                     $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
                 })
-                ->where('entry_custprice_tbl.status', 'ACTIVE')
+                // ->where('entry_custprice_tbl.status', 'ACTIVE')
                 // ->groupBy(['cust_id', 'active_date'])
                 ->orderBy('entry_custprice_tbl.created_date', 'DESC')
                 ->orderBy('part_no', 'ASC')
@@ -68,7 +68,7 @@ class CustPriceController extends Controller
                     $join->on('db_tbs.item.ITEMCODE', '=', 'entry_custprice_tbl.item_code');
                     $join->on('db_tbs.item.CUSTCODE', '=', 'entry_custprice_tbl.cust_id');
                 })
-                ->where('entry_custprice_tbl.status', 'ACTIVE')
+                // ->where('entry_custprice_tbl.status', 'ACTIVE')
                 ->where('entry_custprice_tbl.cust_id', $request->customer)
                 // ->groupBy(['cust_id', 'active_date'])
                 ->orderBy('created_date', 'DESC')
@@ -105,7 +105,7 @@ class CustPriceController extends Controller
             )
             ->rawColumns(['action'])
             ->addColumn('action', function($query){
-                    return view('tms.warehouse.cust-price.button.btnTableIndex', ['data' => $query]);
+                    return view('tms.master.cust-price.button.btnTableIndex', ['data' => $query]);
                 }
             )
             ->rawColumns(['action'])
@@ -125,7 +125,7 @@ class CustPriceController extends Controller
             ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
             ->where('cust_id', $cust)
             ->where('active_date', $date)
-            ->where('entry_custprice_tbl.status', 'ACTIVE')
+            // ->where('entry_custprice_tbl.status', 'ACTIVE')
             ->orderBy('entry_custprice_tbl.item_code', 'ASC')
             ->get();
         return _Success(null, 200, $query);
@@ -143,7 +143,8 @@ class CustPriceController extends Controller
         $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
-                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
+                $item_replace = str_replace(' ', '', $items[$i]['itemcode']);
+                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $item_replace)->orderBy('active_date', 'DESC')->first();
                 if ($old) {
                     $prices = str_replace(',', '', $items[$i]['new_price']);
                     $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
@@ -154,7 +155,7 @@ class CustPriceController extends Controller
                 }
                 $data[] = [
                     'cust_id' => $request->cust_id,
-                    'item_code' => $items[$i]['itemcode'],
+                    'item_code' => str_replace(' ', '', $items[$i]['itemcode']),
                     'currency' => $request->valas,
                     'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['new_price'],
                     'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i][4],
@@ -171,10 +172,14 @@ class CustPriceController extends Controller
                     'posted_date' => Carbon::now(),
                     'posted_by' => Auth::user()->FullName
                 ];
+
+                CustPrice::where('cust_id', $request->cust_id)
+                    ->where('item_code', $item_replace)
+                    ->update(['status' => 'NOT ACTIVE']);
             }
             // DB::connection('db_tbs')->beginTransaction();
             try {
-                $isext = 0;
+                // $isext = 0;
                 if ($request->price_by == 'DATE') {
                     $cekBln = CustPrice::where('cust_id', $request->cust_id)
                         ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
@@ -229,7 +234,7 @@ class CustPriceController extends Controller
     {
         $cek = CustPrice::where('cust_id', $cust)
             ->where('active_date', $active)
-            ->where('entry_custprice_tbl.status', 'ACTIVE')
+            // ->where('entry_custprice_tbl.status', 'ACTIVE')
             ->first();
         $create_by = $cek->created_by;
         $create_date = $cek->created_date;
@@ -242,8 +247,9 @@ class CustPriceController extends Controller
         $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
         $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
         if (!empty($items)) {
-            for ($i=0; $i < count($items); $i++) { 
-                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $items[$i]['itemcode'])->orderBy('active_date', 'DESC')->first();
+            for ($i=0; $i < count($items); $i++) {
+                $itemcode_s = str_replace(' ', '', $items[$i]['itemcode']);
+                $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $itemcode_s)->orderBy('active_date', 'DESC')->first();
                 if ($old) {
                     $prices = str_replace(',', '', $items[$i]['new_price']);
                     $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
@@ -255,7 +261,7 @@ class CustPriceController extends Controller
 
                 $data[] = [
                     'cust_id' => $request->cust_id,
-                    'item_code' => $items[$i]['itemcode'],
+                    'item_code' => $itemcode_s,
                     'currency' => $request->valas,
                     'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
                     'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
@@ -274,21 +280,26 @@ class CustPriceController extends Controller
                     'posted_date' => Carbon::now(),
                     'posted_by' => Auth::user()->FullName
                 ];
+
+                CustPrice::where('cust_id', $request->cust_id)
+                    ->where('item_code', $itemcode_s)
+                    ->update(['status' => 'NOT ACTIVE']);
             }
             // DB::connection('db_tbs')->beginTransaction();
             try {
-                $isext = 0;
+                // $isext = 0;
+                // $test = null;
                 if ($request->price_by == 'DATE') {
-                    $cekBln = CustPrice::where('cust_id', $request->cust_id)
-                        ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
-                        ->whereYear('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'Y'))
-                        ->first();
-                    if (!$cekBln) {
-                        $isext = 0;
-                        // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    }else{
-                        $isext = 1;
-                    }
+                    // $cekBln = CustPrice::where('cust_id', $request->cust_id)
+                    //     ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
+                    //     ->whereYear('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'Y'))
+                    //     ->first();
+                    // if (!$cekBln) {
+                    //     $isext = 0;
+                    //     // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
+                    // }else{
+                    //     $isext = 1;
+                    // }
 
                     // Trigger By Date
                     $trg = $this->triggerDate($data);
@@ -298,8 +309,8 @@ class CustPriceController extends Controller
                 }
                 
                 CustPrice::where('cust_id', $cust)
-                    ->where('active_date', $active)
-                    ->where('entry_custprice_tbl.status', 'ACTIVE')
+                    ->where('active_date', $request->active_date)
+                    // ->where('entry_custprice_tbl.status', 'ACTIVE')
                     ->delete();
 
                 $query = CustPrice::insert($data);
@@ -515,7 +526,7 @@ class CustPriceController extends Controller
         })->update([
             'printed_date' => date('Y-m-d')
         ]);
-        $pdf = PDF::loadView('tms.warehouse.cust-price.report.report', compact('query'))->setPaper('a4', 'potrait');
+        $pdf = PDF::loadView('tms.master.cust-price.report.report', compact('query'))->setPaper('a4', 'potrait');
         $pdf->getDomPDF()->set_option("enable_php", true);
         return $pdf->stream();
     }
@@ -615,7 +626,7 @@ class CustPriceController extends Controller
                 if (isset($request->cust_id)) {
                     $last = CustPrice::where('entry_custprice_tbl.cust_id', $request->cust_id)
                         ->where('entry_custprice_tbl.status', 'ACTIVE')
-                        ->orderBy('active_date', 'DESC')
+                        ->orderBy('created_date', 'DESC')
                         ->first();
                     if ($last) {
                         $query = CustPrice::select([
@@ -623,13 +634,14 @@ class CustPriceController extends Controller
                             'ekanban_customermaster.CustomerCode_eKanban as cuscode', 
                             'ekanban_customermaster.CustomerName as custname',
                             'item.PART_NO as part_no',
-                            'item.DESCRIPT as desc'
+                            'item.DESCRIPT as desc',
+                            DB::raw('TRIM(item.ITEMCODE) as itemcode_trims')
                         ])
                         ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
                         ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
                         ->where('entry_custprice_tbl.cust_id', $request->cust_id)
                         ->where('entry_custprice_tbl.active_date', $last->active_date)
-                        ->where('entry_custprice_tbl.status', 'ACTIVE')
+                        // ->where('entry_custprice_tbl.status', 'ACTIVE')
                         ->get();
                     }else{
                         $query = CustPrice::select([
@@ -637,12 +649,13 @@ class CustPriceController extends Controller
                                 'ekanban_customermaster.CustomerCode_eKanban as cuscode', 
                                 'ekanban_customermaster.CustomerName as custname',
                                 'item.PART_NO as part_no',
-                                'item.DESCRIPT as desc'
+                                'item.DESCRIPT as desc',
+                                DB::raw('TRIM(item.ITEMCODE) as itemcode_trims')
                             ])
                             ->leftJoin('db_tbs.item', 'entry_custprice_tbl.item_code', '=', 'db_tbs.item.itemcode')
                             ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'entry_custprice_tbl.cust_id')
                             ->where('entry_custprice_tbl.cust_id', $request->cust_id)
-                            ->where('entry_custprice_tbl.status', 'ACTIVE')
+                            // ->where('entry_custprice_tbl.status', 'ACTIVE')
                             ->get();
                     }
                     if ($query->isEmpty()) {
@@ -1367,7 +1380,7 @@ class CustPriceController extends Controller
                 $join->on("custprice.item_code", "=", "item.ITEMCODE");
             })
             ->select([
-                'item.ITEMCODE as itemcode',
+                DB::raw('TRIM(item.ITEMCODE) as itemcode'),
                 'item.PART_NO as part_no', 
                 'item.DESCRIPT as descript', 
                 'item.UNIT as unit', 
@@ -1380,36 +1393,6 @@ class CustPriceController extends Controller
             // ->where('custprice.status', 'ACTIVE')
             ->get();
         return $query;
-    }
-
-    public function getitems()
-    {
-        $cust = 'N02';
-        $items = $this->items($cust);
-        $items_arr = [];
-        foreach ($items as $i) {
-            $price = CustPrice::where('item_code', $i->itemcode)
-                ->orderBy('active_date', 'DESC')
-                ->first();
-            if (isset($price)) {
-                $items_arr[] = [
-                    'itemcode' => $i->itemcode,
-                    'part_no' => $i->part_no,
-                    'descript' => $i->descript,
-                    'unit' => $i->unit,
-                    'price' => $price->price_new
-                ];
-            }else{
-                $items_arr[] = [
-                    'itemcode' => $i->itemcode,
-                    'part_no' => $i->part_no,
-                    'descript' => $i->descript,
-                    'unit' => $i->unit,
-                    'price' => 0
-                ];
-            }
-        }
-        print_r($items_arr);
     }
 
     private function items_with_old_price($cust)
