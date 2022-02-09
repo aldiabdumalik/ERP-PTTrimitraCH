@@ -55,6 +55,7 @@ class DoEntry extends Model
         'update_date',
         'do_trans',
         'invoice_date',
+        'id_custprice'
     ];
     protected $hidden = [];
     public $timestamps = false;

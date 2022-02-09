@@ -147,7 +147,7 @@ trait CustPriceTrait {
                                 ->whereNull('sj.invoice_date')
                                 ->whereRaw('DATE(sso.created_date) >= ?', [$act_date])
                                 ->update([
-                                    'sso.custprice' => $custprice_id
+                                    'sso.id_custprice' => $custprice_id
                                 ]);
                         }
                         // End SSO
@@ -161,7 +161,7 @@ trait CustPriceTrait {
                                 ->whereNull('sj.invoice_date')
                                 ->whereRaw('DATE(sj.created_date) >= ?', [$act_date])
                                 ->update([
-                                    'sj.custprice' => $custprice_id
+                                    'sj.id_custprice' => $custprice_id
                                 ]);
                         }
                         // End SJ
@@ -671,7 +671,7 @@ trait CustPriceTrait {
                             })
                             ->whereNull('sj.invoice_date')
                             ->update([
-                                'sso.custprice' => $custprice_id
+                                'sso.id_custprice' => $custprice_id
                             ]);
                     }
                 }
@@ -697,7 +697,7 @@ trait CustPriceTrait {
                             })
                             ->whereNull('sj.invoice_date')
                             ->update([
-                                'custprice' => $custprice_id
+                                'sj.id_custprice' => $custprice_id
                             ]);
                     }
                 }

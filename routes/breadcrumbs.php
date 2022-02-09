@@ -233,3 +233,7 @@ Breadcrumbs::for('tms.db_parts.master.detail_process', function ($trail) {
     $trail->push('Database Parts', '#');
     $trail->push('Master Detail Process', route('tms.db_parts.master.detail_process'));
 });
+Breadcrumbs::for('tms.db_parts.input_parts', function ($trail) {
+    $trail->push('Database Parts', '#');
+    $trail->push('Input Parts', route('tms.db_parts.input_parts'));
+});

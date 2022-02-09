@@ -103,3 +103,12 @@ Route::put('/database_parts/master_detail_process/{id}/actived', [
     'uses' => 'TMS\DB_Parts\MasterDetailProcessController@trashToActive', 
     'as' => 'tms.db_parts.master.detail_process.trash_to_active'
 ]);
+
+Route::get('/database_parts/input_parts', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@index', 
+    'as' => 'tms.db_parts.input_parts'
+]);
+Route::post('/database_parts/input_parts/table_index', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@tableIndex', 
+    'as' => 'tms.db_parts.input_parts.tbl_index'
+]);
