@@ -58,7 +58,49 @@
 $(document).ready(function () {
     const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
     const table_index = $('#iparts-datatable').DataTable();
-    modalAction('#iparts-modal-index');
+
+    $('#iparts-btn-modal-create').on('click', function () {
+        modalAction('#iparts-modal-index');
+    });
+
+    $('#iparts-index-pict').on('change', function(e){
+        e.preventDefault();
+        var fileName = $(this).val().replace('C:\\fakepath\\', " ");
+        var ext = fileName.lastIndexOf(".") + 1;
+        var extFile = fileName.substr(ext, fileName.length).toLowerCase();
+        let oldName = $(this).next('#iparts-index-pict-x').html();
+        if (!fileName) {
+            fileName = 'Choose file';
+        }
+        if (extFile=="jpg" || extFile=="jpeg" || extFile=="png"){
+            loading_start();
+            let route = "{{ route('tms.db_parts.input_parts.upload_temp') }}";
+            let formData = new FormData();
+            formData.append('file', $('#iparts-index-pict')[0].files[0]);
+            if ((oldName.lastIndexOf(".") + 1) > 0) {   
+                formData.append('old_file', oldName);
+            }
+            ajaxFormData(route, formData).then(resolve => {
+                loading_stop();
+                $(this).next('#iparts-index-pict-x').html(resolve.content);
+            });
+        }else{
+            if (extFile != "") {
+                Swal.fire({
+                    title: 'Something was wrong',
+                    text: 'Sorry, extention not supported. Upload file only jpg, png or jpeg',
+                    icon: 'warning'
+                });
+            }else{
+                if ((oldName.lastIndexOf(".") + 1) > 0) {
+                    let data = {type: "delete_temp", old_file: oldName};
+                    ajaxCall({route: "{{route('tms.db_parts.input_parts.header_tools')}}", method: "POST", data:data});
+                }
+            }
+            $(this).next('#iparts-index-pict-x').html('Choose file');
+            $(this).val(null);
+        }
+    });
 
     // Lib func
     function date_convert($date) {
@@ -109,6 +151,34 @@ $(document).ready(function () {
                     }).then(() => {
                         console.clear();
                         reject(response);
+                    });
+                },
+                complete: function (response){
+                    resolve(response);
+                }
+            });
+        });
+    }
+    function ajaxFormData(route, formData) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: route,
+                method: "POST",
+                data: formData,
+                dataType:'JSON',
+                contentType: false,
+                cache: false,
+                processData: false,
+                headers: token_header,
+                error: function(response, status, x){
+                    console.log(response);
+                    loading_stop();
+                    Swal.fire({
+                        title: 'Something was wrong',
+                        text: response.responseJSON.message,
+                        icon: 'error'
+                    }).then(() => {
+                        // console.clear();
                     });
                 },
                 complete: function (response){

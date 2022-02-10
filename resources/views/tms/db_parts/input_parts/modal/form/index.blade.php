@@ -7,14 +7,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-row" style="font-size: 11px;">
-                        <div class="col-xl-4 border-left">
+                        <div class="col-xl-5 border-left">
                             @include('tms.db_parts.input_parts.modal.form.header1')
                         </div>
-                        <div class="col-xl-4 border-left border-right">
+                        <div class="col-xl-5 border-left border-right">
                             @include('tms.db_parts.input_parts.modal.form.header2')
                         </div>
-                        <div class="col-xl-4 border-left">
-                            {{-- @include('tms.db_parts.input_parts.modal.form.header3') --}}
+                        <div class="col-xl-2 border-left">
+                            @include('tms.db_parts.input_parts.modal.form.header3')
                         </div>
                     </div>
                 </div>

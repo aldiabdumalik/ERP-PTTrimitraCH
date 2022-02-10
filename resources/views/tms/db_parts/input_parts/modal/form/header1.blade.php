@@ -14,22 +14,68 @@
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
-    <div class="col-12">
-        <input type="text" name="iparts-index-customeraddr1" id="iparts-index-customeraddr1" class="form-control form-control-sm readonly-first" readonly>
+    <div class="col-2">
+        <label for="iparts-index-ppartno" class="auto-middle">Parent of Part</label>
+    </div>
+    <div class="col-10">
+        <div class="row no-gutters">
+            <div class="col-4">
+                <input type="text" name="iparts-index-ppartno" id="iparts-index-ppartno" class="form-control form-control-sm" placeholder="Press Enter..." autocomplete="off">
+            </div>
+            <div class="col-8">
+                <input type="text" name="iparts-index-ppartno" id="iparts-index-ppartno" class="form-control form-control-sm readonly-first" readonly>
+            </div>
+        </div>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
-    <div class="col-12">
-        <input type="text" name="iparts-index-customeraddr2" id="iparts-index-customeraddr2" class="form-control form-control-sm readonly-first" readonly>
+    <div class="col-2">
+        <label for="iparts-index-partno" class="auto-middle">Part No*</label>
+    </div>
+    <div class="col-10">
+        <input type="text" name="iparts-index-partno" id="iparts-index-partno" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
-    <div class="col-12">
-        <input type="text" name="iparts-index-customeraddr3" id="iparts-index-customeraddr3" class="form-control form-control-sm readonly-first" readonly>
+    <div class="col-2">
+        <label for="iparts-index-partname" class="auto-middle">Part name*</label>
+    </div>
+    <div class="col-10">
+        <input type="text" name="iparts-index-partname" id="iparts-index-partname" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">
-    <div class="col-12">
-        <input type="text" name="iparts-index-customeraddr4" id="iparts-index-customeraddr4" class="form-control form-control-sm readonly-first" readonly>
+    <div class="col-2">
+        <label for="iparts-index-parttype" class="auto-middle">Part type*</label>
+    </div>
+    <div class="col-10">
+        <input type="text" name="iparts-index-parttype" id="iparts-index-parttype" class="form-control form-control-sm" autocomplete="off" required>
+    </div>
+</div>
+<div class="form-row align-items-center mb-1">
+    <div class="col-2">
+        <label for="iparts-index-pict" class="auto-middle">Part picture*</label>
+    </div>
+    <div class="col-10">
+        <div class="custom-file">
+            <input type="file" class="custom-file-input form-control-sm" name="iparts-index-pict" id="iparts-index-pict" accept="image/*" required>
+            <label class="custom-file-label" id="iparts-index-pict-x" for="iparts-index-pict-x">Choose file</label>
+        </div>
+    </div>
+</div>
+<div class="form-row align-items-center mb-1">
+    <div class="col-2">
+        <label for="iparts-index-reff" class="auto-middle">Reff*</label>
+    </div>
+    <div class="col-10">
+        <input type="text" name="iparts-index-reff" id="iparts-index-reff" class="form-control form-control-sm" autocomplete="off" required>
+    </div>
+</div>
+<div class="form-row align-items-center mb-1">
+    <div class="col-2">
+        <label for="iparts-index-vol" class="auto-middle">Vol/Mth*</label>
+    </div>
+    <div class="col-10">
+        <input type="text" name="iparts-index-vol" id="iparts-index-vol" class="form-control form-control-sm" autocomplete="off" required>
     </div>
 </div>

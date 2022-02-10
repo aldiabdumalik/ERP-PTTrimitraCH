@@ -112,3 +112,11 @@ Route::post('/database_parts/input_parts/table_index', [
     'uses' => 'TMS\DB_Parts\InputPartsController@tableIndex', 
     'as' => 'tms.db_parts.input_parts.tbl_index'
 ]);
+Route::post('/database_parts/input_parts/upload_temp', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@uploadTemp', 
+    'as' => 'tms.db_parts.input_parts.upload_temp'
+]);
+Route::post('/database_parts/input_parts/header_tools', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@headerTools', 
+    'as' => 'tms.db_parts.input_parts.header_tools'
+]);
