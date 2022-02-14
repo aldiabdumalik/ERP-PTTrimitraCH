@@ -99,6 +99,9 @@ class CustPriceController extends Controller
             ->editColumn('price_old', function ($query){
                 return rupiah(addZero($query->price_old));
             })
+            ->editColumn('item_code', function ($query){
+                return view('tms.master.cust-price.button.btnItemCode', ['data' => $query]);
+            })
             ->addColumn('group', function($query){
                     return "$query->cust_id|".date('d/m/Y', strtotime($query->active_date))."|Active date|$query->cust_name";
                 }
@@ -149,6 +152,12 @@ class CustPriceController extends Controller
                     $prices = str_replace(',', '', $items[$i]['new_price']);
                     $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
                     $price_old = $old->price_new;
+
+                    // Add range date
+
+                    CustPrice::where('item_code', $item_replace)
+                        ->where('active_date', $old->active_date)
+                        ->update(['range_date' => date('Y-m-d', strtotime($old->active_date. "-1 days"))]);
                 }else{
                     $is_update = 0;
                     $price_old = 0;
@@ -179,19 +188,7 @@ class CustPriceController extends Controller
             }
             // DB::connection('db_tbs')->beginTransaction();
             try {
-                // $isext = 0;
                 if ($request->price_by == 'DATE') {
-                    $cekBln = CustPrice::where('cust_id', $request->cust_id)
-                        ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
-                        ->whereYear('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'Y'))
-                        ->first();
-                    if (!$cekBln) {
-                        $isext = 0;
-                        // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    }else{
-                        $isext = 1;
-                    }
-
                     // Trigger By Date
                     $trg = $this->triggerDate($data);
                 }else{
@@ -414,43 +411,65 @@ class CustPriceController extends Controller
 
     public function posted(Request $request)
     {
-        $cek = CustPrice::where([
-                'cust_id' => $request->cust_id,
-                'active_date' => $request->date
-            ])
-            ->whereNull('voided_date')
-            ->get();
-
-        if ($cek->isEmpty()) {
-            return _Error('Customer Price has been voided');
-        }
-
         $is_stock = ($request->stock == 'true') ? 1 : 0;
         $is_so = ($request->so == 'true') ? 1 : 0;
         $is_sso = ($request->sso == 'true') ? 1 : 0;
         $is_sj = ($request->sj == 'true') ? 1 : 0;
 
-        $posted = CustPrice::where([
-                'cust_id' => $request->cust_id,
-                'active_date' => $request->date
-            ])->update([
-                'posted_date' => Carbon::now(),
-                'posted_by' => Auth::user()->FullName,
-                'is_stock' => $is_stock,
-                'is_so' => $is_so,
-                'is_sso' => $is_sso,
-                'is_sj' => $is_sj
-            ]);
-        if ($posted) {
-            $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-                'cust_id' => $request->cust_id,
-                'active_date' => $request->date,
-                'written_date' => Carbon::now(),
-                'status' => 'POSTED',
-                'user' => Auth::user()->FullName,
-                'note' => null
-            ]);
+        $query = CustPrice::where('active_date', $request->date)->where('cust_id', $request->cust)->get();
+
+        $data = [];
+        $price_by = null;
+
+        if ($query->isNotEmpty()) {
+            foreach ($query as $v) {
+                $data[] = [
+                    'cust_id' => $v['cust_id'],
+                    'item_code' => $v['item_code'],
+                    'currency' => $v['currency'],
+                    'price_new' =>  $v['price_new'],
+                    'price_old' =>  $v['price_old'],
+                    'active_date' => $v['active_date'],
+                    'price_by' => $v['price_by'],
+                    'is_stock' => $is_stock,
+                    'is_so' => $is_so,
+                    'is_sso' => $is_sso,
+                    'is_sj' => $is_sj
+                ];
+
+                $price_by = $v['price_by'];
+            }
+
+            if ($price_by == 'SO') {
+                $trg = $this->repostSO($data);
+            }else{
+                $trg = $this->repostDate($data);
+            }
+
+            return _Success('Cust Price has been Reposted', 200, $trg);
         }
+
+        // $posted = CustPrice::where([
+        //         'cust_id' => $request->cust_id,
+        //         'active_date' => $request->date
+        //     ])->update([
+        //         'posted_date' => Carbon::now(),
+        //         'posted_by' => Auth::user()->FullName,
+        //         'is_stock' => $is_stock,
+        //         'is_so' => $is_so,
+        //         'is_sso' => $is_sso,
+        //         'is_sj' => $is_sj
+        //     ]);
+        // if ($posted) {
+        //     $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+        //         'cust_id' => $request->cust_id,
+        //         'active_date' => $request->date,
+        //         'written_date' => Carbon::now(),
+        //         'status' => 'REPOSTED',
+        //         'user' => Auth::user()->FullName,
+        //         'note' => null
+        //     ]);
+        // }
         return _Success('Customer Price has been Posted');
     }
 
@@ -596,7 +615,23 @@ class CustPriceController extends Controller
                 }
                 return _Error('Params not exist!', 404);
                 break;
-
+            case "item_log":
+                $res = CustPrice::where('item_code', $request->id)->orderBy('created_date', 'DESC')->get();
+                return DataTables::of($res)
+                    ->editColumn('price_new', function ($res){
+                        return rupiah(addZero($res->price_new));
+                    })
+                    ->editColumn('price_old', function ($res){
+                        return rupiah(addZero($res->price_old));
+                    })
+                    ->editColumn('active_date', function ($res){
+                        return (is_null($res->active_date) ? '//' : date('d/m/Y', strtotime($res->active_date)));
+                    })
+                    ->editColumn('range_date', function ($res){
+                        return (is_null($res->range_date) ? '//' : date('d/m/Y', strtotime($res->range_date)));
+                    })
+                    ->make(true);
+                break;
             case "validation":
                 if (isset($request->cust_id) && isset($request->active)) {
                     $query = CustPrice::select([

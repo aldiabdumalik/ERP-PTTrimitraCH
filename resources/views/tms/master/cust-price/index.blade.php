@@ -17,6 +17,7 @@
 @include('tms.master.cust-price.modal.create.itemTableAdd')
 @include('tms.master.cust-price.modal.create.itemFormAdd')
 @include('tms.master.cust-price.modal.log.tableLog')
+@include('tms.master.cust-price.modal.log.itemcodeLog')
 @include('tms.master.cust-price.modal.action.action')
 @include('tms.master.cust-price.modal.action.posted')
 
@@ -172,7 +173,6 @@
                 }
             });
         }
-
         
 
         $('#custprice-datatables tbody').on( 'dblclick', 'tr.group', function () {
@@ -233,23 +233,6 @@
                         $('#custprice-btn-index-log').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
                         $('#custprice-btn-index-print').attr('data-custid', cust_id).attr('data-activedate', active_date.split('/').reverse().join('-'));
                         // console.log(posted);
-                        if (!posted) {
-                            $('#custprice-btn-index-post')
-                                .removeClass('custprice-act-unposted')
-                                .addClass('custprice-act-posted')
-                                .attr('data-custid', cust_id)
-                                .attr('data-activedate', active_date.split('/').reverse().join('-'))
-                                .attr('data-priceby', price_by)
-                                .text('Post');;
-                        }else{
-                            $('#custprice-btn-index-post')
-                                .removeClass('custprice-act-posted')
-                                .addClass('custprice-act-unposted')
-                                .attr('data-custid', cust_id)
-                                .attr('data-activedate', active_date.split('/').reverse().join('-'))
-                                .attr('data-priceby', price_by)
-                                .text('Unpost');
-                        }
                         
                         $('#custprice-create-valas').prop('disabled', true);
                         $('#custprice-create-priceby').prop('disabled', true);
@@ -473,6 +456,37 @@
                 // modalAction('#custprice-modal-item').then(function () {
                 //     getTblItem(cust_id);
                 // });
+            });
+        });
+
+        var tbl_item_log;
+        $(document).on('click', '.custprice-itemcode-popup', function (e) {
+            let id = $(this).data('item');
+            modalAction('#custprice-modal-ilog').then(() => {
+                tbl_item_log = $('#custprice-datatables-ilog').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ajax: {
+                        url: "{{route('tms.master.cust_price.header')}}",
+                        method: "POST",
+                        data: {
+                            type: "item_log",
+                            id: id
+                        },
+                        headers: token_header
+                    },
+                    columns: [
+                        {data:'item_code', name: 'item_code', className: "text-left align-middle"},
+                        {data:'price_new', name: 'price_new', className: "text-left align-middle"},
+                        {data:'price_old', name: 'price_old', className: "text-left align-middle"},
+                        {data:'active_date', name: 'active_date', className: "text-left align-middle"},
+                        {data:'range_date', name: 'range_date', className: "text-center align-middle"},
+                    ],
+                    ordering: false,
+                    lengthChange: false,
+                    searching: false,
+                });
             });
         });
 
@@ -955,9 +969,6 @@
                             text: msg,
                             icon: 'success'
                         }).then(answer => {
-                            // index_data.then(resolve => {
-                            //     resolve.ajax.reload();
-                            // });
                             tbl_custprice_index();
                         });
                     });
@@ -966,40 +977,53 @@
         });
 
         $(document).on('click', '.custprice-act-posted', function () {
-            var cust = $('#custprice-create-customercode').val(); // $(this).data('custid');
-            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-'); // $(this).data('activedate');
-            var priceby = $('#custprice-create-priceby').val(); // $(this).data('priceby');
-            modalAction('#custprice-modal-index', 'hide').then(() => {
-                modalAction('#custprice-modal-post').then(() => {
-                    $('#custprice-btn-post-submit').removeClass('d-none');
-                    $('#custprice-btn-post-submit-save').addClass('d-none');
+            var cust = $('#custprice-create-customercode').val();
+            var date = $('#custprice-create-activedate').val().split('/').reverse().join('-');
+            var priceby = $('#custprice-create-priceby').val();
+            modalAction('#custprice-modal-post').then(() => {
+                $('#custprice-post-id').val(cust);
+                $('#custprice-post-activedate').val(date);
+                $('#custprice-post-priceby').val(priceby);
+                if ($('#custprice-post-priceby').val() == 'SO') {
+                    $('#custprice-post-stock').prop('checked', true);
+                    $('#custprice-post-so').prop('checked', true);
+                    $('#custprice-post-sso').prop('checked', false);
+                    $('#custprice-post-sj').prop('checked', false);
 
-                    $('#custprice-post-id').val(cust);
-                    $('#custprice-post-activedate').val(date);
-                    $('#custprice-post-priceby').val(priceby);
-                    if ($('#custprice-post-priceby').val() == 'SO') {
-                        $('#custprice-post-sso').prop('disabled', false);
-                        $('#custprice-post-sj').prop('disabled', false);
+                    // $('#custprice-post-sso').prop('disabled', true);
+                    // $('#custprice-post-sj').prop('disabled', true);
+                }else{
+                    // $('#custprice-post-sso').prop('disabled', false);
+                    // $('#custprice-post-sj').prop('disabled', false);
 
-                        $('#custprice-post-stock').prop('checked', true);
-                        $('#custprice-post-sso').prop('checked', true);
-                        $('#custprice-post-so').prop('checked', true);
-                        $('#custprice-post-sj').prop('checked', true);
-                    }else{
-                        $('#custprice-post-stock').prop('checked', true);
-                        $('#custprice-post-so').prop('checked', true);
-                        $('#custprice-post-sso').prop('checked', false);
-                        $('#custprice-post-sj').prop('checked', false);
+                    $('#custprice-post-stock').prop('checked', true);
+                    $('#custprice-post-sso').prop('checked', true);
+                    $('#custprice-post-so').prop('checked', true);
+                    $('#custprice-post-sj').prop('checked', true);
+                }
 
-                        $('#custprice-post-sso').prop('disabled', true);
-                        $('#custprice-post-sj').prop('disabled', true);
-                    }
+                $('#custprice-btn-post-submit-save').addClass('d-none');
+                $('#custprice-btn-post-submit').removeClass('d-none');
+
+                $('#custprice-btn-post-submit-save').off('click').on('click', function () {
+                    var post_data = {
+                        cust: $('#custprice-post-id').val(),
+                        date: $('#custprice-post-activedate').val(),
+                        priceby: $('#custprice-post-priceby').val(),
+                        stock: $('#custprice-post-stock').is(':checked'),
+                        so: $('#custprice-post-so').is(':checked'),
+                        sso: $('#custprice-post-sso').is(':checked'),
+                        sj: $('#custprice-post-sj').is(':checked'),
+                    };
+
+                    console.log(post_data);
                 });
             });
         });
         $(document).on('click', '#custprice-btn-post-submit', function () {
+            loading_start();
             const data = {
-                cust_id: $('#custprice-post-id').val(),
+                cust: $('#custprice-post-id').val(),
                 date: $('#custprice-post-activedate').val(),
                 priceby: $('#custprice-post-priceby').val(),
                 stock: $('#custprice-post-stock').is(':checked'),

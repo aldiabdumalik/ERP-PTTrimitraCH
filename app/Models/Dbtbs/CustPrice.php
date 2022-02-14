@@ -22,6 +22,7 @@ class CustPrice extends Model
         'price',
         'price_new',
         'active_date',
+        'range_date',
         'created_by',
         'created_date',
         'updated_date',
