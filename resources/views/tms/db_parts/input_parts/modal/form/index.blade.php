@@ -7,6 +7,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-row" style="font-size: 11px;">
+                        <div id="iparts-index-id" data-val="0"></div>
                         <div class="col-xl-5 border-left">
                             @include('tms.db_parts.input_parts.modal.form.header1')
                         </div>

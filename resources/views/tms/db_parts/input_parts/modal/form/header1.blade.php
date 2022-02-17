@@ -23,7 +23,7 @@
                 <input type="text" name="iparts-index-ppartno" id="iparts-index-ppartno" class="form-control form-control-sm" placeholder="Press Enter..." autocomplete="off">
             </div>
             <div class="col-8">
-                <input type="text" name="iparts-index-ppartno" id="iparts-index-ppartno" class="form-control form-control-sm readonly-first" readonly>
+                <input type="text" name="iparts-index-ppartname" id="iparts-index-ppartname" class="form-control form-control-sm readonly-first" readonly>
             </div>
         </div>
     </div>
@@ -58,7 +58,7 @@
     </div>
     <div class="col-10">
         <div class="custom-file">
-            <input type="file" class="custom-file-input form-control-sm" name="iparts-index-pict" id="iparts-index-pict" accept="image/*" required>
+            <input type="file" class="custom-file-input form-control-sm" name="iparts-index-pict" id="iparts-index-pict" accept="image/*">
             <label class="custom-file-label" id="iparts-index-pict-x" for="iparts-index-pict-x">Choose file</label>
         </div>
     </div>
@@ -76,6 +76,11 @@
         <label for="iparts-index-vol" class="auto-middle">Vol/Mth*</label>
     </div>
     <div class="col-10">
-        <input type="text" name="iparts-index-vol" id="iparts-index-vol" class="form-control form-control-sm" autocomplete="off" required>
+        <div class="input-group">
+            <input type="text" name="iparts-index-vol" id="iparts-index-vol" class="form-control form-control-sm" autocomplete="off" required>
+            <div class="input-group-append">
+                <span class="input-group-text"><i>Pcs Per Month</i></span>
+            </div>
+        </div>
     </div>
 </div>

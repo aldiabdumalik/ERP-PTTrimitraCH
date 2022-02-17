@@ -11,7 +11,26 @@
         <label for="iparts-index-gop" class="auto-middle">Good of part*</label>
     </div>
     <div class="col-10">
-        <input type="text" name="iparts-index-gop" id="iparts-index-gop" class="form-control form-control-sm" autocomplete="off" required>
+        <div class="form-row align-items-center mb-1">
+            <div class="col-1">
+                Assy
+            </div>
+            <div class="col-5">
+                <select name="iparts-index-gopassy" id="iparts-index-gopassy" class="form-control form-control-sm">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+            <div class="col-1">
+                Single
+            </div>
+            <div class="col-5">
+                <select name="iparts-index-gopsingle" id="iparts-index-gopsingle" class="form-control form-control-sm">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>
 <div class="form-row align-items-center mb-1">

@@ -52,15 +52,308 @@
     </div>
 </div>
 @include('tms.db_parts.input_parts.modal.form.index')
+@include('tms.db_parts.input_parts.modal.table.customer')
+@include('tms.db_parts.input_parts.modal.table.itemparent')
+@include('tms.db_parts.input_parts.modal.table.logs')
+@include('tms.db_parts.input_parts.modal.table.trash')
 @endsection
 @section('script')
 <script>
 $(document).ready(function () {
     const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
-    const table_index = $('#iparts-datatable').DataTable();
+    const table_index = $('#iparts-datatable').DataTable({
+        processing: true,
+        serverSide: true,
+        destroy: true,
+        ajax: {
+            url: "{{route('tms.db_parts.input_parts.tbl_index')}}",
+            method: 'POST',
+            headers: token_header
+        },
+        columns: [
+            {data:'type', name: 'type', className: "align-middle"},
+            {data:'part_no', name: 'part_no', className: "align-middle"},
+            {data:'part_name', name: 'part_name', className: "align-middle"},
+            {data:'cust_id', name: 'cust_id', className: "align-middle"},
+            {data:'action', name: 'action', className: "align-middle text-center"},
+        ],
+        order: [[ 0, "asc" ]],
+    });
 
     $('#iparts-btn-modal-create').on('click', function () {
         modalAction('#iparts-modal-index');
+    });
+
+    var tbl_customer;
+    $(document).on('keypress keydown', '#iparts-index-customercode', function (e) {
+        if(e.which == 13) {
+            modalAction('#iparts-modal-customer').then((resolve) => {
+                tbl_customer = $('#iparts-datatables-customer').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ajax: {
+                        url: "{{ route('tms.db_parts.input_parts.header_tools') }}",
+                        method: 'POST',
+                        data: {"type": "customer"},
+                        headers: token_header
+                    },
+                    columns: [
+                        {data: 'code', name: 'code'},
+                        {data: 'name', name: 'name'},
+                    ]
+                });
+            });
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    });
+    $(document).on('shown.bs.modal', '#iparts-modal-customer', function () {
+        $('#iparts-datatables-customer_filter input').focus();
+    });
+    $('#iparts-datatables-customer').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+        var data = tbl_customer.row(this).data();
+        modalAction('#iparts-modal-customer', 'hide').then(() => {
+            $('#iparts-index-customercode').val(data.code);
+            $('#iparts-index-customername').val(data.name);
+        });
+    });
+
+    var tbl_iparent;
+    $(document).on('keypress keydown', '#iparts-index-ppartno', function (e) {
+        if(e.which == 13) {
+            modalAction('#iparts-modal-itemparent').then((resolve) => {
+                tbl_iparent = $('#iparts-datatables-itemparent').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ajax: {
+                        url: "{{ route('tms.db_parts.input_parts.header_tools') }}",
+                        method: 'POST',
+                        data: {"type": "item_parent"},
+                        headers: token_header
+                    },
+                    columns: [
+                        {data: 'part_no', name: 'part_no'},
+                        {data: 'part_name', name: 'part_name'},
+                        {data: 'type', name: 'type'},
+                    ]
+                });
+            });
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    });
+    $(document).on('shown.bs.modal', '#iparts-modal-itemparent', function () {
+        $('#iparts-datatables-itemparent_filter input').focus();
+    });
+    $('#iparts-datatables-itemparent').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+        var data = tbl_iparent.row(this).data();
+        modalAction('#iparts-modal-itemparent', 'hide').then(() => {
+            $('#iparts-index-ppartno').val(data.part_no);
+            $('#iparts-index-ppartno').attr('data-id', data.id);
+            $('#iparts-index-ppartname').val(data.part_name);
+            $('#iparts-index-parttype').val(data.type);
+            $('#iparts-index-reff').val(data.reff);
+        });
+    });
+
+    $(document).on('submit', '#iparts-modal-index', function (e) {
+        e.preventDefault();
+        loading_start();
+        let id = $('#iparts-index-id').data('val');
+        let data = {
+            'cust_id': $('#iparts-index-customercode').val(),
+            'parent_id': $('#iparts-index-ppartno').val(),
+            'part_no': $('#iparts-index-partno').val(),
+            'part_name': $('#iparts-index-partname').val(),
+            'type': $('#iparts-index-parttype').val(),
+            'part_pict': $('#iparts-index-pict-x').html(),
+            'reff': $('#iparts-index-reff').val(),
+            'part_vol': $('#iparts-index-vol').val(),
+            'qty_part_item': $('#iparts-index-qty').val(),
+            'gop_assy': $('#iparts-index-gopassy').val(),
+            'gop_single': $('#iparts-index-gopsingle').val(),
+            'spec': $('#iparts-index-spec').val(),
+            'ms_t': $('#iparts-index-t').val(),
+            'ms_w': $('#iparts-index-w').val(),
+            'ms_l': $('#iparts-index-l').val(),
+            'ms_n_strip': $('#iparts-index-n').val(),
+            'ms_coil_pitch': $('#iparts-index-cp').val(),
+            'part_weight': $('#iparts-index-weight').val(),
+            'vendor_name': $('#iparts-index-vendor').val()
+        };
+        let route = "{{ route('tms.db_parts.input_parts.detail', [':id']) }}";
+            route  = route.replace(':id', id);
+        let method = '';
+        ajaxCall({ route: route, method: "GET"}).then(resolve => {
+            if (resolve.message == 'OK') {
+                route = "{{ route('tms.db_parts.input_parts.update', [':id']) }}";
+                route  = route.replace(':id', id);
+                method = "PUT";
+            }else{
+                route = "{{ route('tms.db_parts.input_parts.store') }}";
+                method = "POST";
+            }
+
+            console.log(route, method, data);
+            submitForm(route, method, data);
+        });
+    });
+
+    function submitForm(route, method, data) {
+        ajaxCall({route:route, method:method, data:data}).then(resolve => {
+            loading_stop();
+            Swal.fire({
+                title: 'Success',
+                text: resolve.message,
+                icon: 'success'
+            }).then(() => {
+                modalAction('#iparts-modal-index', 'hide').then(() => {
+                    table_index.ajax.reload();
+                });
+            });
+        });
+    }
+
+    $('#iparts-modal-index').on('hidden.bs.modal', function () {
+        $('#iparts-form-index').trigger('reset');
+        $('#iparts-index-id').attr('data-val', 0);
+
+        // delete file on server
+        let name = $('#iparts-index-pict-x').html();
+        if ((name.lastIndexOf(".") + 1) > 0) {
+            let data = {type: "delete_temp", old_file: name};
+            ajaxCall({route: "{{route('tms.db_parts.input_parts.header_tools')}}", method: "POST", data:data});
+        }
+        $('#iparts-index-pict-x').html('Choose file');
+    });
+
+    $(document).on('click', '.iparts-act-edit', function () {
+        let id = $(this).data('id');
+        let route = "{{ route('tms.db_parts.input_parts.detail', [':id']) }}";
+            route  = route.replace(':id', id);
+        ajaxCall({ route: route, method: "GET"}).then(resolve => {
+            let dt = resolve.content;
+            modalAction('#iparts-modal-index').then(() => {
+                $('#iparts-index-id').attr('data-val', dt.id);
+                $('#iparts-index-customercode').val(dt.cust_id);
+                $('#iparts-index-ppartno').val(dt.parent_id);
+                $('#iparts-index-partno').val(dt.part_no);
+                $('#iparts-index-partname').val(dt.part_name);
+                $('#iparts-index-parttype').val(dt.type);
+                $('#iparts-index-pict-x').html(dt.part_pict);
+                $('#iparts-index-reff').val(dt.reff);
+                $('#iparts-index-vol').val(dt.part_vol);
+                $('#iparts-index-qty').val(dt.qty_part_item);
+                $('#iparts-index-gopassy').val(dt.gop_assy);
+                $('#iparts-index-gopsingle').val(dt.gop_single);
+                $('#iparts-index-spec').val(dt.spec);
+                $('#iparts-index-t').val(dt.ms_t);
+                $('#iparts-index-w').val(dt.ms_w);
+                $('#iparts-index-l').val(dt.ms_l);
+                $('#iparts-index-n').val(dt.ms_n_strip);
+                $('#iparts-index-cp').val(dt.ms_coil_pitch);
+                $('#iparts-index-weight').val(dt.part_weight);
+                $('#iparts-index-vendor').val(dt.vendor_name);
+            });
+        });
+    });
+
+    $(document).on('click', '.iparts-act-delete', function () {
+        let id = $(this).data('id');
+        let route = "{{ route('tms.db_parts.input_parts.destroy', [':id']) }}";
+            route  = route.replace(':id', id);
+        Swal.fire({
+            icon: 'warning',
+            text: `Are you sure delete this item, Now?`,
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        }).then(answer => {
+            if (answer.value == true) {
+                loading_start();
+                ajaxCall({route: route, method: "DELETE"}).then(resolve => {
+                    loading_stop();
+                    Swal.fire({
+                        title: 'success',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(() => {
+                        table_index.ajax.reload();
+                    });
+                });
+            }
+        });
+    });
+
+    var tbl_log;
+    $(document).on('click', '.iparts-act-log', function () {
+        let id = $(this).data('id');
+        modalAction('#iparts-modal-logs').then((resolve) => {
+            tbl_log = $('#iparts-datatable-logs').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{ route('tms.db_parts.input_parts.header_tools') }}",
+                    method: 'POST',
+                    data: {"type": "logs", "id": id},
+                    headers: token_header
+                },
+                columns: [
+                    {data: 'status', name: 'status'},
+                    {data: 'date', name: 'date'},
+                    {data: 'time', name: 'time'},
+                    {data: 'note', name: 'note'},
+                    {data: 'log_by', name: 'log_by'},
+                ],
+                ordering: false,
+            });
+        });
+    });
+
+    var tbl_trash;
+    $('#iparts-btn-modal-trash').on('click', function () {
+        modalAction('#iparts-modal-trash').then(() => {
+            tbl_trash = $('#iparts-datatable-trash').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{route('tms.db_parts.input_parts.trash')}}",
+                    method: 'POST',
+                    headers: token_header
+                },
+                columns: [
+                    {data:'type', name: 'type', className: "align-middle"},
+                    {data:'part_no', name: 'part_no', className: "align-middle"},
+                    {data:'part_name', name: 'part_name', className: "align-middle"},
+                    {data:'cust_id', name: 'cust_id', className: "align-middle"},
+                    {data:'action', name: 'action', className: "align-middle text-center"},
+                ],
+                order: [[ 0, "asc" ]],
+            });
+        });
+    });
+
+    $(document).on('click', '.iparts-act-active', function () {
+        loading_start();
+        let id = $(this).data('id');
+        let route = "{{ route('tms.db_parts.input_parts.trash_to_active', [':id']) }}";
+            route  = route.replace(':id', id);
+        ajaxCall({route: route, method: "PUT"}).then(resolve => {
+            loading_stop();
+            Swal.fire({
+                title: 'Success',
+                text: resolve.message,
+                icon: 'success'
+            }).then(() => {
+                modalAction('#iparts-modal-trash', 'hide').then(() => {
+                    table_index.ajax.reload();
+                });
+            });
+        });
     });
 
     $('#iparts-index-pict').on('change', function(e){

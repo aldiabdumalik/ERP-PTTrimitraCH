@@ -108,6 +108,10 @@ Route::get('/database_parts/input_parts', [
     'uses' => 'TMS\DB_Parts\InputPartsController@index', 
     'as' => 'tms.db_parts.input_parts'
 ]);
+Route::get('/database_parts/input_parts/{id}/detail', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@detail', 
+    'as' => 'tms.db_parts.input_parts.detail'
+]);
 Route::post('/database_parts/input_parts/table_index', [
     'uses' => 'TMS\DB_Parts\InputPartsController@tableIndex', 
     'as' => 'tms.db_parts.input_parts.tbl_index'
@@ -119,4 +123,24 @@ Route::post('/database_parts/input_parts/upload_temp', [
 Route::post('/database_parts/input_parts/header_tools', [
     'uses' => 'TMS\DB_Parts\InputPartsController@headerTools', 
     'as' => 'tms.db_parts.input_parts.header_tools'
+]);
+Route::post('/database_parts/input_parts/store', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@store', 
+    'as' => 'tms.db_parts.input_parts.store'
+]);
+Route::put('/database_parts/input_parts/{id}/update', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@update', 
+    'as' => 'tms.db_parts.input_parts.update'
+]);
+Route::delete('/database_parts/input_parts/{id}/delete', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@destroy', 
+    'as' => 'tms.db_parts.input_parts.destroy'
+]);
+Route::post('/database_parts/input_parts/table_trash', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@tableTrash', 
+    'as' => 'tms.db_parts.input_parts.trash'
+]);
+Route::put('/database_parts/input_parts/{id}/trash_toactive', [
+    'uses' => 'TMS\DB_Parts\InputPartsController@trashToActive', 
+    'as' => 'tms.db_parts.input_parts.trash_to_active'
 ]);

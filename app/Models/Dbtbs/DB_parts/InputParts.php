@@ -33,6 +33,7 @@ class InputParts extends Model
         'ms_coil_pitch',
         'part_weight',
         'vendor_name',
+        'spec_pict',
         'created_by',
         'created_date',
         'is_active'

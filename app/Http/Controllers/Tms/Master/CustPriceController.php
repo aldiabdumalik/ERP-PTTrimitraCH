@@ -36,7 +36,7 @@ class CustPriceController extends Controller
     {
         $query = null;
         if (!isset($request->customer)) {
-            $query = CustPrice::select([
+            $query = CustPrice::query()->select([
                     'entry_custprice_tbl.*', 
                     'ekanban_customermaster.CustomerCode_eKanban as custcode', 
                     'ekanban_customermaster.CustomerName as cust_name',
@@ -55,7 +55,7 @@ class CustPriceController extends Controller
                 ->orderBy('part_no', 'ASC')
                 ->get();
         }else{
-            $query = CustPrice::select([
+            $query = CustPrice::query()->select([
                     'entry_custprice_tbl.*', 
                     'ekanban_customermaster.CustomerCode_eKanban as custcode', 
                     'ekanban_customermaster.CustomerName as cust_name',
