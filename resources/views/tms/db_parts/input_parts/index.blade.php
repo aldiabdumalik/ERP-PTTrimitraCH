@@ -56,6 +56,7 @@
 @include('tms.db_parts.input_parts.modal.table.itemparent')
 @include('tms.db_parts.input_parts.modal.table.logs')
 @include('tms.db_parts.input_parts.modal.table.trash')
+@include('tms.db_parts.input_parts.modal.table.imageView')
 @endsection
 @section('script')
 <script>
@@ -220,6 +221,10 @@ $(document).ready(function () {
         $('#iparts-form-index').trigger('reset');
         $('#iparts-index-id').attr('data-val', 0);
 
+        $('#iparts-form-index input').not('.readonly-first').prop('readonly', false);
+        $('#iparts-form-index input[type=file]').prop('disabled', false);
+        $('#iparts-form-index select').prop('disabled', false);
+
         // delete file on server
         let name = $('#iparts-index-pict-x').html();
         if ((name.lastIndexOf(".") + 1) > 0) {
@@ -256,6 +261,41 @@ $(document).ready(function () {
                 $('#iparts-index-cp').val(dt.ms_coil_pitch);
                 $('#iparts-index-weight').val(dt.part_weight);
                 $('#iparts-index-vendor').val(dt.vendor_name);
+            });
+        });
+    });
+
+    $(document).on('click', '.iparts-act-view', function () {
+        let id = $(this).data('id');
+        let route = "{{ route('tms.db_parts.input_parts.detail', [':id']) }}";
+            route  = route.replace(':id', id);
+        ajaxCall({ route: route, method: "GET"}).then(resolve => {
+            let dt = resolve.content;
+            modalAction('#iparts-modal-index').then(() => {
+                $('#iparts-index-id').attr('data-val', dt.id);
+                $('#iparts-index-customercode').val(dt.cust_id);
+                $('#iparts-index-ppartno').val(dt.parent_id);
+                $('#iparts-index-partno').val(dt.part_no);
+                $('#iparts-index-partname').val(dt.part_name);
+                $('#iparts-index-parttype').val(dt.type);
+                $('#iparts-index-pict-x').html(dt.part_pict);
+                $('#iparts-index-reff').val(dt.reff);
+                $('#iparts-index-vol').val(dt.part_vol);
+                $('#iparts-index-qty').val(dt.qty_part_item);
+                $('#iparts-index-gopassy').val(dt.gop_assy);
+                $('#iparts-index-gopsingle').val(dt.gop_single);
+                $('#iparts-index-spec').val(dt.spec);
+                $('#iparts-index-t').val(dt.ms_t);
+                $('#iparts-index-w').val(dt.ms_w);
+                $('#iparts-index-l').val(dt.ms_l);
+                $('#iparts-index-n').val(dt.ms_n_strip);
+                $('#iparts-index-cp').val(dt.ms_coil_pitch);
+                $('#iparts-index-weight').val(dt.part_weight);
+                $('#iparts-index-vendor').val(dt.vendor_name);
+
+                $('#iparts-form-index input').prop('readonly', true);
+                $('#iparts-form-index input[type=file]').prop('disabled', true);
+                $('#iparts-form-index select').prop('disabled', true);
             });
         });
     });
@@ -395,6 +435,32 @@ $(document).ready(function () {
         }
     });
 
+    $(document).on('click', '.view-ppict', function () {
+        let fileName = $('#iparts-index-pict-x').html();
+        if ($('#iparts-index-pict-x').html() != 'Choose file') {
+            modalAction('#iparts-modal-ppict').then(() => {
+                cekFile(`{{ asset('db-parts/pictures/${fileName}') }}`).then(
+                    resolve => {
+                        $('#view-ppict').attr('src', `{{ asset('db-parts/pictures/${fileName}') }}`);
+                    }, 
+                    reject => {
+                        console.log(reject);
+                        cekFile(`{{ asset('db-parts/temp/${fileName}') }}`).then(
+                            resolve => {
+                                $('#view-ppict').attr('src', `{{ asset('db-parts/temp/${fileName}') }}`);
+                            }, 
+                            reject => {
+                                console.log(reject);
+                            });
+                    });
+            });
+        }
+    });
+
+    $('#iparts-modal-ppict').on('hidden.bs.modal', function () {
+        $('#view-ppict').attr('src', '#');
+    });
+
     // Lib func
     function date_convert($date) {
         if ($date.length < 0) { return null; }
@@ -479,6 +545,20 @@ $(document).ready(function () {
                 }
             });
         });
+    }
+    function cekFile(url) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: url,
+                type:'HEAD',
+                error: function() {
+                    reject('Not Exist');
+                },
+                success: function(){
+                    resolve('Exist!');
+                }
+            });
+        })
     }
     function isHidden(element=null, hide=true){
         return ((hide == true) ? $(element).addClass('d-none') : $(element).removeClass('d-none'));

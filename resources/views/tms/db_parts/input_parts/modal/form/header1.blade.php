@@ -65,6 +65,13 @@
 </div>
 <div class="form-row align-items-center mb-1">
     <div class="col-2">
+    </div>
+    <div class="col-10">
+        <a href="javascript:void(0)" class="view-ppict">View image</a>
+    </div>
+</div>
+<div class="form-row align-items-center mb-1">
+    <div class="col-2">
         <label for="iparts-index-reff" class="auto-middle">Reff*</label>
     </div>
     <div class="col-10">
