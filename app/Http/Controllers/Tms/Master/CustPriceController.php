@@ -154,10 +154,11 @@ class CustPriceController extends Controller
                     $price_old = $old->price_new;
 
                     // Add range date
-
-                    CustPrice::where('item_code', $item_replace)
-                        ->where('active_date', $old->active_date)
-                        ->update(['range_date' => date('Y-m-d', strtotime($old->active_date. "-1 days"))]);
+                    if ($request->active_date > $old->active_date) {
+                        CustPrice::where('item_code', $item_replace)
+                            ->where('active_date', $old->active_date)
+                            ->update(['range_date' => date('Y-m-d', strtotime($request->active_date. "-1 days"))]);
+                    }
                 }else{
                     $is_update = 0;
                     $price_old = 0;
@@ -264,6 +265,7 @@ class CustPriceController extends Controller
                     'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
                     'price_old' =>  $price_old, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
                     'active_date' => $request->active_date,
+                    'range_date' => $cek->range_date,
                     'updated_by' => Auth::user()->FullName,
                     'updated_date' => Carbon::now(),
                     'created_by' => $create_by,
@@ -431,6 +433,7 @@ class CustPriceController extends Controller
                     'price_old' =>  $v['price_old'],
                     'active_date' => $v['active_date'],
                     'price_by' => $v['price_by'],
+                    'range_date' => $v['range_date'],
                     'is_stock' => $is_stock,
                     'is_so' => $is_so,
                     'is_sso' => $is_sso,

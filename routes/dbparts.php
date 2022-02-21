@@ -144,3 +144,16 @@ Route::put('/database_parts/input_parts/{id}/trash_toactive', [
     'uses' => 'TMS\DB_Parts\InputPartsController@trashToActive', 
     'as' => 'tms.db_parts.input_parts.trash_to_active'
 ]);
+
+Route::get('/database_parts/production_code', [
+    'uses' => 'TMS\DB_Parts\ProductionCodeController@index', 
+    'as' => 'tms.db_parts.production_code'
+]);
+Route::get('/database_parts/production_code/{id}/detail', [
+    'uses' => 'TMS\DB_Parts\ProductionCodeController@detail', 
+    'as' => 'tms.db_parts.production_code.detail'
+]);
+Route::post('/database_parts/production_code/table_index', [
+    'uses' => 'TMS\DB_Parts\ProductionCodeController@tableIndex', 
+    'as' => 'tms.db_parts.production_code.tbl_index'
+]);
