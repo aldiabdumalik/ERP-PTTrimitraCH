@@ -543,6 +543,9 @@ class ThpEntryController extends Controller
             if ($request->what == 'EXCEL') {
                 $row_count = count($params['data']);
                 $name = 'DAILY REPORT THP TGL'. $params['date1'] .'.xlsx';
+                if (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
                 return Excel::download(new ThpEntryExport($params, $row_count), $name);
             }
             $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpall', $params)->setPaper('a3', 'landscape');
@@ -556,6 +559,9 @@ class ThpEntryController extends Controller
             if ($request->what == 'EXCEL') {
                 $row_count = count($params['data']);
                 $name = 'SUMMARY REPORT THP TGL'. $params['date1'] .' sd TGL '.$params['date2'].'.xlsx';
+                if (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
                 return Excel::download(new ThpEntryExportSummary($params, $row_count), $name);
             }
             $pdf = PDF::loadView('tms.manufacturing.thp_entry._report.reportThpsummary', $params)->setPaper('a3', 'landscape');
@@ -1198,6 +1204,9 @@ class ThpEntryController extends Controller
         $data = $this->_reportByDate($request);
         $row_count = count($data['data']);
         $name = 'THP vs LHP Tgl ';
+        if (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         return Excel::download(new ThpEntryExport($data, $row_count), 'invoices.xlsx');
     }
 

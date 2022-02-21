@@ -52,12 +52,18 @@
         </div>
     </div>
 </div>
+@include('tms.db_parts.production_code.modal.form.index')
+@include('tms.db_parts.production_code.modal.table.imageView')
 @endsection
 @section('script')
 <script>
 $(document).ready(function () {
     const token_header = {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')};
     const table_index = $('#prodcode-datatable').DataTable();
+
+    $('#prodcode-btn-modal-create').on('click', function () {
+        modalAction('#prodcode-modal-index');
+    });
 
     // Lib func
     function date_convert($date) {
