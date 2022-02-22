@@ -6,6 +6,7 @@
                     <h4 class="modal-title">Input Part Item</h4>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" name="id" class="id" id="id" value="0">
                     <div class="form-row" style="font-size: 11px;">
                         <div id="iparts-index-id" data-val="0"></div>
                         <div class="col-xl-5 border-left">

@@ -25,6 +25,7 @@ class InputParts extends Model
         'qty_part_item',
         'gop_assy',
         'gop_single',
+        'purch_part',
         'spec',
         'ms_t',
         'ms_w',

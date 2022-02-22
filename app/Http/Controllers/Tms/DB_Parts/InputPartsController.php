@@ -44,7 +44,17 @@ class InputPartsController extends Controller
 
     public function detail($id, Request $request)
     {
-        $req = InputParts::query()->where('id', $id)->first();
+        $req = InputParts::query()
+        ->leftJoin('ekanban.ekanban_customermaster as customer', 'customer.CustomerCode_eKanban', '=', 'db_tbs.dbparts_item_part_tbl.cust_id')
+        ->leftJoin('db_tbs.dbparts_item_part_tbl as part_parent', 'part_parent.parent_id', '=', 'db_tbs.dbparts_item_part_tbl.id')
+        ->select([
+            'db_tbs.dbparts_item_part_tbl.*',
+            'customer.CustomerName as cust_name',
+            'part_parent.parent_id as parent',
+            'part_parent.part_no as parent_no',
+            'part_parent.part_name as parent_name',
+        ])
+        ->where('db_tbs.dbparts_item_part_tbl.id', $id)->first();
 
         if (is_null($req)) {
             return _Success('Data Not Found', 200);
@@ -77,6 +87,7 @@ class InputPartsController extends Controller
                     'qty_part_item' => $request->qty_part_item,
                     'gop_assy' => $request->gop_assy,
                     'gop_single' => $request->gop_single,
+                    'purch_part' => $request->purch_part,
                     'spec' => $request->spec,
                     'ms_t' => $request->ms_t,
                     'ms_w' => $request->ms_w,
@@ -112,30 +123,32 @@ class InputPartsController extends Controller
         if ($request->ajax()) {
             try {
                 $prev = InputParts::query()
-                ->select([
-                    'id',
-                    'parent_id',
-                    'type',
-                    'reff',
-                    'cust_id',
-                    'part_no',
-                    'part_name',
-                    'part_pict',
-                    'part_vol',
-                    'qty_part_item',
-                    'gop_assy',
-                    'gop_single',
-                    'spec',
-                    'ms_t',
-                    'ms_w',
-                    'ms_l',
-                    'ms_n_strip',
-                    'ms_coil_pitch',
-                    'part_weight',
-                    'vendor_name',
-                    'spec_pict',
-                ])
-                ->where('id', $id)->first();
+                    ->select([
+                        'id',
+                        'parent_id',
+                        'type',
+                        'reff',
+                        'cust_id',
+                        'part_no',
+                        'part_name',
+                        'part_pict',
+                        'part_vol',
+                        'qty_part_item',
+                        'gop_assy',
+                        'gop_single',
+                        'purch_part',
+                        'spec',
+                        'ms_t',
+                        'ms_w',
+                        'ms_l',
+                        'ms_n_strip',
+                        'ms_coil_pitch',
+                        'part_weight',
+                        'vendor_name',
+                        'spec_pict',
+                    ])
+                    ->where('id', $id)
+                    ->first();
 
                 $parent_id = null;
                 if ($request->parent_id) {
@@ -143,8 +156,10 @@ class InputPartsController extends Controller
                     $parent_id = $parent->id;
                 }
 
-                if ($request->part_pict != $prev->part_pict) {
-                    File::move(public_path('db-parts/temp/' . $request->part_pict), public_path('db-parts/pictures/' . $request->part_pict));
+                if ($request->part_pict !== $prev->part_pict) {
+                    if (File::exists(public_path('db-parts/temp/' . $request->part_pict))) {
+                        File::move(public_path('db-parts/temp/' . $request->part_pict), public_path('db-parts/pictures/' . $request->part_pict));
+                    }
                     if (File::exists(public_path('db-parts/pictures/'. $prev->part_pict))) {
                         File::delete(public_path('db-parts/pictures/'. $prev->part_pict));
                     }
@@ -163,6 +178,7 @@ class InputPartsController extends Controller
                     'qty_part_item' => $request->qty_part_item,
                     'gop_assy' => $request->gop_assy,
                     'gop_single' => $request->gop_single,
+                    'purch_part' => $request->purch_part,
                     'spec' => $request->spec,
                     'ms_t' => $request->ms_t,
                     'ms_w' => $request->ms_w,
@@ -176,30 +192,31 @@ class InputPartsController extends Controller
                 InputParts::where('id', $prev->id)->update($data);
 
                 $now = InputParts::query()
-                ->select([
-                    'id',
-                    'parent_id',
-                    'type',
-                    'reff',
-                    'cust_id',
-                    'part_no',
-                    'part_name',
-                    'part_pict',
-                    'part_vol',
-                    'qty_part_item',
-                    'gop_assy',
-                    'gop_single',
-                    'spec',
-                    'ms_t',
-                    'ms_w',
-                    'ms_l',
-                    'ms_n_strip',
-                    'ms_coil_pitch',
-                    'part_weight',
-                    'vendor_name',
-                    'spec_pict',
-                ])
-                ->where('id', $prev->id)->first();
+                    ->select([
+                        'id',
+                        'parent_id',
+                        'type',
+                        'reff',
+                        'cust_id',
+                        'part_no',
+                        'part_name',
+                        'part_pict',
+                        'part_vol',
+                        'qty_part_item',
+                        'gop_assy',
+                        'gop_single',
+                        'spec',
+                        'ms_t',
+                        'ms_w',
+                        'ms_l',
+                        'ms_n_strip',
+                        'ms_coil_pitch',
+                        'part_weight',
+                        'vendor_name',
+                        'spec_pict',
+                    ])
+                    ->where('id', $prev->id)
+                    ->first();
 
                 $cek = array_diff_assoc($prev->toArray(), $now->toArray());
                 $note = $this->_createLogOnUpdate($cek);
@@ -390,12 +407,17 @@ class InputPartsController extends Controller
                     if(!in_array($note, $arr_note, true)){
                         array_push($arr_note, $note);
                     }
+                }elseif ($key == 'part_pict') {
+                    $note = 'CHG. PART PICTURE';
+                    if(!in_array($note, $arr_note, true)){
+                        array_push($arr_note, $note);
+                    }
                 }elseif ($key == 'part_weight') {
                     $note = 'UPDATE PART WEIGHT';
                     if(!in_array($note, $arr_note, true)){
                         array_push($arr_note, $note);
                     }
-                }elseif ($key == 'gop_assy' || $key == 'gop_single' || $key == 'qty_part_item' || $key == 'part_vol') {
+                }elseif ($key == 'gop_assy' || $key == 'gop_single' || $key == 'qty_part_item' || $key == 'part_vol' || $key == 'purch_part') {
                     $note = 'CORRECTION STUCTURE OF PART';
                     if(!in_array($note, $arr_note, true)){
                         array_push($arr_note, $note);
@@ -403,7 +425,6 @@ class InputPartsController extends Controller
                 }
 
             }
-
             return $arr_note;
         }
     }

@@ -82,7 +82,9 @@ $(document).ready(function () {
     });
 
     $('#iparts-btn-modal-create').on('click', function () {
-        modalAction('#iparts-modal-index');
+        modalAction('#iparts-modal-index').then(() => {
+            $('#id').val(0);
+        });
     });
 
     var tbl_customer;
@@ -162,7 +164,8 @@ $(document).ready(function () {
     $(document).on('submit', '#iparts-modal-index', function (e) {
         e.preventDefault();
         loading_start();
-        let id = $('#iparts-index-id').data('val');
+        // let id = $('#iparts-index-id').data('val');
+        let id = $('#id').val();
         let data = {
             'cust_id': $('#iparts-index-customercode').val(),
             'parent_id': $('#iparts-index-ppartno').val(),
@@ -175,6 +178,7 @@ $(document).ready(function () {
             'qty_part_item': $('#iparts-index-qty').val(),
             'gop_assy': $('#iparts-index-gopassy').val(),
             'gop_single': $('#iparts-index-gopsingle').val(),
+            'purch_part': $('#iparts-index-purch').val(),
             'spec': $('#iparts-index-spec').val(),
             'ms_t': $('#iparts-index-t').val(),
             'ms_w': $('#iparts-index-w').val(),
@@ -220,6 +224,7 @@ $(document).ready(function () {
     $('#iparts-modal-index').on('hidden.bs.modal', function () {
         $('#iparts-form-index').trigger('reset');
         $('#iparts-index-id').attr('data-val', 0);
+        $('#id').val(0);
 
         $('#iparts-form-index input').not('.readonly-first').prop('readonly', false);
         $('#iparts-form-index input[type=file]').prop('disabled', false);
@@ -242,8 +247,14 @@ $(document).ready(function () {
             let dt = resolve.content;
             modalAction('#iparts-modal-index').then(() => {
                 $('#iparts-index-id').attr('data-val', dt.id);
+                $('#id').val(dt.id);
+
                 $('#iparts-index-customercode').val(dt.cust_id);
-                $('#iparts-index-ppartno').val(dt.parent_id);
+                $('#iparts-index-customername').val(dt.cust_name);
+
+                $('#iparts-index-ppartno').val(dt.parent_no);
+                $('#iparts-index-ppartname').val(dt.parent_name);
+
                 $('#iparts-index-partno').val(dt.part_no);
                 $('#iparts-index-partname').val(dt.part_name);
                 $('#iparts-index-parttype').val(dt.type);
@@ -253,6 +264,7 @@ $(document).ready(function () {
                 $('#iparts-index-qty').val(dt.qty_part_item);
                 $('#iparts-index-gopassy').val(dt.gop_assy);
                 $('#iparts-index-gopsingle').val(dt.gop_single);
+                $('#iparts-index-purch').val(dt.purch_part);
                 $('#iparts-index-spec').val(dt.spec);
                 $('#iparts-index-t').val(dt.ms_t);
                 $('#iparts-index-w').val(dt.ms_w);
@@ -273,8 +285,14 @@ $(document).ready(function () {
             let dt = resolve.content;
             modalAction('#iparts-modal-index').then(() => {
                 $('#iparts-index-id').attr('data-val', dt.id);
+                $('#id').val(dt.id);
+
                 $('#iparts-index-customercode').val(dt.cust_id);
-                $('#iparts-index-ppartno').val(dt.parent_id);
+                $('#iparts-index-customername').val(dt.cust_name);
+
+                $('#iparts-index-ppartno').val(dt.parent_no);
+                $('#iparts-index-ppartname').val(dt.parent_name);
+
                 $('#iparts-index-partno').val(dt.part_no);
                 $('#iparts-index-partname').val(dt.part_name);
                 $('#iparts-index-parttype').val(dt.type);
@@ -284,6 +302,7 @@ $(document).ready(function () {
                 $('#iparts-index-qty').val(dt.qty_part_item);
                 $('#iparts-index-gopassy').val(dt.gop_assy);
                 $('#iparts-index-gopsingle').val(dt.gop_single);
+                $('#iparts-index-purch').val(dt.purch_part);
                 $('#iparts-index-spec').val(dt.spec);
                 $('#iparts-index-t').val(dt.ms_t);
                 $('#iparts-index-w').val(dt.ms_w);

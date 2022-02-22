@@ -241,3 +241,7 @@ Breadcrumbs::for('tms.db_parts.production_code', function ($trail) {
     $trail->push('Database Parts', '#');
     $trail->push('Production Code', route('tms.db_parts.production_code'));
 });
+Breadcrumbs::for('tms.db_parts.report', function ($trail) {
+    $trail->push('Database Parts', '#');
+    $trail->push('Report', route('tms.db_parts.report'));
+});

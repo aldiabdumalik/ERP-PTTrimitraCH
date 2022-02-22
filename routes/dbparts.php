@@ -157,3 +157,12 @@ Route::post('/database_parts/production_code/table_index', [
     'uses' => 'TMS\DB_Parts\ProductionCodeController@tableIndex', 
     'as' => 'tms.db_parts.production_code.tbl_index'
 ]);
+
+Route::get('/database_parts/report', [
+    'uses' => 'TMS\DB_Parts\DBPartReportController@index', 
+    'as' => 'tms.db_parts.report'
+]);
+Route::get('/database_parts/report/print', [
+    'uses' => 'TMS\DB_Parts\DBPartReportController@report', 
+    'as' => 'tms.db_parts.report.print'
+]);
