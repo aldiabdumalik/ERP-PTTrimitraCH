@@ -78,12 +78,13 @@ $(document).ready(function () {
 
     $(document).on('click', '#prodcode-btn-add-item', function () {
         var index = tbl_item.data().length;
+        let i = ++index;
 
         let add = tbl_item.row.add([
-            ++index,
+            i,
             `<input type="text" class="form-control form-control-sm" value="">`,
-            `<input type="text" class="form-control form-control-sm" value="">`,
-            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<select name="prodcode-index-process[]" id="prodcode-index-process-${i}" class="form-control form-control-sm"></select>`,
+            `<input type="text" name="prodcode-index-process_det[]" id="prodcode-index-process_det-${i}" class="form-control form-control-sm prodcode-index-process_det" placeholder="Press ENTER">`,
             `<input type="text" class="form-control form-control-sm" value="">`,
             `<input type="text" class="form-control form-control-sm" value="">`,
             `<input type="text" class="form-control form-control-sm" value="">`,
@@ -91,6 +92,17 @@ $(document).ready(function () {
             `<input type="text" class="form-control form-control-sm" value="">`,
         ]);
         tbl_item.draw(false);
+        loading_start();
+        ajaxCall({route: "{{ route('tms.db_parts.production_code.header_tools') }}", method: "POST", data: {type: "get_process"} }).then(data => {
+            loading_stop();
+            $(`#prodcode-index-process-${i}`).html('');
+            $.each(data.content, function (x, item) {
+                $(`#prodcode-index-process-${i}`).append($('<option>', { 
+                    value: item.process_id,
+                    text : item.process_name 
+                }));
+            });
+        });
     });
 
     $('#prodcode-modal-index').on('shown.bs.modal', function () {

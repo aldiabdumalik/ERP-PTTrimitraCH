@@ -144,6 +144,9 @@ class CustPriceController extends Controller
         $is_so = ($request->post['so'] == 'true') ? 1 : 0;
         $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
         $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
+        $cek_old = CustPrice::where('status', 'ACTIVE')->where('cust_id', $request->cust_id)->orderBy('active_date', 'DESC')->first();
+        $is_rdate = null;
+
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
                 $item_replace = str_replace(' ', '', $items[$i]['itemcode']);
@@ -158,6 +161,9 @@ class CustPriceController extends Controller
                         CustPrice::where('item_code', $item_replace)
                             ->where('active_date', $old->active_date)
                             ->update(['range_date' => date('Y-m-d', strtotime($request->active_date. "-1 days"))]);
+                        $is_rdate = 1;
+                    }else{
+                        $is_rdate = 0;
                     }
                 }else{
                     $is_update = 0;
@@ -167,9 +173,9 @@ class CustPriceController extends Controller
                     'cust_id' => $request->cust_id,
                     'item_code' => str_replace(' ', '', $items[$i]['itemcode']),
                     'currency' => $request->valas,
-                    'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['new_price'],
-                    'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i][4],
-                    'price_old' =>  $price_old, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
+                    'price' =>  str_replace(',', '', $items[$i]['new_price']),
+                    'price_new' =>  str_replace(',', '', $items[$i]['new_price']),
+                    'price_old' =>  $price_old,
                     'active_date' => $request->active_date,
                     'created_by' => Auth::user()->FullName,
                     'created_date' => Carbon::now(),
@@ -193,33 +199,40 @@ class CustPriceController extends Controller
                     // Trigger By Date
                     $trg = $this->triggerDate($data);
                 }else{
-                    // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
                     $trg = $this->triggerSO($data);
                 }
-                $query = CustPrice::insert($data);
-                if ($query) {
-                    $log = [
-                        [
-                            'cust_id' => $request->cust_id,
-                            'active_date' => $request->active_date,
-                            'written_date' => Carbon::now(),
-                            'status' => 'ADD',
-                            'user' => Auth::user()->FullName,
-                            'note' => null
-                        ],
-                        [
-                            'cust_id' => $request->cust_id,
-                            'active_date' => $request->active_date,
-                            'written_date' => Carbon::now(),
-                            'status' => 'POSTED',
-                            'user' => Auth::user()->FullName,
-                            'note' => null
-                        ]
-                    ];
-                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', $log);
+                if ($trg == 1) {
+                    $query = CustPrice::insert($data);
+                    // if ($is_rdate == 0) {
+                    //     CustPrice::where('cust_id', $request->cust_id)
+                    //             ->where('active_date', $request->active_date)
+                    //             ->update(['range_date' => date('Y-m-d', strtotime($cek_old->active_date. "-1 days"))]);
+                    // }
+                    if ($query) {
+                        $log = [
+                            [
+                                'cust_id' => $request->cust_id,
+                                'active_date' => $request->active_date,
+                                'written_date' => Carbon::now(),
+                                'status' => 'ADD',
+                                'user' => Auth::user()->FullName,
+                                'note' => null
+                            ],
+                            [
+                                'cust_id' => $request->cust_id,
+                                'active_date' => $request->active_date,
+                                'written_date' => Carbon::now(),
+                                'status' => 'POSTED',
+                                'user' => Auth::user()->FullName,
+                                'note' => null
+                            ]
+                        ];
+                        $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', $log);
+                    }
+                    // DB::connection('db_tbs')->commit();
+                    return $this->_Success('Saved successfully!', 201, $trg);
                 }
-                // DB::connection('db_tbs')->commit();
-                return $this->_Success('Saved successfully!', 201, $trg);
+                return $this->_Error('failed to save, please check your form again', 401, $trg);
             } catch (Exception $e) {
                 // DB::connection('db_tbs')->rollBack();
                 return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
@@ -244,6 +257,7 @@ class CustPriceController extends Controller
         $is_so = ($request->post['so'] == 'true') ? 1 : 0;
         $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
         $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
+
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) {
                 $itemcode_s = str_replace(' ', '', $items[$i]['itemcode']);
@@ -261,9 +275,9 @@ class CustPriceController extends Controller
                     'cust_id' => $request->cust_id,
                     'item_code' => $itemcode_s,
                     'currency' => $request->valas,
-                    'price' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
-                    'price_new' =>  str_replace(',', '', $items[$i]['new_price']), // $items[$i]['price_new'],
-                    'price_old' =>  $price_old, // str_replace(',', '', $items[$i]['old_price']), // $items[$i][4],
+                    'price' =>  str_replace(',', '', $items[$i]['new_price']),
+                    'price_new' =>  str_replace(',', '', $items[$i]['new_price']),
+                    'price_old' =>  $price_old,
                     'active_date' => $request->active_date,
                     'range_date' => $cek->range_date,
                     'updated_by' => Auth::user()->FullName,
@@ -286,19 +300,7 @@ class CustPriceController extends Controller
             }
             // DB::connection('db_tbs')->beginTransaction();
             try {
-                // $isext = 0;
-                // $test = null;
                 if ($request->price_by == 'DATE') {
-                    // $cekBln = CustPrice::where('cust_id', $request->cust_id)
-                    //     ->whereMonth('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'm'))
-                    //     ->whereYear('active_date', '=', convertDate($request->active_date, 'Y-m-d', 'Y'))
-                    //     ->first();
-                    // if (!$cekBln) {
-                    //     $isext = 0;
-                    //     // $non_active = CustPrice::where('cust_id', $request->cust_id)->update(['status' => 'NOT ACTIVE']);
-                    // }else{
-                    //     $isext = 1;
-                    // }
 
                     // Trigger By Date
                     $trg = $this->triggerDate($data);
@@ -306,37 +308,41 @@ class CustPriceController extends Controller
                     // Trigger By SO
                     $trg = $this->triggerSO($data);
                 }
-                
-                CustPrice::where('cust_id', $cust)
-                    ->where('active_date', $request->active_date)
-                    // ->where('entry_custprice_tbl.status', 'ACTIVE')
-                    ->delete();
 
-                $query = CustPrice::insert($data);
-                if ($query) {
-                    $log = [
-                        [
-                            'cust_id' => $request->cust_id,
-                            'active_date' => $request->active_date,
-                            'written_date' => Carbon::now(),
-                            'status' => 'EDIT',
-                            'user' => Auth::user()->FullName,
-                            'note' => null
-                        ],
-                        [
-                            'cust_id' => $request->cust_id,
-                            'active_date' => $request->active_date,
-                            'written_date' => Carbon::now(),
-                            'status' => 'POSTED',
-                            'user' => Auth::user()->FullName,
-                            'note' => null
-                        ]
-                    ];
-                    $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', $log);
+
+                if ($trg == 1) {
+                    CustPrice::where('cust_id', $cust)
+                        ->where('active_date', $request->active_date)
+                        // ->where('entry_custprice_tbl.status', 'ACTIVE')
+                        ->delete();
+    
+                    $query = CustPrice::insert($data);
+                    if ($query) {
+                        $log = [
+                            [
+                                'cust_id' => $request->cust_id,
+                                'active_date' => $request->active_date,
+                                'written_date' => Carbon::now(),
+                                'status' => 'EDIT',
+                                'user' => Auth::user()->FullName,
+                                'note' => null
+                            ],
+                            [
+                                'cust_id' => $request->cust_id,
+                                'active_date' => $request->active_date,
+                                'written_date' => Carbon::now(),
+                                'status' => 'POSTED',
+                                'user' => Auth::user()->FullName,
+                                'note' => null
+                            ]
+                        ];
+                        $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', $log);
+                    }
+    
+                    // DB::connection('db_tbs')->commit();
+                    return $this->_Success('Cust Price has been update & posted!', 201, $trg);
                 }
-
-                // DB::connection('db_tbs')->commit();
-                return $this->_Success('Cust Price has been update & posted!', 201, $trg);
+                return $this->_Error('failed to update, please check your form again', 401, $trg);
             } catch (Exception $e) {
                 // DB::connection('db_tbs')->rollBack();
                 return $this->_Error('failed to update, please check your form again', 401, $e->getMessage());
@@ -449,31 +455,14 @@ class CustPriceController extends Controller
                 $trg = $this->repostDate($data);
             }
 
-            return _Success('Cust Price has been Reposted', 200, $trg);
+            if ($trg == 1) {
+                return _Success('Cust Price has been Reposted', 200, $trg);
+            }
+
+            return _Error('Cust Price filed Reposted, because : ' . $trg, 200, $trg);
         }
 
-        // $posted = CustPrice::where([
-        //         'cust_id' => $request->cust_id,
-        //         'active_date' => $request->date
-        //     ])->update([
-        //         'posted_date' => Carbon::now(),
-        //         'posted_by' => Auth::user()->FullName,
-        //         'is_stock' => $is_stock,
-        //         'is_so' => $is_so,
-        //         'is_sso' => $is_sso,
-        //         'is_sj' => $is_sj
-        //     ]);
-        // if ($posted) {
-        //     $log = $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
-        //         'cust_id' => $request->cust_id,
-        //         'active_date' => $request->date,
-        //         'written_date' => Carbon::now(),
-        //         'status' => 'REPOSTED',
-        //         'user' => Auth::user()->FullName,
-        //         'note' => null
-        //     ]);
-        // }
-        return _Success('Customer Price has been Posted');
+        return _Error('Customer Price not Exist!');
     }
 
     public function unposted(Request $request)
@@ -619,7 +608,10 @@ class CustPriceController extends Controller
                 return _Error('Params not exist!', 404);
                 break;
             case "item_log":
-                $res = CustPrice::where('item_code', $request->id)->orderBy('created_date', 'DESC')->get();
+                $res = CustPrice::where('item_code', $request->id)
+                // ->orderBy('active_date', 'DESC')
+                ->orderBy('created_date', 'DESC')
+                ->get();
                 return DataTables::of($res)
                     ->editColumn('price_new', function ($res){
                         return rupiah(addZero($res->price_new));

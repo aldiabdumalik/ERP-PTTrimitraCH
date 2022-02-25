@@ -311,6 +311,7 @@ trait CustPriceTrait {
                                 })
                                 ->select([
                                     'sso_dtl.so_no',
+                                    'sso_dtl.sso_no as sso_no',
                                     'sso_hdr.period as sso_period',
                                     'sso_hdr.taxrate as sso_tax_rate',
                                     'sso_dtl.itemcode as sso_item_code',
@@ -360,6 +361,7 @@ trait CustPriceTrait {
                                         })
                                         ->select([
                                             'sso_dtl.so_no',
+                                            'sso_dtl.sso_no as sso_no',
                                             'sso_hdr.period as sso_period',
                                             'sso_hdr.sso_no as sso_no',
                                             'sso_hdr.taxrate as sso_tax_rate',
@@ -842,6 +844,7 @@ trait CustPriceTrait {
                         })
                         ->select([
                             'sso_dtl.so_no',
+                            'sso_dtl.sso_no as sso_no',
                             'sso_hdr.period as sso_period',
                             'sso_hdr.taxrate as sso_tax_rate',
                             'sso_dtl.itemcode as sso_item_code',
@@ -894,6 +897,7 @@ trait CustPriceTrait {
                                 })
                                 ->select([
                                     'sso_dtl.so_no',
+                                    'sso_dtl.sso_no as sso_no',
                                     'sso_hdr.period as sso_period',
                                     'sso_hdr.sso_no as sso_no',
                                     'sso_hdr.taxrate as sso_tax_rate',
@@ -1399,6 +1403,7 @@ trait CustPriceTrait {
                                 })
                                 ->select([
                                     'sso_dtl.so_no',
+                                    'sso_dtl.sso_no as sso_no',
                                     'sso_hdr.period as sso_period',
                                     'sso_hdr.taxrate as sso_tax_rate',
                                     'sso_dtl.itemcode as sso_item_code',
@@ -1983,6 +1988,7 @@ trait CustPriceTrait {
                         })
                         ->select([
                             'sso_dtl.so_no',
+                            'sso_dtl.sso_no as sso_no',
                             'sso_hdr.period as sso_period',
                             'sso_hdr.taxrate as sso_tax_rate',
                             'sso_dtl.itemcode as sso_item_code',
