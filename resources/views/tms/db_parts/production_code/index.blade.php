@@ -65,6 +65,38 @@ $(document).ready(function () {
         modalAction('#prodcode-modal-index');
     });
 
+    var tbl_item = $('#prodcode-datatables-index').DataTable({
+        destroy: true,
+        lengthChange: false,
+        searching: false,
+        paging: false,
+        ordering: false,
+        scrollY: "200px",
+        scrollCollapse: true,
+        fixedHeader: true,
+    });
+
+    $(document).on('click', '#prodcode-btn-add-item', function () {
+        var index = tbl_item.data().length;
+
+        let add = tbl_item.row.add([
+            ++index,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+            `<input type="text" class="form-control form-control-sm" value="">`,
+        ]);
+        tbl_item.draw(false);
+    });
+
+    $('#prodcode-modal-index').on('shown.bs.modal', function () {
+        adjustDraw(tbl_item)
+    });
+
     // Lib func
     function date_convert($date) {
         if ($date.length < 0) { return null; }

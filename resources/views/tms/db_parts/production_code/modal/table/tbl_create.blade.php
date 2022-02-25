@@ -5,6 +5,13 @@
                 <tr style="font-size: 14px;">
                     <th class="align-middle">#</th>
                     <th class="align-middle">Pod. Code</th>
+                    <th class="align-middle">Process</th>
+                    <th class="align-middle">Detail Process</th>
+                    <th class="align-middle">CT <i>(Sec)</i></th>
+                    <th class="align-middle">Tools Parts</th>
+                    <th class="align-middle">Tonage</th>
+                    <th class="align-middle">Prod. Line</th>
+                    <th class="align-middle">Name <br> <i>(PT/CV/etc.)</i></th>
                 </tr>
             </thead>
         </table>

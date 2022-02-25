@@ -18,6 +18,21 @@
                             @include('tms.db_parts.production_code.modal.form.header3')
                         </div>
                     </div>
+                    <div class="mt-4">
+                        <div class="row">
+                            <div id="prodcode-btn-table-item" class="col-12 text-right">
+                                <button type="button" id="prodcode-btn-add-item" class="btn btn-sm btn-info">
+                                    Add
+                                </button>
+                                <button type="button" id="prodcode-btn-delete-item" class="btn btn-sm btn-danger" disabled>
+                                    Delete
+                                </button>
+                            </div>
+                            <div class="col-12 mt-2">
+                                @include('tms.db_parts.production_code.modal.table.tbl_create')
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="prodcode-btn-index-close" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

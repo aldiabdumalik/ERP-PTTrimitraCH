@@ -29,6 +29,10 @@
         display: table-cell;
         width: 25%;
     }
+    .p-td {
+        padding-left: 1.5px;
+        padding-right: 1.5px;
+    }
     </style>
 </head>
 <body>
@@ -83,138 +87,138 @@
     <div style="padding: 10px;">
         <table border="1" cellpadding="20" cellspacing="0" width="100%" style="font-size: 7px;">
             <tr>
-                <td align="center" rowspan="3">No.</td>
-                <td align="center" rowspan="3">Part No</td>
-                <td align="center" rowspan="3">Part Name</td>
-                <td align="center" rowspan="3">Picture</td>
-                <td align="center" rowspan="3">Vol/Mtd</td>
-                <td align="center" rowspan="3">Process</td>
-                <td align="center" rowspan="3">ITEM CODE</td>
-                <td align="center" rowspan="3">PROD. CODE</td>
-                <td align="center" rowspan="3">CYCLE TIME <br/> <i>(Sec)</i></td>
-                <td align="center" rowspan="3">Tools/Parts Similliar</td>
-                <td align="center">Qty</td>
-                <td align="center" colspan="2" rowspan="2">Group of Parts</td>
-                <td align="center" rowspan="3">Purch. <br/> Part</td>
-                <td align="center" rowspan="3">Tonage</td>
-                <td align="center" colspan="11">Press M/C Tonase</td>
-                <td align="center">CNC</td>
-                <td align="center">Weld.</td>
-                <td align="center">Weld.</td>
-                <td align="center" rowspan="3">Jig Weld <br/> (Spot/CO)</td>
-                <td align="center" rowspan="3">Jig <br/> Assembly</td>
-                <td align="center" rowspan="3">Jig Drill/Roamer/ <br/> Cutting</td>
-                <td align="center" colspan="2">Insp. Jig/CF</td>
-                <td align="center" colspan="3">Tools Maker</td>
-                <td align="center" colspan="6">MATERIAL SPEC.</td>
-                <td align="center" rowspan="3">PARTS <br/> WEIGHT <br/> <i>(g)</i></td>
-                <td align="center" rowspan="3">Plan Mass Prod. <br/> Vendor <br/> Name</td>
-                <td align="center" rowspan="3">Project <br/> Officer/ <br>Co. P/J Off.</td>
-                <td align="center" rowspan="3">Last Technical Data Reff. <br/> (ECI/ECN/DN)</td>
-                <td align="center" rowspan="3">Remarks</td>
+                <td align="center" rowspan="3" class="p-td">No.</td>
+                <td align="center" rowspan="3" class="p-td">Part No</td>
+                <td align="center" rowspan="3" class="p-td">Part Name</td>
+                <td align="center" rowspan="3" class="p-td">Picture</td>
+                <td align="center" rowspan="3" class="p-td">Vol/Mtd</td>
+                <td align="center" rowspan="3" class="p-td">Process</td>
+                <td align="center" rowspan="3" class="p-td">ITEM CODE</td>
+                <td align="center" rowspan="3" class="p-td">PROD. CODE</td>
+                <td align="center" rowspan="3" class="p-td">CYCLE TIME <br/> <i>(Sec)</i></td>
+                <td align="center" rowspan="3" class="p-td">Tools/Parts Similliar</td>
+                <td align="center" class="p-td">Qty</td>
+                <td align="center" colspan="2" rowspan="2" class="p-td">Group of Parts</td>
+                <td align="center" rowspan="3" class="p-td">Purch. <br/> Part</td>
+                <td align="center" rowspan="3" class="p-td">Tonage</td>
+                <td align="center" colspan="11" class="p-td">Press M/C Tonase</td>
+                <td align="center" class="p-td">CNC</td>
+                <td align="center" class="p-td">Weld.</td>
+                <td align="center" class="p-td">Weld.</td>
+                <td align="center" rowspan="3" class="p-td">Jig Weld <br/> (Spot/CO)</td>
+                <td align="center" rowspan="3" class="p-td">Jig <br/> Assembly</td>
+                <td align="center" rowspan="3" class="p-td">Jig Drill/Roamer/ <br/> Cutting</td>
+                <td align="center" colspan="2" class="p-td">Insp. Jig/CF</td>
+                <td align="center" colspan="3" class="p-td">Tools Maker</td>
+                <td align="center" colspan="6" class="p-td">MATERIAL SPEC.</td>
+                <td align="center" rowspan="3" class="p-td">PARTS <br/> WEIGHT <br/> <i>(g)</i></td>
+                <td align="center" rowspan="3" class="p-td">Plan Mass Prod. <br/> Vendor <br/> Name</td>
+                <td align="center" rowspan="3" class="p-td">Project <br/> Officer/ <br>Co. P/J Off.</td>
+                <td align="center" rowspan="3" class="p-td">Last Technical Data Reff. <br/> (ECI/ECN/DN)</td>
+                <td align="center" rowspan="3" class="p-td">Remarks</td>
             </tr>
             <tr>
-                <td align="center">Parts</td>
-                <td align="center">&lt;35</td>
-                <td align="center">45</td>
-                <td align="center">60</td>
-                <td align="center">80</td>
-                <td align="center">100</td>
-                <td align="center">150</td>
-                <td align="center">200</td>
-                <td align="center" rowspan="2">300</td>
-                <td align="center" rowspan="2">400</td>
-                <td align="center">500</td>
-                <td align="center">630</td>
-                <td align="center">Bender</td>
-                <td align="center">Spot</td>
-                <td align="center">CO2</td>
-                <td align="center" rowspan="2">Single/ Press/ Sub-</td>
-                <td align="center" rowspan="2">Finish Part</td>
-                <td align="center" rowspan="2">In <br>House</td>
-                <td align="center" rowspan="2">Out <br>House</td>
-                <td align="center" rowspan="2">Nama <br>(PT/CV/etc.)</td>
-                <td align="center" rowspan="2">Spec</td>
-                <td align="center">t</td>
-                <td align="center">width</td>
-                <td align="center">Length</td>
-                <td align="center">N/</td>
-                <td align="center" rowspan="2">Coil/<br/>Pitch</td>
+                <td align="center" class="p-td">Parts</td>
+                <td align="center" class="p-td">&lt;35</td>
+                <td align="center" class="p-td">45</td>
+                <td align="center" class="p-td">60</td>
+                <td align="center" class="p-td">80</td>
+                <td align="center" class="p-td">100</td>
+                <td align="center" class="p-td">150</td>
+                <td align="center" class="p-td">200</td>
+                <td align="center" rowspan="2" class="p-td">300</td>
+                <td align="center" rowspan="2" class="p-td">400</td>
+                <td align="center" class="p-td">500</td>
+                <td align="center" class="p-td">630</td>
+                <td align="center" class="p-td">Bender</td>
+                <td align="center" class="p-td">Spot</td>
+                <td align="center" class="p-td">CO2</td>
+                <td align="center" rowspan="2" class="p-td">Single/ Press/ Sub-</td>
+                <td align="center" rowspan="2" class="p-td">Finish Part</td>
+                <td align="center" rowspan="2" class="p-td">In <br>House</td>
+                <td align="center" rowspan="2" class="p-td">Out <br>House</td>
+                <td align="center" rowspan="2" class="p-td">Nama <br>(PT/CV/etc.)</td>
+                <td align="center" rowspan="2" class="p-td">Spec</td>
+                <td align="center" class="p-td">t</td>
+                <td align="center" class="p-td">width</td>
+                <td align="center" class="p-td">Length</td>
+                <td align="center" class="p-td">N/</td>
+                <td align="center" rowspan="2" class="p-td">Coil/<br/>Pitch</td>
             </tr>
             <tr>
-                <td align="center">Item</td>
-                <td align="center">Assy</td>
-                <td align="center">Single</td>
-                <td align="center">35</td>
-                <td align="center">55</td>
-                <td align="center">65</td>
-                <td align="center">85</td>
-                <td align="center">110</td>
-                <td align="center">160</td>
-                <td align="center">250</td>
-                <td align="center">550</td>
-                <td align="center">&gt;650</td>
-                <td align="center">M/C</td>
-                <td align="center">M/C</td>
-                <td align="center">M/C</td>
-                <td align="center">mm.</td>
-                <td align="center">mm.</td>
-                <td align="center">mm.</td>
-                <td align="center">Strip</td>
+                <td align="center" class="p-td">Item</td>
+                <td align="center" class="p-td">Assy</td>
+                <td align="center" class="p-td">Single</td>
+                <td align="center" class="p-td">35</td>
+                <td align="center" class="p-td">55</td>
+                <td align="center" class="p-td">65</td>
+                <td align="center" class="p-td">85</td>
+                <td align="center" class="p-td">110</td>
+                <td align="center" class="p-td">160</td>
+                <td align="center" class="p-td">250</td>
+                <td align="center" class="p-td">550</td>
+                <td align="center" class="p-td">&gt;650</td>
+                <td align="center" class="p-td">M/C</td>
+                <td align="center" class="p-td">M/C</td>
+                <td align="center" class="p-td">M/C</td>
+                <td align="center" class="p-td">mm.</td>
+                <td align="center" class="p-td">mm.</td>
+                <td align="center" class="p-td">mm.</td>
+                <td align="center" class="p-td">Strip</td>
             </tr>
             @php
                 $no=0;
             @endphp
             @foreach ($params as $item)
             <tr>
-                <td align="center">{{++$no}}</td>
-                <td align="center">{{$item->part_no}}</td>
-                <td align="center">{{$item->part_name}}</td>
+                <td align="center" class="p-td">{{++$no}}</td>
+                <td align="center" class="p-td">{{$item->part_no}}</td>
+                <td align="center" class="p-td">{{$item->part_name}}</td>
                 <td align="center" style="padding: 10px;"><img src="{{public_path('db-parts/pictures/'.$item->part_pict)}}" alt="" style="width: 100px;"></td>
-                <td align="center">{{$item->part_vol}} <i>Pcs <br>Per Month</i></td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">{{$item->qty_part_item}}</td>
-                <td align="center">{{($item->gop_assy == 1 ? 1 : '')}}</td>
-                <td align="center">{{($item->gop_single == 1 ? 1 : '')}}</td>
-                <td align="center">{{($item->purch_part == 1 ? 1 : '')}}</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">{{$item->spec}}</td>
-                <td align="center">{{$item->ms_t}}</td>
-                <td align="center">{{$item->ms_w}}</td>
-                <td align="center">{{$item->ms_l}}</td>
-                <td align="center">{{$item->ms_n_strip}}</td>
-                <td align="center">{{$item->ms_coil_pitch}}</td>
-                <td align="center">{{$item->part_weight}}</td>
-                <td align="center">{{$item->vendor_name}}</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
-                <td align="center">&nbsp;</td>
+                <td align="center" class="p-td">{{$item->part_vol}} <i>Pcs <br>Per Month</i></td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">{{$item->qty_part_item}}</td>
+                <td align="center" class="p-td">{{($item->gop_assy == 1 ? 1 : '')}}</td>
+                <td align="center" class="p-td">{{($item->gop_single == 1 ? 1 : '')}}</td>
+                <td align="center" class="p-td">{{($item->purch_part == 1 ? 1 : '')}}</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">{{$item->spec}}</td>
+                <td align="center" class="p-td">{{$item->ms_t}}</td>
+                <td align="center" class="p-td">{{$item->ms_w}}</td>
+                <td align="center" class="p-td">{{$item->ms_l}}</td>
+                <td align="center" class="p-td">{{$item->ms_n_strip}}</td>
+                <td align="center" class="p-td">{{$item->ms_coil_pitch}}</td>
+                <td align="center" class="p-td">{{$item->part_weight}}</td>
+                <td align="center" class="p-td">{{$item->vendor_name}}</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
             </tr>
             @endforeach
         </table>
