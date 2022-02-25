@@ -100,7 +100,7 @@
                             $(rows).eq( i ).before(`
                                 <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
                                     <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
-                                    <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
+                                    <td colspan="4" class="text-bold align-middle text-right">(double click to view) | ${arr_group[3]}</td>
                                 </tr>
                             `);
 
@@ -162,7 +162,7 @@
                             $(rows).eq( i ).before(`
                                 <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
                                     <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
-                                    <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
+                                    <td colspan="4" class="text-bold align-middle text-right">(double click to view) | ${arr_group[3]}</td>
                                 </tr>
                             `);
 
