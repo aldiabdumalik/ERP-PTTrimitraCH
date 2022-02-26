@@ -99,8 +99,8 @@
                         if ( last !== group ) {
                             $(rows).eq( i ).before(`
                                 <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
-                                    <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
-                                    <td colspan="4" class="text-bold align-middle text-right">(double click to view) | ${arr_group[3]}</td>
+                                    <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]} | Double click to view detail</td>
+                                    <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
                                 </tr>
                             `);
 
@@ -161,8 +161,8 @@
                         if ( last !== group ) {
                             $(rows).eq( i ).before(`
                                 <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
-                                    <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]}</td>
-                                    <td colspan="4" class="text-bold align-middle text-right">(double click to view) | ${arr_group[3]}</td>
+                                    <td colspan="2" class="text-bold align-middle">${arr_group[0]} - ${arr_group[1]} | ${arr_group[2]} | Double click to view detail</td>
+                                    <td colspan="4" class="text-bold align-middle text-right">${arr_group[3]}</td>
                                 </tr>
                             `);
 
@@ -1105,11 +1105,11 @@
                         headers: token_header
                     },
                     columns: [
-                        {data:'date', name: 'date', className: "text-center align-middle"},
-                        {data:'time', name: 'time', className: "text-left align-middle"},
-                        {data:'status', name: 'status', className: "text-left align-middle"},
-                        {data:'user', name: 'user', className: "text-center align-middle"},
-                        {data:'note', name: 'note', className: "text-center align-middle"},
+                        {data:'date', name: 'date', className: "align-middle"},
+                        {data:'time', name: 'time', className: "align-middle"},
+                        {data:'status', name: 'status', className: "align-middle"},
+                        {data:'user', name: 'user', className: "align-middle"},
+                        {data:'note', name: 'note', className: "align-middle"},
                     ],
                     ordering: false,
                     lengthChange: false

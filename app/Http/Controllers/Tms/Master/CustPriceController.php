@@ -144,8 +144,6 @@ class CustPriceController extends Controller
         $is_so = ($request->post['so'] == 'true') ? 1 : 0;
         $is_sso = ($request->post['sso'] == 'true') ? 1 : 0;
         $is_sj = ($request->post['sj'] == 'true') ? 1 : 0;
-        $cek_old = CustPrice::where('status', 'ACTIVE')->where('cust_id', $request->cust_id)->orderBy('active_date', 'DESC')->first();
-        $is_rdate = null;
 
         if (!empty($items)) {
             for ($i=0; $i < count($items); $i++) { 
@@ -161,9 +159,6 @@ class CustPriceController extends Controller
                         CustPrice::where('item_code', $item_replace)
                             ->where('active_date', $old->active_date)
                             ->update(['range_date' => date('Y-m-d', strtotime($request->active_date. "-1 days"))]);
-                        $is_rdate = 1;
-                    }else{
-                        $is_rdate = 0;
                     }
                 }else{
                     $is_update = 0;
@@ -203,11 +198,6 @@ class CustPriceController extends Controller
                 }
                 if ($trg == 1) {
                     $query = CustPrice::insert($data);
-                    // if ($is_rdate == 0) {
-                    //     CustPrice::where('cust_id', $request->cust_id)
-                    //             ->where('active_date', $request->active_date)
-                    //             ->update(['range_date' => date('Y-m-d', strtotime($cek_old->active_date. "-1 days"))]);
-                    // }
                     if ($query) {
                         $log = [
                             [
@@ -248,7 +238,6 @@ class CustPriceController extends Controller
             // ->where('entry_custprice_tbl.status', 'ACTIVE')
             ->first();
         $create_by = $cek->created_by;
-        $create_date = $cek->created_date;
         $data = [];
         $items = json_decode($request->items, true);
         $is_update = 0;
@@ -459,7 +448,7 @@ class CustPriceController extends Controller
                 return _Success('Cust Price has been Reposted', 200, $trg);
             }
 
-            return _Error('Cust Price filed Reposted, because : ' . $trg, 200, $trg);
+            return _Error('Cust Price filed Reposted, because : ' . $trg, 400, $trg);
         }
 
         return _Error('Customer Price not Exist!');
@@ -593,6 +582,7 @@ class CustPriceController extends Controller
                     $query = DB::table('db_tbs.entry_custprice_tbl_log')
                         ->where('cust_id', $request->cust_id)
                         ->where('active_date', $request->date)
+                        ->orderBy('written_date', 'DESC')
                         ->get();
                     return DataTables::of($query)
                         ->addColumn('date', function($query){
