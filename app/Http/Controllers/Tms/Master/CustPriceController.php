@@ -176,6 +176,7 @@ class CustPriceController extends Controller
                     'created_date' => Carbon::now(),
                     'is_update' => $is_update,
                     'price_by' => $request->price_by,
+                    'range_date' => null,
                     'is_stock' => $is_stock,
                     'is_so' => $is_so,
                     'is_sso' => $is_sso,

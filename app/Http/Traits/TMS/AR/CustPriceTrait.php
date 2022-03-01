@@ -13,6 +13,7 @@ trait CustPriceTrait {
                 $act_date = $data[$x]['active_date'];
                 $cust = $data[$x]['cust_id'];
                 $price_new = $data[$x]['price_new'];
+                $range_date = $data[$x]['range_date'];
 
                 if ($data[$x]['is_stock'] == 1) {
                     // Stock TMS
@@ -65,6 +66,11 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->where('so.item_code', $item_i)
                             ->where('so.written_date', '>=', $act_date)
+                            ->where(function ($on) use($range_date){
+                                if (!is_null($range_date)) {
+                                    $on->where('so.written_date', '<=', $range_date);
+                                }
+                            })
                             ->update([
                                 'so.price' => $price_new
                             ]);
@@ -73,8 +79,8 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
                                 SUM(so.qty_so * so.price) AS sub_amt
-                                (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS total_amount
+                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
+                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
@@ -98,6 +104,11 @@ trait CustPriceTrait {
                                 ->where('sso.item_code', $item_i)
                                 // ->whereNull('sj.invoice_date')
                                 ->whereRaw('DATE(sso.created_date) >= ?', [$act_date])
+                                ->where(function ($on) use($range_date){
+                                    if (!is_null($range_date)) {
+                                        $on->whereRaw('DATE(sso.created_date) <= ?', [$range_date]);
+                                    }
+                                })
                                 ->update([
                                     'sso.id_custprice' => $custprice_id
                                 ]);
@@ -112,6 +123,11 @@ trait CustPriceTrait {
                                 ->where('sj.item_code', $item_i)
                                 ->whereNull('sj.invoice_date')
                                 ->whereRaw('DATE(sj.created_date) >= ?', [$act_date])
+                                ->where(function ($on) use($range_date){
+                                    if (!is_null($range_date)) {
+                                        $on->whereRaw('DATE(sj.created_date) <= ?', [$range_date]);
+                                    }
+                                })
                                 ->update([
                                     'sj.id_custprice' => $custprice_id
                                 ]);
@@ -138,10 +154,14 @@ trait CustPriceTrait {
                     ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                         $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                     })
-                    ->where(function ($wh) use ($cust, $act_date, $item_i){
+                    ->where(function ($wh) use ($cust, $act_date, $item_i, $range_date){
                         $wh->where('so_hdr.custcode', $cust);
                         $wh->where('so_hdr.written', '>=', $act_date);
                         $wh->where('so_dtl.itemcode', $item_i);
+
+                        if (!is_null($range_date)) {
+                            $wh->where('so_dtl.written', '<=', $range_date);
+                        }
                     })
                     ->select([
                         'so_dtl.so_no',
@@ -164,10 +184,14 @@ trait CustPriceTrait {
 
                             DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
-                                ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                ->where(function ($wh) use ($so_header, $item_i, $act_date, $range_date){
                                     $wh->where('so_dtl.so_no', $so_header);
                                     $wh->where('so_dtl.itemcode', $item_i);
                                     $wh->where('so_dtl.written', '>=', $act_date);
+
+                                    if (!is_null($range_date)) {
+                                        $wh->where('so_dtl.written', '<=', $range_date);
+                                    }
                                 })
                                 ->update([
                                     'so_dtl.price' => $price_new
@@ -177,8 +201,8 @@ trait CustPriceTrait {
                                 ->where('so_dtl.so_no', $so_header)
                                 ->selectRaw('
                                     SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_amt
+                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
                                 ')
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
@@ -193,10 +217,14 @@ trait CustPriceTrait {
                         if ($data[$x]['is_sso'] == 1) {
                             $sso_tch = DB::table('tch_tbs.sso_dtl as sso_dtl')
                                 ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
-                                ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                ->where(function ($wh) use ($so_header, $item_i, $act_date, $range_date){
                                     $wh->where('sso_dtl.so_no', $so_header);
                                     $wh->where('sso_dtl.itemcode', $item_i);
                                     $wh->where('sso_dtl.written', '>=', $act_date);
+
+                                    if (!is_null($range_date)) {
+                                        $wh->where('sso_dtl.written', '<=', $range_date);
+                                    }
                                 })
                                 ->select([
                                     'sso_dtl.so_no',
@@ -216,10 +244,14 @@ trait CustPriceTrait {
                                     $sso_header = $s->sso_no;
                                     DB::table('tch_tbs.sso_dtl as sso_dtl')
                                         ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
-                                        ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                        ->where(function ($wh) use ($so_header, $item_i, $act_date, $range_date){
                                             $wh->where('sso_dtl.so_no', $so_header);
                                             $wh->where('sso_dtl.itemcode', $item_i);
                                             $wh->where('sso_dtl.written', '>=', $act_date);
+
+                                            if (!is_null($range_date)) {
+                                                $wh->where('sso_dtl.written', '<=', $range_date);
+                                            }
                                         })
                                         ->update([
                                             'sso_dtl.price' => $price_new
@@ -229,8 +261,8 @@ trait CustPriceTrait {
                                         ->where('sso_hdr.sso_no', $sso_header)
                                         ->selectRaw('
                                             SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                            (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS tot_vat,
-                                            SUM(sso_dtl.quantity * sso_dtl.price) + (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS total_amount
+                                            SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
+                                            SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
                                         ')
                                         ->first();
                                     DB::table('tch_tbs.sso_hdr as sso_hdr')
@@ -250,10 +282,14 @@ trait CustPriceTrait {
                                 ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
-                                ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                ->where(function ($wh) use ($so_header, $item_i, $act_date, $range_date){
                                     $wh->where('sj_dtl.so_no', $so_header);
                                     $wh->where('sj_dtl.itemcode', $item_i);
                                     $wh->where('sj_dtl.written', '>=', $act_date);
+
+                                    if (!is_null($range_date)) {
+                                        $wh->where('sj_dtl.written', '<=', $range_date);
+                                    }
                                     $wh->whereNull('inv_dtl.do_no');
                                 })
                                 ->select([
@@ -277,10 +313,13 @@ trait CustPriceTrait {
                                         ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                         })
-                                        ->where(function ($wh) use ($so_header, $item_i, $act_date){
+                                        ->where(function ($wh) use ($so_header, $item_i, $act_date, $range_date){
                                             $wh->where('sj_dtl.so_no', $so_header);
                                             $wh->where('sj_dtl.itemcode', $item_i);
                                             $wh->where('sj_dtl.written', '>=', $act_date);
+                                            if (!is_null($range_date)) {
+                                                $wh->where('sj_dtl.written', '<=', $range_date);
+                                            }
                                             $wh->whereNull('inv_dtl.do_no');
                                         })
                                         ->update([
@@ -294,8 +333,8 @@ trait CustPriceTrait {
                                         ->where('sj_hdr.do_no', $do_no)
                                         ->selectRaw('
                                             SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                            (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS tot_vat,
-                                            SUM(sj_dtl.quantity * sj_dtl.price) + (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS total_amount
+                                            SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
+                                            SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
                                         ')
                                         ->first();
                                     DB::table('tch_tbs.do_dtl as sj_dtl')
@@ -329,6 +368,7 @@ trait CustPriceTrait {
                 $act_date = $data[$x]['active_date'];
                 $cust = $data[$x]['cust_id'];
                 $price_new = $data[$x]['price_new'];
+                $range_date = $data[$x]['range_date'];
 
                 if ($data[$x]['is_stock'] == 1) {
                     // Stock TMS
@@ -358,8 +398,12 @@ trait CustPriceTrait {
                     })
                     ->where('so.cust_id', $cust)
                     ->where('so.item_code', $item_i)
-                    ->where(function ($where) use ($act_date){
+                    ->where(function ($where) use ($act_date, $range_date){
                         $where->whereRaw('DATE(so.written_date) >= ?', [$act_date]);
+
+                        if (!is_null($range_date)) {
+                            $where->whereRaw('DATE(so.written_date) <= ?', [$range_date]);
+                        }
                     })
                     ->select([
                         'so.so_header',
@@ -394,6 +438,11 @@ trait CustPriceTrait {
                             ->where('so.item_code', $item_i)
                             ->where('so.so_header', $so_header)
                             ->whereRaw('DATE(so.written_date) >= ?', [$act_date])
+                            ->where(function ($on) use($range_date){
+                                if (!is_null($range_date)) {
+                                    $on->whereRaw('DATE(so.written_date) <= ?', [$range_date]);
+                                }
+                            })
                             ->update([
                                 'price' => $price_new
                             ]);
@@ -402,8 +451,8 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
                                 SUM(so.qty_so * so.price) AS sub_amt
-                                (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS total_amount
+                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
+                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
@@ -425,6 +474,11 @@ trait CustPriceTrait {
                         })
                         ->where('sso.item_code', $item_i)
                         ->whereRaw('DATE(sso.created_date) >= ?', [$act_date])
+                        ->where(function ($on) use($range_date){
+                            if (!is_null($range_date)) {
+                                $on->whereRaw('DATE(sso.created_date) <= ?', [$range_date]);
+                            }
+                        })
                         ->get();
                     if ($sso_tms->isNotEmpty()) {
                         $cvrt = $act_date;
@@ -436,6 +490,11 @@ trait CustPriceTrait {
                             })
                             ->where('sso.item_code', $item_i)
                             ->whereRaw('DATE(sso.created_date) >= ?', [$act_date])
+                            ->where(function ($on) use($range_date){
+                                if (!is_null($range_date)) {
+                                    $on->whereRaw('DATE(sso.created_date) <= ?', [$range_date]);
+                                }
+                            })
                             ->update([
                                 'sso.id_custprice' => $custprice_id
                             ]);
@@ -447,6 +506,11 @@ trait CustPriceTrait {
                         ->where('sj.cust_id', $cust)
                         ->where('sj.item_code', $item_i)
                         ->whereRaw('DATE(sj.created_date) >= ?', [$act_date])
+                        ->where(function ($on) use($range_date){
+                            if (!is_null($range_date)) {
+                                $on->whereRaw('DATE(sj.created_date) <= ?', [$range_date]);
+                            }
+                        })
                         ->whereNull('sj.invoice_date')
                         ->get();
 
@@ -457,6 +521,11 @@ trait CustPriceTrait {
                             ->where('sj.cust_id', $cust)
                             ->where('sj.item_code', $item_i)
                             ->whereRaw('DATE(sj.created_date) >= ?', [$act_date])
+                            ->where(function ($on) use($range_date){
+                                if (!is_null($range_date)) {
+                                    $on->whereRaw('DATE(sj.created_date) <= ?', [$range_date]);
+                                }
+                            })
                             ->whereNull('sj.invoice_date')
                             ->update([
                                 'sj.id_custprice' => $custprice_id
@@ -478,9 +547,13 @@ trait CustPriceTrait {
                         ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                         })
-                        ->where(function ($where) use ($act_date){
+                        ->where(function ($where) use ($act_date, $range_date){
                             $where->whereNotNull('so_hdr.written');
                             $where->where('so_hdr.written', '>=', $act_date);
+
+                            if (!is_null($range_date)) {
+                                $where->whereRaw('so_hdr.written <= ?', [$range_date]);
+                            }
                         })
                         ->where(function ($wh) use ($cust, $item_i){
                             $wh->where('so_hdr.custcode', $cust);
@@ -512,9 +585,13 @@ trait CustPriceTrait {
                                 ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
-                                ->where(function ($where) use ($act_date){
+                                ->where(function ($where) use ($act_date, $range_date){
                                     $where->whereNotNull('so_hdr.written');
                                     $where->where('so_hdr.written', '>=', $act_date);
+
+                                    if (!is_null($range_date)) {
+                                        $where->whereRaw('so_hdr.written <= ?', [$range_date]);
+                                    }
                                 })
                                 ->where(function ($wh) use ($cust, $item_i){
                                     $wh->where('so_hdr.custcode', $cust);
@@ -529,8 +606,8 @@ trait CustPriceTrait {
                                 ->where('so_dtl.so_no', $so_header)
                                 ->selectRaw('
                                     SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_amt
+                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
                                 ')
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
@@ -555,9 +632,13 @@ trait CustPriceTrait {
                         ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                         })
-                        ->where(function ($where) use ($act_date){
+                        ->where(function ($where) use ($act_date, $range_date){
                             $where->whereNotNull('sso_hdr.written');
                             $where->where('sso_hdr.written', '>=', $act_date);
+
+                            if (!is_null($range_date)) {
+                                $where->whereRaw('sso_hdr.written <= ?', [$range_date]);
+                            }
                         })
                         ->where(function ($wh) use ($cust, $item_i){
                             $wh->where('sso_hdr.custcode', $cust);
@@ -590,9 +671,13 @@ trait CustPriceTrait {
                                 ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
-                                ->where(function ($where) use ($act_date){
+                                ->where(function ($where) use ($act_date, $range_date){
                                     $where->whereNotNull('sso_hdr.written');
                                     $where->where('sso_hdr.written', '>=', $act_date);
+
+                                    if (!is_null($range_date)) {
+                                        $where->whereRaw('sso_hdr.written <= ?', [$range_date]);
+                                    }
                                 })
                                 ->where(function ($wh) use ($cust, $item_i){
                                     $wh->where('sso_hdr.custcode', $cust);
@@ -606,8 +691,8 @@ trait CustPriceTrait {
                                 ->where('sso_hdr.sso_no', $sso_header)
                                 ->selectRaw('
                                     SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                    (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(sso_dtl.quantity * sso_dtl.price) + (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS total_amount
+                                    SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
                                 ')
                                 ->first();
                             DB::table('tch_tbs.sso_hdr as sso_hdr')
@@ -627,9 +712,13 @@ trait CustPriceTrait {
                         ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                         })
-                        ->where(function ($where) use ($act_date){
+                        ->where(function ($where) use ($act_date, $range_date){
                             $where->whereNotNull('sj_hdr.written');
                             $where->where('sj_hdr.written', '>=', $act_date);
+
+                            if (!is_null($range_date)) {
+                                $where->whereRaw('sj_hdr.written <= ?', [$range_date]);
+                            }
                         })
                         ->where(function ($wh) use ($cust, $item_i){
                             $wh->where('sj_hdr.custcode', $cust);
@@ -657,9 +746,13 @@ trait CustPriceTrait {
                                 ->leftJoin('tch_tbs.inv_sj as inv_dtl', function ($join){
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
-                                ->where(function ($where) use ($act_date){
+                                ->where(function ($where) use ($act_date, $range_date){
                                     $where->whereNotNull('sj_hdr.written');
                                     $where->where('sj_hdr.written', '>=', $act_date);
+
+                                    if (!is_null($range_date)) {
+                                        $where->whereRaw('sj_hdr.written <= ?', [$range_date]);
+                                    }
                                 })
                                 ->where(function ($wh) use ($cust, $item_i){
                                     $wh->where('sj_hdr.custcode', $cust);
@@ -678,8 +771,8 @@ trait CustPriceTrait {
                                 ->where('sj_hdr.do_no', $do_no)
                                 ->selectRaw('
                                     SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                    (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(sj_dtl.quantity * sj_dtl.price) + (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS total_amount
+                                    SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
                                 ')
                                 ->first();
                             DB::table('tch_tbs.do_dtl as sj_dtl')
@@ -792,8 +885,8 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
                                 SUM(so.qty_so * so.price) AS sub_amt
-                                (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS total_amount
+                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
+                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
@@ -930,8 +1023,8 @@ trait CustPriceTrait {
                                 ->where('so_dtl.so_no', $so_header)
                                 ->selectRaw('
                                     SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_amt
+                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
                                 ')
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
@@ -1012,8 +1105,8 @@ trait CustPriceTrait {
                                         ->where('sso_hdr.sso_no', $sso_header)
                                         ->selectRaw('
                                             SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                            (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS tot_vat,
-                                            SUM(sso_dtl.quantity * sso_dtl.price) + (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS total_amount
+                                            SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
+                                            SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
                                         ')
                                         ->first();
                                     DB::table('tch_tbs.sso_hdr as sso_hdr')
@@ -1090,8 +1183,8 @@ trait CustPriceTrait {
                                         ->where('sj_hdr.do_no', $do_no)
                                         ->selectRaw('
                                             SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                            (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS tot_vat,
-                                            SUM(sj_dtl.quantity * sj_dtl.price) + (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS total_amount
+                                            SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
+                                            SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
                                         ')
                                         ->first();
                                     DB::table('tch_tbs.do_dtl as sj_dtl')
@@ -1207,8 +1300,8 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
                                 SUM(so.qty_so * so.price) AS sub_amt
-                                (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + (SUM(so.qty_so * so.price) * so.tax_rate) / 100 AS total_amount
+                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
+                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
@@ -1364,8 +1457,8 @@ trait CustPriceTrait {
                                 ->where('so_dtl.so_no', $so_header)
                                 ->selectRaw('
                                     SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + (SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate) / 100 AS tot_amt
+                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
                                 ')
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
@@ -1448,8 +1541,8 @@ trait CustPriceTrait {
                                 ->where('sso_hdr.sso_no', $sso_header)
                                 ->selectRaw('
                                     SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                    (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(sso_dtl.quantity * sso_dtl.price) + (SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate) / 100 AS total_amount
+                                    SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
                                 ')
                                 ->first();
                             DB::table('tch_tbs.sso_hdr as sso_hdr')
@@ -1526,8 +1619,8 @@ trait CustPriceTrait {
                                 ->where('sj_hdr.do_no', $do_no)
                                 ->selectRaw('
                                     SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                    (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS tot_vat,
-                                    SUM(sj_dtl.quantity * sj_dtl.price) + (SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate) / 100 AS total_amount
+                                    SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
+                                    SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
                                 ')
                                 ->first();
                             DB::table('tch_tbs.do_dtl as sj_dtl')
