@@ -269,7 +269,7 @@ class CustPriceController extends Controller
                     'price_new' =>  str_replace(',', '', $items[$i]['new_price']),
                     'price_old' =>  $price_old,
                     'active_date' => $request->active_date,
-                    'range_date' => $cek->range_date,
+                    'range_date' => null,
                     'updated_by' => Auth::user()->FullName,
                     'updated_date' => Carbon::now(),
                     'created_by' => $create_by,
