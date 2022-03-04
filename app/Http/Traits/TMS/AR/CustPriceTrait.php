@@ -77,11 +77,11 @@ trait CustPriceTrait {
 
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
-                            ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt,
-                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
-                            ')
+                            ->select([
+                                DB::raw('SUM(so.qty_so * so.price) AS sub_amt'),
+                                DB::raw('SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat'),
+                                DB::raw('SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount')
+                            ])
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
@@ -199,11 +199,11 @@ trait CustPriceTrait {
                             $new_so_tbs = DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
                                 ->where('so_dtl.so_no', $so_header)
-                                ->selectRaw('
-                                    SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
-                                ')
+                                ->select([
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) AS sub_amt'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
                                 ->where('so_hdr.so_no', $so_header)
@@ -259,11 +259,11 @@ trait CustPriceTrait {
                                     $new_sso_tbs = DB::table('tch_tbs.sso_dtl as sso_dtl')
                                         ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
                                         ->where('sso_hdr.sso_no', $sso_header)
-                                        ->selectRaw('
-                                            SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                            SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
-                                            SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
-                                        ')
+                                        ->select([
+                                            DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt'),
+                                            DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat'),
+                                            DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount')
+                                        ])
                                         ->first();
                                     DB::table('tch_tbs.sso_hdr as sso_hdr')
                                         ->where('sso_hdr.sso_no', $sso_header)
@@ -331,11 +331,11 @@ trait CustPriceTrait {
                                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                         })
                                         ->where('sj_hdr.do_no', $do_no)
-                                        ->selectRaw('
-                                            SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                            SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
-                                            SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
-                                        ')
+                                        ->select([
+                                            DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt'),
+                                            DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat'),
+                                            DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount')
+                                        ])
                                         ->first();
                                     DB::table('tch_tbs.do_dtl as sj_dtl')
                                         ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
@@ -449,11 +449,11 @@ trait CustPriceTrait {
                         
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
-                            ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt,
-                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
-                            ')
+                            ->select([
+                                DB::raw('SUM(so.qty_so * so.price) AS sub_amt'),
+                                DB::raw('SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat'),
+                                DB::raw('SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount')
+                            ])
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
@@ -604,11 +604,11 @@ trait CustPriceTrait {
                             $new_so_tbs = DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
                                 ->where('so_dtl.so_no', $so_header)
-                                ->selectRaw('
-                                    SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
-                                ')
+                                ->select([
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) AS sub_amt'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
                                 ->where('so_hdr.so_no', $so_header)
@@ -689,11 +689,11 @@ trait CustPriceTrait {
                             $new_sso_tbs = DB::table('tch_tbs.sso_dtl as sso_dtl')
                                 ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
                                 ->where('sso_hdr.sso_no', $sso_header)
-                                ->selectRaw('
-                                    SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                    SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
-                                ')
+                                ->select([
+                                    DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt'),
+                                    DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.sso_hdr as sso_hdr')
                                 ->where('sso_hdr.sso_no', $sso_header)
@@ -769,11 +769,11 @@ trait CustPriceTrait {
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
                                 ->where('sj_hdr.do_no', $do_no)
-                                ->selectRaw('
-                                    SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                    SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
-                                ')
+                                ->select([
+                                    DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt'), 
+                                    DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.do_dtl as sj_dtl')
                                 ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
@@ -883,11 +883,11 @@ trait CustPriceTrait {
                             ]);
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
-                            ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt,
-                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
-                            ')
+                            ->select([
+                                DB::raw('SUM(so.qty_so * so.price) AS sub_amt'),
+                                DB::raw('SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat'),
+                                DB::raw('SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount')
+                            ])
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
@@ -1021,11 +1021,11 @@ trait CustPriceTrait {
                             $new_so_tbs = DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
                                 ->where('so_dtl.so_no', $so_header)
-                                ->selectRaw('
-                                    SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
-                                ')
+                                ->select([
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) AS sub_amt'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
                                 ->where('so_hdr.so_no', $so_header)
@@ -1103,11 +1103,11 @@ trait CustPriceTrait {
                                     $new_sso_tbs = DB::table('tch_tbs.sso_dtl as sso_dtl')
                                         ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
                                         ->where('sso_hdr.sso_no', $sso_header)
-                                        ->selectRaw('
-                                            SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                            SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
-                                            SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
-                                        ')
+                                        ->select([
+                                            DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt'), 
+                                            DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat'),
+                                            DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount')
+                                        ])
                                         ->first();
                                     DB::table('tch_tbs.sso_hdr as sso_hdr')
                                         ->where('sso_hdr.sso_no', $sso_header)
@@ -1181,11 +1181,11 @@ trait CustPriceTrait {
                                             $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                         })
                                         ->where('sj_hdr.do_no', $do_no)
-                                        ->selectRaw('
-                                            SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                            SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
-                                            SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
-                                        ')
+                                        ->select([
+                                            DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt'), 
+                                            DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat'),
+                                            DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount')
+                                        ])
                                         ->first();
                                     DB::table('tch_tbs.do_dtl as sj_dtl')
                                         ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
@@ -1298,11 +1298,11 @@ trait CustPriceTrait {
                         
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
-                            ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt,
-                                SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
-                                SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
-                            ')
+                            ->select([
+                                DB::raw('SUM(so.qty_so * so.price) AS sub_amt'),
+                                DB::raw('SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat'),
+                                DB::raw('SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount')
+                            ])
                             ->first();
                         DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
@@ -1455,11 +1455,11 @@ trait CustPriceTrait {
                             $new_so_tbs = DB::table('tch_tbs.soline as so_dtl')
                                 ->leftJoin('tch_tbs.sohdr as so_hdr', 'so_hdr.so_no', '=', 'so_dtl.so_no')
                                 ->where('so_dtl.so_no', $so_header)
-                                ->selectRaw('
-                                    SUM(so_dtl.quantity * so_dtl.price) AS sub_amt,
-                                    SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt
-                                ')
+                                ->select([
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) AS sub_amt'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(so_dtl.quantity * so_dtl.price) + SUM(so_dtl.quantity * so_dtl.price) * so_hdr.taxrate / 100 AS tot_amt')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.sohdr as so_hdr')
                                 ->where('so_hdr.so_no', $so_header)
@@ -1539,11 +1539,11 @@ trait CustPriceTrait {
                             $new_sso_tbs = DB::table('tch_tbs.sso_dtl as sso_dtl')
                                 ->leftJoin('tch_tbs.sso_hdr as sso_hdr', 'sso_hdr.sso_no', '=', 'sso_dtl.sso_no')
                                 ->where('sso_hdr.sso_no', $sso_header)
-                                ->selectRaw('
-                                    SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt, 
-                                    SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount
-                                ')
+                                ->select([
+                                    DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) AS sub_amt'),
+                                    DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(sso_dtl.quantity * sso_dtl.price) + SUM(sso_dtl.quantity * sso_dtl.price) * sso_hdr.taxrate / 100 AS total_amount')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.sso_hdr as sso_hdr')
                                 ->where('sso_hdr.sso_no', $sso_header)
@@ -1617,11 +1617,11 @@ trait CustPriceTrait {
                                     $join->on('inv_dtl.do_no', '=', 'sj_dtl.do_no');
                                 })
                                 ->where('sj_hdr.do_no', $do_no)
-                                ->selectRaw('
-                                    SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt, 
-                                    SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat,
-                                    SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount
-                                ')
+                                ->select([
+                                    DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) AS sub_amt'), 
+                                    DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS tot_vat'),
+                                    DB::raw('SUM(sj_dtl.quantity * sj_dtl.price) + SUM(sj_dtl.quantity * sj_dtl.price) * sj_hdr.taxrate / 100 AS total_amount')
+                                ])
                                 ->first();
                             DB::table('tch_tbs.do_dtl as sj_dtl')
                                 ->leftJoin('tch_tbs.do_hdr as sj_hdr', 'sj_hdr.do_no', '=', 'sj_dtl.do_no')
