@@ -87,7 +87,7 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->update([
                                 'so.sub_amount' => $sum_so_tms->sub_amt,
-                                'so.total_amount' => $sum_so_tms->total_amt,
+                                'so.total_amount' => $sum_so_tms->total_amount,
                                 'so.tot_vat' => $sum_so_tms->tot_vat
                             ]);
                         // End update SO
@@ -459,7 +459,7 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->update([
                                 'so.sub_amount' => $sum_so_tms->sub_amt,
-                                'so.total_amount' => $sum_so_tms->total_amt,
+                                'so.total_amount' => $sum_so_tms->total_amount,
                                 'so.tot_vat' => $sum_so_tms->tot_vat
                             ]);
                     }
@@ -893,7 +893,7 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->update([
                                 'so.sub_amount' => $sum_so_tms->sub_amt,
-                                'so.total_amount' => $sum_so_tms->total_amt,
+                                'so.total_amount' => $sum_so_tms->total_amount,
                                 'so.tot_vat' => $sum_so_tms->tot_vat
                             ]);
                         // End update SO
@@ -1308,7 +1308,7 @@ trait CustPriceTrait {
                             ->where('so.so_header', $so_header)
                             ->update([
                                 'so.sub_amount' => $sum_so_tms->sub_amt,
-                                'so.total_amount' => $sum_so_tms->total_amt,
+                                'so.total_amount' => $sum_so_tms->total_amount,
                                 'so.tot_vat' => $sum_so_tms->tot_vat
                             ]);
                     }
