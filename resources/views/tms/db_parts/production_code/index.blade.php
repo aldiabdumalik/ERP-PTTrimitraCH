@@ -54,6 +54,7 @@
 </div>
 @include('tms.db_parts.production_code.modal.form.index')
 @include('tms.db_parts.production_code.modal.table.imageView')
+@include('tms.db_parts.production_code.modal.table.part')
 @endsection
 @section('script')
 <script>
@@ -74,6 +75,46 @@ $(document).ready(function () {
         scrollY: "200px",
         scrollCollapse: true,
         fixedHeader: true,
+    });
+    var tbl_part;
+    $(document).on('keypress keydown', '#prodcode-index-partno', function (e) {
+        if(e.which == 13) {
+            modalAction('#prodcode-modal-part').then(resolve => {
+                tbl_part = $('#prodcode-datatables-part').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    destroy: true,
+                    ordering: false,
+                    ajax: {
+                        url: "{{ route('tms.db_parts.production_code.header_tools') }}",
+                        method: 'POST',
+                        headers: token_header,
+                        data: {type: "get_part"},
+                    },
+                    columns: [
+                        {data:'part_no', name: 'part_no'},
+                        {data:'part_name', name: 'part_name'},
+                        {data:'type', name: 'type'},
+                    ],
+                });
+
+                resolve.on('shown.bs.modal', function () {
+                    $('#prodcode-datatables-part_filter input').focus();
+                });
+            });
+        }
+        if(e.which == 8 || e.which == 46) { return false; }
+        return false;
+    });
+
+    $('#prodcode-datatables-part').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+        let data = tbl_part.row(this).data();
+        modalAction('#prodcode-modal-part', 'hide').then(resolve => {
+            $('#prodcode-index-partno').val(data.part_no);
+            $('#prodcode-index-partname').val(data.part_name);
+            $('#prodcode-index-parttype').val(data.type);
+            $('#prodcode-index-pict-x').text(data.part_pict);
+        });
     });
 
     $(document).on('click', '#prodcode-btn-add-item', function () {
@@ -103,6 +144,25 @@ $(document).ready(function () {
                 }));
             });
         });
+    });
+
+    $(document).on('click', '.view-ppict', function () {
+        let fileName = $('#prodcode-index-pict-x').html();
+        if ($('#prodcode-index-pict-x').html() != 'Choose file') {
+            modalAction('#prodcode-modal-ppict').then(() => {
+                cekFile(`{{ asset('db-parts/pictures/${fileName}') }}`).then(
+                    resolve => {
+                        $('#view-ppict').attr('src', `{{ asset('db-parts/pictures/${fileName}') }}`);
+                    }, 
+                    reject => {
+                        cekFile(`{{ asset('db-parts/temp/${fileName}') }}`).then(
+                            resolve => {
+                                $('#view-ppict').attr('src', `{{ asset('db-parts/temp/${fileName}') }}`);
+                            }, 
+                            reject => {});
+                    });
+            });
+        }
     });
 
     $('#prodcode-modal-index').on('shown.bs.modal', function () {
@@ -165,6 +225,20 @@ $(document).ready(function () {
                 }
             });
         });
+    }
+    function cekFile(url) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: url,
+                type:'HEAD',
+                error: function() {
+                    reject('Not Exist');
+                },
+                success: function(){
+                    resolve('Exist!');
+                }
+            });
+        })
     }
     function isHidden(element=null, hide=true){
         return ((hide == true) ? $(element).addClass('d-none') : $(element).removeClass('d-none'));

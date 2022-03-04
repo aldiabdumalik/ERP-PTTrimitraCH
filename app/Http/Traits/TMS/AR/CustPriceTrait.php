@@ -78,7 +78,7 @@ trait CustPriceTrait {
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt
+                                SUM(so.qty_so * so.price) AS sub_amt,
                                 SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
                                 SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
@@ -450,7 +450,7 @@ trait CustPriceTrait {
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt
+                                SUM(so.qty_so * so.price) AS sub_amt,
                                 SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
                                 SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
@@ -884,7 +884,7 @@ trait CustPriceTrait {
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt
+                                SUM(so.qty_so * so.price) AS sub_amt,
                                 SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
                                 SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
@@ -1299,7 +1299,7 @@ trait CustPriceTrait {
                         $sum_so_tms = DB::table('db_tbs.entry_so_tbl as so')
                             ->where('so.so_header', $so_header)
                             ->selectRaw('
-                                SUM(so.qty_so * so.price) AS sub_amt
+                                SUM(so.qty_so * so.price) AS sub_amt,
                                 SUM(so.qty_so * so.price) * so.tax_rate / 100 AS tot_vat,
                                 SUM(so.qty_so * so.price) + SUM(so.qty_so * so.price) * so.tax_rate / 100 AS total_amount
                             ')
