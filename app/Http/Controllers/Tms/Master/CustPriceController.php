@@ -687,7 +687,16 @@ class CustPriceController extends Controller
                 }
                 return _Error('Params not exist!', 404);
                 break;
-
+            case 'customer_list':
+                $query = 
+                    DB::connection('ekanban')
+                    ->table('ekanban_customermaster')
+                    ->selectRaw('CustomerCode_eKanban as code, CustomerName as name')
+                    ->where('status_data', 'ACTIVE')
+                    ->where('CustomerCode_eKanban', 'like', '%'. $request->like .'%')
+                    ->get();
+                return _Success(null, 200, $query);
+                break;
             default:
                 return _Error('Params not exist!', 404);
                 break;

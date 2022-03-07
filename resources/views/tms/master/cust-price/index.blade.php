@@ -275,23 +275,12 @@
         })
 
         $('#custprice-modal-customer-search').on('hidden.bs.modal', function () {
-            tbl_customer_s.clear();
+            tbl_customer_s.clear().draw();
+            tbl_customer_s.search('').draw();
         });
 
         $('#custprice-btn-modal-create').on('click', function () {
-            modalAction('#custprice-modal-index').then(() => {
-                // ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: 'currency'}}).then(resolve => {
-                //     var data = resolve.content;
-                //     $('#custprice-create-valas').html('');
-                //     $.each(data, function (i, valas) {
-                //         $('#custprice-create-valas').append($('<option>', { 
-                //             value: valas.valas,
-                //             text : valas.valas 
-                //         }));
-                //     });
-                //     $('#custprice-create-valas').val('IDR');
-                // });
-            });
+            modalAction('#custprice-modal-index');
         });
 
         var tbl_item = $('#custprice-datatables-index').DataTable({
@@ -332,26 +321,6 @@
             });
         });
 
-        // $('#custprice-create-priceby').on('change', function () {
-        //     console.log($(this).val());
-        //     $('#custprice-create-activedate').datepicker('remove');
-        //     $('#custprice-create-activedate').val(null);
-        //     if ($(this).val() === 'SO') {
-        //         $('#custprice-create-activedate').datepicker({
-        //             format: "mm/yyyy",
-        //             viewMode: "months", 
-        //             minViewMode: "months",
-        //             autoclose: true,
-        //         });
-        //     }else{
-        //         $('#custprice-create-activedate').datepicker({
-        //             format: "dd/mm/yyyy",
-        //             autoclose: true,
-        //             enableOnReadonly: false,
-        //         });
-        //     }
-        // });
-
         $('#custprice-datatables-index tbody').off('dblclick', 'tr').on('dblclick', 'tr', function () {
             var data = tbl_item.row(this).data();
             if (data != undefined) {
@@ -376,28 +345,67 @@
         });
 
         $('#custprice-create-customercode').on('keypress', function (e) {
-            e.preventDefault();
+            // e.preventDefault();
+            let cust_id = $('#custprice-create-customercode').val();
             if (e.keyCode == 13) {
-                modalAction('#custprice-modal-customer').then(resolve => {
-                    tbl_item.clear().draw(false);
-                    tbl_customer.clear().draw(false);
-                    ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customer"}}).then(resolve => {
-                        let customer = resolve.content;
-                        $.each(customer, function (i, cust) {
-                            tbl_customer.row.add([
-                                cust.code,
-                                cust.name
-                            ]);
-                        });
-                        tbl_customer.draw();
-                        $('#custprice-datatables-customer-item').DataTable().destroy();
-                        item_select = [];
+                tbl_item.clear().draw(false);
+                tbl_customer.clear().draw(false);
+                if (cust_id.length >= 3) {
+                    ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customerclick", cust_id: cust_id}}).then(resolve => {
+                        if (resolve.content) {
+                            var no = 1;
+                            var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
+                            $.each(resolve.content, function (i, data) {
+                                var price_new = (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new))));
+                                tbl_item.row.add([
+                                    no,
+                                    data.itemcode_trims,
+                                    data.part_no,
+                                    data.desc,
+                                    `<input type="text" class="form-control form-control-sm text-right item-price-text" value="${price_new}">`,
+                                    // currency(addZeroes(String(data.price_old))),
+                                    price_new
+                                ]);
+                                no++;
+                                cust_id = data.cust_id;
+                                cust_name = data.custname;
+                                valas = data.currency;
+                                active_date = data.active_date;
+                                created = data.created_date;
+                                user = data.created_by;
+                                posted = data.posted_date;
+                                voided = data.voided_date;
+                                printed = data.printed_date;
+                                price_by = data.price_by;
 
+                                $('#custprice-create-customername').val(cust_name)
+                            });
+                            tbl_item.draw();
+                        }
                     });
-                });
+                }
+                return false;
             }
-            return false;
         });
+
+        $('#custprice-create-customercode').on('input', delay(function (e) {
+            let like = $(this).val().toUpperCase();
+            if (like.length > 0) {
+                ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customer_list", like:like}}).then(response => {
+                    $('#list').empty();
+                    $.each(response.content, function (id, data) {
+                        $('#list').append($('<option/>', { 
+                            value: data.code,
+                            text : data.code 
+                        }));
+                    })
+                });
+            }else{
+                tbl_item.clear().draw(false);
+                tbl_customer.clear().draw(false);
+                $('#custprice-create-customername').val(null)
+            }
+        }, 1000));
 
         $('#custprice-modal-item').on('shown.bs.modal', function () {
             $('#custprice-datatables-customer-item_filter input').focus();
@@ -406,6 +414,10 @@
         $('#custprice-modal-customer').on('shown.bs.modal', function () {
             adjustDraw(tbl_customer);
             $('#custprice-datatables-customer_filter input').focus();
+        });
+        $('#custprice-modal-customer').on('hidden.bs.modal', function () {
+            tbl_customer.clear().draw();
+            tbl_customer.search('').draw();
         });
 
         $('#custprice-modal-index').on('hidden.bs.modal', function () {
@@ -448,11 +460,6 @@
                         tbl_item.draw();
                     }
                 });
-                // if (data[0] === "A01") {
-                //     $('#custprice-create-priceby').val('DATE');
-                // }else{
-                //     $('#custprice-create-priceby').val('SO');
-                // }
                 // modalAction('#custprice-modal-item').then(function () {
                 //     getTblItem(cust_id);
                 // });
@@ -835,7 +842,7 @@
                 }
             }
             var data = {
-                cust_id: $('#custprice-create-customercode').val(),
+                cust_id: $('#custprice-create-customercode').val().toUpperCase(),
                 valas: $('#custprice-create-valas').val(),
                 active_date: $('#custprice-create-activedate').val().split("/").reverse().join("-"),
                 price_by: $('#custprice-create-priceby').val(),
@@ -1161,6 +1168,16 @@
             $('#custprice-create-valas').prop('disabled', false);
             $('#custprice-create-priceby').prop('disabled', false);
         }
+        function delay(callback, ms) {
+            var timer = 0;
+            return function() {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
         function date_convert($date) {
             if ($date == null) { return null; }
             var first = $date.split(' ');
@@ -1205,7 +1222,7 @@
                     data: params.data,
                     error: function(response, status, x){
                         Swal.fire({
-                            title: 'Access Denied',
+                            title: 'Something was wrong',
                             text: response.responseJSON.message,
                             icon: 'error'
                         });

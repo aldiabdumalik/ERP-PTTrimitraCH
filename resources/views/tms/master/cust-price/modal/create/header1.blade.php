@@ -13,7 +13,8 @@
     <div class="col-10">
         <div class="row no-gutters">
             <div class="col-4">
-                <input type="text" name="custprice-create-customercode" id="custprice-create-customercode" placeholder="press ENTER" class="form-control form-control-sm" autocomplete="off" required>
+                <input list="list" name="custprice-create-customercode" id="custprice-create-customercode" placeholder="" class="form-control form-control-sm" autocomplete="off" style="text-transform: uppercase" required>
+                <datalist id="list"></datalist>
             </div>
             <div class="col-8">
                 <input type="text" name="custprice-create-customername" id="custprice-create-customername" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
