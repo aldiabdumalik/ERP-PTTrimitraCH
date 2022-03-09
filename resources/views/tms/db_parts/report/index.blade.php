@@ -42,9 +42,6 @@
                                     <div class="col-10">
                                         <select name="partreport-index-parttype" id="partreport-index-parttype" class="form-control form-control-sm" required>
                                             <option value="">Select part type</option>
-                                            @foreach ($type as $t)
-                                            <option value="{{$t->type}}">{{$t->type}}</option>
-                                            @endforeach 
                                         </select>
                                     </div>
                                 </div>
@@ -100,6 +97,8 @@ $(document).ready(function () {
         modalAction('#partreport-modal-customer', 'hide').then(() => {
             $('#partreport-index-customercode').val(data.code);
             $('#partreport-index-customername').val(data.name);
+            
+            getType(data.code)
         });
     });
 
@@ -110,7 +109,23 @@ $(document).ready(function () {
             encrypt = btoa(`${customer}&${type}`),
             url = "{{route('tms.db_parts.report.print')}}?params=" + encrypt;
         window.open(url, '_blank');
-    })
+    });
+
+    function getType(customer) {
+        $('#partreport-index-parttype').find('option').not(':first').remove();
+        let route = "{{ route('tms.db_parts.report.parts', [':customer']) }}";
+        route  = route.replace(':customer', customer);
+        ajaxCall({route:route, method: "GET"}).then(response => {
+            if (response.content != null) {
+                $.each(response.content, function (i, type) {
+                    $('#partreport-index-parttype').append($('<option>', {
+                        text: type.type,
+                        value: type.type,
+                    }));
+                });
+            }
+        });
+    }
 
     // Lib func
     function date_convert($date) {

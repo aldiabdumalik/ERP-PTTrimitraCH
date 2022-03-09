@@ -32,7 +32,7 @@ class DoEntryController extends Controller
 
     public function DoEntry(Request $request)
     {
-        $query = DoEntry::groupBy('do_no')->get();
+        $query = DoEntry::query()->groupBy('do_no')->get();
         return DataTables::of($query)
             ->editColumn('delivery_date', function($query) {
                 return date('d/m/Y', strtotime($query->delivery_date));
@@ -129,6 +129,16 @@ class DoEntryController extends Controller
     {
         $items = $request->items;
         $data = [];
+        $periodYear = Carbon::createFromFormat('Y-m',  $request->priod)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $request->priod)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa entry');
+        }
         for ($i=0; $i < count($items); $i++) { 
             $data[] = [
                 'do_no' => $request->do_no,
@@ -171,12 +181,24 @@ class DoEntryController extends Controller
 
     public function DoEntryUpdate(Request $request)
     {
+        $periodYear = Carbon::createFromFormat('Y-m',  $request->priod)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $request->priod)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa edit');
+        }
+
         $items = $request->items;
         $data = [];
         $old_data = DoEntry::where('do_no', $request->do_no)->first();
         $create_by = $old_data->created_by;
         $create_date = $old_data->created_date;
         $old_data = DoEntry::where('do_no', $request->do_no)->delete();
+
         for ($i=0; $i < count($items); $i++) { 
             $data[] = [
                 'do_no' => $request->do_no,
@@ -251,6 +273,16 @@ class DoEntryController extends Controller
     public function DoEntryPost(Request $request)
     {
         $query = DoEntry::where('do_no', $request->do_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $query->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $query->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa dipost');
+        }
         if (isset($query)) {
             $posted = DoEntry::where('do_no', $request->do_no)->update([
                 'posted_date' => date('Y-m-d H:i:s'),
@@ -270,6 +302,16 @@ class DoEntryController extends Controller
     public function DoEntryVoid(Request $request)
     {
         $query = DoEntry::where('do_no', $request->do_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $query->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $query->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa void');
+        }
         if (isset($query)) {
             $voided = DoEntry::where('do_no', $request->do_no)->update([
                 'voided_date' => date('Y-m-d H:i:s'),
@@ -288,6 +330,16 @@ class DoEntryController extends Controller
     public function DoEntryUnpost(Request $request)
     {
         $query = DoEntry::where('do_no', $request->do_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $query->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $query->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa unpost');
+        }
         if (isset($query)) {
             $posted = DoEntry::where('do_no', $request->do_no)->update([
                 'posted_date' => null,
@@ -307,6 +359,16 @@ class DoEntryController extends Controller
     public function DoEntryUnvoid(Request $request)
     {
         $query = DoEntry::where('do_no', $request->do_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $query->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $query->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa unvoid');
+        }
         if (isset($query)) {
             if ($query->revised_date != null) {
                 return $this->_Error("DO No. $request->do_no failed to unvoid, because it has been revised to DO No. $query->revised_to!");

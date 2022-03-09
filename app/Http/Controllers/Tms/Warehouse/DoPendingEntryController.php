@@ -32,7 +32,7 @@ class DoPendingEntryController extends Controller
 
     public function index_table(Request $request)
     {
-        $query = DoPendingEntry::groupBy('do_no')->get();
+        $query = DoPendingEntry::query()->groupBy('do_no')->get();
         return DataTables::of($query)
             ->editColumn('delivery_date', function($query) {
                 return date('d/m/Y', strtotime($query->delivery_date));
@@ -113,6 +113,16 @@ class DoPendingEntryController extends Controller
     {
         if ($request->ajax()) {
             $data = [];
+            $periodYear = Carbon::createFromFormat('Y-m',  $request->priod)->format('Y');
+            $periodMonth = Carbon::createFromFormat('Y-m',  $request->priod)->format('m');
+            $check =  DB::connection('db_tbs')
+                ->table('stclose')
+                ->whereYear('DATE','=',  $periodYear)
+                ->whereMonth('DATE','=', $periodMonth)
+                ->get();
+            if ($check->isEmpty()) {
+                return _Error('Sudah closing tidak bisa entry');
+            }
             $item = json_decode($request->items, true);
             for ($i=0; $i < count($item); $i++) {
                 $data[] = [
@@ -162,6 +172,16 @@ class DoPendingEntryController extends Controller
     public function update($do_no, Request $request)
     {
         if ($request->ajax()) {
+            $periodYear = Carbon::createFromFormat('Y-m',  $request->priod)->format('Y');
+            $periodMonth = Carbon::createFromFormat('Y-m',  $request->priod)->format('m');
+            $check =  DB::connection('db_tbs')
+                ->table('stclose')
+                ->whereYear('DATE','=',  $periodYear)
+                ->whereMonth('DATE','=', $periodMonth)
+                ->get();
+            if ($check->isEmpty()) {
+                return _Error('Sudah closing tidak bisa update');
+            }
             DB::connection('db_tbs')->beginTransaction();
             $data = [];
             $item = json_decode($request->items, true);
@@ -222,6 +242,17 @@ class DoPendingEntryController extends Controller
     {
         if ($request->ajax()) {
             $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            $periodYear = Carbon::createFromFormat('Y-m',  $cek->period)->format('Y');
+            $periodMonth = Carbon::createFromFormat('Y-m',  $cek->period)->format('m');
+            $check =  DB::connection('db_tbs')
+                ->table('stclose')
+                ->whereYear('DATE','=',  $periodYear)
+                ->whereMonth('DATE','=', $periodMonth)
+                ->get();
+            if ($check->isEmpty()) {
+                return _Error('Sudah closing tidak bisa post');
+            }
+
             if (!is_null($cek->voided_date)) {
                 return _Error('DO Temp has been voided');
             }elseif($cek->period < date('Y-m')){
@@ -259,6 +290,16 @@ class DoPendingEntryController extends Controller
     {
         if ($request->ajax()) {
             $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            $periodYear = Carbon::createFromFormat('Y-m',  $cek->period)->format('Y');
+            $periodMonth = Carbon::createFromFormat('Y-m',  $cek->period)->format('m');
+            $check =  DB::connection('db_tbs')
+                ->table('stclose')
+                ->whereYear('DATE','=',  $periodYear)
+                ->whereMonth('DATE','=', $periodMonth)
+                ->get();
+            if ($check->isEmpty()) {
+                return _Error('Sudah closing tidak bisa unpost');
+            }
             if($cek->period < date('Y-m')){
                 return _Error('DO Temp has been finished');
             };
@@ -294,6 +335,16 @@ class DoPendingEntryController extends Controller
     {
         if ($request->ajax()) {
             $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            $periodYear = Carbon::createFromFormat('Y-m',  $cek->period)->format('Y');
+            $periodMonth = Carbon::createFromFormat('Y-m',  $cek->period)->format('m');
+            $check =  DB::connection('db_tbs')
+                ->table('stclose')
+                ->whereYear('DATE','=',  $periodYear)
+                ->whereMonth('DATE','=', $periodMonth)
+                ->get();
+            if ($check->isEmpty()) {
+                return _Error('Sudah closing tidak bisa void');
+            }
             if (!is_null($cek->posted_date)) {
                 return _Error('DO Temp has been posted');
             }elseif($cek->period < date('Y-m')){
@@ -328,6 +379,16 @@ class DoPendingEntryController extends Controller
     {
         if ($request->ajax()) {
             $cek = DoPendingEntry::where('do_no', $do_no)->first();
+            $periodYear = Carbon::createFromFormat('Y-m',  $cek->period)->format('Y');
+            $periodMonth = Carbon::createFromFormat('Y-m',  $cek->period)->format('m');
+            $check =  DB::connection('db_tbs')
+                ->table('stclose')
+                ->whereYear('DATE','=',  $periodYear)
+                ->whereMonth('DATE','=', $periodMonth)
+                ->get();
+            if ($check->isEmpty()) {
+                return _Error('Sudah closing tidak bisa unvoid');
+            }
             if($cek->period < date('Y-m')){
                 return _Error('DO Temp has been closed');
             }

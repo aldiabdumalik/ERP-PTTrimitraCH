@@ -7,6 +7,7 @@ use App\Http\Traits\TMS\Warehouse\ClaimEntryTrait;
 use App\Models\Dbtbs\ClaimEntry;
 use App\Models\Dbtbs\ClaimEntryRG;
 use Barryvdh\DomPDF\Facade as PDF;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,7 +55,7 @@ class ClaimEntryController extends Controller
                 }
             }
         }else{
-            $query = ClaimEntry::groupBy('cl_no')->get();
+            $query = ClaimEntry::query()->groupBy('cl_no')->get();
             return DataTables::of($query)
                 ->editColumn('written', function($query) {
                     return date('d/m/Y', strtotime($query->written));
@@ -85,6 +86,18 @@ class ClaimEntryController extends Controller
         $items = $request->items;
         $tot_qty = 0;
         $num = 0;
+
+        $periodYear = Carbon::createFromFormat('Y-m',  $request->priod)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $request->priod)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa entry');
+        }
+        
         if (!empty($request->items)) {
             for ($i=0; $i < count($items); $i++) { $tot_qty += $items[$i][5]; }
             for ($i=0; $i < count($items); $i++) {
@@ -168,6 +181,18 @@ class ClaimEntryController extends Controller
         $items = $request->items;
         $tot_qty = 0;
         $num = 0;
+
+        $periodYear = Carbon::createFromFormat('Y-m',  $request->priod)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $request->priod)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa update');
+        }
+
         if (!empty($request->items)) {
             $old = ClaimEntry::where('cl_no', $request->cl_no)->first();
             $creation_by = $old->operator;
@@ -370,6 +395,17 @@ class ClaimEntryController extends Controller
 
     public function claimEntryUnClose(Request $request)
     {
+        $claim = ClaimEntry::where('cl_no', $request->cl_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $claim->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $claim->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa unclose');
+        }
         if (isset($request->cl_no)) {
             $claim = ClaimEntry::where('cl_no', $request->cl_no)->update([
                 'closed' => null
@@ -445,6 +481,18 @@ class ClaimEntryController extends Controller
 
     public function claimEntryVoid(Request $request)
     {
+        $claim = ClaimEntry::where('cl_no', $request->cl_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $claim->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $claim->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa void');
+        }
+
         if (isset($request->cl_no)) {
             $voided = ClaimEntry::where('cl_no', $request->cl_no)
                 ->whereNull('voided')
@@ -474,6 +522,17 @@ class ClaimEntryController extends Controller
 
     public function claimEntryUnVoid(Request $request)
     {
+        $claim = ClaimEntry::where('cl_no', $request->cl_no)->first();
+        $periodYear = Carbon::createFromFormat('Y-m',  $claim->period)->format('Y');
+        $periodMonth = Carbon::createFromFormat('Y-m',  $claim->period)->format('m');
+        $check =  DB::connection('db_tbs')
+            ->table('stclose')
+            ->whereYear('DATE','=',  $periodYear)
+            ->whereMonth('DATE','=', $periodMonth)
+            ->get();
+        if ($check->isEmpty()) {
+            return _Error('Sudah closing tidak bisa unvoid');
+        }
         if (isset($request->cl_no)) {
             $voided = ClaimEntry::where('cl_no', $request->cl_no)
                 ->whereNull('voided')

@@ -21,7 +21,7 @@
                     <div class="mt-4">
                         <div class="row">
                             <div id="custprice-search-table-item" class="col-4 text-right align-items-center">
-                                <input type="text" id="custprice-dtsearch" class="form-control form-control-sm custprice-dtsearch" placeholder="Search item...">
+                                <input type="text" id="custprice-dtsearch" class="form-control form-control-sm custprice-dtsearch" autocomplete="off" placeholder="Search item...">
                             </div>
                             <div id="custprice-btn-table-item" class="col-8 text-right">
                                 <button type="button" id="custprice-btn-add-item" class="btn btn-sm btn-info">

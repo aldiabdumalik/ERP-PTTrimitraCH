@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\TMS\DB_Parts;
+namespace App\Http\Controllers\TMS\Engineering;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
@@ -29,7 +29,7 @@ class DBPartReportController extends Controller
         $type = InputParts::select(['type'])->where('cust_id', $customer)->groupBy('type')->get();
 
         if ($type->isEmpty()) {
-            return _Error('Part type for this customer not exist!');
+            return _Success('Part type for this customer not exist!');
         }
 
         return _Success('OK', 200, $type);

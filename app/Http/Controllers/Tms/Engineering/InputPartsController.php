@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\TMS\DB_Parts;
+namespace App\Http\Controllers\TMS\Engineering;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
