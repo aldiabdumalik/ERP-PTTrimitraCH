@@ -1,6 +1,7 @@
 <div class="form-row align-items-center mb-1">
     <div class="col-3">
-        <input type="text" name="do-create-customercode" id="do-create-customercode" class="form-control form-control-sm" autocomplete="off" required>
+        <input list="list" name="do-create-customercode" id="do-create-customercode" class="form-control form-control-sm" autocomplete="off" required>
+        <datalist id="list"></datalist>
     </div>
     <div class="col-9">
         <div class="form-row align-items-center">

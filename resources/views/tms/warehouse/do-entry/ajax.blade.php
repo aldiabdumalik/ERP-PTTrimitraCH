@@ -203,6 +203,24 @@ $(document).ready(function () {
         // e.preventDefault();
         // return false;
     });
+    $('#do-create-customercode').on('input', delay(function (e) {
+        let like = $(this).val().toUpperCase();
+        if (like.length > 0) {
+            ajaxWithPromise({route: "{{route('tms.warehouse.do_entry.header_tools')}}", method: "POST", data: {type: "customer_list", like:like}}).then(response => {
+                $('#list').empty();
+                $.each(response.content, function (id, data) {
+                    $('#list').append($('<option/>', { 
+                        value: data.code,
+                        text : data.code 
+                    }));
+                })
+            });
+        }else{
+            // tbl_item.clear().draw(false);
+            $('#do-create-customername').val(null)
+        }
+    }, 1000));
+
     $('#do-create-sso').on('keypress', (e) => {
         var sso = $('#do-create-sso').val();
         if(e.which == 13) {
@@ -1543,6 +1561,16 @@ $(document).ready(function () {
             $(elementId).modal(action);
             resolve($(elementId));
         });
+    }
+    function delay(callback, ms) {
+        var timer = 0;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+            callback.apply(context, args);
+            }, ms || 0);
+        };
     }
 
     function hideShow(element=null, hide=true){
