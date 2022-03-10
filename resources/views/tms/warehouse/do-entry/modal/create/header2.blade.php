@@ -8,7 +8,7 @@
                 <input type="text" name="do-create-no" id="do-create-no" class="form-control form-control-sm readonly-first" readonly autocomplete="off" required>
             </div>
             <div class="col-2">
-                <input type="text" name="do-create-branch" id="do-create-branch" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly>
+                <input type="text" name="do-create-branch" id="do-create-branch" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly value="{{ auth()->user()->Branch }}">
             </div>
             <div class="col-2">
                 <input type="text" name="do-create-warehouse" id="do-create-warehouse" class="form-control form-control-sm readonly-first" autocomplete="off" required readonly>
@@ -71,7 +71,7 @@
                 <input type="text" name="do-create-delivery" id="do-create-delivery" class="form-control form-control-sm readonly-first" readonly value="/ /">
             </div>
             <div class="col-6">
-                <input type="text" name="do-create-delivery2" id="do-create-delivery2" class="form-control form-control-sm readonly-first" readonly>
+                <input type="text" name="do-create-delivery2" id="do-create-delivery2" class="form-control form-control-sm" placeholder="Driver" autocomplete="off">
             </div>
         </div>
     </div>

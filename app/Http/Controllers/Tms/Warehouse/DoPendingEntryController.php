@@ -120,7 +120,7 @@ class DoPendingEntryController extends Controller
                 ->whereYear('DATE','=',  $periodYear)
                 ->whereMonth('DATE','=', $periodMonth)
                 ->get();
-            if ($check->isEmpty()) {
+            if ($check->isNotEmpty()) {
                 return _Error('Sudah closing tidak bisa entry');
             }
             $item = json_decode($request->items, true);
@@ -179,7 +179,7 @@ class DoPendingEntryController extends Controller
                 ->whereYear('DATE','=',  $periodYear)
                 ->whereMonth('DATE','=', $periodMonth)
                 ->get();
-            if ($check->isEmpty()) {
+            if ($check->isNotEmpty()) {
                 return _Error('Sudah closing tidak bisa update');
             }
             DB::connection('db_tbs')->beginTransaction();
@@ -249,7 +249,7 @@ class DoPendingEntryController extends Controller
                 ->whereYear('DATE','=',  $periodYear)
                 ->whereMonth('DATE','=', $periodMonth)
                 ->get();
-            if ($check->isEmpty()) {
+            if ($check->isNotEmpty()) {
                 return _Error('Sudah closing tidak bisa post');
             }
 
@@ -297,7 +297,7 @@ class DoPendingEntryController extends Controller
                 ->whereYear('DATE','=',  $periodYear)
                 ->whereMonth('DATE','=', $periodMonth)
                 ->get();
-            if ($check->isEmpty()) {
+            if ($check->isNotEmpty()) {
                 return _Error('Sudah closing tidak bisa unpost');
             }
             if($cek->period < date('Y-m')){
@@ -342,7 +342,7 @@ class DoPendingEntryController extends Controller
                 ->whereYear('DATE','=',  $periodYear)
                 ->whereMonth('DATE','=', $periodMonth)
                 ->get();
-            if ($check->isEmpty()) {
+            if ($check->isNotEmpty()) {
                 return _Error('Sudah closing tidak bisa void');
             }
             if (!is_null($cek->posted_date)) {
@@ -386,7 +386,7 @@ class DoPendingEntryController extends Controller
                 ->whereYear('DATE','=',  $periodYear)
                 ->whereMonth('DATE','=', $periodMonth)
                 ->get();
-            if ($check->isEmpty()) {
+            if ($check->isNotEmpty()) {
                 return _Error('Sudah closing tidak bisa unvoid');
             }
             if($cek->period < date('Y-m')){

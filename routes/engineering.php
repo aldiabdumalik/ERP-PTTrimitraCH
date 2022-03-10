@@ -132,6 +132,10 @@ Route::post('/engineering/production_code/table_index', [
     'uses' => 'TMS\Engineering\ProductionCodeController@tableIndex', 
     'as' => 'tms.db_parts.production_code.tbl_index'
 ]);
+Route::post('/engineering/production_code/save', [
+    'uses' => 'TMS\Engineering\ProductionCodeController@store', 
+    'as' => 'tms.db_parts.production_code.store'
+]);
 Route::post('/engineering/production_code/header_tools', [
     'uses' => 'TMS\Engineering\ProductionCodeController@headerTools', 
     'as' => 'tms.db_parts.production_code.header_tools'

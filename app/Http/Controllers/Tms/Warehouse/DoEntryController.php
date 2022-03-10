@@ -136,7 +136,7 @@ class DoEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa entry');
         }
         for ($i=0; $i < count($items); $i++) { 
@@ -159,6 +159,7 @@ class DoEntryController extends Controller
                 'cust_name' => $request->customername,
                 'source' => "",
                 'id_driver' => "",
+                'drv_name' => $request->delivery2,
                 'remark' => $request->remark,
                 'branch' => $request->branch,
                 'warehouse' => $request->warehouse,
@@ -188,7 +189,7 @@ class DoEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa edit');
         }
 
@@ -219,6 +220,7 @@ class DoEntryController extends Controller
                 'cust_name' => $request->customername,
                 'source' => "",
                 'id_driver' => "",
+                'drv_name' => $request->delivery2,
                 'remark' => $request->remark,
                 'branch' => $request->branch,
                 'warehouse' => $request->warehouse,
@@ -235,9 +237,9 @@ class DoEntryController extends Controller
         try {
             $query = DoEntry::insert($data);
             $log = $this->createLOG($request->do_no, 'EDIT');
-            return $this->_Success('Saved successfully!', 201);
+            return $this->_Success('Updated successfully!', 201);
         } catch (Exception $e) {
-            return $this->_Error('failed to save, please check your form again', 401, $e->getMessage());
+            return $this->_Error('failed to update, please check your form again', 401, $e->getMessage());
         }
     }
 
@@ -258,8 +260,8 @@ class DoEntryController extends Controller
 
     public function DoEntryCancel(Request $request)
     {
-        $do = DoEntry::where('do_no', $request->do_no)->get();
-        if ($do->isEmpty()) {
+        $do = DoEntry::where('do_no', $request->do_no)->whereNotNull('delete_date')->first();
+        if ($do) {
             return $this->_Success(NULL);
         }
         $update = DoEntry::where('do_no', $request->do_no)
@@ -280,7 +282,7 @@ class DoEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa dipost');
         }
         if (isset($query)) {
@@ -309,7 +311,7 @@ class DoEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa void');
         }
         if (isset($query)) {
@@ -337,7 +339,7 @@ class DoEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa unpost');
         }
         if (isset($query)) {
@@ -366,7 +368,7 @@ class DoEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa unvoid');
         }
         if (isset($query)) {
@@ -507,6 +509,7 @@ class DoEntryController extends Controller
                 'cust_name' => $request->customername,
                 'source' => "",
                 'id_driver' => "",
+                'drv_name' => $request->delivery2,
                 'remark' => $request->remark,
                 'branch' => $request->branch,
                 'warehouse' => $request->warehouse,
@@ -598,7 +601,16 @@ class DoEntryController extends Controller
                 return DataTables::of($this->headerToolsCustomer($request))->make(true);
                 break;
             case "customerclick":
-                return $this->headerToolsCustomerClick($request);
+                // return $this->headerToolsCustomerClick($request);
+                $query = DB::connection('ekanban')
+                    ->table('ekanban_customermaster')
+                    ->where('CustomerCode_eKanban', $request->cust_code)
+                    ->selectRaw('CustomerCode_eKanban as code, CustomerName as name, Cus_Group as cg')
+                    ->first();
+                if (!$query) {
+                    return _Error('Customer tidak ditemukan');
+                }
+                return _Success(null, 200, $query);
                 break;
             case "doaddr":
                 return DataTables::of($this->headerToolsCustomerAddr($request))->make(true);
@@ -636,11 +648,15 @@ class DoEntryController extends Controller
                 break;
             case "sso_detail":
                 $result = $this->headerToolsSSODetail($request);
+                $do = $this->qtySJ($request->do_no);
                 if ($result->isEmpty()) {
                     return $this->_Error('SSO/SO data not found!', 404);
-                }else{
-                    return $this->_Success('OK!', 200, $result);
                 }
+                $result = [
+                    'result' => $result,
+                    'do' => $do
+                ];
+                return $this->_Success('OK!', 200, $result);
                 break;
             case "dodataforprint":
                 $query = $this->headerToolsDataDoForPrint($request);
@@ -649,6 +665,16 @@ class DoEntryController extends Controller
                         return date('d/m/Y', strtotime($query->delivery_date));
                     })
                     ->make(true);
+                break;
+            case 'customer_list':
+                $query = 
+                    DB::connection('ekanban')
+                    ->table('ekanban_customermaster')
+                    ->selectRaw('CustomerCode_eKanban as code, CustomerName as name')
+                    ->where('status_data', 'ACTIVE')
+                    ->where('CustomerCode_eKanban', 'like', '%'. $request->like .'%')
+                    ->get();
+                return _Success(null, 200, $query);
                 break;
             default:
                 return $this->_Error('Methode Not Found');

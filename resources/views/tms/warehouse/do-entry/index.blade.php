@@ -90,10 +90,10 @@
 @include('tms.warehouse.do-entry.modal.print.modalPrintDo')
 @include('tms.warehouse.do-entry.modal.table.tableNG')
 @endsection
-@section('script')
-@include('tms.warehouse.do-entry.ajax')
-@endsection
+{{-- @section('script')
+@endsection --}}
 @push('js')
+@include('tms.warehouse.do-entry.ajax')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>

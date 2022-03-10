@@ -37,6 +37,7 @@ class DoEntry extends Model
         'branch',
         'warehouse',
         'delivery_date',
+        'drv_name',
         'direct_date',
         'printed_by',
         'printed_date',

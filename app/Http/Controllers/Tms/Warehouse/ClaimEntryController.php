@@ -94,7 +94,7 @@ class ClaimEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa entry');
         }
         
@@ -189,7 +189,7 @@ class ClaimEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa update');
         }
 
@@ -403,7 +403,7 @@ class ClaimEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa unclose');
         }
         if (isset($request->cl_no)) {
@@ -489,7 +489,7 @@ class ClaimEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa void');
         }
 
@@ -530,7 +530,7 @@ class ClaimEntryController extends Controller
             ->whereYear('DATE','=',  $periodYear)
             ->whereMonth('DATE','=', $periodMonth)
             ->get();
-        if ($check->isEmpty()) {
+        if ($check->isNotEmpty()) {
             return _Error('Sudah closing tidak bisa unvoid');
         }
         if (isset($request->cl_no)) {

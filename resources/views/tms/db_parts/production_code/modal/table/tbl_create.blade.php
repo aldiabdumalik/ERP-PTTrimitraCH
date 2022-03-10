@@ -4,7 +4,7 @@
             <thead class="text-center btn-info" style="font-size: 15px;">
                 <tr style="font-size: 14px;">
                     <th class="align-middle">#</th>
-                    <th class="align-middle">Pod. Code</th>
+                    {{-- <th class="align-middle">Pod. Code</th> --}}
                     <th class="align-middle">Process</th>
                     <th class="align-middle">Detail Process</th>
                     <th class="align-middle">CT <i>(Sec)</i></th>

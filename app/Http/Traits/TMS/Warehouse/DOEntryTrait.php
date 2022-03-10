@@ -19,6 +19,7 @@ trait DoEntryTrait {
         $query = DB::table('db_tbs.entry_sso_tbl')
             ->where('db_tbs.entry_sso_tbl.sso_header', $request->sso_header)
             ->where('db_tbs.entry_sso_tbl.active_cls','1')
+            ->where('db_tbs.entry_so_tbl.branch', Auth::user()->Branch)
             ->leftJoin('db_tbs.entry_so_tbl', 'db_tbs.entry_so_tbl.so_header', '=', 'db_tbs.entry_sso_tbl.so_header')
             ->leftJoin('db_tbs.sys_warehouse', function ($join){
                     $join->on('db_tbs.sys_warehouse.branch', '=', 'db_tbs.entry_so_tbl.branch');
@@ -37,6 +38,7 @@ trait DoEntryTrait {
                 'ekanban.ekanban_customermaster.CustomerName as customer',
                 'db_tbs.entry_so_tbl.po_no as po_no',
                 'db_tbs.entry_sso_tbl.dn_no as dn_no',
+                DB::raw('DATE_FORMAT(db_tbs.entry_sso_tbl.dn_date, "%d/%m/%Y") as dn_date'),
                 'db_tbs.sys_do_address.do_addr1 as Address1',
                 'db_tbs.sys_do_address.do_addr2 as Address2',
                 'db_tbs.sys_do_address.do_addr3 as Address3',
@@ -57,6 +59,7 @@ trait DoEntryTrait {
     {
         $query = DB::table('db_tbs.entry_sso_tbl')
             ->where('db_tbs.entry_sso_tbl.so_header', $request->so_header)
+            ->where('db_tbs.entry_so_tbl.branch', Auth::user()->Branch)
             ->where('db_tbs.entry_sso_tbl.active_cls', '1')
             ->leftJoin('db_tbs.entry_so_tbl', 'db_tbs.entry_so_tbl.so_header', '=', 'db_tbs.entry_sso_tbl.so_header')
             ->leftJoin('ekanban.ekanban_customermaster', 'ekanban.ekanban_customermaster.CustomerCode_eKanban', '=', 'db_tbs.entry_so_tbl.cust_id')
@@ -75,6 +78,7 @@ trait DoEntryTrait {
                 'ekanban.ekanban_customermaster.CustomerName as customer',
                 'db_tbs.entry_so_tbl.po_no as po_no',
                 'db_tbs.entry_sso_tbl.dn_no as dn_no',
+                DB::raw('DATE_FORMAT(db_tbs.entry_sso_tbl.dn_date, "%d/%m/%Y") as dn_date'),
                 'db_tbs.sys_do_address.do_addr1 as Address1',
                 'db_tbs.sys_do_address.do_addr2 as Address2',
                 'db_tbs.sys_do_address.do_addr3 as Address3',
@@ -91,7 +95,7 @@ trait DoEntryTrait {
             ->first();
         return $query;
     }
-    protected function headerToolsSSODetail(Request $request)
+    protected function headerToolsSSODetail($request)
     {
         $where = [];
         if (isset($request->sso_header)) {
@@ -105,6 +109,7 @@ trait DoEntryTrait {
         }
         $query = DB::table('db_tbs.entry_sso_tbl')
             ->where($where)
+            ->where('db_tbs.entry_so_tbl.branch', Auth::user()->Branch)
             ->where('db_tbs.entry_sso_tbl.active_cls', '1')
             ->leftJoin('db_tbs.item','db_tbs.entry_sso_tbl.item_code','=','db_tbs.item.itemcode')
             ->leftJoin('db_tbs.entry_so_tbl', function($join){
@@ -135,6 +140,11 @@ trait DoEntryTrait {
             ->groupBy('db_tbs.entry_sso_tbl.item_code')
             ->get();
         return $query;
+    }
+
+    protected function qtySJ($do_no)
+    {
+        return DoEntry::where('do_no', $do_no)->select(['do_no', 'quantity', 'item_code'])->get();
     }
 
     protected function headerToolsViewDo($data)
@@ -533,6 +543,7 @@ trait DoEntryTrait {
             'db_tbs.item.fac_unit as fac_unit',
             'db_tbs.entry_so_tbl.qty_so as qty_so',
             'db_tbs.entry_sso_tbl.qty_sso as qty_sso',
+            DB::raw('DATE_FORMAT(db_tbs.entry_sso_tbl.dn_date, "%d/%m/%Y") as dn_date'),
             'db_tbs.entry_do_tbl.quantity',
             'db_tbs.entry_do_tbl.branch',
             'db_tbs.entry_do_tbl.warehouse',
@@ -544,6 +555,7 @@ trait DoEntryTrait {
             'db_tbs.entry_do_tbl.created_by as user',
             'db_tbs.entry_do_tbl.sj_type',
             'db_tbs.entry_do_tbl.rr_no',
+            'db_tbs.entry_do_tbl.drv_name',
             DB::raw('
                 date(db_tbs.entry_do_tbl.printed_date) as printed,
                 date(db_tbs.entry_do_tbl.posted_date) as posted,
