@@ -205,7 +205,7 @@ class CustPriceController extends Controller
                                 'cust_id' => $request->cust_id,
                                 'active_date' => $request->active_date,
                                 'written_date' => Carbon::now(),
-                                'status' => 'ADD',
+                                'status' => 'POSTED',
                                 'user' => Auth::user()->FullName,
                                 'note' => null
                             ],
@@ -213,7 +213,7 @@ class CustPriceController extends Controller
                                 'cust_id' => $request->cust_id,
                                 'active_date' => $request->active_date,
                                 'written_date' => Carbon::now(),
-                                'status' => 'POSTED',
+                                'status' => 'ADD',
                                 'user' => Auth::user()->FullName,
                                 'note' => null
                             ]
@@ -313,7 +313,7 @@ class CustPriceController extends Controller
                                 'cust_id' => $request->cust_id,
                                 'active_date' => $request->active_date,
                                 'written_date' => Carbon::now(),
-                                'status' => 'EDIT',
+                                'status' => 'POSTED',
                                 'user' => Auth::user()->FullName,
                                 'note' => null
                             ],
@@ -321,7 +321,7 @@ class CustPriceController extends Controller
                                 'cust_id' => $request->cust_id,
                                 'active_date' => $request->active_date,
                                 'written_date' => Carbon::now(),
-                                'status' => 'POSTED',
+                                'status' => 'EDIT',
                                 'user' => Auth::user()->FullName,
                                 'note' => null
                             ]
@@ -446,6 +446,14 @@ class CustPriceController extends Controller
             }
 
             if ($trg == 1) {
+                $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
+                    'cust_id' => $request->cust,
+                    'active_date' => $request->date,
+                    'written_date' => Carbon::now(),
+                    'status' => 'REPOST',
+                    'user' => Auth::user()->FullName,
+                    'note' => $request->note
+                ]);
                 return _Success('Cust Price has been Reposted', 200, $trg);
             }
 

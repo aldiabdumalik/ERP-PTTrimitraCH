@@ -22,10 +22,10 @@
 @include('tms.master.cust-price.modal.action.posted')
 
 @endsection
-@section('script')
-@include('tms.master.cust-price.ajax')
-@endsection
+{{-- @section('script')
+@endsection --}}
 @push('js')
+@include('tms.master.cust-price.ajax')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>
