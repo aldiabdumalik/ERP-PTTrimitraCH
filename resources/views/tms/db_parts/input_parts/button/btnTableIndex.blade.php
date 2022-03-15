@@ -10,6 +10,7 @@
         @else
             <a class="dropdown-item text-success iparts-act-active" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-check"></i> Reactived</a>
         @endif      
+        <a class="dropdown-item text-primary iparts-act-revisi" href="javascript:void(0)" data-id="{{ $data->id }}" data-no="{{ $data->part_no }}" data-name="{{ $data->part_name }}"><i class="fa fa-share"></i> Revision</a>
         <a class="dropdown-item text-primary iparts-act-log" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-share"></i> Log</a>
     </div>
 </div>

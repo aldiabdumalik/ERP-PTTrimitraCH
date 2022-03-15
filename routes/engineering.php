@@ -119,6 +119,10 @@ Route::put('/engineering/input_parts/{id}/trash_toactive', [
     'uses' => 'TMS\Engineering\InputPartsController@trashToActive', 
     'as' => 'tms.db_parts.input_parts.trash_to_active'
 ]);
+Route::post('/engineering/input_parts/revision', [
+    'uses' => 'TMS\Engineering\InputPartsController@revision', 
+    'as' => 'tms.db_parts.input_parts.revision'
+]);
 
 Route::get('/engineering/production_code', [
     'uses' => 'TMS\Engineering\ProductionCodeController@index', 

@@ -52,16 +52,17 @@
     </div>
 </div>
 @include('tms.db_parts.input_parts.modal.form.index')
+@include('tms.db_parts.input_parts.modal.form.revision')
 @include('tms.db_parts.input_parts.modal.table.customer')
 @include('tms.db_parts.input_parts.modal.table.itemparent')
 @include('tms.db_parts.input_parts.modal.table.logs')
 @include('tms.db_parts.input_parts.modal.table.trash')
 @include('tms.db_parts.input_parts.modal.table.imageView')
 @endsection
-@section('script')
-@include('tms.db_parts.input_parts.jscript')
-@endsection
+{{-- @section('script')
+@endsection --}}
 @push('js')
+@include('tms.db_parts.input_parts.ajax')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>

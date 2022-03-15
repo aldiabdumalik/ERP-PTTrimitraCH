@@ -334,6 +334,51 @@
                 });
             });
         });
+        $('.select2').select2();
+        $(document).on('click', '.iparts-act-revisi', function () {
+            let id = $(this).data('id'),
+                no = $(this).data('no'),
+                name = $(this).data('name');
+            modalAction('#iparts-modal-revisi').then(() => {
+                $('#iparts-revisi-field').find('option').not(':first').remove();
+                ajaxCall({route: "{{route('tms.db_parts.input_parts.header_tools')}}", method: "POST", data: {type: "fields"}}).then(res => {
+                    $.each(res.content, function (i, data) {
+                        $('#iparts-revisi-field').append($('<option>', {
+                            value:i, 
+                            text:data
+                        }));
+                    });
+                    $('#iparts-revisi-id').val(id);
+                    $('#iparts-revisi-partno').val(no);
+                    $('#iparts-revisi-partname').val(name);
+                });
+            })
+        });
+        $('#iparts-modal-revisi').on('hidden.bs.modal', function () {
+            $('#iparts-form-revisi').trigger('reset');
+            $('#iparts-revisi-id').val(0);
+        });
+
+        $(document).on('submit', '#iparts-form-revisi', function () {
+            loading_start();
+            let data = {
+                id: $('#iparts-revisi-id').val(),
+                note: $('#iparts-revisi-note').val(),
+                fields: $('#iparts-revisi-field').val().toString(),
+            }
+            ajaxCall({route: "{{ route('tms.db_parts.input_parts.revision') }}", method: "POST", data: data}).then(res => {
+                loading_stop();
+                Swal.fire({
+                    title: 'Success',
+                    text: res.message,
+                    icon: 'success'
+                }).then(() => {
+                    modalAction('#iparts-modal-revisi', 'hide').then(() => {
+                        table_index.ajax.reload();
+                    });
+                });
+            });
+        });
     
         $(document).on('click', '.iparts-act-active', function () {
             loading_start();

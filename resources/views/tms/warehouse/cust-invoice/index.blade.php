@@ -21,10 +21,10 @@
 @include('tms.warehouse.cust-invoice.modal.table.note')
 
 @endsection
-@section('script')
-@include('tms.warehouse.cust-invoice.ajax')
-@endsection
+{{-- @section('script')
+@endsection --}}
 @push('js')
+@include('tms.warehouse.cust-invoice.ajax')
 <script src="{{ asset('vendor/Datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('vendor/Datatables/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('vendor/datepicker/bootstrap-datepicker.min.js') }}"></script>

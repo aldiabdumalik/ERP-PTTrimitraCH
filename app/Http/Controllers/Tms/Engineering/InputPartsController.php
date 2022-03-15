@@ -335,6 +335,19 @@ class InputPartsController extends Controller
         }
     }
 
+    public function revision(Request $request)
+    {
+        DB::table('db_tbs.dbparts_item_part_tbl_log')->insert([
+            'id_part' => $request->id,
+            'status' => 'REVISION',
+            'note' => $request->note,
+            'value' => $request->fields,
+            'log_date' => Carbon::now(),
+            'log_by' => Auth::user()->FullName
+        ]);
+        return _Success('Data saved successfully');
+    }
+
     public function headerTools(Request $request)
     {
         switch ($request->type) {
@@ -368,6 +381,29 @@ class InputPartsController extends Controller
                 })
                 ->rawColumns(['date', 'time'])
                 ->make(true);
+                break;
+            case "fields":
+                return _Success(null, 200, [
+                    'type' => 'PART TYPE',
+                    'reff' => 'REFF',
+                    'cust_id' => 'CUSTOMER',
+                    'part_no' => 'PART NO',
+                    'part_name' => 'PART NAME',
+                    'part_pict' => 'PART PICTURE',
+                    'part_vol' => 'PART VOLUME',
+                    'qty_part_item' => 'QTY PART ITEM',
+                    'gop_assy' => 'Good of Part ASSY',
+                    'gop_single' => 'Good of Part Single',
+                    'purch_part' => 'Purch Part',
+                    'spec' => 'SPEC',
+                    'ms_t' => 'PART TALL',
+                    'ms_w' => 'PART WIDTH',
+                    'ms_l' => 'PART LENGTH',
+                    'ms_n_strip' => 'N Strip',
+                    'ms_coil_pitch' => 'COIL PITCH',
+                    'part_weight' => 'PART WIGHT',
+                    'vendor_name' => 'COMPANY NAME'
+                ]);
                 break;
             default:
                 # code...
