@@ -688,9 +688,18 @@ class CustPriceController extends Controller
                             ->get();
                     }
                     if ($query->isEmpty()) {
-                        return _Success(null, 200);
+                        $customer = DB::connection('ekanban')
+                        ->table('ekanban_customermaster')
+                        ->selectRaw('CustomerCode_eKanban as cuscode, CustomerName as custname')
+                        ->where('CustomerCode_eKanban', $request->cust_id)
+                        ->first();
+
+                        if ($customer) {
+                            return _Success(null, 200, $customer);
+                        }
+                        return _Error('Customer not found');
                     }else{
-                        return _Success(null, 200, $query);
+                        return _Success('exist', 200, $query);
                     }
                 }
                 return _Error('Params not exist!', 404);

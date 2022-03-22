@@ -327,7 +327,7 @@
                 tbl_customer.clear().draw(false);
                 if (cust_id.length >= 3) {
                     ajaxCall({route: "{{route('tms.master.cust_price.header')}}", method: "POST", data: {type: "customerclick", cust_id: cust_id}}).then(resolve => {
-                        if (resolve.content) {
+                        if (resolve.message == 'exist') {
                             var no = 1;
                             var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                             $.each(resolve.content, function (i, data) {
@@ -356,6 +356,8 @@
                                 $('#custprice-create-customername').val(cust_name)
                             });
                             tbl_item.draw();
+                        }else{
+                            $('#custprice-create-customername').val(resolve.content.custname)
                         }
                     });
                 }
