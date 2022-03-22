@@ -57,6 +57,15 @@ function addZero($num)
 	return $num;
 }
 
+function addZero4($num)
+{
+	$res = explode('.', $num);
+	if(count($res) == 1 || (strlen($res[1]) > 0)) {
+		$num = number_format($num, 4, '.', "");
+	}
+	return $num;
+}
+
 function addZeroFirst($num)
 {
 	$jml = strlen($num);

@@ -177,7 +177,7 @@
                                 data.item_code,
                                 data.PART_NO,
                                 data.DESCRIPT,
-                                (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
+                                (data.price_new == null ? "0.0000" : currency(addZeroes(String(data.price_new)))),
                                 currency(addZeroes(String(data.price_old))),
                             ]);
                             no++;
@@ -331,7 +331,7 @@
                             var no = 1;
                             var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                             $.each(resolve.content, function (i, data) {
-                                var price_new = (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new))));
+                                var price_new = (data.price_new == null ? "0.0000" : currency(addZeroes(String(data.price_new))));
                                 tbl_item.row.add([
                                     no,
                                     data.itemcode_trims,
@@ -412,7 +412,7 @@
                         var no = 1;
                         var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                         $.each(resolve.content, function (i, data) {
-                            var price_new = (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new))));
+                            var price_new = (data.price_new == null ? "0.0000" : currency(addZeroes(String(data.price_new))));
                             tbl_item.row.add([
                                 no,
                                 data.itemcode_trims,
@@ -563,7 +563,7 @@
                         item.itemcode,
                         item.part_no,
                         item.descript,
-                        `<input type="text" class="form-control form-control-sm text-right item-price-text" value="0.00">`,
+                        `<input type="text" class="form-control form-control-sm text-right item-price-text" value="0.0000">`,
                         currency(addZeroes(String(item.price))),
                     ]).node();
                     $(add).attr('id', item.itemcode);
@@ -582,7 +582,7 @@
                     var no = 1;
                     
                     $.each(data, function (i, item) {
-                        var old_price = (item.old_price == null) ? '0.00' : currency(addZeroes(String(item.old_price.price_new)));
+                        var old_price = (item.old_price == null) ? '0.0000' : currency(addZeroes(String(item.old_price.price_new)));
                         var add = tbl_item.row.add([
                             no,
                             item.items.itemcode,
@@ -678,7 +678,7 @@
                                 data.item_code,
                                 data.PART_NO,
                                 data.DESCRIPT,
-                                (data.price_new == null ? "0.00" : currency(addZeroes(String(data.price_new)))),
+                                (data.price_new == null ? "0.0000" : currency(addZeroes(String(data.price_new)))),
                                 currency(addZeroes(String(data.price_old))),
                             ]);
                             no++;
@@ -734,7 +734,7 @@
                                         var no = 1;
                                         var cust_id, cust_name, valas, active_date, created, user, posted, voided, printed, price_by;
                                         $.each(resolve.content, function (i, data) {
-                                            var price_new = (data.price_new == null ? "0.00" : addZeroes(String(data.price_new)));
+                                            var price_new = (data.price_new == null ? "0.0000" : addZeroes(String(data.price_new)));
                                             tbl_item.row.add([
                                                 no,
                                                 data.item_code,
@@ -1061,7 +1061,7 @@
             var value = Number(num);
             var res = num.split(".");
             if(res.length == 1 || (res[1].length < 4)) {
-                value = value.toFixed(2);
+                value = value.toFixed(4);
             }
             return value;
         }

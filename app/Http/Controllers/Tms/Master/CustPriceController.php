@@ -94,10 +94,10 @@ class CustPriceController extends Controller
                 }
             )
             ->editColumn('price_new', function ($query){
-                return rupiah(addZero($query->price_new));
+                return rupiah(addZero4($query->price_new));
             })
             ->editColumn('price_old', function ($query){
-                return rupiah(addZero($query->price_old));
+                return rupiah(addZero4($query->price_old));
             })
             ->editColumn('item_code', function ($query){
                 return view('tms.master.cust-price.button.btnItemCode', ['data' => $query]);
@@ -613,10 +613,10 @@ class CustPriceController extends Controller
                 ->get();
                 return DataTables::of($res)
                     ->editColumn('price_new', function ($res){
-                        return rupiah(addZero($res->price_new));
+                        return rupiah(addZero4($res->price_new));
                     })
                     ->editColumn('price_old', function ($res){
-                        return rupiah(addZero($res->price_old));
+                        return rupiah(addZero4($res->price_old));
                     })
                     ->editColumn('active_date', function ($res){
                         return (is_null($res->active_date) ? '//' : date('d/m/Y', strtotime($res->active_date)));

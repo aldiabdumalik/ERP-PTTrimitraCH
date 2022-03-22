@@ -130,8 +130,8 @@
             <td align="left" style="width: 10%;">{{$item->part_no}}</td>
             <td align="left" style="width: 10%;">{{$item->item_code}}</td>
             <td align="left" style="width: 47%;">{{$item->desc}}</td>
-            <td align="right" style="width:15%" class="{{ ($item->is_update == 1) ? 'text-danger text-miring text-bold' : '' }}">{{rupiah(addZero($item->price_new))}}</td>
-            <td align="right" style="width:15%">{{rupiah(addZero($item->price_old))}}</td>
+            <td align="right" style="width:15%" class="{{ ($item->is_update == 1) ? 'text-danger text-miring text-bold' : '' }}">{{rupiah(addZero4($item->price_new))}}</td>
+            <td align="right" style="width:15%">{{rupiah(addZero4($item->price_old))}}</td>
         </tr>
         @endforeach
     </table>
