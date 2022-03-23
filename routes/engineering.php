@@ -79,10 +79,37 @@ Route::put('/engineering/master_detail_process/{id}/actived', [
     'as' => 'tms.db_parts.master.detail_process.trash_to_active'
 ]);
 
-Route::get('/engineering/input_parts', [
-    'uses' => 'TMS\Engineering\InputPartsController@index', 
-    'as' => 'tms.db_parts.input_parts'
+Route::get('/engineering/database_parts', [
+    'uses' => 'TMS\Engineering\DBPartController@index', 
+    'as' => 'tms.db_parts'
 ]);
+Route::post('/engineering/database_parts/dt_projects', [
+    'uses' => 'TMS\Engineering\DBPartController@dtProjects', 
+    'as' => 'tms.db_parts.projects.dt'
+]);
+Route::get('/engineering/database_parts/projects/{id}', [
+    'uses' => 'TMS\Engineering\DBPartController@detail', 
+    'as' => 'tms.db_parts.projects.detail'
+]);
+Route::post('/engineering/database_parts/projects/save', [
+    'uses' => 'TMS\Engineering\DBPartController@store', 
+    'as' => 'tms.db_parts.projects.store'
+]);
+Route::put('/engineering/database_parts/projects/{id}/update', [
+    'uses' => 'TMS\Engineering\DBPartController@update', 
+    'as' => 'tms.db_parts.projects.update'
+]);
+Route::post('/engineering/database_parts/projects/tools', [
+    'uses' => 'TMS\Engineering\DBPartController@tools', 
+    'as' => 'tms.db_parts.projects.tools'
+]);
+Route::delete('/engineering/database_parts/projects/delete', [
+    'uses' => 'TMS\Engineering\DBPartController@destroy', 
+    'as' => 'tms.db_parts.projects.destroy'
+]);
+
+
+
 Route::get('/engineering/input_parts/{id}/detail', [
     'uses' => 'TMS\Engineering\InputPartsController@detail', 
     'as' => 'tms.db_parts.input_parts.detail'

@@ -253,9 +253,16 @@ class CustPriceController extends Controller
                 $itemcode_s = str_replace(' ', '', $items[$i]['itemcode']);
                 $old = CustPrice::where('status', 'ACTIVE')->where('item_code', $itemcode_s)->orderBy('active_date', 'DESC')->first();
                 if ($old) {
+                    $item_replace = str_replace(' ', '', $items[$i]['itemcode']);
                     $prices = str_replace(',', '', $items[$i]['new_price']);
                     $is_update = ($old->price_new != $prices) ? $is_update = 1 : $is_update = 0;
                     $price_old = $old->price_new;
+                    // Add range date
+                    if ($request->active_date > $old->active_date) {
+                        CustPrice::where('item_code', $item_replace)
+                            ->where('active_date', $old->active_date)
+                            ->update(['range_date' => date('Y-m-d', strtotime($request->active_date. "-1 days"))]);
+                    }
                 }else{
                     $is_update = 0;
                     $price_old = 0;
