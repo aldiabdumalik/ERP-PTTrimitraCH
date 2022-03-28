@@ -141,7 +141,7 @@ class DBPartController extends Controller
 
                 // Revision Session
                 $revisionNumber = 0;
-                $revisionType = Revision::type($id)->lastNumber()->first();
+                $revisionType = Revision::whereId($id)->lastNumber()->first();
 
                 if (is_null($old_data) && is_null($new_data)) {
                     if ($revisionType) {
@@ -191,6 +191,26 @@ class DBPartController extends Controller
         ->insert([
             'id_projects' => $id,
             'status' => 'NON ACTIVE',
+            'note' => null,
+            'log_date' => Carbon::now(),
+            'log_by' => Auth::user()->FullName
+        ]);
+
+        return _Success('Data successfully non actived, you can see on view trash');
+    }
+
+    public function toActive($id)
+    {
+        $find = Projects::find($id);
+
+        $find->deleted_at = null;
+
+        $find->save();
+
+        DB::table('db_tbs.dbparts_projects_tbl_log')
+        ->insert([
+            'id_projects' => $id,
+            'status' => 'REACTIVE',
             'note' => null,
             'log_date' => Carbon::now(),
             'log_by' => Auth::user()->FullName
@@ -251,7 +271,7 @@ class DBPartController extends Controller
     static function checkRevision($request)
     {
         if ($request->type_id) {
-            $rev = Revision::type($request->type_id)->whereNotNull('posted_at')->lastNumber()->first();
+            $rev = Revision::whereId($request->type_id)->whereNotNull('posted_at')->lastNumber()->first();
 
             if ($rev) {
                 return _Success(1, 200, $rev->revision_number);

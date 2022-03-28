@@ -72,6 +72,29 @@ $(document).ready(function () {
         ajaxCall({route: "{{ route('tms.db_parts.projects.tools') }}", method: "POST", data: {type: "check_revision", type_id: id}}).then(response => {
             if (response.message == 1) {
                 loading_stop();
+                Swal.fire({
+                    icon: 'warning',
+                    text: `Project ini sudah ter-POST dengan jumlah revisi ${response.content}, Anda yakin ingin menambah revisi?`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then(answer => {
+                    if (answer.value == true) {
+                        loading_start();
+                        modalAction('#projects-modal-form').then(() => {
+                            ajaxCall({route: route, method: "GET"}).then(res => {
+                                loading_stop();
+                                let data = res.content
+                                $('#projects-id').val(data.id)
+                                $('#projects-customer').val(data.cust_id)
+                                $('#projects-customername').val(data.custname)
+                                $('#projects-type').val(data.type)
+                                $('#projects-reff').val(data.reff)
+                            });
+
+                        })
+                    }
+                });
             }else{
                 modalAction('#projects-modal-form').then(() => {
                     ajaxCall({route: route, method: "GET"}).then(res => {
@@ -90,6 +113,41 @@ $(document).ready(function () {
             // $('#projects-customer').val();
             // $('#projects-customername').val(data.custname);
         })
+    });
+
+    $(document).on('click', '.projects-act-parts', function () {
+        let id = $(this).data('id'),
+            url = "{{ route('tms.db_parts.parts.index', [':type']) }}";
+            url = url.replace(':type', btoa(id));
+        window.open(url, '_blank');
+    });
+
+    $(document).on('click', '.projects-act-delete', function () {
+        let id = $(this).data('id'),
+            cust_id = $(this).data('customer');
+        let route = "{{ route('tms.db_parts.projects.destroy', [':id']) }}";
+            route  = route.replace(':id', id);
+            Swal.fire({
+                icon: 'warning',
+                text: `Are you sure non active this projects, Now?`,
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then(answer => {
+                if (answer.value == true) {
+                    loading_start();
+                    ajaxCall({route: route, method: "DELETE"}).then(resolve => {
+                        loading_stop();
+                        Swal.fire({
+                            title: 'success',
+                            text: resolve.message,
+                            icon: 'success'
+                        }).then(() => {
+                            dt(cust_id)
+                        });
+                    });
+                }
+            });
     });
 
 

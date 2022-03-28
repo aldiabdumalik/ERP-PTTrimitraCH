@@ -45,6 +45,11 @@ class Projects extends Model
         return $query->where('type', $type);
     }
 
+    public function scopeTypeId($query, $type)
+    {
+        return $query->where('id', $type);
+    }
+
     public function scopeDetails($query, $id)
     {
         return $query->leftJoin('ekanban.ekanban_customermaster as customer', 'customer.CustomerCode_eKanban', '=', 'db_tbs.dbparts_projects_tbl.cust_id')

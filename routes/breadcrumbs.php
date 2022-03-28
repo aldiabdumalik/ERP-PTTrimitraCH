@@ -249,3 +249,8 @@ Breadcrumbs::for('tms.db_parts.report', function ($trail) {
 Breadcrumbs::for('tms.db_parts', function ($trail) {
     $trail->push('Database Parts', '#');
 });
+
+Breadcrumbs::for('tms.db_parts.parts.index', function ($trail) {
+    $trail->parent('tms.db_parts');
+    $trail->push('Master Parts', '#');
+});

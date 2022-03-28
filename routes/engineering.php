@@ -103,50 +103,98 @@ Route::post('/engineering/database_parts/projects/tools', [
     'uses' => 'TMS\Engineering\DBPartController@tools', 
     'as' => 'tms.db_parts.projects.tools'
 ]);
-Route::delete('/engineering/database_parts/projects/delete', [
+Route::delete('/engineering/database_parts/projects/{id}/delete', [
     'uses' => 'TMS\Engineering\DBPartController@destroy', 
     'as' => 'tms.db_parts.projects.destroy'
 ]);
+Route::put('/engineering/database_parts/projects/{id}/actived', [
+    'uses' => 'TMS\Engineering\DBPartController@toActive', 
+    'as' => 'tms.db_parts.projects.to_active'
+]);
+
+Route::get('/engineering/database_parts/parts/{type}/view', [
+    'uses' => 'TMS\Engineering\PartsController@index', 
+    'as' => 'tms.db_parts.parts.index'
+]);
+Route::get('/engineering/database_parts/parts/{id}/detail', [
+    'uses' => 'TMS\Engineering\PartsController@detail', 
+    'as' => 'tms.db_parts.parts.detail'
+]);
+Route::post('/engineering/database_parts/parts/dt', [
+    'uses' => 'TMS\Engineering\PartsController@dt', 
+    'as' => 'tms.db_parts.parts.dt'
+]);
+Route::post('/engineering/database_parts/parts/tools', [
+    'uses' => 'TMS\Engineering\PartsController@tools', 
+    'as' => 'tms.db_parts.parts.tools'
+]);
+Route::post('/engineering/database_parts/parts/save', [
+    'uses' => 'TMS\Engineering\PartsController@store', 
+    'as' => 'tms.db_parts.parts.store'
+]);
+Route::put('/engineering/database_parts/parts/{id}/update', [
+    'uses' => 'TMS\Engineering\PartsController@update', 
+    'as' => 'tms.db_parts.parts.update'
+]);
+Route::post('/engineering/database_parts/parts/upload_temp', [
+    'uses' => 'TMS\Engineering\PartsController@uploadTemp', 
+    'as' => 'tms.db_parts.parts.upload_temp'
+]);
+Route::delete('/engineering/database_parts/parts/{id}/delete', [
+    'uses' => 'TMS\Engineering\PartsController@destroy', 
+    'as' => 'tms.db_parts.parts.destroy'
+]);
+Route::put('/engineering/database_parts/parts/{id}/to_active', [
+    'uses' => 'TMS\Engineering\PartsController@toActive', 
+    'as' => 'tms.db_parts.parts.to_active'
+]);
+Route::post('/engineering/database_parts/parts/table_trash', [
+    'uses' => 'TMS\Engineering\PartsController@tableTrash', 
+    'as' => 'tms.db_parts.parts.table_trash'
+]);
 
 
-
-Route::get('/engineering/input_parts/{id}/detail', [
+Route::get('/engineering/database_parts/item/{type}/view', [
+    'uses' => 'TMS\Engineering\InputPartsController@index', 
+    'as' => 'tms.db_parts.input_parts.index'
+]);
+Route::get('/engineering/database_parts/item/{id}/detail', [
     'uses' => 'TMS\Engineering\InputPartsController@detail', 
     'as' => 'tms.db_parts.input_parts.detail'
 ]);
-Route::post('/engineering/input_parts/table_index', [
+Route::post('/engineering/database_parts/item/table_index', [
     'uses' => 'TMS\Engineering\InputPartsController@tableIndex', 
     'as' => 'tms.db_parts.input_parts.tbl_index'
 ]);
-Route::post('/engineering/input_parts/upload_temp', [
+Route::post('/engineering/database_parts/item/upload_temp', [
     'uses' => 'TMS\Engineering\InputPartsController@uploadTemp', 
     'as' => 'tms.db_parts.input_parts.upload_temp'
 ]);
-Route::post('/engineering/input_parts/header_tools', [
+Route::post('/engineering/database_parts/item/header_tools', [
     'uses' => 'TMS\Engineering\InputPartsController@headerTools', 
     'as' => 'tms.db_parts.input_parts.header_tools'
 ]);
-Route::post('/engineering/input_parts/store', [
+Route::post('/engineering/database_parts/item/store', [
     'uses' => 'TMS\Engineering\InputPartsController@store', 
     'as' => 'tms.db_parts.input_parts.store'
 ]);
-Route::put('/engineering/input_parts/{id}/update', [
+Route::put('/engineering/database_parts/item/{id}/update', [
     'uses' => 'TMS\Engineering\InputPartsController@update', 
     'as' => 'tms.db_parts.input_parts.update'
 ]);
-Route::delete('/engineering/input_parts/{id}/delete', [
+Route::delete('/engineering/database_parts/item/{id}/delete', [
     'uses' => 'TMS\Engineering\InputPartsController@destroy', 
     'as' => 'tms.db_parts.input_parts.destroy'
 ]);
-Route::post('/engineering/input_parts/table_trash', [
+Route::post('/engineering/database_parts/item/table_trash', [
     'uses' => 'TMS\Engineering\InputPartsController@tableTrash', 
     'as' => 'tms.db_parts.input_parts.trash'
 ]);
-Route::put('/engineering/input_parts/{id}/trash_toactive', [
+Route::put('/engineering/database_parts/item/{id}/trash_toactive', [
     'uses' => 'TMS\Engineering\InputPartsController@trashToActive', 
     'as' => 'tms.db_parts.input_parts.trash_to_active'
 ]);
-Route::post('/engineering/input_parts/revision', [
+Route::post('/engineering/database_parts/item/revision', [
     'uses' => 'TMS\Engineering\InputPartsController@revision', 
     'as' => 'tms.db_parts.input_parts.revision'
 ]);
