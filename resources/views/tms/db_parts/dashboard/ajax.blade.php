@@ -150,6 +150,86 @@ $(document).ready(function () {
             });
     });
 
+    let tbl_log;
+    $(document).on('click', '.projects-act-log', function () {
+        let id = $(this).data('id');
+        modalAction('#projects-modal-logs').then((resolve) => {
+            tbl_log = $('#projects-datatable-logs').DataTable({
+                processing: true,
+                serverSide: true,
+                destroy: true,
+                ajax: {
+                    url: "{{ route('tms.db_parts.projects.tools') }}",
+                    method: 'POST',
+                    data: {type: "logs", id: id},
+                    headers: token_header
+                },
+                columns: [
+                    {data: 'status', name: 'status'},
+                    {data: 'date', name: 'date'},
+                    {data: 'time', name: 'time'},
+                    {data: 'note', name: 'note'},
+                    {data: 'log_by', name: 'log_by'},
+                ],
+                ordering: false,
+            });
+        });
+    });
+
+    $(document).on('click', '.projects-act-posted', function () {
+        loading_start();
+        let id = $(this).data('id'),
+            route = "{{ route('tms.db_parts.projects.detail', [':id']) }}",
+            method = "GET";
+            route = route.replace(':id', id);
+        modalAction('#projects_post-modal-form').then(() => {
+            ajaxCall({route: route, method: method}).then(ress => {
+                loading_stop();
+                let data = ress.content;
+                $('#projects_post-id').val(data.id)
+                $('#projects_post-type').val(data.type)
+                $('#projects_post-reff').val(data.reff)
+            });
+        })
+    })
+
+    $(document).on('submit', '#projects_post-form', function (e) {
+        e.preventDefault()
+        let id = $('#projects_post-id').val(),
+            route = "{{ route('tms.db_parts.projects.posted', [':id']) }}",
+            method = "POST",
+            data = {
+                note: $('#projects_post-note').val()
+            };
+            route = route.replace(':id', id);
+        loading_start();
+        ajaxCall({route: route, method: method, data: data}).then(ress => {
+            loading_stop();
+            if (ress.content != 3) {
+                Swal.fire({
+                    title: 'Success',
+                    text: ress.message,
+                    icon: 'success'
+                }).then(() => {
+                    modalAction('#projects_post-modal-form', 'hide').then(() => {
+                        // table_index.ajax.reload();
+                        // dt(data.cust_id)
+                    });
+                });
+            } else {
+                Swal.fire({
+                    title: 'Warning',
+                    text: ress.message,
+                    icon: 'warning'
+                })
+            }
+        })
+    })
+    $('#projects_post-modal-form').on('hidden.bs.modal', function () {
+        $(this).find('form').trigger('reset')
+        $(this).find('#projects_post-id').val(0)
+    });
+
 
     $('#projects-btn-modal-create').on('click', function () {
         modalAction('#projects-modal-form')

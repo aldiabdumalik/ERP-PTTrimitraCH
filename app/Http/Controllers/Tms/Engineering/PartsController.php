@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\DB_parts\Parts;
 use App\Models\Dbtbs\DB_parts\Projects;
+use App\Models\Dbtbs\DB_parts\Revision;
+use App\Models\Dbtbs\DB_parts\RevisionLogs;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,6 +19,11 @@ use Yajra\DataTables\Facades\DataTables;
 class PartsController extends Controller
 {
     use ToolsTrait;
+
+    function __construct() 
+    {
+        date_default_timezone_set('Asia/Jakarta');
+    }
 
     public function index($type)
     {
@@ -69,14 +76,13 @@ class PartsController extends Controller
         ])
         ->where('db_tbs.dbparts_item_part_tbl.id', $id)
         // ->whereNull('part_parent.parent_id')
-        ->first()->toArray();
-
+        ->first();
         if (!$model) {
             return _Success(0);
         }
 
-        if (!is_null($model['parent_id'])) {
-            $parent = Parts::whereId($model['parent_id'])
+        if (!is_null($model->parent_id)) {
+            $parent = Parts::whereId($model->parent_id)
             ->select([
                 'part_no as parent_partno',
                 'part_name as parent_partname',
@@ -84,7 +90,7 @@ class PartsController extends Controller
             ->first()->toArray();
 
 
-            $model = array_merge($model, $parent);
+            $model = array_merge($model->toArray(), $parent);
         }
 
         return _Success(1, 200, $model);
@@ -152,6 +158,93 @@ class PartsController extends Controller
                 ->select(static::arr_select())
                 ->where('id', $id)
                 ->first();
+            if ($request->part_pict !== $prev->part_pict) {
+                if (File::exists(public_path('db-parts/temp/' . $request->part_pict))) {
+                    File::move(public_path('db-parts/temp/' . $request->part_pict), public_path('db-parts/pictures/' . $request->part_pict));
+                }
+                if (File::exists(public_path('db-parts/pictures/'. $prev->part_pict))) {
+                    File::delete(public_path('db-parts/pictures/'. $prev->part_pict));
+                }
+            }
+
+            $model = Parts::find($id);
+            $model->project_id = base64_decode($request->type_id);
+            $model->part_id = null;
+            $model->parent_id = $request->parent_id;
+            $model->type = $request->type;
+            $model->reff = $request->reff;
+            $model->cust_id = $request->cust_id;
+            $model->part_no = $request->part_no;
+            $model->part_name = $request->part_name;
+            $model->part_pict = $request->part_pict;
+            $model->part_vol = $request->part_vol;
+            $model->qty_part_item = $request->qty_part_item;
+            $model->gop_assy = $request->gop_assy;
+            $model->gop_single = $request->gop_single;
+            $model->purch_part = $request->purch_part;
+            $model->spec = $request->spec;
+            $model->ms_t = $request->ms_t;
+            $model->ms_w = $request->ms_w;
+            $model->ms_l = $request->ms_l;
+            $model->ms_n_strip = $request->ms_n_strip;
+            $model->ms_coil_pitch = $request->ms_coil_pitch;
+            $model->part_weight = $request->part_weight;
+            $model->vendor_name = $request->vendor_name;
+            $model->spec_pict = null;
+            $model->created_by = Auth::user()->FullName;
+            $model->created_date = Carbon::now();
+            $model->is_active = 1;
+            $model->save();
+
+            $now = Parts::query()
+                ->select(static::arr_select())
+                ->where('id', $id)
+                ->first();
+
+            $old_data = array_diff_assoc($prev->toArray(), $now->toArray());
+            $new_data = array_diff_assoc($now->toArray(), $prev->toArray());
+            // $note = $this->_createLogOnUpdate($cek);
+            DB::table('db_tbs.dbparts_item_part_tbl_log')->insert([
+                'id_part' => $id,
+                'status' => 'EDIT',
+                'note' => null,
+                'value' => (empty($old_data)) ? '' : json_encode($old_data),
+                'log_date' => Carbon::now(),
+                'log_by' => Auth::user()->FullName
+            ]);
+            $revisionNumber = 0;
+            $revisionType = Revision::where('id_type', base64_decode($request->type_id))->lastNumber()->first();
+
+            if (!empty($old_data) && !empty($new_data)) {
+                if ($revisionType) {
+                    if (is_null($revisionType->posted_at)) {
+                        $revisionNumber = $revisionType->revision_number;
+                    }else{
+                        $revisionNumber = $revisionType->revision_number + 1;
+                        Revision::create([
+                            'revision_number' => $revisionNumber,
+                            'id_type' => base64_decode($request->type_id)
+                        ]);
+                    }
+                }else{
+                    $revisionNumber = 1;
+                    Revision::create([
+                        'revision_number' => $revisionNumber,
+                        'id_type' => base64_decode($request->type_id)
+                    ]);
+                }
+                RevisionLogs::create([
+                    'id_part' => $id,
+                    'id_type' => base64_decode($request->type_id),
+                    'revision_number' => $revisionNumber,
+                    'type_revision' => 'PART',
+                    'old_data' => (empty($old_data)) ? null : json_encode($old_data),
+                    'new_data' => (empty($new_data)) ? null : json_encode($new_data),
+                    'created_by' => Auth::user()->FullName,
+                    'created_at' => Carbon::now()
+                ]);
+            }
+            return _Success('Updated successfully!', 201, $old_data);
 
         } catch (Exception $e) {
             return _Error($e->getMessage());
@@ -301,10 +394,6 @@ class PartsController extends Controller
     static function arr_select()
     {
         return [
-            'parent_id',
-            'type',
-            'reff',
-            'cust_id',
             'part_no',
             'part_name',
             'part_pict',
@@ -321,7 +410,6 @@ class PartsController extends Controller
             'ms_coil_pitch',
             'part_weight',
             'vendor_name',
-            'spec_pict',
         ];
     }
 }

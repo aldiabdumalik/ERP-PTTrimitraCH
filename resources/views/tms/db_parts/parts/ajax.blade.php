@@ -175,7 +175,7 @@
                     $('#iparts-index-customername').val(dt.cust_name);
     
                     $('#iparts-index-ppartno').val(parent_no);
-                    if (parent_no != null) {
+                    if (parent_no !== null) {
                         $('#iparts-index-ppartno').attr('data-id', dt.parent_id)
                     }
                     $('#iparts-index-ppartname').val(parent_name);
@@ -199,9 +199,9 @@
                     $('#iparts-index-weight').val(dt.part_weight);
                     $('#iparts-index-vendor').val(dt.vendor_name);
     
-                    $('#iparts-form-index input').prop('readonly', true);
-                    $('#iparts-form-index input[type=file]').prop('disabled', true);
-                    $('#iparts-form-index select').prop('disabled', true);
+                    // $('#iparts-form-index input').prop('readonly', true);
+                    // $('#iparts-form-index input[type=file]').prop('disabled', true);
+                    // $('#iparts-form-index select').prop('disabled', true);
                 });
             });
         });

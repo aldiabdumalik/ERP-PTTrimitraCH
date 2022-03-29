@@ -15,6 +15,11 @@ use Yajra\DataTables\Facades\DataTables;
 
 class DBPartController extends Controller
 {
+    function __construct() 
+    {
+        date_default_timezone_set('Asia/Jakarta');
+    }
+
     public function index()
     {
         $bycust = Projects::groupBy('cust_id')->get();
@@ -141,9 +146,9 @@ class DBPartController extends Controller
 
                 // Revision Session
                 $revisionNumber = 0;
-                $revisionType = Revision::whereId($id)->lastNumber()->first();
+                $revisionType = Revision::where('id_type', $id)->lastNumber()->first();
 
-                if (is_null($old_data) && is_null($new_data)) {
+                if (!empty($old_data) && !empty($new_data)) {
                     if ($revisionType) {
                         if (is_null($revisionType->posted_at)) {
                             $revisionNumber = $revisionType->revision_number;
@@ -219,24 +224,77 @@ class DBPartController extends Controller
         return _Success('Data successfully non actived, you can see on view trash');
     }
 
+    public function postedRevision($id, Request $request)
+    {
+        $request->validate([
+            'note' => 'required',
+        ]);
+        $model = Revision::where('id_type', $id)->lastNumber()->first();
+
+        if (!$model) {
+            return _Success('Belum ada revisi pada type/project ini!', 200, 3);
+        }
+        
+        if (!is_null($model->posted_at)) {
+            return _Success('Revisi pada type/project ini sudah dipost', 200, 3);
+        }
+        $revisionNumber = $model->revision_number;
+        Revision::where(function ($on) use($id, $revisionNumber){
+            $on->where('id_type', $id);
+            $on->where('revision_number', $revisionNumber);
+        })->update([
+            'posted_at' => Carbon::now(),
+            'posted_by' => Auth::user()->FullName,
+            'note' => $request->note
+        ]);
+
+        return _Success("Type/Project ini berhasil di POST dengan jumlah revisi $revisionNumber");
+    }
+
+    public function revLogs($id)
+    {
+        $revLogs = RevisionLogs::where('id_type', $id)
+        ->orderBy('created_at', 'ASC')
+        ->get();
+
+        if ($revLogs->isEmpty()) {
+            return _Error('Revisi tidak di temukan');
+        }
+
+        $byLogType = $revLogs->groupBy('type_revision')->toArray();
+
+        foreach ($byLogType as $key => $val) {
+            foreach($val as $v){
+                if ($key=='PART') {
+                    foreach (json_decode($v['old_data']) as $oldKey => $old) {
+                        foreach (json_decode($v['new_data']) as $newKey => $new) {
+                            if ($oldKey == $newKey) {
+                                $coba[$key][$v['id_part']][$oldKey] = [
+                                    'field' => $oldKey,
+                                    'name' => static::convertFieldName($oldKey),
+                                    'old' => $old,
+                                    'new' => $new
+                                ];
+                                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return _Success(1, 200, $coba);
+    }
+
     public function tools(Request $request)
     {
-        switch ($request->type) {
-            case 'init':
-                return static::init();
-                break;
-            case 'customer_enter':
-                return static::customerEnter($request);
-                break;
-
-            case 'check_revision':
-                return static::checkRevision($request);
-                break;
-            
-            default:
-                # code...
-                break;
+        if ($request->type) {
+            $func = $request->type;
+            if (!method_exists($this, $func)) {
+                return _Error("Sorry, function $func does not exist.");
+            }
+            return static::$func($request);
         }
+        return _Error("Sorry, params does not exist.");
     }
 
     static function init()
@@ -251,7 +309,7 @@ class DBPartController extends Controller
         return _Success(1, 200, $arr);
     }
 
-    static function customerEnter($request)
+    static function customer_enter($request)
     {
         if (isset($request->cust_id)) {
             $customer = DB::connection('ekanban')
@@ -268,7 +326,7 @@ class DBPartController extends Controller
         return _Error('Please check your params');
     }
 
-    static function checkRevision($request)
+    static function check_revision($request)
     {
         if ($request->type_id) {
             $rev = Revision::whereId($request->type_id)->whereNotNull('posted_at')->lastNumber()->first();
@@ -280,5 +338,43 @@ class DBPartController extends Controller
             return _Success(0, 200);
         }
         return _Error('Please check your params');
+    }
+
+    static function logs($request)
+    {
+        $result = DB::table('db_tbs.dbparts_projects_tbl_log')->where('id_projects', $request->id)->orderBy('log_date', 'DESC')->get();
+        return DataTables::of($result)
+        ->addColumn('date', function($result){
+            return date('d/m/Y', strtotime($result->log_date));
+        })
+        ->addColumn('time', function($result){
+            return date('H:i:s', strtotime($result->log_date));
+        })
+        ->rawColumns(['date', 'time'])
+        ->make(true);
+    }
+
+    static function convertFieldName($key)
+    {
+        $arr = [
+            'part_no' => 'Part No',
+            'part_name' => 'Part Name',
+            'part_pict' => 'Part Picture',
+            'part_vol' => 'Volume',
+            'qty_part_item' => 'Qty Part Item',
+            'gop_assy' => 'Group of Parts Assy',
+            'gop_single' => 'Group of Parts Single',
+            'purch_part' => 'Purch Part',
+            'spec' => 'Spec',
+            'ms_t' => 'Tall',
+            'ms_w' => 'Width',
+            'ms_l' => 'Length',
+            'ms_n_strip' => 'N/Strip',
+            'ms_coil_pitch' => 'Coil/Pitch',
+            'part_weight' => 'Weight',
+            'vendor_name' => 'Plan mass prod. vendor name',
+        ];
+
+        return $arr[$key];
     }
 }

@@ -111,6 +111,14 @@ Route::put('/engineering/database_parts/projects/{id}/actived', [
     'uses' => 'TMS\Engineering\DBPartController@toActive', 
     'as' => 'tms.db_parts.projects.to_active'
 ]);
+Route::post('/engineering/database_parts/projects/{id}/posted', [
+    'uses' => 'TMS\Engineering\DBPartController@postedRevision', 
+    'as' => 'tms.db_parts.projects.posted'
+]);
+Route::get('/engineering/database_parts/projects/{id}/rev_logs', [
+    'uses' => 'TMS\Engineering\DBPartController@revLogs', 
+    'as' => 'tms.db_parts.projects.rev_logs'
+]);
 
 Route::get('/engineering/database_parts/parts/{type}/view', [
     'uses' => 'TMS\Engineering\PartsController@index', 
