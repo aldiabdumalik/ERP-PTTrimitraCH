@@ -416,6 +416,340 @@
         $('#iparts-modal-ppict').on('hidden.bs.modal', function () {
             $('#view-ppict').attr('src', '#');
         });
+
+        // Production Process
+        let tbl_prodpro = $('#prodpro-datatables-index').DataTable({
+            destroy: true,
+            lengthChange: false,
+            searching: false,
+            paging: false,
+            ordering: false,
+            scrollY: "300px",
+            scrollCollapse: true,
+            fixedHeader: true,
+        })
+
+        $(document).on('click', '.iparts-act-prodpro', function () {
+            let id = $(this).data('id'),
+                route = "{{ route('tms.db_parts.parts.prodpro', [':id']) }}";
+                route  = route.replace(':id', id);
+            loading_start();
+            ajaxCall({route: route, method: "GET"}).then(response => {
+                loading_stop();
+                if (response.message == 0) {
+                    modalAction('#prodpro-modal-jml').then(() => {
+                        $('#prodpro-jml-id').val(id)
+                    })
+                }else{
+                    let data = response.content;
+                    modalAction('#prodpro-modal-index').then(() => {
+                        $('#prodpro-index-id').val(id);
+                        let element_dprocess = 0;
+                        $.each(data, function (i, dt) {
+                            ++i;
+                            element_dprocess = (dt.id_detail_process == null) ? `<input type="text" name="prodpro-index-process_det[]" id="prodpro-index-process_det-${i}" class="form-control form-control-sm prodpro-index-process_det" data-i="${i}" value="" placeholder="Press ENTER" autocomplete="off">` : `<input type="text" name="prodpro-index-process_det[]" id="prodpro-index-process_det-${i}" class="form-control form-control-sm prodpro-index-process_det" data-i="${i}" data-process="${dt.id_detail_process}" value="${dt.process_detail_name}" placeholder="Press ENTER" autocomplete="off">`;
+                            let add = tbl_prodpro.row.add([
+                                dt.process_sequence_2,
+                                `<select name="prodpro-index-process[]" id="prodpro-index-process-${i}" class="form-control form-control-sm prodpro-index-process" data-i="${i}"></select>`,
+                                element_dprocess,
+                                `<input type="number" class="form-control form-control-sm" id="prodpro-index-ct-${i}" value="${dt.ct_second}" autocomplete="off">`,
+                                `<input type="text" class="form-control form-control-sm" id="prodpro-index-tools-${i}" value="${dt.tool_parts}" autocomplete="off">`,
+                                `<select class="form-control form-control-sm" id="prodpro-index-tonage-${i}">
+                                    <option value="&lt;35">&lt;35</option>
+                                    <option value="35">35</option>
+                                    <option value="45">45</option>
+                                    <option value="55">55</option>
+                                    <option value="60">60</option>
+                                    <option value="65">65</option>
+                                    <option value="80">80</option>
+                                    <option value="85">85</option>
+                                    <option value="100">100</option>
+                                    <option value="110">110</option>
+                                    <option value="150">150</option>
+                                    <option value="160">160</option>
+                                    <option value="200">200</option>
+                                    <option value="250">250</option>
+                                    <option value="300">300</option>
+                                    <option value="400">400</option>
+                                    <option value="500">500</option>
+                                    <option value="550">550</option>
+                                    <option value="630">630</option>
+                                    <option value="&gt;650">&gt;650</option>
+                                </select>`,
+                                `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${i}" class="form-control form-control-sm prodpro-index-prodline" data-i="${i}" value="${dt.production_line}" autocomplete="off" readonly>`,
+                                `<input type="text" class="form-control form-control-sm" value="${dt.company_name}" autocomplete="off">`,
+                            ]);
+                            tbl_prodpro.draw(false);
+                            $(`#prodpro-index-tonage-${i}`).val(dt.tonage)
+
+                            loading_start();
+                            ajaxCall({route: "{{ route('tms.db_parts.parts.tools') }}", method: "POST", data: {type: "get_process"} }).then(datap => {
+                                loading_stop();
+                                $(`#prodpro-index-process-${i}`).html('<option value="">Select process</option>');
+                                $.each(datap.content, function (x, item) {
+                                    $(`#prodpro-index-process-${i}`).append($('<option>', { 
+                                        value: item.process_id,
+                                        text : item.process_name
+                                    }).attr('data-routing', item.routing));
+                                });
+                                $('#prodpro-index-process-' +i).val(dt.id_process)
+                            });
+                        })
+                    });
+                }
+            })
+        })
+        $('#prodpro-modal-jml').on('hidden.bs.modal', function () {
+            $('#prodpro-jml-id').val(0)
+            $('#prodpro-jml').val(null)
+        })
+
+        $(document).on('submit', '#prodpro-form-jml', function (e) {
+            e.preventDefault()
+            let id = $('#prodpro-jml-id').val();
+            let jml = $('#prodpro-jml').val();
+            let data = {
+                jml: jml,
+                id_part: id
+            };
+            modalAction('#prodpro-modal-jml', 'hide')
+            modalAction('#prodpro-modal-index').then(() => {
+                $('#prodpro-index-id').val(id);
+                for (let i = 1; i <= parseInt(jml); i++) {
+                    let add = tbl_prodpro.row.add([
+                        i,
+                        `<select name="prodpro-index-process[]" id="prodpro-index-process-${i}" class="form-control form-control-sm prodpro-index-process" data-i="${i}"></select>`,
+                        `<input type="text" name="prodpro-index-process_det[]" id="prodpro-index-process_det-${i}" class="form-control form-control-sm prodpro-index-process_det" data-i="${i}" placeholder="Press ENTER" autocomplete="off">`,
+                        `<input type="number" class="form-control form-control-sm" value="" autocomplete="off">`,
+                        `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
+                        `<select class="form-control form-control-sm">
+                            <option value="&lt;35">&lt;35</option>
+                            <option value="35">35</option>
+                            <option value="45">45</option>
+                            <option value="55">55</option>
+                            <option value="60">60</option>
+                            <option value="65">65</option>
+                            <option value="80">80</option>
+                            <option value="85">85</option>
+                            <option value="100">100</option>
+                            <option value="110">110</option>
+                            <option value="150">150</option>
+                            <option value="160">160</option>
+                            <option value="200">200</option>
+                            <option value="250">250</option>
+                            <option value="300">300</option>
+                            <option value="400">400</option>
+                            <option value="500">500</option>
+                            <option value="550">550</option>
+                            <option value="630">630</option>
+                            <option value="&gt;650">&gt;650</option>
+                        </select>`,
+                        `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${i}" class="form-control form-control-sm prodpro-index-prodline" data-i="${i}" autocomplete="off" readonly>`,
+                        `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
+                    ]);
+                    tbl_prodpro.draw(false);
+
+                    loading_start();
+                    ajaxCall({route: "{{ route('tms.db_parts.parts.tools') }}", method: "POST", data: {type: "get_process"} }).then(data => {
+                        loading_stop();
+                        $(`#prodpro-index-process-${i}`).html('<option value="">Select process</option>');
+                        $.each(data.content, function (x, item) {
+                            $(`#prodpro-index-process-${i}`).append($('<option>', { 
+                                value: item.process_id,
+                                text : item.process_name
+                            }).attr('data-routing', item.routing));
+                        });
+                    });
+                }
+            })
+        })
+
+        $(document).on('click', '#prodpro-btn-add-item', function () {
+            var index = tbl_prodpro.data().length;
+            let i = ++index;
+
+            let add = tbl_prodpro.row.add([
+                i,
+                `<select name="prodpro-index-process[]" id="prodpro-index-process-${i}" class="form-control form-control-sm prodpro-index-process" data-i="${i}"></select>`,
+                `<input type="text" name="prodpro-index-process_det[]" id="prodpro-index-process_det-${i}" class="form-control form-control-sm prodpro-index-process_det" data-i="${i}" placeholder="Press ENTER" autocomplete="off">`,
+                `<input type="number" class="form-control form-control-sm" value="" autocomplete="off">`,
+                `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
+                `<select class="form-control form-control-sm">
+                    <option value="&lt;35">&lt;35</option>
+                    <option value="35">35</option>
+                    <option value="45">45</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                    <option value="100">100</option>
+                    <option value="110">110</option>
+                    <option value="150">150</option>
+                    <option value="160">160</option>
+                    <option value="200">200</option>
+                    <option value="250">250</option>
+                    <option value="300">300</option>
+                    <option value="400">400</option>
+                    <option value="500">500</option>
+                    <option value="550">550</option>
+                    <option value="630">630</option>
+                    <option value="&gt;650">&gt;650</option>
+                </select>`,
+                `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${i}" class="form-control form-control-sm prodpro-index-prodline" data-i="${i}" autocomplete="off" readonly>`,
+                `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
+            ]);
+            tbl_prodpro.draw(false);
+            loading_start();
+            ajaxCall({route: "{{ route('tms.db_parts.parts.tools') }}", method: "POST", data: {type: "get_process"} }).then(data => {
+                loading_stop();
+                $(`#prodpro-index-process-${i}`).html('<option value="">Select process</option>');
+                $.each(data.content, function (x, item) {
+                    $(`#prodpro-index-process-${i}`).append($('<option>', { 
+                        value: item.process_id,
+                        text : item.process_name
+                    }).attr('data-routing', item.routing));
+                });
+            });
+        });
+
+        $('#prodpro-modal-index').on('shown.bs.modal', function () {
+            adjustDraw(tbl_prodpro)
+        })
+        $('#prodpro-modal-index').on('hidden.bs.modal', function () {
+            tbl_prodpro.clear().draw(false);
+            $('#prodpro-index-id').val(0);
+        });
+
+        let tbl_detail_process;
+        $(document).on('keypress keydown', '.prodpro-index-process_det', function (e) {
+            if(e.which == 13) {
+                let i = $(this).data('i'),
+                    process = $(`#prodpro-index-process-${i}`).val()
+                modalAction('#prodpro-modal-dprocess').then(() => {
+                    $('#process_detail_ke').val(i);
+                    tbl_detail_process = $('#prodpro-datatable-dprocess').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        destroy: true,
+                        ordering: false,
+                        ajax: {
+                            url: "{{ route('tms.db_parts.parts.tools') }}",
+                            method: 'POST',
+                            headers: token_header,
+                            data: {type: "get_detail_process", process: process},
+                        },
+                        columns: [
+                            {data:'process_name', name: 'process_name'},
+                            {data:'process_detail_name', name: 'process_detail_name'},
+                        ],
+                    });
+                })
+            }
+            if(e.which == 8 || e.which == 46) { return false; }
+            return false;
+        });
+
+        $('#prodpro-datatable-dprocess').off('dblclick', 'tr').on('dblclick', 'tr', function () {
+            let data = tbl_detail_process.row(this).data(),
+                i = $('#process_detail_ke').val()
+            modalAction('#prodpro-modal-dprocess', 'hide').then(() => {
+                $('#prodpro-index-process_det-' + i).val(data.process_detail_name)
+                $('#prodpro-index-process_det-' + i).attr('data-process', data.process_detail_id)
+                $('#prodpro-index-prodline-' + i).val(data.routing)
+            })
+        })
+
+        $('#prodpro-modal-dprocess').on('hidden.bs.modal', function () {
+            $('#process_detail_ke').val(null)
+        })
+
+        $(document).on('change', '.prodpro-index-process', function () {
+            let i = $(this).data('i')
+            $('#prodpro-index-process_det-' + i).val(null);
+            $('#prodpro-index-prodline-' + i).val($(this).find('option:selected').data('routing'));
+        })
+
+        $(document).on('submit', '#prodpro-form-index', function (e) {
+            e.preventDefault();
+            let items = tbl_prodpro.rows().data().toArray();
+            let items_fix = [];
+            if (items.length > 0) {
+                for (let i = 0; i < items.length; i++) {
+                    let obj_tbl_index = {}
+
+                    let process = tbl_prodpro.rows().cell(i, 1).nodes().to$().find('select').val();
+                    let dprocess = tbl_prodpro.rows().cell(i, 2).nodes().to$().find('input').data('process');
+                    let ct = tbl_prodpro.rows().cell(i, 3).nodes().to$().find('input').val();
+                    let tool = tbl_prodpro.rows().cell(i, 4).nodes().to$().find('input').val();
+                    let tonage = tbl_prodpro.rows().cell(i, 5).nodes().to$().find('select').val();
+                    let routing = tbl_prodpro.rows().cell(i, 6).nodes().to$().find('input').val();
+                    let company = tbl_prodpro.rows().cell(i, 7).nodes().to$().find('input').val();
+
+                    if (process == "" || ct == "" || tool == "" || tonage == "" || routing == "" || company == "") {
+                        Swal.fire({
+                            title: 'Warning',
+                            text: 'Harap lengkapi table input',
+                            icon: 'warning'
+                        }).then(() => {
+                            return false;
+                        });
+                    }
+
+                    obj_tbl_index.process = process;
+                    obj_tbl_index.dprocess = (dprocess == undefined) ? null : dprocess;
+                    obj_tbl_index.ct = ct;
+                    obj_tbl_index.tool = tool;
+                    obj_tbl_index.tonage = tonage;
+                    obj_tbl_index.routing = routing;
+                    obj_tbl_index.company = company;
+
+                    items_fix.push(obj_tbl_index);
+                }
+
+                // console.log(items_fix);
+                let data = {
+                    part_id: $('#prodpro-index-id').val(),
+                    items: JSON.stringify(items_fix)
+                }
+
+                // let route = "{{ route('tms.db_parts.production_code.store') }}";
+                let id = data.part_id,
+                    route = "{{ route('tms.db_parts.parts.prodpro', [':id']) }}";
+                    route  = route.replace(':id', id);
+                let method = 0;
+                loading_start();
+                ajaxCall({route: route, method: "GET"}).then(response => {
+                    if (response.message == 1) {
+                        route = "{{ route('tms.db_parts.parts.prodpro.update', [':id']) }}";
+                        route  = route.replace(':id', id);
+                        method = "PUT";
+                    }else{
+                        route = "{{ route('tms.db_parts.parts.prodpro.store') }}";
+                        method = "POST";
+                    }
+
+                    ajaxCall({route: route, method: method, data: data}).then(response => {
+                        loading_stop();
+                        Swal.fire({
+                            title: 'Success',
+                            text: response.message,
+                            icon: 'success'
+                        }).then(() => {
+                            modalAction('#prodpro-form-index', 'hide')
+                        });
+                    })
+                })
+            }else{
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Harap lengkapi table input',
+                    icon: 'warning'
+                }).then(() => {
+                    return false;
+                });
+            }
+        });
     
         // Lib func
         function date_convert($date) {

@@ -127,27 +127,27 @@ $(document).ready(function () {
             cust_id = $(this).data('customer');
         let route = "{{ route('tms.db_parts.projects.destroy', [':id']) }}";
             route  = route.replace(':id', id);
-            Swal.fire({
-                icon: 'warning',
-                text: `Are you sure non active this projects, Now?`,
-                showCancelButton: true,
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No'
-            }).then(answer => {
-                if (answer.value == true) {
-                    loading_start();
-                    ajaxCall({route: route, method: "DELETE"}).then(resolve => {
-                        loading_stop();
-                        Swal.fire({
-                            title: 'success',
-                            text: resolve.message,
-                            icon: 'success'
-                        }).then(() => {
-                            dt(cust_id)
-                        });
+        Swal.fire({
+            icon: 'warning',
+            text: `Are you sure non active this projects, Now?`,
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        }).then(answer => {
+            if (answer.value == true) {
+                loading_start();
+                ajaxCall({route: route, method: "DELETE"}).then(resolve => {
+                    loading_stop();
+                    Swal.fire({
+                        title: 'success',
+                        text: resolve.message,
+                        icon: 'success'
+                    }).then(() => {
+                        dt(cust_id)
                     });
-                }
-            });
+                });
+            }
+        });
     });
 
     let tbl_log;
@@ -175,6 +175,90 @@ $(document).ready(function () {
             });
         });
     });
+
+    let tbl_revlog;
+    $(document).on('click', '#projects_post-vlogs', function (e) {
+        e.preventDefault();
+        let groupColumn = 0,
+            id = $('#projects_post-id').val(),
+            route = "{{ route('tms.db_parts.projects.rev_logs', [':id']) }}",
+            method = "GET";
+            route = route.replace(':id', id);
+        modalAction('#projects-modal-logrev').then(() => {
+            tbl_revlog = $('#projects-table-revlogs').DataTable({
+                processing: true,
+                serverSide: false,
+                destroy: true,
+                ajax: {
+                    url: route,
+                    method: 'GET',
+                    headers: token_header
+                },
+                columns: [
+                    {data:'group', name: 'group', className: "align-middle"},
+                    // {data:'DT_RowIndex', name: 'DT_RowIndex', className: "align-middle"},
+                    {data:'name', name: 'name', className: "align-middle"},
+                    {data:'old', name: 'old', className: "align-middle"},
+                    {data:'new', name: 'new', className: "align-middle"}
+                ],
+                ordering: false,
+                lengthChange: false,
+                searching: false,
+                paging: false,
+                ordering: false,
+                scrollY: "500px",
+                scrollCollapse: true,
+                fixedHeader: true,
+                columnDefs: [
+                    { "visible": false, "targets": groupColumn },
+                ],
+                drawCallback: function ( settings ) {
+                    var api = this.api();
+                    var rows = api.rows( {page:'current'} ).nodes();
+                    var last=null;
+                    var x = 1;
+                    api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
+                        var arr_group = group.split('|');
+                        if ( last !== group ) {
+                            let log_type = `Log Type : ${arr_group[0]}`;
+                            let part_nomer = (arr_group[1] !== " ") ? ` - Part No : ${arr_group[1]}` : '';
+                            $(rows).eq( i ).before(`
+                                <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
+                                    <td colspan="3" class="text-bold align-middle">${log_type}${part_nomer}</td>
+                                </tr>
+                            `);
+
+                            last = group;
+                        }
+                    });
+                }
+            })
+        })
+        // ajaxCall({route: route, method: method}).then(response => {
+        //     let data = response.content;
+        //     let c_part = 0;
+        //     $.each(data, function (type, val) {
+        //         // console.log(type, val);
+        //         if (type == 'PART') {
+        //             $.each(val, function (part_id, val_part) {
+        //                 $.each(val_part, function (i, item) {
+        //                     ++c_part;
+        //                     $('#projects-table-revlogs tbody').append(`<tr>
+        //                         <td rowspan="${c_part}">${type}</td>
+        //                         <td>${type}</td>
+        //                         <td>${type}</td>
+        //                         <td>${type}</td>
+        //                         <td>${type}</td>
+        //                     </tr>`)
+        //                 })
+        //             })
+
+        //         }
+        //     })
+        //     console.log(c_part);
+        //     modalAction('#projects-modal-logrev')
+        // })
+    })
 
     $(document).on('click', '.projects-act-posted', function () {
         loading_start();

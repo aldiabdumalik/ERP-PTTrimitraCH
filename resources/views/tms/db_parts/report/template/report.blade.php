@@ -72,24 +72,24 @@
                 <tr>
                     <td width="20%">Customer</td>
                     <td width="5%">:</td>
-                    <td>{{ $params[0]->cust_name }}</td>
+                    <td>{{ $project->custname }}</td>
                 </tr>
                 <tr>
                     <td width="20%">Type</td>
                     <td width="5%">:</td>
-                    <td>{{ $params[0]->type }}</td>
+                    <td>{{ $project->type }}</td>
                 </tr>
                 <tr>
                     <td width="20%">Reff</td>
                     <td width="5%">:</td>
-                    <td>{{ $params[0]->reff }}</td>
+                    <td>{{ $project->reff }}</td>
                 </tr>
             </table>
         </div>
         <div class="header2">
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td align="center"><h1>DRAFT DATA BASE PARTS</h1></td>
+                    <td align="center"><h1>DATABASE PARTS</h1></td>
                 </tr>
                 <tr>
                     <td align="center"><i>ISSUED DATE : {{ date('F jS. Y') }}</i></td>
@@ -97,7 +97,7 @@
             </table>
         </div>
         <div class="header3">
-            <table border="1" cellpadding="20" cellspacing="0" width="100%" style="font-size: 7px;">
+            {{-- <table border="1" cellpadding="20" cellspacing="0" width="100%" style="font-size: 7px;">
                 <tr>
                     <td align="center">No.</td>
                     <td align="center">DATE</td>
@@ -113,7 +113,7 @@
                     <td align="center">{{$l->log_by}}</td>
                 </tr>
                 @endforeach 
-            </table>
+            </table> --}}
         </div>
     </div>
     <div style="padding: 10px;">
@@ -198,9 +198,7 @@
                 <td align="center" class="p-td">mm.</td>
                 <td align="center" class="p-td">Strip</td>
             </tr>
-            @php
-                $no=0;
-            @endphp
+            @php $no=0; @endphp
             @foreach ($res as $key => $item)
             @php
                 $part_no = explode('|', $item['part_no']);
@@ -221,19 +219,27 @@
                 $vendor_name = explode('|', $item['vendor_name']);
             @endphp
             <tr>
-                <td align="center" class="p-td">{{++$no}}</td>
-                <td align="center" class="p-td">{{$part_no[0]}} {!! (!empty($part_no[1])) ? $part_no[1] : null !!}</td>
-                <td align="center" class="p-td">{{$part_name[0]}} {!! (!empty($part_name[1])) ? $part_name[1] : null !!}</td>
-                <td align="center" style="padding: 10px;"><img src="{{public_path('db-parts/pictures/'.$part_pict[0])}}" alt="" style="width: 100px;"></td>
-                <td align="center" class="p-td">{{$part_vol[0]}} <i>Pcs <br>Per Month</i>{!! (!empty($part_vol[1])) ? $part_vol[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{++$no}}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$part_no[0]}} {!! (!empty($part_no[1])) ? $part_no[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$part_name[0]}} {!! (!empty($part_name[1])) ? $part_name[1] : null !!}</td>
+                <td align="center" style="padding: 10px;" rowspan="{{ count($item['production']) }}"><img src="{{public_path('db-parts/pictures/'.$part_pict[0])}}" alt="" style="width: 50px;"></td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$part_vol[0]}} <i>Pcs <br>Per Month</i>{!! (!empty($part_vol[1])) ? $part_vol[1] : null !!}</td>
+                @if (count($item['production']) > 0)
+                <td align="center" class="p-td">{{$item['production'][0]['process_name']}} <br/> {{ $item['production'][0]['process_detail_name'] }}</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                @else
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
-                <td align="center" class="p-td">{{$qty_part_item[0]}} {!! (!empty($qty_part_item[1])) ? $qty_part_item[1] : null !!}</td>
-                <td align="center" class="p-td">{{($gop_assy[0] == 1 ? 1 : '')}} {!! (!empty($gop_assy[1])) ? $gop_assy[1] : null !!}</td>
-                <td align="center" class="p-td">{{($gop_single[0] == 1 ? 1 : '')}} {!! (!empty($gop_single[1])) ? $gop_single[1] : null !!}</td>
+                @endif
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$qty_part_item[0]}} {!! (!empty($qty_part_item[1])) ? $qty_part_item[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{($gop_assy[0] == 1 ? 1 : '')}} {!! (!empty($gop_assy[1])) ? $gop_assy[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{($gop_single[0] == 1 ? 1 : '')}} {!! (!empty($gop_single[1])) ? $gop_single[1] : null !!}</td>
                 <td align="center" class="p-td">{{($purch_part[0] == 1 ? 1 : '')}} {!! (!empty($purch_part[1])) ? $purch_part[1] : null !!}</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
@@ -258,18 +264,88 @@
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
-                <td align="center" class="p-td">{{$spec[0]}} {!! (!empty($spec[1])) ? $spec[1] : null !!}</td>
-                <td align="center" class="p-td">{{$ms_t[0]}} {!! (!empty($ms_t[1])) ? $ms_t[1] : null !!}</td>
-                <td align="center" class="p-td">{{$ms_w[0]}} {!! (!empty($ms_w[1])) ? $ms_w[1] : null !!}</td>
-                <td align="center" class="p-td">{{$ms_l[0]}} {!! (!empty($ms_l[1])) ? $ms_l[1] : null !!}</td>
-                <td align="center" class="p-td">{{$ms_n_strip[0]}} {!! (!empty($ms_n_strip[1])) ? $ms_n_strip[1] : null !!}</td>
-                <td align="center" class="p-td">{{$ms_coil_pitch[0]}} {!! (!empty($ms_coil_pitch[1])) ? $ms_coil_pitch[1] : null !!}</td>
-                <td align="center" class="p-td">{{$part_weight[0]}} {!! (!empty($part_weight[1])) ? $part_weight[1] : null !!}</td>
-                <td align="center" class="p-td">{{$vendor_name[0]}} {!! (!empty($vendor_name[1])) ? $vendor_name[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$spec[0]}} {!! (!empty($spec[1])) ? $spec[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_t[0]}} {!! (!empty($ms_t[1])) ? $ms_t[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_w[0]}} {!! (!empty($ms_w[1])) ? $ms_w[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_l[0]}} {!! (!empty($ms_l[1])) ? $ms_l[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_n_strip[0]}} {!! (!empty($ms_n_strip[1])) ? $ms_n_strip[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_coil_pitch[0]}} {!! (!empty($ms_coil_pitch[1])) ? $ms_coil_pitch[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$part_weight[0]}} {!! (!empty($part_weight[1])) ? $part_weight[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$vendor_name[0]}} {!! (!empty($vendor_name[1])) ? $vendor_name[1] : null !!}</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">&nbsp;</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">&nbsp;</td>
+                <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">&nbsp;</td>
+            </tr>
+            @if (count($item['production']) > 0)
+            @for ($i = 1; $i < count($item['production']); $i++)
+            <tr>
+                <td align="center" class="p-td">{{$item['production'][$i]['process_name']}} <br/> {{ $item['production'][$i]['process_detail_name'] }}</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
             </tr>
+            @endfor
+                {{-- @foreach($item['production'] as $prod)
+
+            <tr>
+                <td align="center" class="p-td">{{ $prod['process_detail_name'] }}</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+                <td align="center" class="p-td">&nbsp;</td>
+            </tr>
+
+                @endforeach --}}
+            @endif
             @endforeach
             {{-- @foreach ($params as $key => $item)
             <tr>

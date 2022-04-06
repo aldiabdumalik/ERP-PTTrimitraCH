@@ -56,6 +56,11 @@
 @include('tms.db_parts.parts.modal.table.logs')
 @include('tms.db_parts.parts.modal.table.trash')
 @include('tms.db_parts.parts.modal.table.imageView')
+
+{{-- production process --}}
+@include('tms.db_parts.parts.modal.table.production_process.jml')
+@include('tms.db_parts.parts.modal.table.production_process.prodpro')
+@include('tms.db_parts.parts.modal.table.production_process.detail_process')
 @endsection
 {{-- @section('script')
 @endsection --}}

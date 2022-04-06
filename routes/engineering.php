@@ -160,6 +160,26 @@ Route::post('/engineering/database_parts/parts/table_trash', [
     'uses' => 'TMS\Engineering\PartsController@tableTrash', 
     'as' => 'tms.db_parts.parts.table_trash'
 ]);
+Route::get('/engineering/database_parts/parts/{part_id}/production_process', [
+    'uses' => 'TMS\Engineering\PartsController@productionProcess', 
+    'as' => 'tms.db_parts.parts.prodpro'
+]);
+Route::get('/engineering/database_parts/parts/production_process/{id_part}/dt', [
+    'uses' => 'TMS\Engineering\PartsController@dtProductionProcess', 
+    'as' => 'tms.db_parts.parts.prodpro.dt'
+]);
+Route::post('/engineering/database_parts/parts/production_process/save', [
+    'uses' => 'TMS\Engineering\PartsController@storeProductionProcess', 
+    'as' => 'tms.db_parts.parts.prodpro.store'
+]);
+Route::put('/engineering/database_parts/parts/production_process/{id_part}/update', [
+    'uses' => 'TMS\Engineering\PartsController@updateProductionProcess', 
+    'as' => 'tms.db_parts.parts.prodpro.update'
+]);
+Route::get('/engineering/database_parts/report/print/{type}', [
+    'uses' => 'TMS\Engineering\DBPartReportController@report', 
+    'as' => 'tms.db_parts.report.print'
+]);
 
 
 Route::get('/engineering/database_parts/item/{type}/view', [

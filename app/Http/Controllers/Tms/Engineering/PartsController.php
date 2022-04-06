@@ -5,6 +5,7 @@ namespace App\Http\Controllers\TMS\Engineering;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\DB_parts\Parts;
+use App\Models\Dbtbs\DB_parts\ProductionCode;
 use App\Models\Dbtbs\DB_parts\Projects;
 use App\Models\Dbtbs\DB_parts\Revision;
 use App\Models\Dbtbs\DB_parts\RevisionLogs;
@@ -411,5 +412,180 @@ class PartsController extends Controller
             'part_weight',
             'vendor_name',
         ];
+    }
+
+    public function productionProcess($part_id)
+    {
+        $model = ProductionCode::detail()
+        ->partId($part_id)
+        ->select([
+            'db_tbs.dbparts_productioncode_tbl.*',
+            'tbl_process.itemcode_process_id',
+            'tbl_process.process_name',
+            'tbl_dprocess.process_detail_name',
+        ])
+        ->get();
+
+        if ($model->isEmpty()) {
+            return _Success(0);
+        }
+
+        return _Success(1, 200, $model);
+    }
+
+    public function dtProductionProcess($id_part)
+    {
+        $model = ProductionCode::partId($id_part)->get();
+        return DataTables::of($model)
+            ->addIndexColumn()
+            ->skipPaging()
+            ->toJson();
+    }
+
+    public function storeProductionProcess(Request $request)
+    {
+        $items = json_decode($request->items, true);
+        $part_id = $request->part_id;
+        if (!empty($items)) {
+            $sq1 = 1;
+            $sq2 = 0;
+            $sq_tot = count($items);
+            $parts = Parts::find($part_id);
+            foreach ($items as $key => $item) {
+                ProductionCode::create([
+                    'id_part' => $part_id,
+                    'id_process' => $item['process'],
+                    'id_detail_process' => $item['dprocess'],
+                    'cust_id' => $parts->cust_id,
+                    'production_code' => null,
+                    'part_no' => $parts->part_no,
+                    'process_x' => null,
+                    'part_name' => $parts->part_name,
+                    'part_type' => $parts->type,
+                    'process_sequence_1' => $sq1,
+                    'process_sequence_2' => ++$sq2,
+                    'ct_second' => $item['ct'],
+                    'tool_parts' => $item['tool'],
+                    'tonage' => $item['tonage'],
+                    'production_line' => $item['routing'],
+                    'company_name' => $item['company'],
+                    'created_by' => Auth::user()->FullName,
+                    'created_at' => Carbon::now(),
+                ]);
+
+                if ($sq2 == $sq_tot) {
+                    $parts->squence_process == "1/$sq_tot";
+                    $parts->save();
+
+                    DB::table('db_tbs.dbparts_productioncode_tbl_log')->insert([
+                        'id_part' => $part_id,
+                        'status' => 'ADD',
+                        'note' => 'Squence: '. "1/$sq_tot",
+                        'log_date' => Carbon::now(),
+                        'log_by' => Auth::user()->FullName
+                    ]);
+                }
+            }
+
+            return _Success('Production process saved successfully');
+        }
+        return _Error('Please input on table');
+    }
+
+    public function updateProductionProcess($id_part, Request $request)
+    {
+        $items = json_decode($request->items, true);
+        $part_id = $request->part_id;
+
+        // $prev = ProductionCode::detail()
+        // ->partId($part_id)
+        // ->select([
+        //     'db_tbs.dbparts_productioncode_tbl.*',
+        //     'tbl_process.itemcode_process_id',
+        //     'tbl_process.process_name',
+        //     'tbl_dprocess.process_detail_name',
+        // ])
+        // ->get();
+
+        if (!empty($items)) {
+            $sq1 = 1;
+            $sq2 = 0;
+            $sq_tot = count($items);
+            $parts = Parts::find($part_id);
+            ProductionCode::where('id_part', $part_id)->delete(); // Delete old data
+            foreach ($items as $key => $item) {
+                ProductionCode::create([
+                    'id_part' => $part_id,
+                    'id_process' => $item['process'],
+                    'id_detail_process' => $item['dprocess'],
+                    'cust_id' => $parts->cust_id,
+                    'production_code' => null,
+                    'part_no' => $parts->part_no,
+                    'process_x' => null,
+                    'part_name' => $parts->part_name,
+                    'part_type' => $parts->type,
+                    'process_sequence_1' => $sq1,
+                    'process_sequence_2' => ++$sq2,
+                    'ct_second' => $item['ct'],
+                    'tool_parts' => $item['tool'],
+                    'tonage' => $item['tonage'],
+                    'production_line' => $item['routing'],
+                    'company_name' => $item['company'],
+                    'created_by' => Auth::user()->FullName,
+                    'created_at' => Carbon::now(),
+                ]);
+
+                if ($sq2 == $sq_tot) {
+                    $parts->squence_process == "1/$sq_tot";
+                    $parts->save();
+
+                    DB::table('db_tbs.dbparts_productioncode_tbl_log')->insert([
+                        'id_part' => $part_id,
+                        'status' => 'EDIT',
+                        'note' => 'Squence: '. "1/$sq_tot",
+                        'log_date' => Carbon::now(),
+                        'log_by' => Auth::user()->FullName
+                    ]);
+                }
+            }
+
+            return _Success('Production process updated successfully');
+        }
+        return _Error('Please input on table');
+    }
+
+    public function storeProductionProcessBck(Request $request)
+    {
+        $arr_id = [];
+        if ($request->jml) {
+            for ($i=0; $i < $request->jml; $i++) { 
+                $model = new ProductionCode;
+        
+                $model->id_part = $request->id_part;
+                $model->created_at = Carbon::now();
+                $model->created_by = Auth::user()->FullName;
+
+                $model->save();
+                $arr_id[] = $model->id;
+            }
+            return _Success(null, 200, $arr_id);
+        }
+    }
+
+    static function get_process($request)
+    {
+        $db = DB::table('db_tbs.dbparts_master_process_tbl')->where('is_active', 1)->get();
+        return _Success(1, 200, $db);
+    }
+
+    static function get_detail_process($request)
+    {
+        $query = DB::table('db_tbs.dbparts_master_process_detail_tbl')
+        ->leftJoin('db_tbs.dbparts_master_process_tbl', 'db_tbs.dbparts_master_process_detail_tbl.process_id', '=', 'db_tbs.dbparts_master_process_tbl.process_id')
+        ->where('db_tbs.dbparts_master_process_detail_tbl.process_id', $request->process)
+        ->where('db_tbs.dbparts_master_process_detail_tbl.is_active', 1)
+        ->get();
+        return DataTables::of($query)
+        ->make(true);
     }
 }

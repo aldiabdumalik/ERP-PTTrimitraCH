@@ -5,6 +5,9 @@ namespace App\Http\Controllers\TMS\Engineering;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\DB_parts\InputParts;
+use App\Models\Dbtbs\DB_parts\Parts;
+use App\Models\Dbtbs\DB_parts\Projects;
+use App\Models\Dbtbs\DB_parts\RevisionLogs;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +39,57 @@ class DBPartReportController extends Controller
         return _Success('OK', 200, $type);
     }
 
-    public function report(Request $request)
+    public function report($type, Request $request)
+    {
+        // $type = 6;
+
+        $project = Projects::details($type)->first();
+
+        $parts = Parts::with('production')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->get();
+        $arr_params = $parts->toArray();
+
+        $revLogs = RevisionLogs::where('id_type', $type)
+        ->orderBy('created_at', 'ASC')
+        ->get();
+
+        if ($revLogs->isEmpty()) {
+            $request->session()->flash('message', 'Data revisi tidak ditemukan!');
+            return Redirect::back();
+        }
+
+        $byLogType = $revLogs->groupBy('type_revision')->toArray();
+        $log_mark = [];
+        foreach ($byLogType as $key => $val) {
+            foreach($val as $v){
+                if ($key=='PART') {
+                    foreach (json_decode($v['old_data']) as $oldKey => $old) {
+                        foreach (json_decode($v['new_data']) as $newKey => $new) {
+                            if ($oldKey == $newKey) {
+                                $log_mark[$v['id_part']][$oldKey] = $v['revision_number'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $res = [];
+        for ($x=0; $x < count($arr_params); $x++) {
+            foreach ($arr_params[$x] as $key => $value) {
+                if (!empty($log_mark[$arr_params[$x]['id']][$key])) {
+                    $res[$x][$key] = $arr_params[$x][$key] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['id']][$key] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$key]) .'</p></div>';
+                }else{
+                    $res[$x][$key] = $arr_params[$x][$key];
+                }
+            }
+        }
+        
+        // print_r($res);die;
+        $pdf = PDF::loadView('tms.db_parts.report.template.report', compact('res', 'project'))->setPaper('a3', 'landscape');
+        return $pdf->stream();
+    }
+
+    public function _report(Request $request)
     {
         if (isset($request->params) && $request->params != "") {
             $decode = base64_decode($request->params);

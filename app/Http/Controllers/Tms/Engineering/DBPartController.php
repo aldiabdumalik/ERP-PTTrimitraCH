@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\TMS\Engineering;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dbtbs\DB_parts\Parts;
 use App\Models\Dbtbs\DB_parts\Projects;
 use App\Models\Dbtbs\DB_parts\Revision;
 use App\Models\Dbtbs\DB_parts\RevisionLogs;
@@ -262,16 +263,35 @@ class DBPartController extends Controller
         }
 
         $byLogType = $revLogs->groupBy('type_revision')->toArray();
-
+        $arr_1 = [];
         foreach ($byLogType as $key => $val) {
             foreach($val as $v){
                 if ($key=='PART') {
+                    $part_no = static::convertParts($v['id_part']);
                     foreach (json_decode($v['old_data']) as $oldKey => $old) {
                         foreach (json_decode($v['new_data']) as $newKey => $new) {
                             if ($oldKey == $newKey) {
-                                $coba[$key][$v['id_part']][$oldKey] = [
+                                $arr_1[$key][$v['id_part']][$oldKey] = [
+                                    'type_log' => $key,
+                                    'part_no' => $part_no,
                                     'field' => $oldKey,
                                     'name' => static::convertFieldName($oldKey),
+                                    'old' => $old,
+                                    'new' => $new
+                                ];
+                                
+                            }
+                        }
+                    }
+                }else{
+                    foreach (json_decode($v['old_data']) as $oldKey => $old) {
+                        foreach (json_decode($v['new_data']) as $newKey => $new) {
+                            if ($oldKey == $newKey) {
+                                $arr_1[$key][$oldKey] = [
+                                    'type_log' => $key,
+                                    'part_no' => " ",
+                                    'field' => $oldKey,
+                                    'name' => $oldKey,
                                     'old' => $old,
                                     'new' => $new
                                 ];
@@ -282,7 +302,30 @@ class DBPartController extends Controller
                 }
             }
         }
-        return _Success(1, 200, $coba);
+
+        $arr_fix = [];
+
+        foreach ($arr_1 as $key => $val) {
+            if ($key == 'PART') {
+                foreach ($val as $id => $valKey) {
+                    foreach ($valKey as $field => $field_value) {
+                        $arr_fix[] = $field_value;
+                    }
+                }
+            }else{
+                foreach ($val as $field => $field_value) {
+                    $arr_fix[] = $field_value;
+                }
+            }
+        }
+        return DataTables::of($arr_fix)
+        ->addColumn('group', function ($arr_fix){
+            return $arr_fix['type_log'] . "|" . $arr_fix['part_no'];
+        })
+        ->addIndexColumn()
+        ->skipPaging()
+        ->toJson();
+        // return _Success(1, 200, $arr_fix);
     }
 
     public function tools(Request $request)
@@ -376,5 +419,12 @@ class DBPartController extends Controller
         ];
 
         return $arr[$key];
+    }
+
+    static function convertParts($id)
+    {
+        $model = Parts::whereId($id)->select(['part_no'])->first();
+
+        return $model->part_no;
     }
 }

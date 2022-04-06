@@ -7,6 +7,7 @@
             <a class="dropdown-item text-success iparts-act-view" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-eye"></i> View</a>
             <a class="dropdown-item text-warning iparts-act-edit" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-pencil"></i> Edit</a>
             <a class="dropdown-item text-danger iparts-act-delete" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-trash"></i> Delete</a>
+            <a class="dropdown-item text-success iparts-act-prodpro" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-eye"></i> Production Process</a>
         @else
             <a class="dropdown-item text-success iparts-act-active" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-check"></i> Reactived</a>
         @endif      

@@ -92,6 +92,7 @@
 @include('tms.db_parts.dashboard.modal.form.form_projects')
 @include('tms.db_parts.dashboard.modal.form.form_projects_post')
 @include('tms.db_parts.dashboard.modal.table.logs')
+@include('tms.db_parts.dashboard.modal.table.log_revisi')
 @endsection
 @push('js')
 @include('tms.db_parts.dashboard.ajax')

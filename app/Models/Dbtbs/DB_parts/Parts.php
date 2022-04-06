@@ -36,6 +36,7 @@ class Parts extends Model
         'part_weight',
         'vendor_name',
         'spec_pict',
+        'squence_process',
         'created_by',
         'created_date',
         'is_active'
@@ -43,4 +44,17 @@ class Parts extends Model
     protected $hidden = [];
    
     public $timestamps = false;
+
+    public function production()
+    {
+        return $this->hasMany(ProductionCode::class, 'id_part', 'id')
+        
+        ->leftJoin('db_tbs.dbparts_master_process_tbl as tbl_process', 'tbl_process.process_id', '=', 'db_tbs.dbparts_productioncode_tbl.id_process')
+        ->leftJoin('db_tbs.dbparts_master_process_detail_tbl as tbl_dprocess', 'tbl_dprocess.process_detail_id', '=', 'db_tbs.dbparts_productioncode_tbl.id_detail_process')
+        ->select([
+            'db_tbs.dbparts_productioncode_tbl.*',
+            'tbl_process.process_name',
+            'tbl_dprocess.process_detail_name',
+        ]);
+    }
 }

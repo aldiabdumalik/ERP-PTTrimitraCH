@@ -35,4 +35,21 @@ class ProductionCode extends Model
     protected $hidden = [];
    
     public $timestamps = false;
+
+    public function scopePartId($query, $part_id)
+    {
+        return $query->where('id_part', $part_id);
+    }
+
+    public function scopeDetail($query)
+    {
+        return $query->leftJoin('db_tbs.dbparts_item_part_tbl as tbl_part', 'tbl_part.id', '=', 'db_tbs.dbparts_productioncode_tbl.id_part')
+            ->leftJoin('db_tbs.dbparts_master_process_tbl as tbl_process', 'tbl_process.process_id', '=', 'db_tbs.dbparts_productioncode_tbl.id_process')
+            ->leftJoin('db_tbs.dbparts_master_process_detail_tbl as tbl_dprocess', 'tbl_dprocess.process_detail_id', '=', 'db_tbs.dbparts_productioncode_tbl.id_detail_process');
+    }
+
+    public function part()
+    {
+        return $this->belongsTo(Parts::class);
+    }
 }
