@@ -137,6 +137,7 @@ class CustPriceController extends Controller
     public function save(Request $request)
     {
         $data = [];
+        $for_trigger = [];
         $items = json_decode($request->items, true);
         $is_update = 0;
         $price_old = 0;
@@ -164,6 +165,29 @@ class CustPriceController extends Controller
                     $is_update = 0;
                     $price_old = 0;
                 }
+                if ($is_update == 1 || $price_old == 0) {
+                    $for_trigger[] = [
+                        'cust_id' => $request->cust_id,
+                        'item_code' => str_replace(' ', '', $items[$i]['itemcode']),
+                        'currency' => $request->valas,
+                        'price' =>  str_replace(',', '', $items[$i]['new_price']),
+                        'price_new' =>  str_replace(',', '', $items[$i]['new_price']),
+                        'price_old' =>  $price_old,
+                        'active_date' => $request->active_date,
+                        'created_by' => Auth::user()->FullName,
+                        'created_date' => Carbon::now(),
+                        'is_update' => $is_update,
+                        'price_by' => $request->price_by,
+                        'range_date' => null,
+                        'is_stock' => $is_stock,
+                        'is_so' => $is_so,
+                        'is_sso' => $is_sso,
+                        'is_sj' => $is_sj,
+                        'posted_date' => Carbon::now(),
+                        'posted_by' => Auth::user()->FullName
+                    ];
+                }
+
                 $data[] = [
                     'cust_id' => $request->cust_id,
                     'item_code' => str_replace(' ', '', $items[$i]['itemcode']),
@@ -189,16 +213,29 @@ class CustPriceController extends Controller
                     ->where('item_code', $item_replace)
                     ->update(['status' => 'NOT ACTIVE']);
             }
+            $data_insert = collect($data);
+            $data_trigger = collect($for_trigger);
+
+            $data_insert = $data_insert->chunk(200);
+            $data_trigger = $data_trigger->chunk(200);
             // DB::connection('db_tbs')->beginTransaction();
             try {
-                if ($request->price_by == 'DATE') {
-                    // Trigger By Date
-                    $trg = $this->triggerDate($data);
-                }else{
-                    $trg = $this->triggerSO($data);
+                $trg = 0;
+
+                foreach ($data_trigger as $dtrg) {
+                    if ($request->price_by == 'DATE') {
+                        $trg = $this->triggerDate($dtrg->toArray());
+                    }else{
+                        $trg = $this->triggerSO($dtrg->toArray());
+                    }
+
+                    $trg = $trg;
                 }
+                
                 if ($trg == 1) {
-                    $query = CustPrice::insert($data);
+                    foreach ($data_insert as $ins) {
+                        $query = CustPrice::insert($ins->toArray());
+                    }
                     if ($query) {
                         $log = [
                             [
@@ -240,6 +277,7 @@ class CustPriceController extends Controller
             ->first();
         $create_by = $cek->created_by;
         $data = [];
+        $for_trigger = [];
         $items = json_decode($request->items, true);
         $is_update = 0;
         $price_old = 0;
@@ -266,6 +304,29 @@ class CustPriceController extends Controller
                 }else{
                     $is_update = 0;
                     $price_old = 0;
+                }
+
+                if ($is_update == 1 || $price_old == 0) {
+                    $for_trigger[] = [
+                        'cust_id' => $request->cust_id,
+                        'item_code' => str_replace(' ', '', $items[$i]['itemcode']),
+                        'currency' => $request->valas,
+                        'price' =>  str_replace(',', '', $items[$i]['new_price']),
+                        'price_new' =>  str_replace(',', '', $items[$i]['new_price']),
+                        'price_old' =>  $price_old,
+                        'active_date' => $request->active_date,
+                        'created_by' => Auth::user()->FullName,
+                        'created_date' => Carbon::now(),
+                        'is_update' => $is_update,
+                        'price_by' => $request->price_by,
+                        'range_date' => null,
+                        'is_stock' => $is_stock,
+                        'is_so' => $is_so,
+                        'is_sso' => $is_sso,
+                        'is_sj' => $is_sj,
+                        'posted_date' => Carbon::now(),
+                        'posted_by' => Auth::user()->FullName
+                    ];
                 }
 
                 $data[] = [
@@ -295,15 +356,21 @@ class CustPriceController extends Controller
                     ->where('item_code', $itemcode_s)
                     ->update(['status' => 'NOT ACTIVE']);
             }
+            $data_insert = collect($data);
+            $data_trigger = collect($for_trigger);
+
+            $data_insert = $data_insert->chunk(200);
+            $data_trigger = $data_trigger->chunk(200);
             // DB::connection('db_tbs')->beginTransaction();
             try {
-                if ($request->price_by == 'DATE') {
-
-                    // Trigger By Date
-                    $trg = $this->triggerDate($data);
-                }else{
-                    // Trigger By SO
-                    $trg = $this->triggerSO($data);
+                $trg = 0;
+                foreach ($data_trigger as $dtrg) {
+                    if ($request->price_by == 'DATE') {
+                        $trg = $this->triggerDate($dtrg->toArray());
+                    }else{
+                        $trg = $this->triggerSO($dtrg->toArray());
+                    }
+                    $trg = $trg;
                 }
 
 
@@ -313,7 +380,9 @@ class CustPriceController extends Controller
                         // ->where('entry_custprice_tbl.status', 'ACTIVE')
                         ->delete();
     
-                    $query = CustPrice::insert($data);
+                    foreach ($data_insert as $ins) {
+                        $query = CustPrice::insert($ins->toArray());
+                    }
                     if ($query) {
                         $log = [
                             [
@@ -446,11 +515,20 @@ class CustPriceController extends Controller
                 $price_by = $v['price_by'];
             }
 
-            if ($price_by == 'SO') {
-                $trg = $this->repostSO($data);
-            }else{
-                $trg = $this->repostDate($data);
+            $data_trigger = collect($data);
+            $data_trigger = $data_trigger->chunk(300);
+
+            $trg = 0;
+            foreach ($data_trigger as $dtrg) {
+                if ($price_by == 'SO') {
+                    $trg = $this->repostSO($dtrg->toArray());
+                }else{
+                    $trg = $this->repostDate($dtrg->toArray());
+                }
+
+                $trg = $trg;
             }
+
 
             if ($trg == 1) {
                 $this->createGlobalLog('db_tbs.entry_custprice_tbl_log', [
