@@ -233,6 +233,7 @@ class CustPriceController extends Controller
                 }
                 
                 if ($trg == 1) {
+                    $query = null;
                     foreach ($data_insert as $ins) {
                         $query = CustPrice::insert($ins->toArray());
                     }
@@ -379,7 +380,7 @@ class CustPriceController extends Controller
                         ->where('active_date', $request->active_date)
                         // ->where('entry_custprice_tbl.status', 'ACTIVE')
                         ->delete();
-    
+                    $query = null;
                     foreach ($data_insert as $ins) {
                         $query = CustPrice::insert($ins->toArray());
                     }
