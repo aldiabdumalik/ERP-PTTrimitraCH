@@ -57,4 +57,14 @@ class Parts extends Model
             'tbl_dprocess.process_detail_name',
         ]);
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(Parts::class, 'parent_id')->whereNull('parent_id')->with('parent');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Parts::class, 'parent_id')->with('children')->with('production');
+    }
 }

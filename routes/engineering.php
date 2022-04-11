@@ -256,7 +256,7 @@ Route::get('/engineering/report/part_type/{customer}', [
     'uses' => 'TMS\Engineering\DBPartReportController@partsType', 
     'as' => 'tms.db_parts.report.parts'
 ]);
-Route::get('/engineering/report/print', [
-    'uses' => 'TMS\Engineering\DBPartReportController@report', 
-    'as' => 'tms.db_parts.report.print'
-]);
+// Route::get('/engineering/report/print', [
+//     'uses' => 'TMS\Engineering\DBPartReportController@report', 
+//     'as' => 'tms.db_parts.report.print'
+// ]);

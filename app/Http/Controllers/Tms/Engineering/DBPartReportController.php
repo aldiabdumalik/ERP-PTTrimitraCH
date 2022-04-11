@@ -7,6 +7,7 @@ use App\Http\Traits\TMS\Warehouse\ToolsTrait;
 use App\Models\Dbtbs\DB_parts\InputParts;
 use App\Models\Dbtbs\DB_parts\Parts;
 use App\Models\Dbtbs\DB_parts\Projects;
+use App\Models\Dbtbs\DB_parts\Revision;
 use App\Models\Dbtbs\DB_parts\RevisionLogs;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
@@ -42,10 +43,15 @@ class DBPartReportController extends Controller
     public function report($type, Request $request)
     {
         // $type = 6;
+        $log_note = Revision::where('id_type', $type)
+        ->orderBy('revision_number', 'ASC')
+        ->get();
 
         $project = Projects::details($type)->first();
 
-        $parts = Parts::with('production')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->get();
+        $parts = Parts::with('children')->with('production')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->whereNull('parent_id')->get();
+        // print_r($parts->toArray());die;
+        // $parts = Parts::with('production')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->get();
         $arr_params = $parts->toArray();
 
         $revLogs = RevisionLogs::where('id_type', $type)
@@ -74,18 +80,45 @@ class DBPartReportController extends Controller
         }
 
         $res = [];
+        $no = 1;
+        $child = [];
+        $ii = 1;
+        $iii = 0.1;
         for ($x=0; $x < count($arr_params); $x++) {
+            $res[$x]['no'] = $no;
+            // $no++;
             foreach ($arr_params[$x] as $key => $value) {
                 if (!empty($log_mark[$arr_params[$x]['id']][$key])) {
                     $res[$x][$key] = $arr_params[$x][$key] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['id']][$key] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$key]) .'</p></div>';
                 }else{
-                    $res[$x][$key] = $arr_params[$x][$key];
+                    if ($key !== 'children') {
+                        $res[$x][$key] = $arr_params[$x][$key];
+                    }
+                }
+                if ($key == 'children' && !empty($arr_params[$x]['children'])) {
+                    $iii = 0.1;
+                    for ($xc=0; $xc < count($arr_params[$x]['children']); $xc++) { 
+                        foreach ($arr_params[$x]['children'][$xc] as $keyChild => $valChild) {
+                            $child[] = $arr_params[$x]['children'][$xc][$keyChild];
+                            if (!empty($log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild])) {
+                                $res[$x+$ii][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$keyChild]) .'</p></div>';
+                            }else{
+                                $res[$x+$ii][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild];
+                            }
+                        }
+                        $res[$x+$ii]['no'] = $no + $iii;
+                        $ii++;
+                        $iii += $iii;
+                    }
+
                 }
             }
+            $no++;
         }
-        
         // print_r($res);die;
-        $pdf = PDF::loadView('tms.db_parts.report.template.report', compact('res', 'project'))->setPaper('a3', 'landscape');
+        // print_r($log_mark[$arr_params[0]['children'][0]['id']]);die;
+        $pdf = PDF::loadView('tms.db_parts.report.template.report', compact('res', 'project', 'log_note'))->setPaper('a3', 'landscape');
+        $pdf->getDomPDF()->set_option("enable_php", true);
         return $pdf->stream();
     }
 

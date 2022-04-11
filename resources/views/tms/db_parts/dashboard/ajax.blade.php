@@ -150,6 +150,14 @@ $(document).ready(function () {
         });
     });
 
+    $(document).on('click', '.projects-act-report', function () {
+        let id = $(this).data('id'),
+            encrypt = btoa(`${id}`),
+            url = "{{ route('tms.db_parts.report.print', [':type']) }}";
+            url = url.replace(':type', id);
+        window.open(url, '_blank');
+    })
+
     let tbl_log;
     $(document).on('click', '.projects-act-log', function () {
         let id = $(this).data('id');
