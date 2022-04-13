@@ -42,7 +42,7 @@ $(document).ready(function () {
 
     const get_tbl_item = () => {
         return new Promise(function(resolve, reject) {
-            var customercode = ($('#do-create-customercode').val() == "") ? null : $('#do-create-customercode').val();
+            var customercode = ($('#do-create-customercode').val() == "") ? null : $('#do-create-customercode').val().toUpperCase();
             if (customercode == null) {
                 reject(customercode);
             }
@@ -85,6 +85,7 @@ $(document).ready(function () {
 
     $('#do-btn-modal-create').on('click', function () {
         modalAction('#do-modal-create').then(function (resolve) {
+            hideShow('#do-btn-create-reset', false);
             var now = new Date();
             var currentMonth = ('0'+(now.getMonth()+1)).slice(-2);
             $('#do-create-priod').val(`${now.getFullYear()}-${currentMonth}`);
@@ -111,6 +112,7 @@ $(document).ready(function () {
         hideShow('#item-button-div', false);
         hideShow('#do-btn-create-submit', false);
         hideShow('#do-btn-revise', true);
+        hideShow('#do-btn-create-reset', true);
         $('#do-form-create input').not('.readonly-first').removeAttr('readonly');
         $('#do-form-create select').prop('disabled', false);
         $('#do-btn-create-submit').text('Simpan');
@@ -132,7 +134,7 @@ $(document).ready(function () {
     });
 
     $(document).on('keypress', '#do-create-customercode', function (e) {
-        let cust_id = $('#do-create-customercode').val();
+        let cust_id = $('#do-create-customercode').val().toUpperCase();
         if (e.keyCode == 13) {
             resetCreateForm();
             if (cust_id.length >= 3) {
@@ -203,23 +205,23 @@ $(document).ready(function () {
         // e.preventDefault();
         // return false;
     });
-    $('#do-create-customercode').on('input', delay(function (e) {
-        let like = $(this).val().toUpperCase();
-        if (like.length > 0) {
-            ajaxWithPromise({route: "{{route('tms.warehouse.do_entry.header_tools')}}", method: "POST", data: {type: "customer_list", like:like}}).then(response => {
-                $('#list').empty();
-                $.each(response.content, function (id, data) {
-                    $('#list').append($('<option/>', { 
-                        value: data.code,
-                        text : data.code 
-                    }));
-                })
-            });
-        }else{
-            // tbl_item.clear().draw(false);
-            $('#do-create-customername').val(null)
-        }
-    }, 1000));
+    // $('#do-create-customercode').on('input', delay(function (e) {
+    //     let like = $(this).val().toUpperCase();
+    //     if (like.length > 0) {
+    //         ajaxWithPromise({route: "{{route('tms.warehouse.do_entry.header_tools')}}", method: "POST", data: {type: "customer_list", like:like}}).then(response => {
+    //             $('#list').empty();
+    //             $.each(response.content, function (id, data) {
+    //                 $('#list').append($('<option/>', { 
+    //                     value: data.code,
+    //                     text : data.code 
+    //                 }));
+    //             })
+    //         });
+    //     }else{
+    //         // tbl_item.clear().draw(false);
+    //         $('#do-create-customername').val(null)
+    //     }
+    // }, 1000));
 
     $('#do-create-sso').on('keypress', (e) => {
         var sso = $('#do-create-sso').val();
@@ -238,7 +240,7 @@ $(document).ready(function () {
                         response = response.responseJSON;
                         if (response.status == true) {
                             var data = response.content;
-                            if (data.cust_id == $('#do-create-customercode').val()) {
+                            if (data.cust_id == $('#do-create-customercode').val().toUpperCase()) {
                                 if (data.closed_date == null) {
                                     $('#do-create-customerdoaddr').val(data.id_do);
                                     $('#do-create-customeraddr1').val(data.Address1);
@@ -291,7 +293,7 @@ $(document).ready(function () {
                         response = response.responseJSON;
                         if (response.status == true) {
                             var data = response.content;
-                            if (data.cust_id == $('#do-create-customercode').val()) {
+                            if (data.cust_id == $('#do-create-customercode').val().toUpperCase()) {
                                 if (data.closed_date == null) {
                                     $('#do-create-customerdoaddr').val(data.id_do);
                                     $('#do-create-customeraddr1').val(data.Address1);
@@ -375,6 +377,7 @@ $(document).ready(function () {
                 send,
                 (response) => {
                     response = response.responseJSON;
+                    console.log(response)
                     if (response.status == true) {
                         var data = response.content.result;
                         var data_do = response.content.do;
@@ -390,26 +393,10 @@ $(document).ready(function () {
                         var qty = 0;
                         if(max_qty > 0){
                             for (i=0; i < data.length; i++){
-                                for (let d = 0; d < data_do.length; d++) {
-                                    if (data_do[d].item_code == data[i].itemcode) {
-                                        qty = data[i].qty_sj - data_do[d].quantity;
-                                        id++;
-                                        tbl_items.row.add([
-                                            data[i].dn_no,
-                                            data[i].itemcode,
-                                            data[i].part_no,
-                                            data[i].sso_no,
-                                            data[i].so_no,
-                                            data[i].part_name,
-                                            data[i].model,
-                                            data[i].qty_so,
-                                            data[i].qty_sso,
-                                            qty,
-                                            data[i].unit,
-                                            '<input autocomplete="off" type="number" class="form-control-sm" id="rowid-'+id+'" value="'+data[i].qty_sj+'">'
-                                        ]).draw();
-                                    }else{
-                                        if(data[i].qty_sj < data[i].qty_sso){
+                                if (data_do.length > 0) {
+                                    for (let d = 0; d < data_do.length; d++) {
+                                        if (data_do[d].item_code == data[i].itemcode) {
+                                            qty = data[i].qty_sj - data_do[d].quantity;
                                             id++;
                                             tbl_items.row.add([
                                                 data[i].dn_no,
@@ -421,12 +408,51 @@ $(document).ready(function () {
                                                 data[i].model,
                                                 data[i].qty_so,
                                                 data[i].qty_sso,
-                                                data[i].qty_sj,
+                                                qty,
                                                 data[i].unit,
-                                                '<input autocomplete="off" type="number" class="form-control-sm" id="rowid-'+id+'">'
+                                                '<input autocomplete="off" type="number" class="form-control-sm" id="rowid-'+id+'" value="'+data[i].qty_sj+'">'
                                             ]).draw();
+                                        }else{
+                                            if(data[i].qty_sj < data[i].qty_sso){
+                                                console.log(data[i].qty_sj)
+                                                id++;
+                                                tbl_items.row.add([
+                                                    data[i].dn_no,
+                                                    data[i].itemcode,
+                                                    data[i].part_no,
+                                                    data[i].sso_no,
+                                                    data[i].so_no,
+                                                    data[i].part_name,
+                                                    data[i].model,
+                                                    data[i].qty_so,
+                                                    data[i].qty_sso,
+                                                    data[i].qty_sj,
+                                                    data[i].unit,
+                                                    '<input autocomplete="off" type="number" class="form-control-sm" id="rowid-'+id+'">'
+                                                ]).draw();
+                                            }
                                         }
                                     }
+                                    
+                                }else{
+                                    if(data[i].qty_sj < data[i].qty_sso){
+                                        console.log(data[i].qty_sj)
+                                        id++;
+                                        tbl_items.row.add([
+                                            data[i].dn_no,
+                                            data[i].itemcode,
+                                            data[i].part_no,
+                                            data[i].sso_no,
+                                            data[i].so_no,
+                                            data[i].part_name,
+                                            data[i].model,
+                                            data[i].qty_so,
+                                            data[i].qty_sso,
+                                            data[i].qty_sj,
+                                            data[i].unit,
+                                            '<input autocomplete="off" type="number" class="form-control-sm" id="rowid-'+id+'">'
+                                        ]).draw();
+                                    } 
                                 }
                             }
                             modalAction('#do-modal-itemtable').then(resolve => {
@@ -543,6 +569,28 @@ $(document).ready(function () {
         }
         tbl_additem.draw(false);
     });
+
+    $(document).on('click', '#do-btn-create-reset', function () {
+        tbl_additem.clear().draw(false);
+        $('#do-form-create input').not('.readonly-first').removeAttr('readonly');
+        $('#do-form-create select').prop('disabled', false);
+        $('#do-btn-edit-item').prop('disabled', true);
+        $('#do-btn-delete-item').prop('disabled', true);
+
+        $('#do-create-sso').val(null);
+        $('#do-create-so').val(null);
+        $('#do-create-warehouse').val(null);
+        $('#do-create-dnno').val(null);
+        $('#do-create-pono').val(null);
+        $('#do-create-delivery').val(null);
+        $('#do-create-customername').val(null);
+        $('#do-create-customerdoaddr').val(null);
+        $('#do-create-customergroup').val(null);
+        $('#do-create-customeraddr1').val(null);
+        $('#do-create-customeraddr2').val(null);
+        $('#do-create-customeraddr3').val(null);
+        $('#do-create-customeraddr4').val(null);
+    })
 
     $(document).off('click', '.do-act-view').on('click', '.do-act-view', function () {
         var id = $(this).data('dono');
@@ -1258,7 +1306,7 @@ $(document).ready(function () {
                     "delivery": $('#do-create-delivery').val(),
                     "delivery2": $('#do-create-delivery2').val(),
                     "remark": $('#do-create-remark').val(),
-                    "customercode": $('#do-create-customercode').val(),
+                    "customercode": $('#do-create-customercode').val().toUpperCase(),
                     "customerdoaddr": $('#do-create-customerdoaddr').val(),
                     "customername": $('#do-create-customername').val(),
                     "customergroup": $('#do-create-customergroup').val(),
@@ -1321,7 +1369,7 @@ $(document).ready(function () {
             "delivery": $('#do-create-delivery').val(),
             "delivery2": $('#do-create-delivery2').val(),
             "remark": $('#do-create-remark').val(),
-            "customercode": $('#do-create-customercode').val(),
+            "customercode": $('#do-create-customercode').val().toUpperCase(),
             "customerdoaddr": $('#do-create-customerdoaddr').val(),
             "customername": $('#do-create-customername').val(),
             "customergroup": $('#do-create-customergroup').val(),

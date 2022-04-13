@@ -1,5 +1,5 @@
 <div class="modal fade bd-example-modal-lg do-modal-create" style="z-index: 1041" tabindex="-1" id="do-modal-create" data-target="#do-modal-create" data-backdrop="static" data-keyboard="false" data-whatever="@domodalcreate"  role="dialog">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-xl">
         <form id="do-form-create" action="javascript:void(0)">
             <div class="modal-content">
                 <div class="modal-header">
@@ -35,6 +35,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" id="do-btn-create-reset" class="btn btn-danger d-none">Reset</button>
                     <button type="button" id="do-btn-create-close" class="btn btn-secondary">Batal</button>
                     <button type="submit" id="do-btn-create-submit" class="btn btn-info">Simpan</button>
                     <button type="button" id="do-btn-revise" class="btn btn-info d-none">Revise</button>

@@ -565,8 +565,11 @@
         })
 
         $(document).on('click', '#prodpro-btn-add-item', function () {
-            var index = tbl_prodpro.data().length;
+            let index = tbl_prodpro.data().length;
+            let last = tbl_prodpro.row(':last').data();
             let i = ++index;
+
+            console.log();
 
             let add = tbl_prodpro.row.add([
                 i,
