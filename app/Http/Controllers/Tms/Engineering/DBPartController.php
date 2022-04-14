@@ -267,13 +267,14 @@ class DBPartController extends Controller
         foreach ($byLogType as $key => $val) {
             foreach($val as $v){
                 if ($key=='PART') {
-                    $part_no = static::convertParts($v['id_part']);
+                    $pconvert = static::convertParts($v['id_part']);
                     foreach (json_decode($v['old_data']) as $oldKey => $old) {
                         foreach (json_decode($v['new_data']) as $newKey => $new) {
                             if ($oldKey == $newKey) {
                                 $arr_1[$key][$v['id_part']][$oldKey] = [
                                     'type_log' => $key,
-                                    'part_no' => $part_no,
+                                    'part_no' => $pconvert->part_no,
+                                    'part_name' => $pconvert->part_name,
                                     'field' => $oldKey,
                                     'name' => static::convertFieldName($oldKey),
                                     'old' => $old,
@@ -290,6 +291,7 @@ class DBPartController extends Controller
                                 $arr_1[$key][$oldKey] = [
                                     'type_log' => $key,
                                     'part_no' => " ",
+                                    'part_name' => " ",
                                     'field' => $oldKey,
                                     'name' => $oldKey,
                                     'old' => $old,
@@ -318,9 +320,10 @@ class DBPartController extends Controller
                 }
             }
         }
+        // print_r($arr_fix);die;
         return DataTables::of($arr_fix)
         ->addColumn('group', function ($arr_fix){
-            return $arr_fix['type_log'] . "|" . $arr_fix['part_no'];
+            return $arr_fix['type_log'] . "|" . $arr_fix['part_no'] . "|" . $arr_fix['part_name'];
         })
         ->addIndexColumn()
         ->skipPaging()
@@ -423,8 +426,8 @@ class DBPartController extends Controller
 
     static function convertParts($id)
     {
-        $model = Parts::whereId($id)->select(['part_no'])->first();
+        $model = Parts::whereId($id)->select(['part_no', 'part_name'])->first();
 
-        return $model->part_no;
+        return $model;
     }
 }

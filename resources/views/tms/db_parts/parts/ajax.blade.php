@@ -477,9 +477,10 @@
                                     <option value="&gt;650">&gt;650</option>
                                 </select>`,
                                 `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${i}" class="form-control form-control-sm prodpro-index-prodline" data-i="${i}" value="${dt.production_line}" autocomplete="off" readonly>`,
-                                `<input type="text" class="form-control form-control-sm" value="${dt.company_name}" autocomplete="off">`,
+                                `<input type="text" id="prodpro-index-company-${i}" class="form-control form-control-sm prodpro-index-company" data-i="${i}" value="${dt.company_name}" autocomplete="off">`,
                             ]);
                             tbl_prodpro.draw(false);
+                            add.nodes().to$().attr('data-indexid', i);
                             $(`#prodpro-index-tonage-${i}`).val(dt.tonage)
 
                             loading_start();
@@ -545,9 +546,10 @@
                             <option value="&gt;650">&gt;650</option>
                         </select>`,
                         `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${i}" class="form-control form-control-sm prodpro-index-prodline" data-i="${i}" autocomplete="off" readonly>`,
-                        `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
+                        `<input type="text" id="prodpro-index-company-${i}" class="form-control form-control-sm prodpro-index-company" data-i="${i}" autocomplete="off">`,
                     ]);
                     tbl_prodpro.draw(false);
+                    add.nodes().to$().attr('data-indexid', i);
 
                     loading_start();
                     ajaxCall({route: "{{ route('tms.db_parts.parts.tools') }}", method: "POST", data: {type: "get_process"} }).then(data => {
@@ -566,15 +568,16 @@
 
         $(document).on('click', '#prodpro-btn-add-item', function () {
             let index = tbl_prodpro.data().length;
-            let last = tbl_prodpro.row(':last').data();
+            let last = tbl_prodpro.row(':last').node();
+            let idx = $(last).data('indexid');
+            console.log(idx);
             let i = ++index;
-
-            console.log();
+            let x = (idx == undefined) ? 1 : ++idx;
 
             let add = tbl_prodpro.row.add([
                 i,
-                `<select name="prodpro-index-process[]" id="prodpro-index-process-${i}" class="form-control form-control-sm prodpro-index-process" data-i="${i}"></select>`,
-                `<input type="text" name="prodpro-index-process_det[]" id="prodpro-index-process_det-${i}" class="form-control form-control-sm prodpro-index-process_det" data-i="${i}" placeholder="Press ENTER" autocomplete="off">`,
+                `<select name="prodpro-index-process[]" id="prodpro-index-process-${x}" class="form-control form-control-sm prodpro-index-process" data-i="${x}"></select>`,
+                `<input type="text" name="prodpro-index-process_det[]" id="prodpro-index-process_det-${x}" class="form-control form-control-sm prodpro-index-process_det" data-i="${x}" placeholder="Press ENTER" autocomplete="off">`,
                 `<input type="number" class="form-control form-control-sm" value="" autocomplete="off">`,
                 `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
                 `<select class="form-control form-control-sm">
@@ -599,16 +602,17 @@
                     <option value="630">630</option>
                     <option value="&gt;650">&gt;650</option>
                 </select>`,
-                `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${i}" class="form-control form-control-sm prodpro-index-prodline" data-i="${i}" autocomplete="off" readonly>`,
-                `<input type="text" class="form-control form-control-sm" value="" autocomplete="off">`,
+                `<input type="text" name="prodpro-index-prodline[]" id="prodpro-index-prodline-${x}" class="form-control form-control-sm prodpro-index-prodline" data-i="${x}" autocomplete="off" readonly>`,
+                `<input type="text" id="prodpro-index-company-${x}" class="form-control form-control-sm prodpro-index-company" data-i="${x}" autocomplete="off">`,
             ]);
             tbl_prodpro.draw(false);
+            add.nodes().to$().attr('data-indexid', x);
             loading_start();
             ajaxCall({route: "{{ route('tms.db_parts.parts.tools') }}", method: "POST", data: {type: "get_process"} }).then(data => {
                 loading_stop();
-                $(`#prodpro-index-process-${i}`).html('<option value="">Select process</option>');
-                $.each(data.content, function (x, item) {
-                    $(`#prodpro-index-process-${i}`).append($('<option>', { 
+                $(`#prodpro-index-process-${x}`).html('<option value="">Select process</option>');
+                $.each(data.content, function (xx, item) {
+                    $(`#prodpro-index-process-${x}`).append($('<option>', { 
                         value: item.process_id,
                         text : item.process_name
                     }).attr('data-routing', item.routing));
@@ -697,6 +701,13 @@
             let i = $(this).data('i')
             $('#prodpro-index-process_det-' + i).val(null);
             $('#prodpro-index-prodline-' + i).val($(this).find('option:selected').data('routing'));
+            if ($(this).find('option:selected').data('routing') == 'INHOUSE') {
+                $('#prodpro-index-company-' + i).val('TCH')
+                $('#prodpro-index-company-' + i).prop('readonly', true)
+            }else{
+                $('#prodpro-index-company-' + i).val(null)
+                $('#prodpro-index-company-' + i).prop('readonly', false)
+            }
         })
 
         $(document).on('submit', '#prodpro-form-index', function (e) {

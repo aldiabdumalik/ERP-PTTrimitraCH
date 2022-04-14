@@ -95,7 +95,7 @@
                 <tr>
                     <td width="20%">Type</td>
                     <td width="5%">:</td>
-                    <td>{{ $project->type }}</td>
+                    <td><p style="font-size: 16px;font-weight: bold;">{{ $project->type }}</p></td>
                 </tr>
                 <tr>
                     <td width="20%">Reff</td>

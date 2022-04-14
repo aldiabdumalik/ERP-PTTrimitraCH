@@ -19,6 +19,11 @@ class Projects extends Model
         'created_by',
         'created_at',
         'deleted_at',
+        'approved_at',
+        'approved_by',
+        'published_at',
+        'published_by',
+        'status',
     ];   
     protected $hidden = [];
    

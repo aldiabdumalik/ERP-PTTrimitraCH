@@ -204,7 +204,7 @@ $(document).ready(function () {
                 },
                 columns: [
                     {data:'group', name: 'group', className: "align-middle"},
-                    // {data:'DT_RowIndex', name: 'DT_RowIndex', className: "align-middle"},
+                    {data:'DT_RowIndex', name: 'DT_RowIndex', className: "align-middle"},
                     {data:'name', name: 'name', className: "align-middle"},
                     {data:'old', name: 'old', className: "align-middle"},
                     {data:'new', name: 'new', className: "align-middle"}
@@ -230,9 +230,10 @@ $(document).ready(function () {
                         if ( last !== group ) {
                             let log_type = `Log Type : ${arr_group[0]}`;
                             let part_nomer = (arr_group[1] !== " ") ? ` - Part No : ${arr_group[1]}` : '';
+                            let part_names = (arr_group[2] !== " ") ? ` - Part Name : ${arr_group[2]}` : '';
                             $(rows).eq( i ).before(`
-                                <tr class="group bg-y" data-id="${arr_group[0]} - ${arr_group[1]}">
-                                    <td colspan="3" class="text-bold align-middle">${log_type}${part_nomer}</td>
+                                <tr class="group bg-y">
+                                    <td colspan="4" class="text-bold align-middle">${log_type}${part_nomer}${part_names}</td>
                                 </tr>
                             `);
 

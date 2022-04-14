@@ -50,9 +50,9 @@
                 <button type="button"  class="btn btn-primary btn-flat btn-sm" id="projects-btn-modal-create">
                     <i class="ti-plus"></i>  Add New Project
                 </button>
-                <button type="button"  class="btn btn-danger btn-flat btn-sm" id="projects-btn-modal-trash">
+                {{-- <button type="button"  class="btn btn-danger btn-flat btn-sm" id="projects-btn-modal-trash">
                     <i class="ti-trash"></i>  View Trash Project
-                </button>
+                </button> --}}
             </div>
         </div>
         <div class="col-12 mt-5">

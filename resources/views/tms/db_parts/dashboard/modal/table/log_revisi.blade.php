@@ -11,7 +11,7 @@
                             <thead>
                                 <tr>
                                     <th class="align-middle">Group</th>
-                                    {{-- <th class="align-middle">No.</th> --}}
+                                    <th class="align-middle">No.</th>
                                     <th class="align-middle">Field Name</th>
                                     <th class="align-middle">Before Update</th>
                                     <th class="align-middle">After Update</th>
