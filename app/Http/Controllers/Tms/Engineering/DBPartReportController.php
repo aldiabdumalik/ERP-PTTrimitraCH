@@ -49,7 +49,7 @@ class DBPartReportController extends Controller
 
         $project = Projects::details($type)->first();
 
-        $parts = Parts::with('children')->with('production')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->whereNull('parent_id')->get();
+        $parts = Parts::with('production')->with('children')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->whereNull('parent_id')->get();
         // print_r($parts->toArray());die;
         // $parts = Parts::with('production')->where('db_tbs.dbparts_item_part_tbl.project_id', $type)->get();
         $arr_params = $parts->toArray();
@@ -65,6 +65,7 @@ class DBPartReportController extends Controller
 
         $byLogType = $revLogs->groupBy('type_revision')->toArray();
         $log_mark = [];
+        $log_type = [];
         foreach ($byLogType as $key => $val) {
             foreach($val as $v){
                 if ($key=='PART') {
@@ -74,6 +75,10 @@ class DBPartReportController extends Controller
                                 $log_mark[$v['id_part']][$oldKey] = $v['revision_number'];
                             }
                         }
+                    }
+                }elseif($key == 'PROJECT'){
+                    foreach (json_decode($v['old_data']) as $oldKey => $old) {
+                        $log_type[$oldKey] = '<div class="rev"><p>'.$v['revision_number'].'</p></div>';
                     }
                 }
             }
@@ -85,39 +90,63 @@ class DBPartReportController extends Controller
         $ii = 1;
         $iii = 0.1;
         for ($x=0; $x < count($arr_params); $x++) {
-            $res[$x]['no'] = $no;
+            $res[$ii]['no'] = $no;
             // $no++;
             foreach ($arr_params[$x] as $key => $value) {
                 if (!empty($log_mark[$arr_params[$x]['id']][$key])) {
-                    $res[$x][$key] = $arr_params[$x][$key] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['id']][$key] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$key]) .'</p></div>';
+                    $res[$ii][$key] = $arr_params[$x][$key] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['id']][$key] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$key]) .'</p></div>';
                 }else{
                     if ($key !== 'children') {
-                        $res[$x][$key] = $arr_params[$x][$key];
-                    }
-                }
-                if ($key == 'children' && !empty($arr_params[$x]['children'])) {
-                    $iii = 0.1;
-                    for ($xc=0; $xc < count($arr_params[$x]['children']); $xc++) { 
-                        foreach ($arr_params[$x]['children'][$xc] as $keyChild => $valChild) {
-                            $child[] = $arr_params[$x]['children'][$xc][$keyChild];
-                            if (!empty($log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild])) {
-                                $res[$x+$ii][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$keyChild]) .'</p></div>';
-                            }else{
-                                $res[$x+$ii][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild];
+                        $res[$ii][$key] = $arr_params[$x][$key];
+                    }else{
+                        $iii = 0.1;
+                        $ix = ++$ii;
+                        for ($xc=0; $xc < count($arr_params[$x]['children']); $xc++) { 
+                            foreach ($arr_params[$x]['children'][$xc] as $keyChild => $valChild) {
+                                $child[] = $arr_params[$x]['children'][$xc][$keyChild];
+                                if (!empty($log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild])) {
+                                    $res[$ix][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$keyChild]) .'</p></div>';
+                                }else{
+                                    if ($keyChild !== 'children') {
+                                        $res[$ix][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild];
+                                    }
+                                }
                             }
+                            $res[$ix]['no'] = $no + $iii;
+                            // $ii++;
+                            $ix++;
+                            $iii += $iii;
                         }
-                        $res[$x+$ii]['no'] = $no + $iii;
-                        $ii++;
-                        $iii += $iii;
                     }
-
                 }
+                // if ($key == 'children' && (count($arr_params[$x]['children']) > 0)) {
+                //     $iii = 0.1;
+                //     $ix = ++$ii;
+                //     for ($xc=0; $xc < count($arr_params[$x]['children']); $xc++) { 
+                //         foreach ($arr_params[$x]['children'][$xc] as $keyChild => $valChild) {
+                //             $child[] = $arr_params[$x]['children'][$xc][$keyChild];
+                //             if (!empty($log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild])) {
+                //                 $res[$ix][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild] . '|<div class="rev"><p>' . $log_mark[$arr_params[$x]['children'][$xc]['id']][$keyChild] .'</p></div>';// implode('&', $log_mark[$arr_params[$x]['id']][$keyChild]) .'</p></div>';
+                //             }else{
+                //                 if ($keyChild !== 'children') {
+                //                     $res[$ix][$keyChild] = $arr_params[$x]['children'][$xc][$keyChild];
+                //                 }
+                //             }
+                //         }
+                //         $res[$ix]['no'] = $no + $iii;
+                //         // $ii++;
+                //         $ix++;
+                //         $iii += $iii;
+                //     }
+
+                // }
             }
+            $ii++;
             $no++;
         }
-        // print_r($res);die;
+        // print_r($log_type);die;
         // print_r($log_mark[$arr_params[0]['children'][0]['id']]);die;
-        $pdf = PDF::loadView('tms.db_parts.report.template.report', compact('res', 'project', 'log_note'))->setPaper('a3', 'landscape');
+        $pdf = PDF::loadView('tms.db_parts.report.template.report', compact('res', 'project', 'log_type', 'log_note'))->setPaper('a3', 'landscape');
         $pdf->getDomPDF()->set_option("enable_php", true);
         return $pdf->stream();
     }

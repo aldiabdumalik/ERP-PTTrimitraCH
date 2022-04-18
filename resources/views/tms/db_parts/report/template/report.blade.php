@@ -81,7 +81,7 @@
         <div class="header1">
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td colspan="3">
+                    <td colspan="4">
                         PT. Trimitra Chitrahasta <br/>
                         <i>Engineering Dept.</i><br/>
                         &nbsp;
@@ -91,16 +91,19 @@
                     <td width="20%">Customer</td>
                     <td width="5%">:</td>
                     <td>{{ $project->custname }}</td>
+                    <td>&nbsp;</td>
                 </tr>
                 <tr>
                     <td width="20%">Type</td>
                     <td width="5%">:</td>
                     <td><p style="font-size: 16px;font-weight: bold;">{{ $project->type }}</p></td>
+                    <td>{!! (!isset($log_type['type'])) ? '' : $log_type['type'] !!}</td>
                 </tr>
                 <tr>
                     <td width="20%">Reff</td>
                     <td width="5%">:</td>
-                    <td>{{ $project->reff }}</td>
+                    <td>{{ $project->reff }}</div></td>
+                    <td>{!! (!isset($log_type['reff'])) ? '' : $log_type['reff'] !!}</td>
                 </tr>
             </table>
         </div>
@@ -235,7 +238,10 @@
                 $ms_coil_pitch = explode('|', $item['ms_coil_pitch']);
                 $part_weight = explode('|', $item['part_weight']);
                 $vendor_name = explode('|', $item['vendor_name']);
-                $tonage = $item['production'][0]['tonage'];
+                $tonage = (empty($item['production'])) ? null : $item['production'][0]['tonage'];
+                $prodline = (empty($item['production'])) ? null : $item['production'][0]['production_line'];
+                $company_name = (empty($item['production'])) ? null : $item['production'][0]['company_name'];
+
             @endphp
             <tr>
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$item['no']}}</td>
@@ -260,7 +266,7 @@
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{($gop_assy[0] == 1 ? 1 : '')}} {!! (!empty($gop_assy[1])) ? $gop_assy[1] : null !!}</td>
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{($gop_single[0] == 1 ? 1 : '')}} {!! (!empty($gop_single[1])) ? $gop_single[1] : null !!}</td>
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{($purch_part[0] == 1 ? 1 : '')}} {!! (!empty($purch_part[1])) ? $purch_part[1] : null !!}</td>
-                <td align="center" class="p-td">{{ $item['production'][0]['tonage'] }}</td>
+                <td align="center" class="p-td">{{ $tonage }}</td>
                 <td align="center" class="p-td">{{ ($tonage == '<35' || $tonage == '35') ? '1' : '' }}</td>
                 <td align="center" class="p-td">{{ ($tonage == '45' || $tonage == '55') ? '1' : '' }}</td>
                 <td align="center" class="p-td">{{ ($tonage == '60' || $tonage == '65') ? '1' : '' }}</td>
@@ -280,9 +286,9 @@
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
-                <td align="center" class="p-td">{{ ($item['production'][0]['production_line'] == 'INHOUSE') ? '1' : '' }}</td>
-                <td align="center" class="p-td">{{ ($item['production'][0]['production_line'] == 'OUTHOUSE') ? '1' : '' }}</td>
-                <td align="center" class="p-td">{{ $item['production'][0]['company_name'] }}</td>
+                <td align="center" class="p-td">{{ ($prodline == 'INHOUSE') ? '1' : '' }}</td>
+                <td align="center" class="p-td">{{ ($prodline == 'OUTHOUSE') ? '1' : '' }}</td>
+                <td align="center" class="p-td">{{ $company_name }}</td>
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$spec[0]}} {!! (!empty($spec[1])) ? $spec[1] : null !!}</td>
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_t[0]}} {!! (!empty($ms_t[1])) ? $ms_t[1] : null !!}</td>
                 <td align="center" class="p-td" rowspan="{{ count($item['production']) }}">{{$ms_w[0]}} {!! (!empty($ms_w[1])) ? $ms_w[1] : null !!}</td>
@@ -324,7 +330,7 @@
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">&nbsp;</td>
                 <td align="center" class="p-td">{{ ($item['production'][$i]['production_line'] == 'INHOUSE') ? '1' : '' }}</td>
-                <td align="center" class="p-td">{{ ($item['production'][$i]['production_line'] == 'OUTHOUSE') ? '1' : '' }}</td>
+                <td align="center" class="p-td">{{ ($item['production'][$i]['production_line'] == 'SUBCONT') ? '1' : '' }}</td>
                 <td align="center" class="p-td">{{ $item['production'][$i]['company_name'] }}</td>
             </tr>
             @endfor

@@ -753,7 +753,6 @@
                     items: JSON.stringify(items_fix)
                 }
 
-                // let route = "{{ route('tms.db_parts.production_code.store') }}";
                 let id = data.part_id,
                     route = "{{ route('tms.db_parts.parts.prodpro', [':id']) }}";
                     route  = route.replace(':id', id);
