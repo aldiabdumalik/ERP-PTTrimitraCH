@@ -114,7 +114,12 @@ class DBPartController extends Controller
             'reff' => 'required',
         ]);
 
-        
+        $proj = Projects::with('lrev')->find($id);
+
+        if (!is_null($proj->published_at)) {
+            return _Error('This project has been Published');
+        }
+
         $cek = Projects::type($request->type)->where('id', '<>', $id)->first();
         
         if ($cek) {
@@ -429,5 +434,79 @@ class DBPartController extends Controller
         $model = Parts::whereId($id)->select(['part_no', 'part_name'])->first();
 
         return $model;
+    }
+
+    static function check_before_approve($request)
+    {
+        $prjId = $request->project_id;
+
+        $cek = Revision::type($prjId)->lastNumber()->first();
+        
+        if (!$cek) {
+            return _Error('Perintah di tolak, harap POST project terlebih dahulu!');
+        }
+
+        $project = Projects::with('lrev')->find($prjId);
+
+    }
+
+    public function approvedPost(Request $request)
+    {
+        $prjId = $request->project_id;
+
+        $project = Projects::with('lrev')->find($prjId);
+
+        if (!is_null($project->published_at)) {
+            return _Error('This project has been Published');
+        }
+
+        if (empty($project->lrev)) {
+            return _Error('Perintah di tolak, harap POST project terlebih dahulu!');
+        }
+
+        $revNo = $project->lrev->revision_number;
+
+        $revisi = Revision::find($project->lrev->id);
+
+        if (!is_null($revisi->approved_at)) {
+            return _Error('Revisi no. '.$revNo. ' has been approved!');
+        }
+
+        $revisi->approved_at = Carbon::now();
+        $revisi->approved_by = Auth::user()->FullName;
+
+        $revisi->save();
+
+        return _Success('Revisi no. '.$revNo. ' approved successfully!');
+    }
+
+    public function published(Request $request)
+    {
+        $prjId = $request->project_id;
+
+        $project = Projects::with('lrev')->find($prjId);
+
+        if (!is_null($project->published_at)) {
+            return _Error('This project has been Published');
+        }
+
+        if (empty($project->lrev)) {
+            return _Error('Perintah di tolak, harap POST project terlebih dahulu!');
+        }
+
+        $cek = Revision::type($prjId)->whereNull('approved_at')->lastNumber()->first();
+
+        if ($cek) {
+            return _Error('Perintah di tolak, ada revisi yang belum di Approve. No. revisi '. $cek->revision_number);
+        }
+
+        $project = Projects::find($prjId);
+
+        $project->published_at = Carbon::now();
+        $project->published_by = Auth::user()->FullName;
+
+        $project->save();
+
+        return _Success('Project type '. $project->type . ' published successfully!');
     }
 }

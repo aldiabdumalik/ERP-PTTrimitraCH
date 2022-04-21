@@ -18,6 +18,8 @@ class Revision extends Model
         'note',
         'posted_by',
         'posted_at',
+        'approved_by',
+        'approved_at',
     ];   
     protected $hidden = [];
    
@@ -31,5 +33,10 @@ class Revision extends Model
     public function scopeLastNumber($query)
     {
         return $query->orderBy('revision_number', 'DESC');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Projects::class, 'id_type', 'id');
     }
 }

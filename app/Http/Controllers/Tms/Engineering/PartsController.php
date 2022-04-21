@@ -105,6 +105,12 @@ class PartsController extends Controller
             'part_pict' => 'required',
         ]);
 
+        $proj = Projects::with('lrev')->find(base64_decode($request->type_id));
+
+        if (!is_null($proj->published_at)) {
+            return _Error('This project has been Published');
+        }
+
         try {
             File::move(public_path('db-parts/temp/' . $request->part_pict), public_path('db-parts/pictures/' . $request->part_pict));
             
@@ -154,6 +160,12 @@ class PartsController extends Controller
 
     public function update($id, Request $request)
     {
+        $proj = Projects::with('lrev')->find(base64_decode($request->type_id));
+
+        if (!is_null($proj->published_at)) {
+            return _Error('This project has been Published');
+        }
+
         try {
             $prev = Parts::query()
                 ->select(static::arr_select())
@@ -255,6 +267,12 @@ class PartsController extends Controller
     public function destroy($id)
     {
         $model = Parts::find($id);
+        $proj = Projects::with('lrev')->find($model->project_id);
+
+        if (!is_null($proj->published_at)) {
+            return _Error('This project has been Published');
+        }
+
         $model->is_active = 0;
 
         if ($model->save()) {
@@ -274,6 +292,13 @@ class PartsController extends Controller
     public function toActive($id)
     {
         $model = Parts::find($id);
+
+        $proj = Projects::with('lrev')->find($model->project_id);
+
+        if (!is_null($proj->published_at)) {
+            return _Error('This project has been Published');
+        }
+
         $model->is_active = 1;
 
         if ($model->save()) {
@@ -451,6 +476,13 @@ class PartsController extends Controller
             $sq2 = 0;
             $sq_tot = count($items);
             $parts = Parts::find($part_id);
+
+            $proj = Projects::with('lrev')->find($parts->project_id);
+
+            if (!is_null($proj->published_at)) {
+                return _Error('This project has been Published');
+            }
+
             foreach ($items as $key => $item) {
                 ProductionCode::create([
                     'id_part' => $part_id,
@@ -512,6 +544,12 @@ class PartsController extends Controller
             $sq2 = 0;
             $sq_tot = count($items);
             $parts = Parts::find($part_id);
+            $proj = Projects::with('lrev')->find($parts->project_id);
+
+            if (!is_null($proj->published_at)) {
+                return _Error('This project has been Published');
+            }
+            
             ProductionCode::where('id_part', $part_id)->delete(); // Delete old data
             foreach ($items as $key => $item) {
                 ProductionCode::create([

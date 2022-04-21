@@ -62,4 +62,14 @@ class Projects extends Model
                     ->select(['db_tbs.dbparts_projects_tbl.*', 'customer.CustomerCode_eKanban as custcode', 'customer.CustomerName as custname']);
 
     }
+
+    public function revision()
+    {
+        return $this->hasMany(Revision::class, 'id_type', 'id');
+    }
+
+    public function lrev()
+    {
+        return $this->hasOne(Revision::class, 'id_type', 'id')->whereNotNull('posted_at')->latest('revision_number');
+    }
 }

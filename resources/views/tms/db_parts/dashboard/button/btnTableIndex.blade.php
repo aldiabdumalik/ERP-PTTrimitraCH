@@ -8,6 +8,8 @@
             <a class="dropdown-item text-danger projects-act-delete" href="javascript:void(0)" data-id="{{ $data->id }}" data-customer="{{ $data->cust_id }}"><i class="fa fa-trash"></i> Delete</a>
             <a class="dropdown-item text-success projects-act-parts" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-eye"></i> Item Part</a>
             <a class="dropdown-item text-success projects-act-posted" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-share"></i> Posted Revision</a>
+            <a class="dropdown-item text-success projects-act-approved" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-share"></i> Approved Revision</a>
+            <a class="dropdown-item text-success projects-act-published" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-share"></i> Publish</a>
             <a class="dropdown-item text-success projects-act-report" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-print"></i> Report</a>
         @else
             <a class="dropdown-item text-success projects-act-active" href="javascript:void(0)" data-id="{{ $data->id }}"><i class="fa fa-check"></i> Reactived</a>

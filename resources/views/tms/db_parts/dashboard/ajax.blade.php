@@ -150,6 +150,38 @@ $(document).ready(function () {
         });
     });
 
+    $(document).on('click', '.projects-act-approved', function () {
+        let id = $(this).data('id'),
+            route = "{{ route('tms.db_parts.projects.approved') }}",
+            method = "POST",
+            data = {project_id: id};
+        loading_start();
+        ajaxCall({route: route, method: method, data:data}).then(response => {
+            loading_stop();
+            Swal.fire({
+                title: 'success',
+                text: response.message,
+                icon: 'success'
+            })
+        })
+    });
+
+    $(document).on('click', '.projects-act-published', function () {
+        let id = $(this).data('id'),
+            route = "{{ route('tms.db_parts.projects.published') }}",
+            method = "POST",
+            data = {project_id: id};
+        loading_start();
+        ajaxCall({route: route, method: method, data:data}).then(response => {
+            loading_stop();
+            Swal.fire({
+                title: 'success',
+                text: response.message,
+                icon: 'success'
+            })
+        })
+    });
+
     $(document).on('click', '.projects-act-report', function () {
         let id = $(this).data('id'),
             encrypt = btoa(`${id}`),

@@ -119,6 +119,14 @@ Route::get('/engineering/database_parts/projects/{id}/rev_logs', [
     'uses' => 'TMS\Engineering\DBPartController@revLogs', 
     'as' => 'tms.db_parts.projects.rev_logs'
 ]);
+Route::post('/engineering/database_parts/projects/approved/this', [
+    'uses' => 'TMS\Engineering\DBPartController@approvedPost', 
+    'as' => 'tms.db_parts.projects.approved'
+]);
+Route::post('/engineering/database_parts/projects/published/this', [
+    'uses' => 'TMS\Engineering\DBPartController@published', 
+    'as' => 'tms.db_parts.projects.published'
+]);
 
 Route::get('/engineering/database_parts/parts/{type}/view', [
     'uses' => 'TMS\Engineering\PartsController@index', 
